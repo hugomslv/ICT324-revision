@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snapshot | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/snapshot  <a class="ext small" href="https://vitest.dev/guide/snapshot">version en ligne</a></div>
+<h1 id="snapshot"><a class="anchor" href="#snapshot">#</a>Snapshot</h1>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>For a beginner-friendly introduction to snapshot testing, see the <a href="learn/snapshots.html">Snapshot Testing</a> tutorial.</p>
+</div><p><CourseLink href="https://vueschool.io/lessons/snapshots-in-vitest?friend=vueuse">Learn Snapshot by video from Vue School</CourseLink></p>
+<p>Snapshot tests are a very useful tool whenever you want to make sure the output of your functions does not change unexpectedly.</p>
+<p>When using snapshot, Vitest will take a snapshot of the given value, then compare it to a reference snapshot file stored alongside the test. The test will fail if the two snapshots do not match: either the change is unexpected, or the reference snapshot needs to be updated to the new version of the result.</p>
+<h2 id="use-snapshots"><a class="anchor" href="#use-snapshots">#</a>Use Snapshots</h2>
+<p>To snapshot a value, you can use the <a href="../api/expect.html#tomatchsnapshot"><code>toMatchSnapshot()</code></a> from <code>expect()</code> API:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;toUpperCase&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-title function_">toUpperCase</span>(<span class="hljs-string">&#x27;foobar&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(result).<span class="hljs-title function_">toMatchSnapshot</span>()
+})</code></pre></div>
+<p>The first time this test is run, Vitest creates a snapshot file that looks like this:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html</span>
+
+<span class="hljs-built_in">exports</span>[<span class="hljs-string">&#x27;toUpperCase 1&#x27;</span>] = <span class="hljs-string">&#x27;&quot;FOOBAR&quot;&#x27;</span></code></pre></div>
+<p>The snapshot artifact should be committed alongside code changes, and reviewed as part of your code review process. On subsequent test runs, Vitest will compare the rendered output with the previous snapshot. If they match, the test will pass. If they don&#39;t match, either the test runner found a bug in your code that should be fixed, or the implementation has changed and the snapshot needs to be updated.</p>
+<p>Vitest stores a serialized representation of the received value. Snapshot rendering is powered by <a href="https://npmx.dev/package/@vitest/pretty-format"><code>@vitest/pretty-format</code></a>. <a href="../config/snapshotformat.html"><code>snapshotFormat</code></a> allows configuring general snapshot formatting behavior in Vitest. For further customization, you can implement your own <a href="#custom-serializer">custom serializers</a> or <a href="#custom-snapshot-matchers">custom snapshot matchers</a>.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>When using Snapshots with async concurrent tests, <code>expect</code> from the local <a href="test-context.html">Test Context</a> must be used to ensure the right test is detected.</p>
+</div><h2 id="inline-snapshots"><a class="anchor" href="#inline-snapshots">#</a>Inline Snapshots</h2>
+<p>Similarly, you can use the <a href="../api/expect.html#tomatchinlinesnapshot"><code>toMatchInlineSnapshot()</code></a> to store the snapshot inline within the test file.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;toUpperCase&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-title function_">toUpperCase</span>(<span class="hljs-string">&#x27;foobar&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(result).<span class="hljs-title function_">toMatchInlineSnapshot</span>()
+})</code></pre></div>
+<p>Instead of creating a snapshot file, Vitest will modify the test file directly to update the snapshot as a string:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;toUpperCase&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-title function_">toUpperCase</span>(<span class="hljs-string">&#x27;foobar&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(result).<span class="hljs-title function_">toMatchInlineSnapshot</span>(<span class="hljs-string">&#x27;&quot;FOOBAR&quot;&#x27;</span>)
+})</code></pre></div>
+<p>This allows you to see the expected output directly without jumping across different files.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>When using Snapshots with async concurrent tests, <code>expect</code> from the local <a href="test-context.html">Test Context</a> must be used to ensure the right test is detected.</p>
+</div><h2 id="updating-snapshots"><a class="anchor" href="#updating-snapshots">#</a>Updating Snapshots</h2>
+<p>When the received value doesn&#39;t match the snapshot, the test fails and shows you the difference between them. When the snapshot change is expected, you may want to update the snapshot from the current state.</p>
+<p>In watch mode, you can press the <code>u</code> key in the terminal to update the failed snapshot directly.</p>
+<p>Or you can use the <code>--update</code> or <code>-u</code> flag in the CLI to make Vitest update snapshots.</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest -u</code></pre></div>
+<h3 id="ci-behavior"><a class="anchor" href="#ci-behavior">#</a>CI behavior</h3>
+<p>By default, Vitest does not write snapshots in CI (<code>process.env.CI</code> is truthy) and any snapshot mismatches, missing snapshots, and obsolete snapshots fail the run. See <a href="../config/update.html"><code>update</code></a> for the details.</p>
+<p>An <strong>obsolete snapshot</strong> is a snapshot entry (or snapshot file) that no longer matches any collected test. This usually happens after removing or renaming tests.</p>
+<h2 id="file-snapshots"><a class="anchor" href="#file-snapshots">#</a>File Snapshots</h2>
+<p>When calling <code>toMatchSnapshot()</code>, we store all snapshots in a formatted snap file. That means we need to escape some characters (namely the double-quote <code>&quot;</code> and backtick <code>`</code>) in the snapshot string. Meanwhile, you might lose the syntax highlighting for the snapshot content (if they are in some language).</p>
+<p>In light of this, we introduced <a href="../api/expect.html#tomatchfilesnapshot"><code>toMatchFileSnapshot()</code></a> to explicitly match against a file. This allows you to assign any file extension to the snapshot file, and makes them more readable.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;render basic&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-title function_">renderHTML</span>(<span class="hljs-title function_">h</span>(<span class="hljs-string">&#x27;div&#x27;</span>, { <span class="hljs-attr">class</span>: <span class="hljs-string">&#x27;foo&#x27;</span> }))
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(result).<span class="hljs-title function_">toMatchFileSnapshot</span>(<span class="hljs-string">&#x27;./test/basic.output.html&#x27;</span>)
+})</code></pre></div>
+<p>It will compare with the content of <code>./test/basic.output.html</code>. And can be written back with the <code>--update</code> flag.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Do not use a snapshot path managed by Vitest, such as <code>__snapshots__/basic.test.ts.snap</code>, with <code>toMatchFileSnapshot</code>. Choose a separate file path pattern for file snapshots.</p>
+</div><h2 id="visual-snapshots"><a class="anchor" href="#visual-snapshots">#</a>Visual Snapshots</h2>
+<p>For visual regression testing of UI components and pages, Vitest provides built-in support through <a href="browser/index.html">browser mode</a> with the <a href="../api/browser/assertions.html#tomatchscreenshot"><code>toMatchScreenshot()</code></a> assertion:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;button looks correct&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> button = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>)
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(button).<span class="hljs-title function_">toMatchScreenshot</span>(<span class="hljs-string">&#x27;primary-button&#x27;</span>)
+})</code></pre></div>
+<p>This captures screenshots and compares them against reference images to detect unintended visual changes. Learn more in the <a href="browser/visual-regression-testing.html">Visual Regression Testing guide</a>.</p>
+<h2 id="aria-snapshots"><a class="anchor" href="#aria-snapshots">#</a>ARIA Snapshots <Experimental /> <Version>4.1.4</Version></h2>
+<p>ARIA snapshots capture the accessibility tree of a DOM element and compare it against a stored template. Based on <a href="https://playwright.dev/docs/aria-snapshots">Playwright&#39;s ARIA snapshots</a>, they provide a semantic alternative to visual regression testing — asserting structure and meaning rather than pixels.</p>
+<p>For example, given this HTML:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">nav</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Main&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/&quot;</span>&gt;</span>Home<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/about&quot;</span>&gt;</span>About<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">nav</span>&gt;</span></code></pre></div>
+<p>You can assert its accessibility tree:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;navigation structure&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;navigation&#x27;</span>)).<span class="hljs-title function_">toMatchAriaInlineSnapshot</span>(<span class="hljs-string">`
+    - navigation &quot;Main&quot;:
+      - link &quot;Home&quot;:
+        - /url: /
+      - link &quot;About&quot;:
+        - /url: /about
+  `</span>)
+})</code></pre></div>
+<p>See the dedicated <a href="browser/aria-snapshots.html">ARIA Snapshots guide</a> for syntax details, retry behavior in Browser Mode, and file vs. inline snapshot examples. See <a href="../api/expect.html#tomatcharisnapshot"><code>toMatchAriaSnapshot</code></a> and <a href="../api/expect.html#tomatchariainlinesnapshot"><code>toMatchAriaInlineSnapshot</code></a> for the full API reference.</p>
+<h2 id="custom-serializer"><a class="anchor" href="#custom-serializer">#</a>Custom Serializer</h2>
+<p>You can add your own logic to alter how your snapshots are serialized. Like Jest, Vitest has default serializers for built-in JavaScript types, HTML elements, ImmutableJS and for React elements.</p>
+<p>You can explicitly add custom serializer by using <a href="../api/expect.html#expect-addsnapshotserializer"><code>expect.addSnapshotSerializer</code></a> API.</p>
+<div class="code"><pre><code class="hljs lang-ts">expect.<span class="hljs-title function_">addSnapshotSerializer</span>({
+  <span class="hljs-title function_">serialize</span>(<span class="hljs-params">val, config, indentation, depth, refs, printer</span>) {
+    <span class="hljs-comment">// `printer` is a function that serializes a value using existing plugins.</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`Pretty foo: <span class="hljs-subst">${printer(
+      val.foo,
+      config,
+      indentation,
+      depth,
+      refs,
+    )}</span>`</span>
+  },
+  <span class="hljs-title function_">test</span>(<span class="hljs-params">val</span>) {
+    <span class="hljs-keyword">return</span> val &amp;&amp; <span class="hljs-title class_">Object</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">hasOwnProperty</span>.<span class="hljs-title function_">call</span>(val, <span class="hljs-string">&#x27;foo&#x27;</span>)
+  },
+})</code></pre></div>
+<p>We also support <a href="../config/snapshotserializers.html">snapshotSerializers</a> option to implicitly add custom serializers.</p>
+<div class="code"><div class="code-title">path/to/custom-serializer.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">SnapshotSerializer</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+  <span class="hljs-title function_">serialize</span>(<span class="hljs-params">val, config, indentation, depth, refs, printer</span>) {
+    <span class="hljs-comment">// `printer` is a function that serializes a value using existing plugins.</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`Pretty foo: <span class="hljs-subst">${printer(
+      val.foo,
+      config,
+      indentation,
+      depth,
+      refs,
+    )}</span>`</span>
+  },
+  <span class="hljs-title function_">test</span>(<span class="hljs-params">val</span>) {
+    <span class="hljs-keyword">return</span> val &amp;&amp; <span class="hljs-title class_">Object</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">hasOwnProperty</span>.<span class="hljs-title function_">call</span>(val, <span class="hljs-string">&#x27;foo&#x27;</span>)
+  },
+} <span class="hljs-keyword">satisfies</span> <span class="hljs-title class_">SnapshotSerializer</span></code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">snapshotSerializers</span>: [<span class="hljs-string">&#x27;path/to/custom-serializer.ts&#x27;</span>],
+  },
+})</code></pre></div>
+<p>After adding a test like this:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;foo snapshot test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> bar = {
+    <span class="hljs-attr">foo</span>: {
+      <span class="hljs-attr">x</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">y</span>: <span class="hljs-number">2</span>,
+    },
+  }
+
+  <span class="hljs-title function_">expect</span>(bar).<span class="hljs-title function_">toMatchSnapshot</span>()
+})</code></pre></div>
+<p>You will get the following snapshot:</p>
+<div class="code"><pre><code class="hljs lang-txt">Pretty foo: Object {
+  &quot;x&quot;: 1,
+  &quot;y&quot;: 2,
+}</code></pre></div>
+<h2 id="custom-snapshot-matchers"><a class="anchor" href="#custom-snapshot-matchers">#</a>Custom Snapshot Matchers <Experimental /> <Version>4.1.3</Version></h2>
+<p>You can build custom snapshot matchers using the composable functions exposed on <code>Snapshots</code> from <code>vitest</code>. These let you transform values before snapshotting while preserving full snapshot lifecycle support (creation, update, inline rewriting).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, <span class="hljs-title class_">Snapshots</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> { toMatchFileSnapshot, toMatchInlineSnapshot, toMatchSnapshot } = <span class="hljs-title class_">Snapshots</span>
+
+expect.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-title function_">toMatchTrimmedSnapshot</span>(<span class="hljs-params"><span class="hljs-attr">received</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">length</span>: <span class="hljs-built_in">number</span></span>) {
+    <span class="hljs-keyword">return</span> toMatchSnapshot.<span class="hljs-title function_">call</span>(<span class="hljs-variable language_">this</span>, received.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, length))
+  },
+  <span class="hljs-title function_">toMatchTrimmedInlineSnapshot</span>(<span class="hljs-params"><span class="hljs-attr">received</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">inlineSnapshot</span>?: <span class="hljs-built_in">string</span></span>) {
+    <span class="hljs-keyword">return</span> toMatchInlineSnapshot.<span class="hljs-title function_">call</span>(<span class="hljs-variable language_">this</span>, received.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>), inlineSnapshot)
+  },
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">toMatchTrimmedFileSnapshot</span>(<span class="hljs-params"><span class="hljs-attr">received</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">file</span>: <span class="hljs-built_in">string</span></span>) {
+    <span class="hljs-keyword">return</span> toMatchFileSnapshot.<span class="hljs-title function_">call</span>(<span class="hljs-variable language_">this</span>, received.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>), file)
+  },
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;file snapshot&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// create __snapshots__/demo.test.ts with</span>
+  <span class="hljs-comment">// &gt; exports[`file snapshot 1`] = `&quot;extra long&quot;`</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-string">&#x27;extra long string oh my gerd&#x27;</span>).<span class="hljs-title function_">toMatchTrimmedSnapshot</span>(<span class="hljs-number">10</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;inline snapshot&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-string">&#x27;super long string oh my gerd&#x27;</span>).<span class="hljs-title function_">toMatchTrimmedInlineSnapshot</span>(<span class="hljs-string">`&quot;super long&quot;`</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;raw file snapshot&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// create raw-file.txt with:</span>
+  <span class="hljs-comment">// &gt; crazy long</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-string">&#x27;crazy long string oh my gerd&#x27;</span>).<span class="hljs-title function_">toMatchTrimmedFileSnapshot</span>(<span class="hljs-string">&#x27;./raw-file.txt&#x27;</span>)
+})</code></pre></div>
+<p>The composables return <code>{ pass, message }</code> so you can further customize the error:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">Snapshots</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> { toMatchSnapshot } = <span class="hljs-title class_">Snapshots</span>
+
+expect.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-title function_">toMatchTrimmedSnapshot</span>(<span class="hljs-params"><span class="hljs-attr">received</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">length</span>: <span class="hljs-built_in">number</span></span>) {
+    <span class="hljs-keyword">const</span> result = toMatchSnapshot.<span class="hljs-title function_">call</span>(<span class="hljs-variable language_">this</span>, received.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, length))
+    <span class="hljs-keyword">return</span> { ...result, <span class="hljs-attr">message</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-string">`Trimmed snapshot failed: <span class="hljs-subst">${result.message()}</span>`</span> }
+  },
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>For inline snapshot matchers, the snapshot argument must be the last parameter (or second-to-last when using property matchers). Vitest rewrites the last string argument in the source code, so custom arguments before the snapshot work, but custom arguments after it are not supported.</p>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>File snapshot matchers must be <code>async</code> — <code>toMatchFileSnapshot</code> returns a <code>Promise</code>. Remember to <code>await</code> the result in the matcher and in your test.</p>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>When custom inline snapshot matcher is asynchronous, Vitest cannot automatically infer the call location for inline snapshot rewriting. You must capture the call site by setting the <code>&#39;error&#39;</code> flag on the chai assertion object:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, chai, <span class="hljs-title class_">Snapshots</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> { toMatchInlineSnapshot } = <span class="hljs-title class_">Snapshots</span>
+
+expect.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">toMatchTransformedInlineSnapshot</span>(<span class="hljs-params"><span class="hljs-attr">received</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">inlineSnapshot</span>?: <span class="hljs-built_in">string</span></span>) {
+    <span class="hljs-comment">// capture call site synchronously at the top of matcher implementation</span>
+    chai.<span class="hljs-property">util</span>.<span class="hljs-title function_">flag</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">assertion</span>, <span class="hljs-string">&#x27;error&#x27;</span>, <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>())
+    <span class="hljs-keyword">const</span> transformed = <span class="hljs-keyword">await</span> <span class="hljs-title function_">transform</span>(received)
+    <span class="hljs-keyword">return</span> toMatchInlineSnapshot.<span class="hljs-title function_">call</span>(<span class="hljs-variable language_">this</span>, transformed, inlineSnapshot)
+  },
+})</code></pre></div>
+</div><p>For TypeScript, augment the <code>Matchers&lt;R, T&gt;</code> interface:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Matchers</span>&lt;R, T&gt; {
+    <span class="hljs-attr">toMatchTrimmedSnapshot</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">length</span>: <span class="hljs-built_in">number</span></span>) =&gt;</span> R
+    <span class="hljs-attr">toMatchTrimmedInlineSnapshot</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">inlineSnapshot</span>?: <span class="hljs-built_in">string</span></span>) =&gt;</span> R
+    <span class="hljs-attr">toMatchTrimmedFileSnapshot</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">file</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  }
+}</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>See <a href="extending-matchers.html">Extending Matchers</a> for more on <code>expect.extend</code> and custom matcher conventions.</p>
+</div><h2 id="custom-snapshot-domain"><a class="anchor" href="#custom-snapshot-domain">#</a>Custom Snapshot Domain <Experimental /> <Version>4.1.4</Version></h2>
+<p>Custom serializers control how values are <em>rendered</em> into snapshot strings, but comparison is still string equality. A <strong>domain snapshot adapter</strong> goes further: it owns the entire comparison pipeline for a custom matcher, including how to capture a value, render it, parse a stored snapshot, and match them semantically.</p>
+<h3 id="the-adapter-interface"><a class="anchor" href="#the-adapter-interface">#</a>The adapter interface</h3>
+<p>A domain adapter implements four methods and is generic over two types — <code>Captured</code> (what the value actually is) and <code>Expected</code> (what the stored snapshot parses into):</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">DomainMatchResult</span>, <span class="hljs-title class_">DomainSnapshotAdapter</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">myAdapter</span>: <span class="hljs-title class_">DomainSnapshotAdapter</span>&lt;<span class="hljs-title class_">Captured</span>, <span class="hljs-title class_">Expected</span>&gt; = {
+  <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;my-domain&#x27;</span>,
+
+  <span class="hljs-comment">// Extract structured data from the received value</span>
+  <span class="hljs-title function_">capture</span>(<span class="hljs-attr">received</span>: <span class="hljs-built_in">unknown</span>): <span class="hljs-title class_">Captured</span> { <span class="hljs-comment">/* ... */</span> },
+
+  <span class="hljs-comment">// Render captured data as the snapshot string (what gets stored)</span>
+  <span class="hljs-title function_">render</span>(<span class="hljs-attr">captured</span>: <span class="hljs-title class_">Captured</span>): <span class="hljs-built_in">string</span> { <span class="hljs-comment">/* ... */</span> },
+
+  <span class="hljs-comment">// Parse a stored snapshot string into a structured expected value</span>
+  <span class="hljs-title function_">parseExpected</span>(<span class="hljs-attr">input</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Expected</span> { <span class="hljs-comment">/* ... */</span> },
+
+  <span class="hljs-comment">// Compare captured vs expected, return pass/fail and resolved output</span>
+  <span class="hljs-title function_">match</span>(<span class="hljs-attr">captured</span>: <span class="hljs-title class_">Captured</span>, <span class="hljs-attr">expected</span>: <span class="hljs-title class_">Expected</span>): <span class="hljs-title class_">DomainMatchResult</span> { <span class="hljs-comment">/* ... */</span> },
+}</code></pre></div>
+<h4 id="domainmatchresult"><a class="anchor" href="#domainmatchresult">#</a><code>DomainMatchResult</code></h4>
+<p>The <code>match</code> method returns a <code>DomainMatchResult</code> with two optional string fields beyond <code>pass</code>:</p>
+<ul>
+<li><p><strong><code>resolved</code></strong> — the captured value viewed through the template&#39;s lens. Where the template uses patterns (e.g. regexes) or omits details, the resolved string adopts those patterns. Where the template doesn&#39;t match, it uses literal captured values. This serves as both the actual side of diffs and the value written on <code>--update</code>. When omitted, falls back to <code>render(capture(received))</code>.</p>
+</li>
+<li><p><strong><code>expected</code></strong> — the stored template re-rendered as a string. Used as the expected side of diffs. When omitted, falls back to the raw snapshot string from the snap file or inline snapshot.</p>
+</li>
+</ul>
+<details class="box"><summary>Why are <code>Captured</code> and <code>Expected</code> separate types?</summary><p>When a snapshot is first generated, <code>render(captured)</code> produces a plain string that gets stored. But once stored, the user can <strong>hand-edit</strong> it — replacing literals with regex patterns, relaxing assertions, or adding domain-specific query syntax. After editing, <code>parseExpected(input)</code> parses this modified string into a type that is <em>richer</em> than what <code>capture</code> produces.</p>
+<p>For example, in the <a href="#example-key-value-adapter">key-value adapter</a> below, <code>Captured</code> values are always <code>string</code>, but <code>Expected</code> values can be <code>string | RegExp</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">type</span> <span class="hljs-title class_">KVCaptured</span> = <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt;
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">KVExpected</span> = <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span>&gt;</code></pre></div>
+<p>This asymmetry is what makes <code>--update</code> work correctly: <code>match</code> returns a <code>resolved</code> string that updates changed literal parts while <strong>preserving</strong> the user&#39;s hand-edited patterns. If both sides were the same type, there would be no way to distinguish &quot;what the value actually is&quot; from &quot;what the user chose to assert&quot; — and every update would overwrite the user&#39;s patterns.</p>
+</details><h3 id="build-a-matcher-from-the-adapter"><a class="anchor" href="#build-a-matcher-from-the-adapter">#</a>Build a matcher from the adapter</h3>
+<p>Register a custom matcher with <code>expect.extend(...)</code> and call the snapshot composables from <code>vitest</code>:</p>
+<div class="code"><div class="code-title">setup.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, <span class="hljs-title class_">Snapshots</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Matchers</span>&lt;R, T&gt; {
+    <span class="hljs-attr">toMatchMyDomainSnapshot</span>: <span class="hljs-function">() =&gt;</span> R
+    <span class="hljs-attr">toMatchMyDomainInlineSnapshot</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">inlineSnapshot</span>?: <span class="hljs-built_in">string</span></span>) =&gt;</span> R
+  }
+}
+
+expect.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-title function_">toMatchMyDomainSnapshot</span>(<span class="hljs-params"><span class="hljs-attr">received</span>: <span class="hljs-built_in">unknown</span></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Snapshots</span>.<span class="hljs-property">toMatchDomainSnapshot</span>.<span class="hljs-title function_">call</span>(<span class="hljs-variable language_">this</span>, myAdapter, received)
+  },
+  <span class="hljs-title function_">toMatchMyDomainInlineSnapshot</span>(<span class="hljs-params"><span class="hljs-attr">received</span>: <span class="hljs-built_in">unknown</span>, <span class="hljs-attr">inlineSnapshot</span>?: <span class="hljs-built_in">string</span></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Snapshots</span>.<span class="hljs-property">toMatchDomainInlineSnapshot</span>.<span class="hljs-title function_">call</span>(
+      <span class="hljs-variable language_">this</span>,
+      myAdapter,
+      received,
+      inlineSnapshot,
+    )
+  },
+})</code></pre></div>
+<p>Then use your matcher in tests:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">expect</span>(value).<span class="hljs-title function_">toMatchMyDomainSnapshot</span>()
+<span class="hljs-title function_">expect</span>(value).<span class="hljs-title function_">toMatchMyDomainInlineSnapshot</span>(<span class="hljs-string">`key=value`</span>)</code></pre></div>
+<h3 id="example-key-value-adapter"><a class="anchor" href="#example-key-value-adapter">#</a>Example: key-value adapter</h3>
+<p>A minimal adapter that stores objects as <code>key=value</code> lines, with regex pattern and subset key match support (<a href="https://github.com/vitest-dev/vitest/blob/main/test/snapshots/test/fixtures/domain/basic.ts">full source</a>):</p>
+<div class="code"><div class="code-title">kv-adapter.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">DomainMatchResult</span>, <span class="hljs-title class_">DomainSnapshotAdapter</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">KVCaptured</span> = <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt;
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">KVExpected</span> = <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span>&gt;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">renderKV</span>(<span class="hljs-params"><span class="hljs-attr">obj</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt;</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-string">`\n<span class="hljs-subst">${<span class="hljs-built_in">Object</span>.entries(obj).map(([k, v]) =&gt; <span class="hljs-string">`<span class="hljs-subst">${k}</span>=<span class="hljs-subst">${v}</span>`</span>).join(<span class="hljs-string">&#x27;\n&#x27;</span>)}</span>\n`</span>
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">kvAdapter</span>: <span class="hljs-title class_">DomainSnapshotAdapter</span>&lt;<span class="hljs-title class_">KVCaptured</span>, <span class="hljs-title class_">KVExpected</span>&gt; = {
+  <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;kv&#x27;</span>,
+
+  <span class="hljs-title function_">capture</span>(<span class="hljs-attr">received</span>: <span class="hljs-built_in">unknown</span>): <span class="hljs-title class_">KVCaptured</span> {
+    <span class="hljs-keyword">if</span> (received &amp;&amp; <span class="hljs-keyword">typeof</span> received === <span class="hljs-string">&#x27;object&#x27;</span>) {
+      <span class="hljs-keyword">return</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">fromEntries</span>(
+        <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">entries</span>(received).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">[k, v]</span>) =&gt;</span> [k, <span class="hljs-title class_">String</span>(v)]),
+      )
+    }
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">TypeError</span>(<span class="hljs-string">&#x27;kv adapter expects a plain object&#x27;</span>)
+  },
+
+  <span class="hljs-title function_">render</span>(<span class="hljs-attr">captured</span>: <span class="hljs-title class_">KVCaptured</span>): <span class="hljs-built_in">string</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-title function_">renderKV</span>(captured)
+  },
+
+  <span class="hljs-title function_">parseExpected</span>(<span class="hljs-attr">input</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">KVExpected</span> {
+    <span class="hljs-keyword">const</span> entries = input.<span class="hljs-title function_">trim</span>().<span class="hljs-title function_">split</span>(<span class="hljs-string">&#x27;\n&#x27;</span>).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">line</span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> eq = line.<span class="hljs-title function_">indexOf</span>(<span class="hljs-string">&#x27;=&#x27;</span>)
+      <span class="hljs-keyword">const</span> key = line.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, eq)
+      <span class="hljs-keyword">const</span> raw = line.<span class="hljs-title function_">slice</span>(eq + <span class="hljs-number">1</span>)
+      <span class="hljs-keyword">const</span> value = (raw.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&#x27;/&#x27;</span>) &amp;&amp; raw.<span class="hljs-title function_">endsWith</span>(<span class="hljs-string">&#x27;/&#x27;</span>) &amp;&amp; raw.<span class="hljs-property">length</span> &gt; <span class="hljs-number">1</span>)
+        ? <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(raw.<span class="hljs-title function_">slice</span>(<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>))
+        : raw
+      <span class="hljs-keyword">return</span> [key, value]
+    })
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">fromEntries</span>(entries)
+  },
+
+  <span class="hljs-title function_">match</span>(<span class="hljs-attr">captured</span>: <span class="hljs-title class_">KVCaptured</span>, <span class="hljs-attr">expected</span>: <span class="hljs-title class_">KVExpected</span>): <span class="hljs-title class_">DomainMatchResult</span> {
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">resolvedLines</span>: <span class="hljs-built_in">string</span>[] = []
+    <span class="hljs-keyword">let</span> pass = <span class="hljs-literal">true</span>
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [key, actualValue] <span class="hljs-keyword">of</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">entries</span>(captured)) {
+      <span class="hljs-keyword">const</span> expectedValue = expected[key]
+
+      <span class="hljs-comment">// non-asserted keys are skipped (works as subset match)</span>
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> expectedValue === <span class="hljs-string">&#x27;undefined&#x27;</span>) {
+        <span class="hljs-keyword">continue</span>
+      }
+
+      <span class="hljs-comment">// preserve matched pattern for normalized diff and partial update</span>
+      <span class="hljs-keyword">if</span> (expectedValue <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">RegExp</span> &amp;&amp; expectedValue.<span class="hljs-title function_">test</span>(actualValue)) {
+        resolvedLines.<span class="hljs-title function_">push</span>(<span class="hljs-string">`<span class="hljs-subst">${key}</span>=/<span class="hljs-subst">${expectedValue.source}</span>/`</span>)
+        <span class="hljs-keyword">continue</span>
+      }
+
+      resolvedLines.<span class="hljs-title function_">push</span>(<span class="hljs-string">`<span class="hljs-subst">${key}</span>=<span class="hljs-subst">${actualValue}</span>`</span>)
+      pass &amp;&amp;= actualValue === expectedValue
+    }
+
+    <span class="hljs-keyword">return</span> {
+      pass,
+      <span class="hljs-attr">message</span>: pass ? <span class="hljs-literal">undefined</span> : <span class="hljs-string">&#x27;KV entries do not match&#x27;</span>,
+      <span class="hljs-attr">resolved</span>: <span class="hljs-string">`\n<span class="hljs-subst">${resolvedLines.join(<span class="hljs-string">&#x27;\n&#x27;</span>)}</span>\n`</span>,
+      <span class="hljs-attr">expected</span>: <span class="hljs-string">`\n<span class="hljs-subst">${renderKV(expected)}</span>\n`</span>,
+    }
+  },
+}</code></pre></div>
+<div class="code"><div class="code-title">setup.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, <span class="hljs-title class_">Snapshots</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { kvAdapter } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./kv-adapter&#x27;</span>
+
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Matchers</span>&lt;R, T&gt; {
+    <span class="hljs-attr">toMatchKvSnapshot</span>: <span class="hljs-function">() =&gt;</span> R
+    <span class="hljs-attr">toMatchKvInlineSnapshot</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">inlineSnapshot</span>?: <span class="hljs-built_in">string</span></span>) =&gt;</span> R
+  }
+}
+
+expect.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-title function_">toMatchKvSnapshot</span>(<span class="hljs-params"><span class="hljs-attr">received</span>: <span class="hljs-built_in">unknown</span></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Snapshots</span>.<span class="hljs-property">toMatchDomainSnapshot</span>.<span class="hljs-title function_">call</span>(<span class="hljs-variable language_">this</span>, kvAdapter, received)
+  },
+  <span class="hljs-title function_">toMatchKvInlineSnapshot</span>(<span class="hljs-params"><span class="hljs-attr">received</span>: <span class="hljs-built_in">unknown</span>, <span class="hljs-attr">inlineSnapshot</span>?: <span class="hljs-built_in">string</span></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Snapshots</span>.<span class="hljs-property">toMatchDomainInlineSnapshot</span>.<span class="hljs-title function_">call</span>(<span class="hljs-variable language_">this</span>, kvAdapter, received, inlineSnapshot)
+  },
+})</code></pre></div>
+<div class="code"><div class="code-title">example.test.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;user data&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> user = { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span>, <span class="hljs-attr">score</span>: <span class="hljs-string">&#x27;42&#x27;</span> }
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toMatchKvSnapshot</span>()
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;user data inline&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> user = { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">100</span>, <span class="hljs-attr">score</span>: <span class="hljs-string">&#x27;42&#x27;</span> }
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toMatchKvInlineSnapshot</span>(<span class="hljs-string">`
+    name=Alice
+    score=/\\d+/
+  `</span>)
+})</code></pre></div>
+<h2 id="difference-from-jest"><a class="anchor" href="#difference-from-jest">#</a>Difference from Jest</h2>
+<p>Vitest provides an almost compatible Snapshot feature with <a href="https://jestjs.io/docs/snapshot-testing">Jest&#39;s</a> with a few exceptions:</p>
+<h4 id="1-comment-header-in-the-snapshot-file-is-different"><a class="anchor" href="#1-comment-header-in-the-snapshot-file-is-different">#</a>1. Comment header in the snapshot file is different</h4>
+<div class="code"><pre><code class="hljs lang-diff"><span class="hljs-deletion">- // Jest Snapshot v1, https://goo.gl/fbAQLP</span>
+<span class="hljs-addition">+ // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html</span></code></pre></div>
+<p>This does not really affect the functionality but might affect your commit diff when migrating from Jest.</p>
+<h4 id="2-printbasicprototype-is-default-to-false"><a class="anchor" href="#2-printbasicprototype-is-default-to-false">#</a>2. <code>printBasicPrototype</code> is default to <code>false</code></h4>
+<p>Both Jest and Vitest snapshots are powered by <code>pretty-format</code>, but Vitest applies its own snapshot defaults on top of <a href="https://npmx.dev/package/@vitest/pretty-format"><code>@vitest/pretty-format</code></a>. In particular, Vitest sets <code>printBasicPrototype</code> to <code>false</code> to provide a cleaner snapshot output, while in Jest &lt;29.0.0 it is <code>true</code> by default.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;snapshot&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> bar = [
+    {
+      <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span>,
+    },
+  ]
+
+  <span class="hljs-comment">// in Jest</span>
+  <span class="hljs-title function_">expect</span>(bar).<span class="hljs-title function_">toMatchInlineSnapshot</span>(<span class="hljs-string">`
+    Array [
+      Object {
+        &quot;foo&quot;: &quot;bar&quot;,
+      },
+    ]
+  `</span>)
+
+  <span class="hljs-comment">// in Vitest</span>
+  <span class="hljs-title function_">expect</span>(bar).<span class="hljs-title function_">toMatchInlineSnapshot</span>(<span class="hljs-string">`
+    [
+      {
+        &quot;foo&quot;: &quot;bar&quot;,
+      },
+    ]
+  `</span>)
+})</code></pre></div>
+<p>We believe this is a more reasonable default for readability and overall DX. If you still prefer Jest&#39;s behavior, you can change your config:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">snapshotFormat</span>: {
+      <span class="hljs-attr">printBasicPrototype</span>: <span class="hljs-literal">true</span>,
+    },
+  },
+})</code></pre></div>
+<h4 id="3-chevron-is-used-as-a-separator-instead-of-colon-for-custom-messages"><a class="anchor" href="#3-chevron-is-used-as-a-separator-instead-of-colon-for-custom-messages">#</a>3. Chevron <code>&gt;</code> is used as a separator instead of colon <code>:</code> for custom messages</h4>
+<p>Vitest uses chevron <code>&gt;</code> as a separator instead of colon <code>:</code> for readability, when a custom message is passed during creation of a snapshot file.</p>
+<p>For the following example test code:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;toThrowErrorMatchingSnapshot&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;error&#x27;</span>)
+  }).<span class="hljs-title function_">toThrowErrorMatchingSnapshot</span>(<span class="hljs-string">&#x27;hint&#x27;</span>)
+})</code></pre></div>
+<p>In Jest, the snapshot will be:</p>
+<div class="code"><pre><code class="hljs lang-console">exports[`toThrowErrorMatchingSnapshot: hint 1`] = `<span class="hljs-string">&quot;error&quot;</span>`;</code></pre></div>
+<p>In Vitest, the equivalent snapshot will be:</p>
+<div class="code"><pre><code class="hljs lang-console">exports[`toThrowErrorMatchingSnapshot &gt; hint 1`] = `[Error: error]`;</code></pre></div>
+<h4 id="4-default-error-snapshot-is-different-for-tothrowerrormatchingsnapshot-and-tothrowerrormatchinginlinesnapshot"><a class="anchor" href="#4-default-error-snapshot-is-different-for-tothrowerrormatchingsnapshot-and-tothrowerrormatchinginlinesnapshot">#</a>4. default <code>Error</code> snapshot is different for <code>toThrowErrorMatchingSnapshot</code> and <code>toThrowErrorMatchingInlineSnapshot</code></h4>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;snapshot&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// in Jest and Vitest</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;error&#x27;</span>)).<span class="hljs-title function_">toMatchInlineSnapshot</span>(<span class="hljs-string">`[Error: error]`</span>)
+
+  <span class="hljs-comment">// Jest snapshots `Error.message` for `Error` instance</span>
+  <span class="hljs-comment">// Vitest prints the same value as toMatchInlineSnapshot</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;error&#x27;</span>)
+  }).<span class="hljs-title function_">toThrowErrorMatchingInlineSnapshot</span>(<span class="hljs-string">`&quot;error&quot;`</span>)
+  }).<span class="hljs-title function_">toThrowErrorMatchingInlineSnapshot</span>(<span class="hljs-string">`[Error: error]`</span>)
+})</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#use-snapshots">Use Snapshots</a><a class="toc-2" href="#inline-snapshots">Inline Snapshots</a><a class="toc-2" href="#updating-snapshots">Updating Snapshots</a><a class="toc-3" href="#ci-behavior">CI behavior</a><a class="toc-2" href="#file-snapshots">File Snapshots</a><a class="toc-2" href="#visual-snapshots">Visual Snapshots</a><a class="toc-2" href="#aria-snapshots">ARIA Snapshots 4.1.4</a><a class="toc-2" href="#custom-serializer">Custom Serializer</a><a class="toc-2" href="#custom-snapshot-matchers">Custom Snapshot Matchers 4.1.3</a><a class="toc-2" href="#custom-snapshot-domain">Custom Snapshot Domain 4.1.4</a><a class="toc-3" href="#the-adapter-interface">The adapter interface</a><a class="toc-3" href="#build-a-matcher-from-the-adapter">Build a matcher from the adapter</a><a class="toc-3" href="#example-key-value-adapter">Example: key-value adapter</a><a class="toc-2" href="#difference-from-jest">Difference from Jest</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

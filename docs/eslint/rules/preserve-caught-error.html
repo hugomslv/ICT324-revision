@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>preserve-caught-error (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/preserve-caught-error <span class="badge badge-suggestion">suggestion</span> <span class="badge badge-reco">✅ dans js/recommended</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/preserve-caught-error">version en ligne</a></div>
+<h1>preserve-caught-error</h1><p>JavaScript developers often re-throw errors in <code>catch</code> blocks to add context but forget to preserve the original error, resulting in lost debugging information.</p>
+<p>Using the <code>cause</code> option when throwing new errors helps retain the original error and maintain complete error chains, which improves debuggability and traceability.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">try</span> {
+	<span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">&quot;https://xyz.com/resource&quot;</span>);
+} <span class="hljs-keyword">catch</span>(error) {
+	<span class="hljs-comment">// Throw a more specific error without losing original context</span>
+	<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Failed to fetch resource&quot;</span>, {
+		<span class="hljs-attr">cause</span>: error
+	});
+}</code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule enforces the use of the <code>cause</code> property when throwing a new error inside a <code>catch</code> block.</p>
+<p>Checks for all built-in <code>error types</code> that support passing a <code>cause</code>.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint preserve-caught-error: &quot;error&quot; */</span>
+
+<span class="hljs-comment">// Not using the `cause` option</span>
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-comment">// ...</span>
+} <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Something went wrong: &quot;</span> + error.<span class="hljs-property">message</span>);
+}
+
+<span class="hljs-comment">// Throwing a new Error with unrelated cause</span>
+<span class="hljs-keyword">try</span> {
+	<span class="hljs-title function_">doSomething</span>();
+} <span class="hljs-keyword">catch</span> (err) {
+	<span class="hljs-keyword">const</span> unrelated = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;other&quot;</span>);
+	<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Something failed&quot;</span>, { <span class="hljs-attr">cause</span>: unrelated });
+}
+
+<span class="hljs-comment">// Caught error is being lost partially due to destructuring</span>
+<span class="hljs-keyword">try</span> {
+	<span class="hljs-title function_">doSomething</span>();
+} <span class="hljs-keyword">catch</span> ({ message, ...rest }) {
+	<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(message);
+}
+
+<span class="hljs-comment">// Cause error is being shadowed by a closer scoped redeclaration.</span>
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-title function_">doSomething</span>();
+} <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-keyword">if</span> (whatever) {
+        <span class="hljs-keyword">const</span> error = anotherError; <span class="hljs-comment">// This declaration is the problem.</span>
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Something went wrong&quot;</span>, { <span class="hljs-attr">cause</span>: error });
+    }
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint preserve-caught-error: &quot;error&quot; */</span>
+
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-comment">// ...</span>
+} <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Something went wrong&quot;</span>, { <span class="hljs-attr">cause</span>: error });
+}
+
+<span class="hljs-comment">// When the thrown error is not directly related to the caught error.</span>
+<span class="hljs-keyword">try</span> {
+} <span class="hljs-keyword">catch</span> (error) {
+	foo = {
+		<span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {
+			<span class="hljs-comment">// This throw is not directly related to the caught error.</span>
+			<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Something went wrong&quot;</span>);
+		}
+	};
+}
+
+<span class="hljs-comment">// No throw inside catch</span>
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-title function_">doSomething</span>();
+} <span class="hljs-keyword">catch</span> (e) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(e);
+}
+
+<span class="hljs-comment">// Ignoring the caught error at the parameter level</span>
+<span class="hljs-comment">// This is valid by default, but this behavior can be changed</span>
+<span class="hljs-comment">// by using the `requireCatchParameter` option discussed below.</span>
+<span class="hljs-keyword">try</span> {
+	<span class="hljs-title function_">doSomething</span>();
+} <span class="hljs-keyword">catch</span> {
+	<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">TypeError</span>(<span class="hljs-string">&quot;Something went wrong&quot;</span>);
+}</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule takes a single option — an object with the following optional properties:</p>
+<ul>
+<li><code>requireCatchParameter</code>: Requires the catch blocks to always have the caught error parameter when set to <code>true</code>. By default, this is <code>false</code>.</li>
+<li><code>errorClassNames</code>: Additional error class names to check for cause preservation. By default, this is <code>[]</code>.</li>
+</ul>
+<h3 id="requirecatchparameter"><a class="anchor" href="#requirecatchparameter">#</a>requireCatchParameter</h3>
+<p>Enabling this option mandates for all the catch blocks to have a caught error parameter. This makes sure that the caught error is not discarded at the parameter level.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-string">&quot;preserve-caught-error&quot;</span>: [<span class="hljs-string">&quot;error&quot;</span>, {
+  <span class="hljs-string">&quot;requireCatchParameter&quot;</span>: <span class="hljs-literal">true</span>
+}]</code></pre></div>
+<p>Example of <strong>incorrect</strong> code for the <code>{ &quot;requireCatchParameter&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint preserve-caught-error: [&quot;error&quot;, { &quot;requireCatchParameter&quot;: true }] */</span>
+
+<span class="hljs-keyword">try</span> {
+	<span class="hljs-title function_">doSomething</span>();
+} <span class="hljs-keyword">catch</span> { <span class="hljs-comment">// Can&#x27;t discard the error ❌</span>
+	<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Something went wrong&quot;</span>);
+}</code></pre></div>
+</div><p>Example of <strong>correct</strong> code for the <code>{ &quot;requireCatchParameter&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint preserve-caught-error: [&quot;error&quot;, { &quot;requireCatchParameter&quot;: true }] */</span>
+
+<span class="hljs-keyword">try</span> {
+	<span class="hljs-title function_">doSomething</span>();
+} <span class="hljs-keyword">catch</span>(error) { <span class="hljs-comment">// Error is being referenced ✅</span>
+	<span class="hljs-comment">// Handling and re-throw logic</span>
+}</code></pre></div>
+</div><h3 id="errorclassnames"><a class="anchor" href="#errorclassnames">#</a>errorClassNames</h3>
+<p>By default, this rule checks only the built-in <code>Error</code> types (<code>Error</code>, <code>EvalError</code>, <code>RangeError</code>, <code>ReferenceError</code>, <code>SyntaxError</code>, <code>TypeError</code>, <code>URIError</code>, <code>AggregateError</code>). Use <code>errorClassNames</code> to also check custom error classes.</p>
+<p>Each entry can be either a string or an object:</p>
+<ul>
+<li>A <strong>string</strong> specifies the class name. The constructor is assumed to accept the options object as the second argument, matching the built-in <code>Error</code> signature.</li>
+<li>An <strong>object</strong> with <code>name</code> and <code>argumentPosition</code> is used when the constructor accepts the options object at a different position. <code>argumentPosition</code> is 1-indexed.</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;rules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;preserve-caught-error&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;errorClassNames&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                <span class="hljs-string">&quot;AppError&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;APIError&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;argumentPosition&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3</span> <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">]</span>
+        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+    <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Example of <strong>incorrect</strong> code for the <code>{ &quot;errorClassNames&quot;: [&quot;AppError&quot;] }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint preserve-caught-error: [&quot;error&quot;, { &quot;errorClassNames&quot;: [&quot;AppError&quot;] }] */</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">AppError</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Error</span> {}
+
+<span class="hljs-keyword">try</span> {
+	<span class="hljs-title function_">doSomething</span>();
+} <span class="hljs-keyword">catch</span> (err) {
+	<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">AppError</span>(<span class="hljs-string">&quot;Something failed&quot;</span>);
+}</code></pre></div>
+</div><p>Example of <strong>correct</strong> code for the <code>{ &quot;errorClassNames&quot;: [&quot;AppError&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint preserve-caught-error: [&quot;error&quot;, { &quot;errorClassNames&quot;: [&quot;AppError&quot;] }] */</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">AppError</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Error</span> {}
+
+<span class="hljs-keyword">try</span> {
+	<span class="hljs-title function_">doSomething</span>();
+} <span class="hljs-keyword">catch</span> (err) {
+	<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">AppError</span>(<span class="hljs-string">&quot;Something failed&quot;</span>, { <span class="hljs-attr">cause</span>: err });
+}</code></pre></div>
+</div><p>Example of <strong>incorrect</strong> code for the <code>{ &quot;errorClassNames&quot;: [{ &quot;name&quot;: &quot;APIError&quot;, &quot;argumentPosition&quot;: 3 }] }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint preserve-caught-error: [&quot;error&quot;, { &quot;errorClassNames&quot;: [{ &quot;name&quot;: &quot;APIError&quot;, &quot;argumentPosition&quot;: 3 }] }] */</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">APIError</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Error</span> {
+	<span class="hljs-title function_">constructor</span>(<span class="hljs-params">message, statusCode, options</span>) {
+		<span class="hljs-variable language_">super</span>(message, options);
+		<span class="hljs-variable language_">this</span>.<span class="hljs-property">statusCode</span> = statusCode;
+	}
+}
+
+<span class="hljs-keyword">try</span> {
+	<span class="hljs-title function_">doSomething</span>();
+} <span class="hljs-keyword">catch</span> (err) {
+	<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">APIError</span>(<span class="hljs-string">&quot;Request failed&quot;</span>, <span class="hljs-number">500</span>);
+}</code></pre></div>
+</div><p>Example of <strong>correct</strong> code for the <code>{ &quot;errorClassNames&quot;: [{ &quot;name&quot;: &quot;APIError&quot;, &quot;argumentPosition&quot;: 3 }] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint preserve-caught-error: [&quot;error&quot;, { &quot;errorClassNames&quot;: [{ &quot;name&quot;: &quot;APIError&quot;, &quot;argumentPosition&quot;: 3 }] }] */</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">APIError</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Error</span> {
+	<span class="hljs-title function_">constructor</span>(<span class="hljs-params">message, statusCode, options</span>) {
+		<span class="hljs-variable language_">super</span>(message, options);
+		<span class="hljs-variable language_">this</span>.<span class="hljs-property">statusCode</span> = statusCode;
+	}
+}
+
+<span class="hljs-keyword">try</span> {
+	<span class="hljs-title function_">doSomething</span>();
+} <span class="hljs-keyword">catch</span> (err) {
+	<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">APIError</span>(<span class="hljs-string">&quot;Request failed&quot;</span>, <span class="hljs-number">500</span>, { <span class="hljs-attr">cause</span>: err });
+}</code></pre></div>
+</div><h2 id="known-limitations"><a class="anchor" href="#known-limitations">#</a>Known Limitations</h2>
+<p>The <code>errorClassNames</code> option accepts names, not references to specific error classes. The rule matches these configured names in the AST and does not resolve scope or type information.</p>
+<p>As a result, a local class can shadow the intended error class while having the same name. The rule cannot distinguish the local class from the intended class and may report a false positive.</p>
+<p>For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint preserve-caught-error: [&quot;error&quot;, { errorClassNames: [&quot;AppError&quot;] }] */</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">makeWrapped</span>(<span class="hljs-params"></span>) {
+	<span class="hljs-keyword">class</span> <span class="hljs-title class_">AppError</span> {
+		<span class="hljs-title function_">constructor</span>(<span class="hljs-params">err</span>) {
+			<span class="hljs-variable language_">this</span>.<span class="hljs-property">original</span> = err;
+		}
+	}
+
+	<span class="hljs-keyword">try</span> {
+		<span class="hljs-title function_">doSomething</span>();
+	} <span class="hljs-keyword">catch</span> (err) {
+		<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">AppError</span>(err);
+	}
+}</code></pre></div>
+<p>Here, <code>AppError</code> is configured by name, but the local <code>AppError</code> class is different from the intended global/imported class. The rule still matches the name and may report a missing <code>cause</code>, even though this local class has a different constructor signature and does not accept an options object containing <code>cause</code>.</p>
+<h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>You might not want to enable this rule if:</p>
+<ul>
+<li><p>You follow a custom error-handling approach where the original error is intentionally omitted from re-thrown errors (e.g., to avoid exposing internal details or to log the original error separately).</p>
+</li>
+<li><p>You use a third-party or internal error-handling library that preserves error context using non-standard properties (e.g., <a href="https://www.npmjs.com/package/verror">verror</a>) instead of the cause option.</p>
+</li>
+<li><p>(In rare cases) you are targeting legacy environments where the cause option in <code>Error</code> constructors is not supported.</p>
+</li>
+</ul>
+<h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause</a></li><li><a class="ext" href="https://nodejs.org/api/errors.html#errorcause">https://nodejs.org/api/errors.html#errorcause</a></li><li><a class="ext" href="https://github.com/tc39/proposal-error-cause/blob/main/README.md">https://github.com/tc39/proposal-error-cause/blob/main/README.md</a></li><li><a class="ext" href="https://dev.to/amnish04/never-lose-valuable-error-context-in-javascript-3aco">https://dev.to/amnish04/never-lose-valuable-error-context-in-javascript-3aco</a></li><li><a class="ext" href="https://github.com/microsoft/TypeScript/blob/main/src/lib/es2022.error.d.ts">https://github.com/microsoft/TypeScript/blob/main/src/lib/es2022.error.d.ts</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#requirecatchparameter">requireCatchParameter</a><a class="toc-3" href="#errorclassnames">errorClassNames</a><a class="toc-2" href="#known-limitations">Known Limitations</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

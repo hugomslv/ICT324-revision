@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2. ESLint : installation et configuration · ICT-324 Révision</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/hljs.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../index.html">Accueil</a><a class="nav-link" href="../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../pages/vite.html">1. Vite</a><a class="nav-link active" href="../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../pages/projets.html">Projets du cours</a><a class="nav-link" href="../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../docs/index.html">Index des docs</a><a class="nav-link" href="../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../docs/vite/index.html">Vite</a><a class="nav-link" href="../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+
+<h1>2. ESLint : installation et configuration</h1><p class="lead">ESLint analyse le code JavaScript sans l'exécuter et signale les problèmes (bugs probables) et les écarts de style, selon des règles qu'on choisit.</p><p>Versions : ESLint <strong>9</strong> (projets <code>lint</code> et <code>currency-converter</code>) et ESLint <strong>10</strong> (projet <code>vite_lint_test_doc</code>, et la version actuelle 10.11). La configuration est identique pour nous. Doc hors-ligne : <a href="../docs/eslint/index.html">ESLint</a>, <a href="../docs/eslint/rules/index.html">les règles</a>, <a href="../docs/eslint/use/configure/configuration-files.html">fichier de config</a>.</p>
+<h2 id="installer"><a class="anchor" href="#installer">#</a>Installer</h2>
+<h3 id="option-a-l-assistant-avec-reseau-uniquement"><a class="anchor" href="#option-a-l-assistant-avec-reseau-uniquement">#</a>Option A : l&#39;assistant (avec réseau uniquement)</h3>
+<div class="code"><pre><code class="hljs lang-bash">npm init @eslint/config@latest
+<span class="hljs-comment"># ou : npx eslint --init</span></code></pre></div>
+<p>Réponses utilisées en cours :</p>
+<div class="code"><pre><code class="hljs lang-text">✔ What do you want to lint? · javascript
+✔ How would you like to use ESLint? · problems
+✔ What type of modules does your project use? · esm
+✔ Which framework does your project use? · none
+✔ Does your project use TypeScript? · No
+✔ Where does your code run? · browser
+✔ Would you like to install them now? · Yes
+✔ Which package manager do you want to use? · npm</code></pre></div>
+<p>Il installe <code>eslint</code>, <code>@eslint/js</code>, <code>globals</code> et crée <code>eslint.config.mjs</code> (ou <code>.js</code> si <code>&quot;type&quot;: &quot;module&quot;</code>).</p>
+<div class="box box-danger"><div class="box-title">🛑 Danger : Hors-ligne, l'assistant ne marche pas</div><p>Il télécharge <code>@eslint/create-config</code>. Hors-ligne : installe les paquets pendant la phase réseau, puis écris le fichier de config à la main (modèle ci-dessous).</p>
+</div><h3 id="option-b-a-la-main"><a class="anchor" href="#option-b-a-la-main">#</a>Option B : à la main</h3>
+<div class="code"><pre><code class="hljs lang-bash">npm install -D eslint @eslint/js globals</code></pre></div>
+<p>Puis créer <code>eslint.config.js</code> à la racine du projet.</p>
+<h3 id="extension-vs-code"><a class="anchor" href="#extension-vs-code">#</a>Extension VS Code</h3>
+<p>Installe l&#39;extension <strong>ESLint</strong> (Microsoft) : les erreurs sont soulignées en rouge dans l&#39;éditeur, survol = message + nom de la règle. Elle utilise le <code>eslint</code> installé dans <code>node_modules</code>.</p>
+<h2 id="le-fichier-eslint-config-js-flat-config"><a class="anchor" href="#le-fichier-eslint-config-js-flat-config">#</a>Le fichier <code>eslint.config.js</code> (flat config)</h2>
+<p>C&#39;est le format depuis ESLint 9 : un tableau d&#39;objets de configuration. ESLint 10 ne lit <strong>plus</strong> les anciens <code>.eslintrc.*</code>.</p>
+<div class="code"><div class="code-title">eslint.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> js <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/js&quot;</span>                       <span class="hljs-comment">// règles de base d&#x27;ESLint</span>
+<span class="hljs-keyword">import</span> globals <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;globals&quot;</span>                     <span class="hljs-comment">// listes de variables globales</span>
+<span class="hljs-keyword">import</span> { defineConfig, globalIgnores } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+  <span class="hljs-comment">// 1. fichiers à ne JAMAIS analyser (générés)</span>
+  <span class="hljs-title function_">globalIgnores</span>([ <span class="hljs-string">&quot;dist/&quot;</span>, <span class="hljs-string">&quot;docs/&quot;</span>, <span class="hljs-string">&quot;coverage/&quot;</span> ]),
+
+  <span class="hljs-comment">// 2. config principale</span>
+  {
+    <span class="hljs-attr">files</span>: [ <span class="hljs-string">&quot;**/*.{js,mjs,cjs}&quot;</span> ],               <span class="hljs-comment">// à quels fichiers ça s&#x27;applique</span>
+    <span class="hljs-attr">plugins</span>: { js },                              <span class="hljs-comment">// on déclare le plugin &quot;js&quot;</span>
+    <span class="hljs-attr">extends</span>: [ <span class="hljs-string">&quot;js/recommended&quot;</span> ],                <span class="hljs-comment">// règles recommandées</span>
+    <span class="hljs-attr">languageOptions</span>: {
+      <span class="hljs-attr">globals</span>: globals.<span class="hljs-property">browser</span>,                   <span class="hljs-comment">// window, document, fetch… connus</span>
+      <span class="hljs-comment">// ecmaVersion: &quot;latest&quot;, sourceType: &quot;module&quot;  (valeurs par défaut)</span>
+    },
+    <span class="hljs-attr">rules</span>: {
+      <span class="hljs-attr">quotes</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;double&quot;</span> ],
+      <span class="hljs-attr">semi</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;never&quot;</span> ],
+      <span class="hljs-attr">indent</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-number">2</span> ],
+      <span class="hljs-attr">eqeqeq</span>: <span class="hljs-string">&quot;error&quot;</span>,
+    },
+  },
+
+  <span class="hljs-comment">// 3. surcharge pour certains fichiers</span>
+  {
+    <span class="hljs-attr">files</span>: [ <span class="hljs-string">&quot;scripts/**/*.js&quot;</span>, <span class="hljs-string">&quot;*.config.js&quot;</span> ],
+    <span class="hljs-attr">languageOptions</span>: { <span class="hljs-attr">globals</span>: globals.<span class="hljs-property">node</span> },   <span class="hljs-comment">// process, __dirname…</span>
+  },
+])</code></pre></div>
+<h3 id="ce-qu-il-faut-comprendre"><a class="anchor" href="#ce-qu-il-faut-comprendre">#</a>Ce qu&#39;il faut comprendre</h3>
+<ul>
+<li><strong>Ordre</strong> : les objets sont fusionnés dans l&#39;ordre, <strong>le dernier gagne</strong> pour une même règle.</li>
+<li><strong><code>files</code></strong> : motifs glob. Sans <code>files</code>, l&#39;objet s&#39;applique à tous les fichiers analysés.</li>
+<li><strong><code>ignores</code></strong> : dans un objet qui ne contient <strong>que</strong> <code>ignores</code> (ou <code>globalIgnores(...)</code>), c&#39;est global. <code>node_modules/</code> et <code>.git/</code> sont ignorés par défaut.</li>
+<li><strong><code>extends: [ &quot;js/recommended&quot; ]</code></strong> marche avec <code>defineConfig</code> + <code>plugins: { js }</code>. L&#39;autre écriture (projet currency) : mettre <code>js.configs.recommended</code> directement dans le tableau.</li>
+<li><strong><code>globals</code></strong> : sans <code>globals.browser</code>, <code>document</code> ou <code>console</code> sont signalés par <code>no-undef</code>. Code Node (scripts) : <code>globals.node</code>. Les deux : <code>{ ...globals.browser, ...globals.node }</code>. Tests Vitest avec <code>globals: true</code> : <code>globals.vitest</code> existe aussi dans le paquet <code>globals</code>.</li>
+</ul>
+<h3 id="severite-et-options"><a class="anchor" href="#severite-et-options">#</a>Sévérité et options</h3>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-attr">rules</span>: {
+  <span class="hljs-string">&quot;no-console&quot;</span>: <span class="hljs-string">&quot;off&quot;</span>,                 <span class="hljs-comment">// 0 : désactivée</span>
+  <span class="hljs-string">&quot;no-alert&quot;</span>: <span class="hljs-string">&quot;warn&quot;</span>,                  <span class="hljs-comment">// 1 : avertissement (n&#x27;échoue pas)</span>
+  <span class="hljs-attr">eqeqeq</span>: <span class="hljs-string">&quot;error&quot;</span>,                     <span class="hljs-comment">// 2 : erreur (code de sortie 1)</span>
+  <span class="hljs-attr">quotes</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;double&quot;</span> ],       <span class="hljs-comment">// [ sévérité, option ]</span>
+  <span class="hljs-string">&quot;max-len&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, { <span class="hljs-attr">code</span>: <span class="hljs-number">80</span> } ],<span class="hljs-comment">// [ sévérité, objet d&#x27;options ]</span>
+  <span class="hljs-string">&quot;array-bracket-spacing&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;always&quot;</span>, { <span class="hljs-attr">arraysInArrays</span>: <span class="hljs-literal">false</span> } ],
+}</code></pre></div>
+<p>La section <strong>Options</strong> de chaque page de règle de la doc indique exactement quoi mettre.</p>
+<h2 id="les-commandes"><a class="anchor" href="#les-commandes">#</a>Les commandes</h2>
+<div class="code"><pre><code class="hljs lang-bash">npx eslint .                    <span class="hljs-comment"># tout le projet</span>
+npx eslint src/ index.js        <span class="hljs-comment"># des dossiers / fichiers précis</span>
+npx eslint . --fix              <span class="hljs-comment"># corrige automatiquement ce qui peut l&#x27;être</span>
+npx eslint . --max-warnings 0   <span class="hljs-comment"># échoue aussi s&#x27;il y a des warnings</span>
+npx eslint . --quiet            <span class="hljs-comment"># n&#x27;affiche que les erreurs</span>
+npx eslint --print-config src/main.js   <span class="hljs-comment"># config finale appliquée à ce fichier</span>
+npx eslint . -f json -o rapport.json    <span class="hljs-comment"># rapport dans un fichier</span>
+npx eslint -c autre.config.js .         <span class="hljs-comment"># utiliser un autre fichier de config</span>
+npx eslint . --rule <span class="hljs-string">&quot;no-console: error&quot;</span> <span class="hljs-comment"># ajouter une règle en ligne de commande</span></code></pre></div>
+<p>Dans <code>package.json</code> :</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;lint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;eslint .&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;lint:fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;eslint . --fix&quot;</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Le corrigé du prof utilise <code>&quot;lint&quot;: &quot;eslint \&quot;**/*.js\&quot; --ignore-pattern node_modules/&quot;</code> (ça marche aussi). Passer une option à un script npm : <code>npm run lint -- --fix</code>.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Lire la sortie</div><div class="code"><pre><code class="hljs lang-text">/chemin/inDex.js
+   1:10  error  Extra semicolon                 semi
+   ^ ^                                          ^
+   | colonne                                    nom de la règle → cherche-la dans la doc
+   ligne
+
+✖ 27 problems (27 errors, 0 warnings)
+  17 errors and 0 warnings potentially fixable with the `--fix` option.</code></pre></div>
+</div><h2 id="desactiver-localement-commentaires"><a class="anchor" href="#desactiver-localement-commentaires">#</a>Désactiver localement (commentaires)</h2>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint-disable */</span>                       <span class="hljs-comment">// tout le fichier (en haut)</span>
+<span class="hljs-comment">/* eslint-disable no-console */</span>            <span class="hljs-comment">// une règle, jusqu&#x27;à la fin ou eslint-enable</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;debug&quot;</span>) <span class="hljs-comment">// eslint-disable-line no-console</span>
+<span class="hljs-comment">// eslint-disable-next-line no-undef</span>
+maVariableGlobale = <span class="hljs-number">3</span>
+<span class="hljs-comment">/* global maVariableGlobale */</span>             <span class="hljs-comment">// déclare une globale connue</span>
+<span class="hljs-comment">/* eslint quotes: [&quot;error&quot;, &quot;single&quot;] */</span>   <span class="hljs-comment">// change une règle pour ce fichier</span></code></pre></div>
+<h2 id="plugins-exemple-filename-rules"><a class="anchor" href="#plugins-exemple-filename-rules">#</a>Plugins : exemple <code>filename-rules</code></h2>
+<p>Pour les noms de fichiers (exercice 2) il faut un plugin, car ESLint ne vérifie pas les noms de fichiers.</p>
+<div class="code"><pre><code class="hljs lang-bash">npm install -D @maintained/eslint-plugin-filename-rules</code></pre></div>
+<div class="code"><div class="code-title">eslint.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> js <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/js&quot;</span>
+<span class="hljs-keyword">import</span> globals <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;globals&quot;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>
+<span class="hljs-keyword">import</span> { plugin <span class="hljs-keyword">as</span> filenameRules } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@maintained/eslint-plugin-filename-rules&quot;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+  {
+    <span class="hljs-attr">files</span>: [ <span class="hljs-string">&quot;**/*.{js,mjs,cjs}&quot;</span> ],
+    <span class="hljs-attr">plugins</span>: { js, <span class="hljs-string">&quot;filename-rules&quot;</span>: filenameRules },
+    <span class="hljs-attr">extends</span>: [ <span class="hljs-string">&quot;js/recommended&quot;</span> ],
+    <span class="hljs-attr">languageOptions</span>: { <span class="hljs-attr">globals</span>: globals.<span class="hljs-property">browser</span> },
+    <span class="hljs-attr">rules</span>: {
+      <span class="hljs-string">&quot;filename-rules/match&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;snake_case&quot;</span> ],
+    },
+  },
+])</code></pre></div>
+<p>Valeurs acceptées : <code>snake_case</code> / <code>snakecase</code>, <code>camelCase</code>, <code>PascalCase</code>, <code>kebab-case</code>, ou une <strong>regex</strong>. Le README complet est dans <code>node_modules/@maintained/eslint-plugin-filename-rules/README.md</code>.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Noms de DOSSIERS en snake_case (testé)</div><p>Le plugin a une option <code>includePath: true</code> qui teste le chemin complet. Ce motif refuse une majuscule dans un dossier ou un fichier sous <code>src/</code> (fonctionne sous Windows et Linux grâce à <code>[\\/]</code>) :</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-string">&quot;filename-rules/match&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, {
+  <span class="hljs-attr">includePath</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">pattern</span>: <span class="hljs-regexp">/[\\/]src([\\/][a-z0-9_]+)*[\\/][a-z0-9_]+(\.[a-z]+)+$/</span>,
+} ],</code></pre></div>
+<p>Résultat : <code>src/MonDossier/ok_file.js</code> ❌, <code>src/bon_dossier/Mauvais.js</code> ❌, <code>src/bon_dossier/sous_dossier/ok_file.js</code> ✅.</p>
+</div><h2 id="les-3-styles-de-config-que-tu-verras"><a class="anchor" href="#les-3-styles-de-config-que-tu-verras">#</a>Les 3 styles de config que tu verras</h2>
+<details class="box"><summary>1. defineConfig + extends (projets lint et vite_lint_test_doc)</summary><div class="code"><div class="code-title">cours/1-lint/eslint.config.mjs</div><pre><code class="hljs lang-mjs"><span class="hljs-keyword">import</span> js <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/js&quot;</span>;
+<span class="hljs-keyword">import</span> { plugin <span class="hljs-keyword">as</span> filenameRules } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@maintained/eslint-plugin-filename-rules&#x27;</span>
+<span class="hljs-keyword">import</span> globals <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;globals&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+  { 
+    <span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.{js,mjs,cjs}&quot;</span>], 
+    <span class="hljs-attr">plugins</span>: { js, <span class="hljs-string">&#x27;filename-rules&#x27;</span>: filenameRules }, 
+    <span class="hljs-attr">extends</span>: [<span class="hljs-string">&quot;js/recommended&quot;</span>], 
+    <span class="hljs-attr">languageOptions</span>: { <span class="hljs-attr">globals</span>: globals.<span class="hljs-property">browser</span> },
+    <span class="hljs-attr">rules</span>: {
+      <span class="hljs-attr">quotes</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;double&quot;</span> ],
+      <span class="hljs-string">&quot;no-unused-vars&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-undef&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-implicit-globals&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-const-assign&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-var&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;prefer-const&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;array-bracket-spacing&quot;</span>: [ 
+        <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;always&quot;</span>, { <span class="hljs-string">&quot;arraysInArrays&quot;</span>: <span class="hljs-literal">false</span> } 
+      ],
+      <span class="hljs-attr">eqeqeq</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-attr">semi</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;never&quot;</span> ],
+      <span class="hljs-attr">indent</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-number">2</span> ],
+      <span class="hljs-string">&quot;brace-style&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;1tbs&quot;</span> ],
+      <span class="hljs-string">&quot;linebreak-style&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;unix&quot;</span> ],
+      <span class="hljs-string">&quot;max-len&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, {<span class="hljs-string">&quot;code&quot;</span>:<span class="hljs-number">80</span>} ],
+      <span class="hljs-string">&quot;id-match&quot;</span>: [
+        <span class="hljs-string">&quot;error&quot;</span>,
+        <span class="hljs-string">&quot;^[a-z_]+$&quot;</span>,
+        {
+          <span class="hljs-string">&quot;properties&quot;</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-string">&quot;onlyDeclarations&quot;</span>: <span class="hljs-literal">true</span>
+        }
+      ],
+      <span class="hljs-string">&#x27;filename-rules/match&#x27;</span>: [<span class="hljs-number">2</span>, <span class="hljs-string">&#x27;snake_case&#x27;</span>],
+    }
+  }
+]);</code></pre></div>
+<p class="file-link"><a href="../projets/cours/1-lint/eslint.config.mjs">📄 ouvrir le fichier eslint.config.mjs</a></p></details><details class="box"><summary>2. Tableau simple sans defineConfig (projet currency-converter)</summary><div class="code"><div class="code-title">cours/4-currency-converter/eslint.config.mjs</div><pre><code class="hljs lang-mjs"><span class="hljs-keyword">import</span> globals <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;globals&quot;</span>
+<span class="hljs-keyword">import</span> pluginJs <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/js&quot;</span>
+
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> [
+    {
+        <span class="hljs-attr">files</span>: [<span class="hljs-string">&#x27;**/*.js&#x27;</span>, <span class="hljs-string">&#x27;**/*.jsx&#x27;</span>]
+    },
+    {
+        <span class="hljs-attr">ignores</span>: [<span class="hljs-string">&quot;dist*/&quot;</span>, <span class="hljs-string">&quot;docs*/&quot;</span>, <span class="hljs-string">&quot;node_modules/*&quot;</span>, <span class="hljs-string">&quot;.config/*&quot;</span>, <span class="hljs-string">&quot;*.config.*js&quot;</span>]
+    },
+    {
+        <span class="hljs-attr">languageOptions</span>: {
+            <span class="hljs-attr">globals</span>: globals.<span class="hljs-property">browser</span>
+        },
+        <span class="hljs-attr">rules</span>: {
+            <span class="hljs-string">&quot;no-unused-vars&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+            <span class="hljs-string">&quot;no-undef&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+            <span class="hljs-string">&quot;no-implicit-globals&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+            <span class="hljs-string">&quot;no-const-assign&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+            <span class="hljs-string">&quot;no-var&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+            <span class="hljs-string">&quot;prefer-const&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+            <span class="hljs-string">&quot;array-bracket-spacing&quot;</span>: [<span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;always&quot;</span>, { <span class="hljs-string">&quot;arraysInArrays&quot;</span>: <span class="hljs-literal">false</span> }],
+            <span class="hljs-string">&quot;object-curly-spacing&quot;</span>: [<span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;always&quot;</span> ],
+            <span class="hljs-string">&quot;eqeqeq&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+            <span class="hljs-string">&quot;semi&quot;</span>: [<span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;never&quot;</span>],
+            <span class="hljs-string">&quot;indent&quot;</span>: [<span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-number">2</span>],
+            <span class="hljs-string">&quot;brace-style&quot;</span>: [<span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;1tbs&quot;</span>],
+            <span class="hljs-string">&quot;linebreak-style&quot;</span>: [<span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;unix&quot;</span>],
+        }
+    },
+    pluginJs.<span class="hljs-property">configs</span>.<span class="hljs-property">recommended</span>,
+]</code></pre></div>
+<p class="file-link"><a href="../projets/cours/4-currency-converter/eslint.config.mjs">📄 ouvrir le fichier eslint.config.mjs</a></p>
+Ici `pluginJs.configs.recommended` est placé **en dernier** : il est appliqué après les règles perso, mais comme il ne contient aucune règle de mise en forme, il n'écrase rien d'important.</details><details class="box"><summary>3. Ancien format .eslintrc.json (à reconnaître, plus supporté en ESLint 10)</summary><div class="code"><div class="code-title">.eslintrc.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;env&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;browser&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;es2021&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;extends&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;eslint:recommended&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;parserOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;ecmaVersion&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;latest&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;sourceType&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;module&quot;</span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;rules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;semi&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;never&quot;</span><span class="hljs-punctuation">]</span> <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Équivalent flat config : <code>env.browser</code> → <code>languageOptions.globals: globals.browser</code>, <code>&quot;eslint:recommended&quot;</code> → <code>js.configs.recommended</code>.</p>
+</details><h2 id="ce-que-contient-js-recommended"><a class="anchor" href="#ce-que-contient-js-recommended">#</a>Ce que contient <code>js/recommended</code></h2>
+<p>64 règles (ESLint 10), toutes de type <em>problem</em> ou <em>suggestion</em> « sûres » : <code>no-unused-vars</code>, <code>no-undef</code>, <code>no-const-assign</code>, <code>no-dupe-keys</code>, <code>no-unreachable</code>, <code>no-empty</code>, <code>no-debugger</code>, <code>no-redeclare</code>, <code>no-self-assign</code>, <code>use-isnan</code>, <code>valid-typeof</code>… Aucune règle de mise en forme (guillemets, point-virgule, indentation) : celles-là, c&#39;est toi qui les ajoutes. La liste : <a href="../docs/eslint/rules/index.html">règles</a> (badge ✅ recommended dans la liste).</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#installer">Installer</a><a class="toc-3" href="#option-a-l-assistant-avec-reseau-uniquement">Option A : l'assistant (avec réseau uniquement)</a><a class="toc-3" href="#option-b-a-la-main">Option B : à la main</a><a class="toc-3" href="#extension-vs-code">Extension VS Code</a><a class="toc-2" href="#le-fichier-eslint-config-js-flat-config">Le fichier eslint.config.js (flat config)</a><a class="toc-3" href="#ce-qu-il-faut-comprendre">Ce qu'il faut comprendre</a><a class="toc-3" href="#severite-et-options">Sévérité et options</a><a class="toc-2" href="#les-commandes">Les commandes</a><a class="toc-2" href="#desactiver-localement-commentaires">Désactiver localement (commentaires)</a><a class="toc-2" href="#plugins-exemple-filename-rules">Plugins : exemple filename-rules</a><a class="toc-2" href="#les-3-styles-de-config-que-tu-verras">Les 3 styles de config que tu verras</a><a class="toc-2" href="#ce-que-contient-js-recommended">Ce que contient js/recommended</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../assets/app.js"></script>
+</body>
+</html>

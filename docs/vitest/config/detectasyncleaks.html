@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>detectAsyncLeaks | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/detectasyncleaks  <a class="ext small" href="https://vitest.dev/config/detectasyncleaks">version en ligne</a></div>
+<h1 id="detectasyncleaks"><a class="anchor" href="#detectasyncleaks">#</a>detectAsyncLeaks</h1>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>CLI:</strong> <code>--detectAsyncLeaks</code>, <code>--detect-async-leaks</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Enabling this option will make your tests run much slower. Use only when debugging or developing tests.</p>
+</div><p>Detect asynchronous resources leaking from the test file.
+Uses <a href="https://nodejs.org/api/async_hooks.html"><code>node:async_hooks</code></a> to track creation of async resources. If a resource is not cleaned up, it will be logged after tests have finished.</p>
+<p>For example if your code has <code>setTimeout</code> calls that execute the callback after tests have finished, you will see following error:</p>
+<div class="code"><pre><code class="hljs lang-sh">⎯⎯⎯⎯⎯⎯⎯⎯ Async Leaks 1 ⎯⎯⎯⎯⎯⎯⎯⎯
+
+Timeout leaking <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>/checkout-screen.test.tsx
+ 26|
+ 27|   useEffect(() =&gt; {
+ <span class="hljs-number">28</span>|     setTimeout(() =&gt; setWindowWidth(window.innerWidth), <span class="hljs-number">150</span>)
+   |     ^
+ <span class="hljs-number">29</span>|   })
+ <span class="hljs-number">30</span>|</code></pre></div>
+<p>To fix this, you&#39;ll need to make sure your code cleans the timeout properly:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-built_in">setTimeout</span>(setWindowWidth, <span class="hljs-number">150</span>, <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span>)
+  <span class="hljs-keyword">const</span> timeout = <span class="hljs-built_in">setTimeout</span>(setWindowWidth, <span class="hljs-number">150</span>, <span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span>)
+
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">cleanup</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-built_in">clearTimeout</span>(timeout)
+  }
+})</code></pre></div>
+
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

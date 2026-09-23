@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>use-isnan (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/use-isnan <span class="badge badge-problem">problème</span> <span class="badge badge-reco">✅ dans js/recommended</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/use-isnan">version en ligne</a></div>
+<h1>use-isnan</h1><p>In JavaScript, <code>NaN</code> is a special value of the <code>Number</code> type. It&#39;s used to represent any of the &quot;not-a-number&quot; values represented by the double-precision 64-bit format as specified by the IEEE Standard for Binary Floating-Point Arithmetic.</p>
+<p>Because <code>NaN</code> is unique in JavaScript by not being equal to anything, including itself, the results of comparisons to <code>NaN</code> are confusing:</p>
+<ul>
+<li><code>NaN === NaN</code> or <code>NaN == NaN</code> evaluate to <code>false</code></li>
+<li><code>NaN !== NaN</code> or <code>NaN != NaN</code> evaluate to <code>true</code></li>
+</ul>
+<p>Therefore, use <code>Number.isNaN()</code> or global <code>isNaN()</code> functions to test whether a value is <code>NaN</code>.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule disallows comparisons to <code>NaN</code>.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint use-isnan: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">if</span> (foo == <span class="hljs-title class_">NaN</span>) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (foo != <span class="hljs-title class_">NaN</span>) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (foo == <span class="hljs-title class_">Number</span>.<span class="hljs-property">NaN</span>) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (foo != <span class="hljs-title class_">Number</span>.<span class="hljs-property">NaN</span>) {
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint use-isnan: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">if</span> (<span class="hljs-built_in">isNaN</span>(foo)) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (!<span class="hljs-built_in">isNaN</span>(foo)) {
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has an object option, with two options:</p>
+<ul>
+<li><code>&quot;enforceForSwitchCase&quot;: true</code> (default) additionally disallows <code>case NaN</code> and <code>switch(NaN)</code> in <code>switch</code> statements.</li>
+<li><code>&quot;enforceForIndexOf&quot;: true</code> additionally disallows the use of <code>indexOf</code> and <code>lastIndexOf</code> methods with <code>NaN</code>. Default is <code>false</code>, meaning that this rule by default does not warn about <code>indexOf(NaN)</code> or <code>lastIndexOf(NaN)</code> method calls.</li>
+</ul>
+<h3 id="enforceforswitchcase"><a class="anchor" href="#enforceforswitchcase">#</a>enforceForSwitchCase</h3>
+<p>The <code>switch</code> statement internally uses the <code>===</code> comparison to match the expression&#39;s value to a case clause.
+Therefore, it can never match <code>case NaN</code>. Also, <code>switch(NaN)</code> can never match a case clause.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with <code>&quot;enforceForSwitchCase&quot;</code> option set to <code>true</code> (default):</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint use-isnan: [&quot;error&quot;, {&quot;enforceForSwitchCase&quot;: true}]*/</span>
+
+<span class="hljs-keyword">switch</span> (foo) {
+    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NaN</span>:
+        <span class="hljs-title function_">bar</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-number">1</span>:
+        <span class="hljs-title function_">baz</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">switch</span> (<span class="hljs-title class_">NaN</span>) {
+    <span class="hljs-keyword">case</span> <span class="hljs-attr">a</span>:
+        <span class="hljs-title function_">bar</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-attr">b</span>:
+        <span class="hljs-title function_">baz</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">switch</span> (foo) {
+    <span class="hljs-keyword">case</span> <span class="hljs-title class_">Number</span>.<span class="hljs-property">NaN</span>:
+        <span class="hljs-title function_">bar</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-number">1</span>:
+        <span class="hljs-title function_">baz</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">switch</span> (<span class="hljs-title class_">Number</span>.<span class="hljs-property">NaN</span>) {
+    <span class="hljs-keyword">case</span> <span class="hljs-attr">a</span>:
+        <span class="hljs-title function_">bar</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-attr">b</span>:
+        <span class="hljs-title function_">baz</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with <code>&quot;enforceForSwitchCase&quot;</code> option set to <code>true</code> (default):</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint use-isnan: [&quot;error&quot;, {&quot;enforceForSwitchCase&quot;: true}]*/</span>
+
+<span class="hljs-keyword">if</span> (<span class="hljs-title class_">Number</span>.<span class="hljs-built_in">isNaN</span>(foo)) {
+    <span class="hljs-title function_">bar</span>();
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">switch</span> (foo) {
+        <span class="hljs-keyword">case</span> <span class="hljs-number">1</span>:
+            <span class="hljs-title function_">baz</span>();
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-comment">// ...</span>
+    }
+}
+
+<span class="hljs-keyword">if</span> (<span class="hljs-title class_">Number</span>.<span class="hljs-built_in">isNaN</span>(a)) {
+    <span class="hljs-title function_">bar</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-title class_">Number</span>.<span class="hljs-built_in">isNaN</span>(b)) {
+    <span class="hljs-title function_">baz</span>();
+} <span class="hljs-comment">// ...</span></code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with <code>&quot;enforceForSwitchCase&quot;</code> option set to <code>false</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint use-isnan: [&quot;error&quot;, {&quot;enforceForSwitchCase&quot;: false}]*/</span>
+
+<span class="hljs-keyword">switch</span> (foo) {
+    <span class="hljs-keyword">case</span> <span class="hljs-title class_">NaN</span>:
+        <span class="hljs-title function_">bar</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-number">1</span>:
+        <span class="hljs-title function_">baz</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">switch</span> (<span class="hljs-title class_">NaN</span>) {
+    <span class="hljs-keyword">case</span> <span class="hljs-attr">a</span>:
+        <span class="hljs-title function_">bar</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-attr">b</span>:
+        <span class="hljs-title function_">baz</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">switch</span> (foo) {
+    <span class="hljs-keyword">case</span> <span class="hljs-title class_">Number</span>.<span class="hljs-property">NaN</span>:
+        <span class="hljs-title function_">bar</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-number">1</span>:
+        <span class="hljs-title function_">baz</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">switch</span> (<span class="hljs-title class_">Number</span>.<span class="hljs-property">NaN</span>) {
+    <span class="hljs-keyword">case</span> <span class="hljs-attr">a</span>:
+        <span class="hljs-title function_">bar</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-attr">b</span>:
+        <span class="hljs-title function_">baz</span>();
+        <span class="hljs-keyword">break</span>;
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+</div><h3 id="enforceforindexof"><a class="anchor" href="#enforceforindexof">#</a>enforceForIndexOf</h3>
+<p>The following methods internally use the <code>===</code> comparison to match the given value with an array element:</p>
+<ul>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.indexof"><code>Array.prototype.indexOf</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.lastindexof"><code>Array.prototype.lastIndexOf</code></a></li>
+</ul>
+<p>Therefore, for any array <code>foo</code>, <code>foo.indexOf(NaN)</code> and <code>foo.lastIndexOf(NaN)</code> will always return <code>-1</code>.</p>
+<p>Set <code>&quot;enforceForIndexOf&quot;</code> to <code>true</code> if you want this rule to report <code>indexOf(NaN)</code> and <code>lastIndexOf(NaN)</code> method calls.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with <code>&quot;enforceForIndexOf&quot;</code> option set to <code>true</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint use-isnan: [&quot;error&quot;, {&quot;enforceForIndexOf&quot;: true}]*/</span>
+
+<span class="hljs-keyword">const</span> hasNaN = myArray.<span class="hljs-title function_">indexOf</span>(<span class="hljs-title class_">NaN</span>) &gt;= <span class="hljs-number">0</span>;
+
+<span class="hljs-keyword">const</span> firstIndex = myArray.<span class="hljs-title function_">indexOf</span>(<span class="hljs-title class_">NaN</span>);
+
+<span class="hljs-keyword">const</span> lastIndex = myArray.<span class="hljs-title function_">lastIndexOf</span>(<span class="hljs-title class_">NaN</span>);
+
+<span class="hljs-keyword">const</span> indexWithSequenceExpression = myArray.<span class="hljs-title function_">indexOf</span>((<span class="hljs-title function_">doStuff</span>(), <span class="hljs-title class_">NaN</span>));
+
+<span class="hljs-keyword">const</span> firstIndexFromSecondElement = myArray.<span class="hljs-title function_">indexOf</span>(<span class="hljs-title class_">NaN</span>, <span class="hljs-number">1</span>);
+
+<span class="hljs-keyword">const</span> lastIndexFromSecondElement = myArray.<span class="hljs-title function_">lastIndexOf</span>(<span class="hljs-title class_">NaN</span>, <span class="hljs-number">1</span>);</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with <code>&quot;enforceForIndexOf&quot;</code> option set to <code>true</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint use-isnan: [&quot;error&quot;, {&quot;enforceForIndexOf&quot;: true}]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">myIsNaN</span>(<span class="hljs-params">val</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">typeof</span> val === <span class="hljs-string">&quot;number&quot;</span> &amp;&amp; <span class="hljs-built_in">isNaN</span>(val);
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">indexOfNaN</span>(<span class="hljs-params">arr</span>) {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; arr.<span class="hljs-property">length</span>; i++) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-title function_">myIsNaN</span>(arr[i])) {
+            <span class="hljs-keyword">return</span> i;
+        }
+    }
+    <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">lastIndexOfNaN</span>(<span class="hljs-params">arr</span>) {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = arr.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i--) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-title function_">myIsNaN</span>(arr[i])) {
+            <span class="hljs-keyword">return</span> i;
+        }
+    }
+    <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;
+}
+
+<span class="hljs-keyword">const</span> hasNaN = myArray.<span class="hljs-title function_">some</span>(myIsNaN);
+
+<span class="hljs-keyword">const</span> hasNaN1 = <span class="hljs-title function_">indexOfNaN</span>(myArray) &gt;= <span class="hljs-number">0</span>;
+
+<span class="hljs-keyword">const</span> firstIndex = <span class="hljs-title function_">indexOfNaN</span>(myArray);
+
+<span class="hljs-keyword">const</span> lastIndex = <span class="hljs-title function_">lastIndexOfNaN</span>(myArray);
+
+<span class="hljs-comment">// ES2015</span>
+<span class="hljs-keyword">const</span> hasNaN2 = myArray.<span class="hljs-title function_">some</span>(<span class="hljs-title class_">Number</span>.<span class="hljs-property">isNaN</span>);
+
+<span class="hljs-comment">// ES2015</span>
+<span class="hljs-keyword">const</span> firstIndex1 = myArray.<span class="hljs-title function_">findIndex</span>(<span class="hljs-title class_">Number</span>.<span class="hljs-property">isNaN</span>);
+
+<span class="hljs-comment">// ES2016</span>
+<span class="hljs-keyword">const</span> hasNaN3 = myArray.<span class="hljs-title function_">includes</span>(<span class="hljs-title class_">NaN</span>);</code></pre></div>
+</div><h4 id="known-limitations"><a class="anchor" href="#known-limitations">#</a>Known Limitations</h4>
+<p>This option checks methods with the given names, <em>even if</em> the object which has the method is <em>not</em> an array.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#enforceforswitchcase">enforceForSwitchCase</a><a class="toc-3" href="#enforceforindexof">enforceForIndexOf</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

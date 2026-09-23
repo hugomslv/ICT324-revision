@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TestCase (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/advanced/test-case  <a class="ext small" href="https://vitest.dev/api/advanced/test-case">version en ligne</a></div>
+<h1 id="testcase"><a class="anchor" href="#testcase">#</a>TestCase</h1>
+<p>The <code>TestCase</code> class represents a single test. This class is only available in the main thread. Refer to the <a href="runner.html#tasks">&quot;Runner API&quot;</a> if you are working with runtime tasks.</p>
+<p>The <code>TestCase</code> instance always has a <code>type</code> property with the value of <code>test</code>. You can use it to distinguish between different task types:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">if</span> (task.<span class="hljs-property">type</span> === <span class="hljs-string">&#x27;test&#x27;</span>) {
+  task <span class="hljs-comment">// TestCase</span>
+}</code></pre></div>
+<h2 id="project"><a class="anchor" href="#project">#</a>project</h2>
+<p>This references the <a href="test-project.html"><code>TestProject</code></a> that the test belongs to.</p>
+<h2 id="module"><a class="anchor" href="#module">#</a>module</h2>
+<p>This is a direct reference to the <a href="test-module.html"><code>TestModule</code></a> where the test is defined.</p>
+<h2 id="name"><a class="anchor" href="#name">#</a>name</h2>
+<p>This is a test name that was passed to the <code>test</code> function.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;the validation works correctly&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// ...</span>
+})</code></pre></div>
+<h2 id="fullname"><a class="anchor" href="#fullname">#</a>fullName</h2>
+<p>The name of the test including all parent suites separated with <code>&gt;</code> symbol. This test has a full name &quot;the validation logic &gt; the validation works correctly&quot;:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;the validation logic&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;the validation works correctly&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// ...</span>
+  })
+})</code></pre></div>
+<h2 id="id"><a class="anchor" href="#id">#</a>id</h2>
+<p>This is test&#39;s unique identifier. This ID is deterministic and will be the same for the same test across multiple runs. The ID is based on the <a href="test-project.html">project</a> name, module ID and test order.</p>
+<p>The ID looks like this:</p>
+<div class="code"><pre><code class="hljs lang-txt">1223128da3_0_0
+^^^^^^^^^^ the file hash
+           ^ suite index
+             ^ test index</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You can generate file hash with <code>generateFileHash</code> function from <code>vitest/node</code> which is available since Vitest 3:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { generateFileHash } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> hash = <span class="hljs-title function_">generateFileHash</span>(
+  <span class="hljs-string">&#x27;/file/path.js&#x27;</span>, <span class="hljs-comment">// relative path</span>
+  <span class="hljs-literal">undefined</span>, <span class="hljs-comment">// the project name or `undefined` is not set</span>
+)</code></pre></div>
+</div><div class="box box-danger"><div class="box-title">🛑 Danger</div><p>Don&#39;t try to parse the ID. It can have a minus at the start: <code>-1223128da3_0_0_0</code>.</p>
+</div><h2 id="location"><a class="anchor" href="#location">#</a>location</h2>
+<p>The location in the module where the test was defined. Locations are collected only if <a href="../../config/includetasklocation.html"><code>includeTaskLocation</code></a> is enabled in the config. Note that this option is automatically enabled if <code>--reporter=html</code>, <code>--ui</code> or <code>--browser</code> flags are used.</p>
+<p>The location of this test will be equal to <code>{ line: 3, column: 1 }</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts:line-numbers">import { test } from 'vitest'
+
+test('the validation works correctly', () =&gt; {
+  // ...
+})</code></pre></div>
+<h2 id="parent"><a class="anchor" href="#parent">#</a>parent</h2>
+<p>Parent <a href="test-suite.html">suite</a>. If the test was called directly inside the <a href="test-module.html">module</a>, the parent will be the module itself.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>options</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">TaskOptions</span> {
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">each</span>: <span class="hljs-built_in">boolean</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">fails</span>: <span class="hljs-built_in">boolean</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">concurrent</span>: <span class="hljs-built_in">boolean</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">shuffle</span>: <span class="hljs-built_in">boolean</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">retry</span>: <span class="hljs-built_in">number</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">repeats</span>: <span class="hljs-built_in">number</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">tags</span>: <span class="hljs-built_in">string</span>[] | <span class="hljs-literal">undefined</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">timeout</span>: <span class="hljs-built_in">number</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">mode</span>: <span class="hljs-string">&#x27;run&#x27;</span> | <span class="hljs-string">&#x27;only&#x27;</span> | <span class="hljs-string">&#x27;skip&#x27;</span> | <span class="hljs-string">&#x27;todo&#x27;</span>
+}</code></pre></div>
+<p>The options that test was collected with.</p>
+<h2 id="tags"><a class="anchor" href="#tags">#</a>tags <Version>4.1.0</Version></h2>
+<p><a href="../../guide/test-tags.html">Tags</a> that were implicitly or explicitly assigned to the test.</p>
+<h2 id="ok"><a class="anchor" href="#ok">#</a>ok</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">ok</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">boolean</span></code></pre></div>
+<p>Checks if the test did not fail the suite. If the test is not finished yet or was skipped, it will return <code>true</code>.</p>
+<h2 id="meta"><a class="anchor" href="#meta">#</a>meta</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">meta</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">TaskMeta</span></code></pre></div>
+<p>Custom <a href="metadata.html">metadata</a> that was attached to the test during its execution. The meta can be attached by assigning a property to the <code>ctx.task.meta</code> object during a test run:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;the validation works correctly&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ task }</span>) =&gt;</span> {
+  <span class="hljs-comment">// ...</span>
+
+  task.<span class="hljs-property">meta</span>.<span class="hljs-property">decorated</span> = <span class="hljs-literal">false</span>
+})</code></pre></div>
+<p>If the test did not finish running yet, the meta will be an empty object, unless it has static meta:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;the validation works correctly&#x27;</span>, { <span class="hljs-attr">meta</span>: { <span class="hljs-attr">decorated</span>: <span class="hljs-literal">true</span> } })</code></pre></div>
+<p>Since Vitest 4.1, Vitest inherits <a href="test-suite.html#meta"><code>meta</code></a> property defined on the <a href="test-suite.html">suite</a>.</p>
+<h2 id="result"><a class="anchor" href="#result">#</a>result</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">result</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">TestResult</span></code></pre></div>
+<p>Test results. If test is not finished yet or was just collected, it will be equal to <code>TestResultPending</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">TestResultPending</span> {
+  <span class="hljs-comment">/**
+   * The test was collected, but didn&#x27;t finish running yet.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">state</span>: <span class="hljs-string">&#x27;pending&#x27;</span>
+  <span class="hljs-comment">/**
+   * Pending tests have no errors.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">errors</span>: <span class="hljs-literal">undefined</span>
+}</code></pre></div>
+<p>If the test was skipped, the return value will be <code>TestResultSkipped</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">TestResultSkipped</span> {
+  <span class="hljs-comment">/**
+   * The test was skipped with `skip` or `todo` flag.
+   * You can see which one was used in the `options.mode` option.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">state</span>: <span class="hljs-string">&#x27;skipped&#x27;</span>
+  <span class="hljs-comment">/**
+   * Skipped tests have no errors.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">errors</span>: <span class="hljs-literal">undefined</span>
+  <span class="hljs-comment">/**
+   * A custom note passed down to `ctx.skip(note)`.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">note</span>: <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>
+}</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If the test was skipped because another test has <code>only</code> flag, the <code>options.mode</code> will be equal to <code>skip</code>.</p>
+</div><p>If the test failed, the return value will be <code>TestResultFailed</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">TestResultFailed</span> {
+  <span class="hljs-comment">/**
+   * The test failed to execute.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">state</span>: <span class="hljs-string">&#x27;failed&#x27;</span>
+  <span class="hljs-comment">/**
+   * Errors that were thrown during the test execution.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">errors</span>: <span class="hljs-title class_">ReadonlyArray</span>&lt;<span class="hljs-title class_">TestError</span>&gt;
+}</code></pre></div>
+<p>If the test passed, the return value will be <code>TestResultPassed</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">TestResultPassed</span> {
+  <span class="hljs-comment">/**
+   * The test passed successfully.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">state</span>: <span class="hljs-string">&#x27;passed&#x27;</span>
+  <span class="hljs-comment">/**
+   * Errors that were thrown during the test execution.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">errors</span>: <span class="hljs-title class_">ReadonlyArray</span>&lt;<span class="hljs-title class_">TestError</span>&gt; | <span class="hljs-literal">undefined</span>
+}</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that the test with <code>passed</code> state can still have errors attached - this can happen if <code>retry</code> was triggered at least once.</p>
+</div><h2 id="diagnostic"><a class="anchor" href="#diagnostic">#</a>diagnostic</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">diagnostic</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">TestDiagnostic</span> | <span class="hljs-literal">undefined</span></code></pre></div>
+<p>Useful information about the test like duration, memory usage, etc:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">TestDiagnostic</span> {
+  <span class="hljs-comment">/**
+   * If the duration of the test is above `slowTestThreshold`.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">slow</span>: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-comment">/**
+   * The amount of memory used by the test in bytes.
+   * This value is only available if the test was executed with `logHeapUsage` flag.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">heap</span>: <span class="hljs-built_in">number</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-comment">/**
+   * The time it takes to execute the test in ms.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">duration</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * The time in ms when the test started.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">startTime</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * The amount of times the test was retried.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">retryCount</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * The amount of times the test was repeated as configured by `repeats` option.
+   * This value can be lower if the test failed during the repeat and no `retry` is configured.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">repeatCount</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * If test passed on a second retry.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">flaky</span>: <span class="hljs-built_in">boolean</span>
+}</code></pre></div>
+<div class="box box-info"><div class="box-title">ℹ️ Info</div><p><code>diagnostic()</code> will return <code>undefined</code> if the test was not scheduled to run yet.</p>
+</div><h2 id="annotations"><a class="anchor" href="#annotations">#</a>annotations</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">annotations</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">ReadonlyArray</span>&lt;<span class="hljs-title class_">TestAnnotation</span>&gt;</code></pre></div>
+<p><a href="../../guide/test-annotations.html">Test annotations</a> added via the <a href="../../guide/test-context.html#annotate"><code>task.annotate</code></a> API during the test execution.</p>
+<h2 id="artifacts"><a class="anchor" href="#artifacts">#</a>artifacts <Version type="experimental">4.0.11</Version> <Experimental /></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">artifacts</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">ReadonlyArray</span>&lt;<span class="hljs-title class_">TestArtifact</span>&gt;</code></pre></div>
+<p><a href="artifacts.html">Test artifacts</a> recorded via the <code>recordArtifact</code> API during the test execution.</p>
+<h2 id="totestspecification"><a class="anchor" href="#totestspecification">#</a>toTestSpecification <Version>4.1.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toTestSpecification</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">TestSpecification</span></code></pre></div>
+<p>Returns a new <a href="test-specification.html">test specification</a> that can be used to filter or run this specific test case.</p>
+<h2 id="logs"><a class="anchor" href="#logs">#</a>logs <Version>5.0.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">logs</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">ReadonlyArray</span>&lt;<span class="hljs-title class_">UserConsoleLog</span>&gt;</code></pre></div>
+<p>Console logs recorded during the test execution.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#project">project</a><a class="toc-2" href="#module">module</a><a class="toc-2" href="#name">name</a><a class="toc-2" href="#fullname">fullName</a><a class="toc-2" href="#id">id</a><a class="toc-2" href="#location">location</a><a class="toc-2" href="#parent">parent</a><a class="toc-2" href="#options">options</a><a class="toc-2" href="#tags">tags 4.1.0</a><a class="toc-2" href="#ok">ok</a><a class="toc-2" href="#meta">meta</a><a class="toc-2" href="#result">result</a><a class="toc-2" href="#diagnostic">diagnostic</a><a class="toc-2" href="#annotations">annotations</a><a class="toc-2" href="#artifacts">artifacts 4.0.11</a><a class="toc-2" href="#totestspecification">toTestSpecification 4.1.0</a><a class="toc-2" href="#logs">logs 5.0.0</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

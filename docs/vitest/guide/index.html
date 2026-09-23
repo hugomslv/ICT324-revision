@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting Started | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/index  <a class="ext small" href="https://vitest.dev/guide/">version en ligne</a></div>
+<h1 id="getting-started"><a class="anchor" href="#getting-started">#</a>Getting Started</h1>
+<h2 id="overview"><a class="anchor" href="#overview">#</a>Overview</h2>
+<p>Vitest (pronounced as <em>&quot;veetest&quot;</em>) is a next generation testing framework
+powered by
+Vite.</p>
+<p>You can learn more about the rationale behind the project in the <a href="why.html">Why Vitest</a> section.</p>
+<h2 id="trying-vitest-online"><a class="anchor" href="#trying-vitest-online">#</a>Trying Vitest Online</h2>
+<p>You can try Vitest online on <a href="https://vitest.new">StackBlitz</a>. It runs Vitest directly in the browser, and it is almost identical to the local setup but doesn&#39;t require installing anything on your machine.</p>
+<h2 id="adding-vitest-to-your-project"><a class="anchor" href="#adding-vitest-to-your-project">#</a>Adding Vitest to Your Project</h2>
+<p><CourseLink href="https://vueschool.io/lessons/how-to-install-vitest?friend=vueuse">Learn how to install by Video</CourseLink></p>
+<div class="code-group"><div class="code"><div class="code-title">npm</div><pre><code class="hljs lang-bash">npm install -D vitest</code></pre></div>
+<div class="code"><div class="code-title">yarn</div><pre><code class="hljs lang-bash">yarn add -D vitest vite</code></pre></div>
+<div class="code"><div class="code-title">pnpm</div><pre><code class="hljs lang-bash">pnpm add -D vitest</code></pre></div>
+<div class="code"><div class="code-title">bun</div><pre><code class="hljs lang-bash">bun add -D vitest</code></pre></div>
+<div class="code"><div class="code-title">deno</div><pre><code class="hljs lang-bash">deno add -D vitest</code></pre></div>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Vitest requires Vite &gt;=v6.4.0 and Node &gt;=v22.12.0</p>
+</div><p>It is recommended that you install a copy of <code>vitest</code> in your <code>package.json</code>, using one of the methods listed above. However, if you would prefer to run <code>vitest</code> directly, you can use <code>npx vitest</code> (the <code>npx</code> tool comes with npm and Node.js).</p>
+<p>The <code>npx</code> tool will execute the specified command. By default, <code>npx</code> will first check if the command exists in the local project&#39;s binaries. If it is not found there, <code>npx</code> will look in the system&#39;s <code>$PATH</code> and execute it if found. If the command is not found in either location, <code>npx</code> will install it in a temporary location prior to execution.</p>
+<p>Vitest and third party integrations can use <code>.vitest</code> directory to store generated artifacts. It&#39;s recommended to add this in your <code>.gitignore</code>.</p>
+<div class="code"><div class="code-title">.gitignore</div><pre><code class="hljs lang-sh"><span class="hljs-comment"># Vitest reports and artifacts</span>
+.vitest/</code></pre></div>
+<h2 id="writing-tests"><a class="anchor" href="#writing-tests">#</a>Writing Tests</h2>
+<p>As an example, we will write a simple test that verifies the output of a function that adds two numbers.</p>
+<div class="code"><div class="code-title">sum.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">sum</span>(<span class="hljs-params">a, b</span>) {
+  <span class="hljs-keyword">return</span> a + b
+}</code></pre></div>
+<div class="code"><div class="code-title">sum.test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { sum } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./sum.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;adds 1 + 2 to equal 3&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">sum</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">3</span>)
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>By default, tests must contain <code>.test.</code> or <code>.spec.</code> in their file name.</p>
+</div><p>Next, in order to execute the test, add the following section to your <code>package.json</code>:</p>
+<div class="code"><div class="code-title">package.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;test&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Finally, run <code>npm run test</code>, <code>yarn test</code> or <code>pnpm test</code>, depending on your package manager, and Vitest will print this message:</p>
+<div class="code"><pre><code class="hljs lang-txt">✓ sum.test.js (1)
+  ✓ adds 1 + 2 to equal 3
+
+Test Files  1 passed (1)
+     Tests  1 passed (1)
+  Start at  02:15:44
+  Duration  311ms</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If you are using Bun as your package manager, make sure to use <code>bun run test</code> command instead of <code>bun test</code>, otherwise Bun will run its own test runner.</p>
+</div><p>Your first test is passing! Continue to <a href="learn/writing-tests.html">Writing Tests</a> to learn about organizing tests, reading test output, and the core testing patterns you&#39;ll use every day.</p>
+<p>To run tests once without watching for file changes, use <code>vitest run</code>. You can also pass additional flags like <code>--reporter</code> or <code>--coverage</code>. For a full list of CLI options, run <code>npx vitest --help</code> or see the <a href="cli.html">CLI guide</a>.</p>
+<h2 id="configuring-vitest"><a class="anchor" href="#configuring-vitest">#</a>Configuring Vitest</h2>
+<p>Vitest reads your <code>vite.config.*</code> by default, so your existing Vite plugins and configuration work out-of-the-box. You can also create a dedicated <code>vitest.config.*</code> for test-specific settings. See the <a href="../config/index.html">Config Reference</a> for details.</p>
+<h2 id="ide-integrations"><a class="anchor" href="#ide-integrations">#</a>IDE Integrations</h2>
+<p>We also provided an official extension for Visual Studio Code to enhance your testing experience with Vitest.</p>
+<p><a href="https://marketplace.visualstudio.com/items?itemName=vitest.explorer">Install from VS Code Marketplace</a></p>
+<p>Learn more about <a href="ide.html">IDE Integrations</a></p>
+<h2 id="examples"><a class="anchor" href="#examples">#</a>Examples</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Example</th>
+<th>Source</th>
+<th>Playground</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>basic</code></td>
+<td><a href="https://github.com/vitest-dev/vitest/tree/main/examples/basic">GitHub</a></td>
+<td><a href="https://stackblitz.com/fork/github/vitest-dev/vitest/tree/main/examples/basic?initialPath=__vitest__/">Play Online</a></td>
+</tr>
+<tr>
+<td><code>fastify</code></td>
+<td><a href="https://github.com/vitest-dev/vitest/tree/main/examples/fastify">GitHub</a></td>
+<td><a href="https://stackblitz.com/fork/github/vitest-dev/vitest/tree/main/examples/fastify?initialPath=__vitest__/">Play Online</a></td>
+</tr>
+<tr>
+<td><code>in-source-test</code></td>
+<td><a href="https://github.com/vitest-dev/vitest/tree/main/examples/in-source-test">GitHub</a></td>
+<td><a href="https://stackblitz.com/fork/github/vitest-dev/vitest/tree/main/examples/in-source-test?initialPath=__vitest__/">Play Online</a></td>
+</tr>
+<tr>
+<td><code>lit</code></td>
+<td><a href="https://github.com/vitest-dev/vitest/tree/main/examples/lit">GitHub</a></td>
+<td><a href="https://stackblitz.com/fork/github/vitest-dev/vitest/tree/main/examples/lit?initialPath=__vitest__/">Play Online</a></td>
+</tr>
+<tr>
+<td><code>vue</code></td>
+<td><a href="https://github.com/vitest-tests/browser-examples/tree/main/examples/vue">GitHub</a></td>
+<td><a href="https://stackblitz.com/fork/github/vitest-tests/browser-examples/tree/main/examples/vue?initialPath=__vitest__/">Play Online</a></td>
+</tr>
+<tr>
+<td><code>marko</code></td>
+<td><a href="https://github.com/vitest-tests/browser-examples/tree/main/examples/marko">GitHub</a></td>
+<td><a href="https://stackblitz.com/fork/github/vitest-tests/browser-examples/tree/main/examples/marko?initialPath=__vitest__/">Play Online</a></td>
+</tr>
+<tr>
+<td><code>preact</code></td>
+<td><a href="https://github.com/vitest-tests/browser-examples/tree/main/examples/preact">GitHub</a></td>
+<td><a href="https://stackblitz.com/fork/github/vitest-tests/browser-examples/tree/main/examples/preact?initialPath=__vitest__/">Play Online</a></td>
+</tr>
+<tr>
+<td><code>qwik</code></td>
+<td><a href="https://github.com/vitest-tests/browser-examples/tree/main/examples/qwik">GitHub</a></td>
+<td><a href="https://stackblitz.com/fork/github/vitest-tests/browser-examples/tree/main/examples/qwik?initialPath=__vitest__/">Play Online</a></td>
+</tr>
+<tr>
+<td><code>react</code></td>
+<td><a href="https://github.com/vitest-tests/browser-examples/tree/main/examples/react">GitHub</a></td>
+<td><a href="https://stackblitz.com/fork/github/vitest-tests/browser-examples/tree/main/examples/react?initialPath=__vitest__/">Play Online</a></td>
+</tr>
+<tr>
+<td><code>solid</code></td>
+<td><a href="https://github.com/vitest-tests/browser-examples/tree/main/examples/solid">GitHub</a></td>
+<td><a href="https://stackblitz.com/fork/github/vitest-tests/browser-examples/tree/main/examples/solid?initialPath=__vitest__/">Play Online</a></td>
+</tr>
+<tr>
+<td><code>svelte</code></td>
+<td><a href="https://github.com/vitest-tests/browser-examples/tree/main/examples/svelte">GitHub</a></td>
+<td><a href="https://stackblitz.com/fork/github/vitest-tests/browser-examples/tree/main/examples/svelte?initialPath=__vitest__/">Play Online</a></td>
+</tr>
+<tr>
+<td><code>profiling</code></td>
+<td><a href="https://github.com/vitest-dev/vitest/tree/main/examples/profiling">GitHub</a></td>
+<td>Not Available</td>
+</tr>
+<tr>
+<td><code>typecheck</code></td>
+<td><a href="https://github.com/vitest-dev/vitest/tree/main/examples/typecheck">GitHub</a></td>
+<td><a href="https://stackblitz.com/fork/github/vitest-dev/vitest/tree/main/examples/typecheck?initialPath=__vitest__/">Play Online</a></td>
+</tr>
+<tr>
+<td><code>projects</code></td>
+<td><a href="https://github.com/vitest-dev/vitest/tree/main/examples/projects">GitHub</a></td>
+<td><a href="https://stackblitz.com/fork/github/vitest-dev/vitest/tree/main/examples/projects?initialPath=__vitest__/">Play Online</a></td>
+</tr>
+</tbody></table></div>
+<h2 id="community"><a class="anchor" href="#community">#</a>Community</h2>
+<p>If you have questions or need help, reach out to the community at <a href="https://chat.vitest.dev">Discord</a> and <a href="https://github.com/vitest-dev/vitest/discussions">GitHub Discussions</a>.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#overview">Overview</a><a class="toc-2" href="#trying-vitest-online">Trying Vitest Online</a><a class="toc-2" href="#adding-vitest-to-your-project">Adding Vitest to Your Project</a><a class="toc-2" href="#writing-tests">Writing Tests</a><a class="toc-2" href="#configuring-vitest">Configuring Vitest</a><a class="toc-2" href="#ide-integrations">IDE Integrations</a><a class="toc-2" href="#examples">Examples</a><a class="toc-2" href="#community">Community</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>@augments (JSDoc) · ICT-324 Révision</title>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/hljs.css">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../index.html">Accueil</a><a class="nav-link" href="../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../docs/index.html">Index des docs</a><a class="nav-link" href="../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../docs/vite/index.html">Vite</a><a class="nav-link active" href="../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="index.html">JSDoc</a> › tags-augments <span class="badge">synonymes : @extends</span> <span class="badge">Indicate that a symbol inherits from, and adds to, a parent symbol.</span> <a class="ext small" href="https://jsdoc.app/tags-augments.html">version en ligne</a></div>
+<h1>@augments</h1><h2 id="syntax"><a class="anchor" href="#syntax">#</a>Syntax</h2>
+<p><code>@augments &lt;namepath&gt;</code></p>
+<h2 id="overview"><a class="anchor" href="#overview">#</a>Overview</h2>
+<p>The <code>@augments</code> or<code> @extends</code> tag indicates that a symbol inherits from, and potentially adds to, a
+parent symbol. You can use this tag to document both class-based and prototype-based inheritance.</p>
+<p>In JSDoc 3.3.0 and later, if a symbol inherits from multiple parents, and both parents have
+identically named members, JSDoc uses the documentation from the last parent that is listed in the
+JSDoc comment.</p>
+<h2 id="examples"><a class="anchor" href="#examples">#</a>Examples</h2>
+<p>In the following example, the <code>Duck</code> class is defined as a subclass of <code>Animal</code>. <code>Duck</code> instances
+have the same properties as <code>Animal</code> instances, as well as a <code>speak</code> method that is unique to <code>Duck</code>
+instances.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Documenting a class/subclass relationship</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@constructor</span>
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Animal</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">/** Is this animal alive? */</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">alive</span> = <span class="hljs-literal">true</span>;
+}
+
+<span class="hljs-comment">/**
+ * <span class="hljs-doctag">@constructor</span>
+ * <span class="hljs-doctag">@augments</span> <span class="hljs-variable">Animal</span>
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Duck</span>(<span class="hljs-params"></span>) {}
+<span class="hljs-title class_">Duck</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Animal</span>();
+
+<span class="hljs-comment">/** What do ducks say? */</span>
+<span class="hljs-title class_">Duck</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">speak</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">alive</span>) {
+        <span class="hljs-title function_">alert</span>(<span class="hljs-string">&#x27;Quack!&#x27;</span>);
+    }
+};
+
+<span class="hljs-keyword">var</span> d = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Duck</span>();
+d.<span class="hljs-title function_">speak</span>(); <span class="hljs-comment">// Quack!</span>
+d.<span class="hljs-property">alive</span> = <span class="hljs-literal">false</span>;
+d.<span class="hljs-title function_">speak</span>(); <span class="hljs-comment">// (nothing)</span></code></pre></div>
+</div><p>In the following example, the <code>Duck</code> class inherits from both the <code>Flyable</code> and <code>Bird</code> classes, both
+of which define a <code>takeOff</code> method. Because the documentation for <code>Duck</code> lists <code>@augments Bird</code>
+last, JSDoc automatically documents <code>Duck#takeOff</code> using the comment from <code>Bird#takeOff</code>.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Multiple inheritance with duplicated method names</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Abstract class for things that can fly.
+ * <span class="hljs-doctag">@class</span>
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Flyable</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">canFly</span> = <span class="hljs-literal">true</span>;
+}
+
+<span class="hljs-comment">/** Take off. */</span>
+<span class="hljs-title class_">Flyable</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">takeOff</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};
+
+<span class="hljs-comment">/**
+ * Abstract class representing a bird.
+ * <span class="hljs-doctag">@class</span>
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Bird</span>(<span class="hljs-params">canFly</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">canFly</span> = canFly;
+}
+
+<span class="hljs-comment">/** Spread your wings and fly, if possible. */</span>
+<span class="hljs-title class_">Bird</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">takeOff</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">canFly</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">_spreadWings</span>()
+            .<span class="hljs-title function_">_run</span>()
+            .<span class="hljs-title function_">_flapWings</span>();
+    }
+};
+
+<span class="hljs-comment">/**
+ * Class representing a duck.
+ * <span class="hljs-doctag">@class</span>
+ * <span class="hljs-doctag">@augments</span> <span class="hljs-variable">Flyable</span>
+ * <span class="hljs-doctag">@augments</span> <span class="hljs-variable">Bird</span>
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Duck</span>(<span class="hljs-params"></span>) {}
+
+<span class="hljs-comment">// Described in the docs as &quot;Spread your wings and fly, if possible.&quot;</span>
+<span class="hljs-title class_">Duck</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">takeOff</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};</code></pre></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#syntax">Syntax</a><a class="toc-2" href="#overview">Overview</a><a class="toc-2" href="#examples">Examples</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

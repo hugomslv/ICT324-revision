@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timers (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/mocking/timers  <a class="ext small" href="https://vitest.dev/guide/mocking/timers">version en ligne</a></div>
+<h1 id="timers"><a class="anchor" href="#timers">#</a>Timers</h1>
+<p>When we test code that involves timeouts or intervals, instead of having our tests wait it out or timeout, we can speed up our tests by using &quot;fake&quot; timers that mock calls to <code>setTimeout</code> and <code>setInterval</code>.</p>
+<p>See the <a href="../../api/vi.html#vi-usefaketimers"><code>vi.useFakeTimers</code> API section</a> for a more in depth detailed API description.</p>
+<h2 id="example"><a class="anchor" href="#example">#</a>Example</h2>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { afterEach, beforeEach, describe, expect, it, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">executeAfterTwoHours</span>(<span class="hljs-params">func</span>) {
+  <span class="hljs-built_in">setTimeout</span>(func, <span class="hljs-number">1000</span> * <span class="hljs-number">60</span> * <span class="hljs-number">60</span> * <span class="hljs-number">2</span>) <span class="hljs-comment">// 2 hours</span>
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">executeEveryMinute</span>(<span class="hljs-params">func</span>) {
+  <span class="hljs-built_in">setInterval</span>(func, <span class="hljs-number">1000</span> * <span class="hljs-number">60</span>) <span class="hljs-comment">// 1 minute</span>
+}
+
+<span class="hljs-keyword">const</span> mock = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;executed&#x27;</span>))
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;delayed execution&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> {
+    vi.<span class="hljs-title function_">useFakeTimers</span>()
+  })
+  <span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> {
+    vi.<span class="hljs-title function_">clearAllMocks</span>()
+  })
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;should execute the function&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">executeAfterTwoHours</span>(mock)
+    vi.<span class="hljs-title function_">runAllTimers</span>()
+    <span class="hljs-title function_">expect</span>(mock).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(<span class="hljs-number">1</span>)
+  })
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;should not execute the function&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">executeAfterTwoHours</span>(mock)
+    <span class="hljs-comment">// advancing by 2ms won&#x27;t trigger the func</span>
+    vi.<span class="hljs-title function_">advanceTimersByTime</span>(<span class="hljs-number">2</span>)
+    <span class="hljs-title function_">expect</span>(mock).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveBeenCalled</span>()
+  })
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;should execute every minute&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">executeEveryMinute</span>(mock)
+    vi.<span class="hljs-title function_">advanceTimersToNextTimer</span>()
+    <span class="hljs-title function_">expect</span>(mock).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(<span class="hljs-number">1</span>)
+    vi.<span class="hljs-title function_">advanceTimersToNextTimer</span>()
+    <span class="hljs-title function_">expect</span>(mock).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(<span class="hljs-number">2</span>)
+  })
+})</code></pre></div>
+
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

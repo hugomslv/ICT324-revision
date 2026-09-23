@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>comma-dangle (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/comma-dangle <span class="badge badge-layout">mise en forme (layout)</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/comma-dangle">version en ligne</a></div>
+<h1>comma-dangle</h1><p>Trailing commas in object literals are valid according to the ECMAScript 5 (and ECMAScript 3!) spec. However, IE8 (when not in IE8 document mode) and below will throw an error when it encounters trailing commas in JavaScript.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">var</span> foo = {
+    <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+    <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>,
+};</code></pre></div>
+<p>Trailing commas simplify adding and removing items to objects and arrays, since only the lines you are modifying must be touched.
+Another argument in favor of trailing commas is that it improves the clarity of diffs when an item is added or removed from an object or array:</p>
+<p>Less clear:</p>
+<div class="code"><pre><code class="hljs lang-diff"> var foo = {
+<span class="hljs-deletion">-    bar: &quot;baz&quot;,</span>
+<span class="hljs-deletion">-    qux: &quot;quux&quot;</span>
+<span class="hljs-addition">+    bar: &quot;baz&quot;</span>
+ };</code></pre></div>
+<p>More clear:</p>
+<div class="code"><pre><code class="hljs lang-diff"> var foo = {
+     bar: &quot;baz&quot;,
+<span class="hljs-deletion">-    qux: &quot;quux&quot;,</span>
+ };</code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule enforces consistent use of trailing commas in object and array literals.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has a string option or an object option:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;comma-dangle&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;never&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-comment">// or</span>
+    <span class="hljs-attr">&quot;comma-dangle&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;arrays&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;never&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;objects&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;never&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;never&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;exports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;never&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;functions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;never&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<ul>
+<li><code>&quot;never&quot;</code> (default) disallows trailing commas</li>
+<li><code>&quot;always&quot;</code> requires trailing commas</li>
+<li><code>&quot;always-multiline&quot;</code> requires trailing commas when the last element or property is in a <em>different</em> line than the closing <code>]</code> or <code>}</code> and disallows trailing commas when the last element or property is on the <em>same</em> line as the closing <code>]</code> or <code>}</code></li>
+<li><code>&quot;only-multiline&quot;</code> allows (but does not require) trailing commas when the last element or property is in a <em>different</em> line than the closing <code>]</code> or <code>}</code> and disallows trailing commas when the last element or property is on the <em>same</em> line as the closing <code>]</code> or <code>}</code></li>
+</ul>
+<p>You can also use an object option to configure this rule for each type of syntax.
+Each of the following options can be set to <code>&quot;never&quot;</code>, <code>&quot;always&quot;</code>, <code>&quot;always-multiline&quot;</code>, <code>&quot;only-multiline&quot;</code>, or <code>&quot;ignore&quot;</code>.
+The default for each option is <code>&quot;never&quot;</code> unless otherwise specified.</p>
+<ul>
+<li><code>arrays</code> is for array literals and array patterns of destructuring. (e.g. <code>let [a,] = [1,];</code>)</li>
+<li><code>objects</code> is for object literals and object patterns of destructuring. (e.g. <code>let {a,} = {a: 1};</code>)</li>
+<li><code>imports</code> is for import declarations of ES Modules. (e.g. <code>import {a,} from &quot;foo&quot;;</code>)</li>
+<li><code>exports</code> is for export declarations of ES Modules. (e.g. <code>export {a,};</code>)</li>
+<li><code>functions</code> is for function declarations and function calls. (e.g. <code>(function(a,){ })(b,);</code>)<ul>
+<li><code>functions</code> should only be enabled when linting ECMAScript 2017 or higher.</li>
+</ul>
+</li>
+</ul>
+<h3 id="never"><a class="anchor" href="#never">#</a>never</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the default <code>&quot;never&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint comma-dangle: [&quot;error&quot;, &quot;never&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> foo = {
+    <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+    <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>,
+};
+
+<span class="hljs-keyword">var</span> arr = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,];
+
+<span class="hljs-title function_">foo</span>({
+  <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+  <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>,
+});</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the default <code>&quot;never&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint comma-dangle: [&quot;error&quot;, &quot;never&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> foo = {
+    <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+    <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>
+};
+
+<span class="hljs-keyword">var</span> arr = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>];
+
+<span class="hljs-title function_">foo</span>({
+  <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+  <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>
+});</code></pre></div>
+</div><h3 id="always"><a class="anchor" href="#always">#</a>always</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;always&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint comma-dangle: [&quot;error&quot;, &quot;always&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> foo = {
+    <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+    <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>
+};
+
+<span class="hljs-keyword">var</span> arr = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>];
+
+<span class="hljs-title function_">foo</span>({
+  <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+  <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>
+});</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;always&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint comma-dangle: [&quot;error&quot;, &quot;always&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> foo = {
+    <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+    <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>,
+};
+
+<span class="hljs-keyword">var</span> arr = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,];
+
+<span class="hljs-title function_">foo</span>({
+  <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+  <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>,
+},);</code></pre></div>
+</div><h3 id="always-multiline"><a class="anchor" href="#always-multiline">#</a>always-multiline</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;always-multiline&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint comma-dangle: [&quot;error&quot;, &quot;always-multiline&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> foo = {
+    <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+    <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>
+};
+
+<span class="hljs-keyword">var</span> foo = { <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>, <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>, };
+
+<span class="hljs-keyword">var</span> arr = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,];
+
+<span class="hljs-keyword">var</span> arr = [<span class="hljs-number">1</span>,
+    <span class="hljs-number">2</span>,];
+
+<span class="hljs-keyword">var</span> arr = [
+    <span class="hljs-number">1</span>,
+    <span class="hljs-number">2</span>
+];
+
+<span class="hljs-title function_">foo</span>({
+  <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+  <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>
+});</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;always-multiline&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint comma-dangle: [&quot;error&quot;, &quot;always-multiline&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> foo = {
+    <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+    <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>,
+};
+
+<span class="hljs-keyword">var</span> foo = {<span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>, <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>};
+<span class="hljs-keyword">var</span> arr = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>];
+
+<span class="hljs-keyword">var</span> arr = [<span class="hljs-number">1</span>,
+    <span class="hljs-number">2</span>];
+
+<span class="hljs-keyword">var</span> arr = [
+    <span class="hljs-number">1</span>,
+    <span class="hljs-number">2</span>,
+];
+
+<span class="hljs-title function_">foo</span>({
+  <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+  <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>,
+});</code></pre></div>
+</div><h3 id="only-multiline"><a class="anchor" href="#only-multiline">#</a>only-multiline</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;only-multiline&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint comma-dangle: [&quot;error&quot;, &quot;only-multiline&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> foo = { <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>, <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>, };
+
+<span class="hljs-keyword">var</span> arr = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,];
+
+<span class="hljs-keyword">var</span> arr = [<span class="hljs-number">1</span>,
+    <span class="hljs-number">2</span>,];
+</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;only-multiline&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint comma-dangle: [&quot;error&quot;, &quot;only-multiline&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> foo = {
+    <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+    <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>,
+};
+
+<span class="hljs-keyword">var</span> foo = {
+    <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+    <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>
+};
+
+<span class="hljs-keyword">var</span> foo = {<span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>, <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>};
+<span class="hljs-keyword">var</span> arr = [<span class="hljs-number">1</span>,<span class="hljs-number">2</span>];
+
+<span class="hljs-keyword">var</span> arr = [<span class="hljs-number">1</span>,
+    <span class="hljs-number">2</span>];
+
+<span class="hljs-keyword">var</span> arr = [
+    <span class="hljs-number">1</span>,
+    <span class="hljs-number">2</span>,
+];
+
+<span class="hljs-keyword">var</span> arr = [
+    <span class="hljs-number">1</span>,
+    <span class="hljs-number">2</span>
+];
+
+<span class="hljs-title function_">foo</span>({
+  <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+  <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>,
+});
+
+<span class="hljs-title function_">foo</span>({
+  <span class="hljs-attr">bar</span>: <span class="hljs-string">&quot;baz&quot;</span>,
+  <span class="hljs-attr">qux</span>: <span class="hljs-string">&quot;quux&quot;</span>
+});</code></pre></div>
+</div><h3 id="functions"><a class="anchor" href="#functions">#</a>functions</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>{&quot;functions&quot;: &quot;never&quot;}</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint comma-dangle: [&quot;error&quot;, {&quot;functions&quot;: &quot;never&quot;}]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">a, b,</span>) {
+}
+
+<span class="hljs-title function_">foo</span>(a, b,);
+<span class="hljs-keyword">new</span> <span class="hljs-title function_">foo</span>(a, b,);</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{&quot;functions&quot;: &quot;never&quot;}</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint comma-dangle: [&quot;error&quot;, {&quot;functions&quot;: &quot;never&quot;}]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">a, b</span>) {
+}
+
+<span class="hljs-title function_">foo</span>(a, b);
+<span class="hljs-keyword">new</span> <span class="hljs-title function_">foo</span>(a, b);</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for this rule with the <code>{&quot;functions&quot;: &quot;always&quot;}</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint comma-dangle: [&quot;error&quot;, {&quot;functions&quot;: &quot;always&quot;}]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">a, b</span>) {
+}
+
+<span class="hljs-title function_">foo</span>(a, b);
+<span class="hljs-keyword">new</span> <span class="hljs-title function_">foo</span>(a, b);</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{&quot;functions&quot;: &quot;always&quot;}</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint comma-dangle: [&quot;error&quot;, {&quot;functions&quot;: &quot;always&quot;}]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">a, b,</span>) {
+}
+
+<span class="hljs-title function_">foo</span>(a, b,);
+<span class="hljs-keyword">new</span> <span class="hljs-title function_">foo</span>(a, b,);</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>You can turn this rule off if you are not concerned with dangling commas.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#never">never</a><a class="toc-3" href="#always">always</a><a class="toc-3" href="#always-multiline">always-multiline</a><a class="toc-3" href="#only-multiline">only-multiline</a><a class="toc-3" href="#functions">functions</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

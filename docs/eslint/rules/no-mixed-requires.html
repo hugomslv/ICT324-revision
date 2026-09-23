@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-mixed-requires (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-mixed-requires <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-mixed-requires">version en ligne</a></div>
+<h1>no-mixed-requires</h1><p>In the Node.js community it is often customary to separate initializations with calls to <code>require</code> modules from other variable declarations, sometimes also grouping them by the type of module. This rule helps you enforce this convention.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>When this rule is enabled, each <code>var</code> statement must satisfy the following conditions:</p>
+<ul>
+<li>either none or all variable declarations must be require declarations (default)</li>
+<li>all require declarations must be of the same type (grouping)</li>
+</ul>
+<p>This rule distinguishes between six kinds of variable declaration types:</p>
+<ul>
+<li><code>core</code>: declaration of a required <a href="https://nodejs.org/api/modules.html#modules_core_modules">core module</a></li>
+<li><code>file</code>: declaration of a required <a href="https://nodejs.org/api/modules.html#modules_file_modules">file module</a></li>
+<li><code>module</code>: declaration of a required module from the <a href="https://nodejs.org/api/modules.html#modules_loading_from_node_modules_folders">node_modules folder</a></li>
+<li><code>computed</code>: declaration of a required module whose type could not be determined (either because it is computed or because require was called without an argument)</li>
+<li><code>uninitialized</code>: a declaration that is not initialized</li>
+<li><code>other</code>: any other kind of declaration</li>
+</ul>
+<p>In this document, the first four types are summed up under the term <em>require declaration</em>.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">var</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;fs&#x27;</span>),        <span class="hljs-comment">// &quot;core&quot;     \</span>
+    <span class="hljs-keyword">async</span> = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;async&#x27;</span>),  <span class="hljs-comment">// &quot;module&quot;   |- these are &quot;require declaration&quot;s</span>
+    foo = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;./foo&#x27;</span>),    <span class="hljs-comment">// &quot;file&quot;     |</span>
+    bar = <span class="hljs-built_in">require</span>(<span class="hljs-title function_">getName</span>()),  <span class="hljs-comment">// &quot;computed&quot; /</span>
+    baz = <span class="hljs-number">42</span>,                  <span class="hljs-comment">// &quot;other&quot;</span>
+    bam;                       <span class="hljs-comment">// &quot;uninitialized&quot;</span></code></pre></div>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule can have an object literal option whose two properties have <code>false</code> values by default.</p>
+<p>Configuring this rule with one boolean option <code>true</code> is deprecated.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with the default <code>{ &quot;grouping&quot;: false, &quot;allowCall&quot;: false }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-mixed-requires: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">var</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;fs&#x27;</span>),
+    i = <span class="hljs-number">0</span>;
+
+<span class="hljs-keyword">var</span> <span class="hljs-keyword">async</span> = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;async&#x27;</span>),
+    debug = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;diagnostics&#x27;</span>).<span class="hljs-title function_">someFunction</span>(<span class="hljs-string">&#x27;my-module&#x27;</span>),
+    eslint = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;eslint&#x27;</span>);</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the default <code>{ &quot;grouping&quot;: false, &quot;allowCall&quot;: false }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-mixed-requires: &quot;error&quot;*/</span>
+
+<span class="hljs-comment">// only require declarations (grouping off)</span>
+<span class="hljs-keyword">var</span> eventEmitter = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;events&#x27;</span>).<span class="hljs-property">EventEmitter</span>,
+    myUtils = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;./utils&#x27;</span>),
+    util = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;util&#x27;</span>),
+    bar = <span class="hljs-built_in">require</span>(<span class="hljs-title function_">getBarModuleName</span>());
+
+<span class="hljs-comment">// only non-require declarations</span>
+<span class="hljs-keyword">var</span> foo = <span class="hljs-number">42</span>,
+    bar = <span class="hljs-string">&#x27;baz&#x27;</span>;
+
+<span class="hljs-comment">// always valid regardless of grouping because all declarations are of the same type</span>
+<span class="hljs-keyword">var</span> foo = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;foo&#x27;</span> + <span class="hljs-variable constant_">VERSION</span>),
+    bar = <span class="hljs-built_in">require</span>(<span class="hljs-title function_">getBarModuleName</span>()),
+    baz = <span class="hljs-built_in">require</span>();</code></pre></div>
+</div><h3 id="grouping"><a class="anchor" href="#grouping">#</a>grouping</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>{ &quot;grouping&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-mixed-requires: [&quot;error&quot;, { &quot;grouping&quot;: true }]*/</span>
+
+<span class="hljs-comment">// invalid because of mixed types &quot;core&quot; and &quot;module&quot;</span>
+<span class="hljs-keyword">var</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;fs&#x27;</span>),
+    <span class="hljs-keyword">async</span> = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;async&#x27;</span>);
+
+<span class="hljs-comment">// invalid because of mixed types &quot;file&quot; and &quot;unknown&quot;</span>
+<span class="hljs-keyword">var</span> foo = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;foo&#x27;</span>),
+    bar = <span class="hljs-built_in">require</span>(<span class="hljs-title function_">getBarModuleName</span>());</code></pre></div>
+</div><h3 id="allowcall"><a class="anchor" href="#allowcall">#</a>allowCall</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>{ &quot;allowCall&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-mixed-requires: [&quot;error&quot;, { &quot;allowCall&quot;: true }]*/</span>
+
+<span class="hljs-keyword">var</span> <span class="hljs-keyword">async</span> = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;async&#x27;</span>),
+    debug = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;diagnostics&#x27;</span>).<span class="hljs-title function_">someFunction</span>(<span class="hljs-string">&#x27;my-module&#x27;</span>), <span class="hljs-comment">/* allowCall doesn&#x27;t allow calling any function */</span>
+    eslint = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;eslint&#x27;</span>);</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;allowCall&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-mixed-requires: [&quot;error&quot;, { &quot;allowCall&quot;: true }]*/</span>
+
+<span class="hljs-keyword">var</span> <span class="hljs-keyword">async</span> = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;async&#x27;</span>),
+    debug = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;diagnostics&#x27;</span>)(<span class="hljs-string">&#x27;my-module&#x27;</span>),
+    eslint = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;eslint&#x27;</span>);</code></pre></div>
+</div><h2 id="known-limitations"><a class="anchor" href="#known-limitations">#</a>Known Limitations</h2>
+<ul>
+<li><p>The implementation is not aware of any local functions with the name <code>require</code> that may shadow Node.js&#39; global <code>require</code>.</p>
+</li>
+<li><p>Internally, the list of core modules is retrieved via <code>require(&quot;repl&quot;)._builtinLibs</code>. If you use different versions of Node.js for ESLint and your application, the list of core modules for each version may be different.
+The above mentioned <code>_builtinLibs</code> property became available in 0.8, for earlier versions a hardcoded list of module names is used as a fallback. If your version of Node.js is older than 0.6 that list may be inaccurate.</p>
+</li>
+</ul>
+<h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you use a pattern such as <a href="https://github.com/umdjs/umd">UMD</a> where the <code>require</code>d modules are not loaded in variable declarations, this rule will obviously do nothing for you.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#grouping">grouping</a><a class="toc-3" href="#allowcall">allowCall</a><a class="toc-2" href="#known-limitations">Known Limitations</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

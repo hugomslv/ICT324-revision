@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parallelism | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/parallelism  <a class="ext small" href="https://vitest.dev/guide/parallelism">version en ligne</a></div>
+<h1 id="parallelism"><a class="anchor" href="#parallelism">#</a>Parallelism</h1>
+<p>Vitest has two levels of parallelism: it can run multiple <em>test files</em> at the same time, and within each file it can run multiple <em>tests</em> at the same time. Understanding the difference between the two is important because they work differently and have different trade-offs.</p>
+<h2 id="file-parallelism"><a class="anchor" href="#file-parallelism">#</a>File Parallelism</h2>
+<p>By default, Vitest runs test files in parallel across multiple workers. Each file gets its own isolated environment, so tests in different files can&#39;t interfere with each other.</p>
+<p>The mechanism Vitest uses to create workers depends on the configured <a href="../config/pool.html"><code>pool</code></a>:</p>
+<ul>
+<li><code>forks</code> (the default) and <code>vmForks</code> run each file in a separate <a href="https://nodejs.org/api/child_process.html">child process</a></li>
+<li><code>threads</code> and <code>vmThreads</code> run each file in a separate <a href="https://nodejs.org/api/worker_threads.html">worker thread</a></li>
+</ul>
+<p>You can control how many workers run simultaneously with the <a href="../config/maxworkers.html"><code>maxWorkers</code></a> option. More workers means more files run in parallel, but also more memory and CPU usage. The right number depends on your machine and how heavy your tests are.</p>
+<p>For most projects, file parallelism is the single biggest factor in test suite speed. However, there are cases where you might want to disable it — for example, if your tests share an external resource like a database that can&#39;t handle concurrent access. You can set <a href="../config/fileparallelism.html"><code>fileParallelism</code></a> to <code>false</code> to run files one at a time.</p>
+<p>To learn more about tuning performance, see the <a href="improving-performance.html">Performance Guide</a>.</p>
+<h2 id="test-parallelism"><a class="anchor" href="#test-parallelism">#</a>Test Parallelism</h2>
+<p>Within a single file, Vitest runs tests sequentially by default. Tests execute in the order they are defined, one after another. This is the safest default because tests within a file often share setup and state through lifecycle hooks like <code>beforeEach</code>.</p>
+<p>If the tests in a file are independent, you can opt into running them concurrently with the <a href="../api/test.html#test-concurrent"><code>concurrent</code></a> modifier:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+test.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;fetches user profile&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> user = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetchUser</span>(<span class="hljs-number">1</span>)
+  <span class="hljs-title function_">expect</span>(user.<span class="hljs-property">name</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)
+})
+
+test.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;fetches user posts&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> posts = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetchPosts</span>(<span class="hljs-number">1</span>)
+  <span class="hljs-title function_">expect</span>(posts).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">3</span>)
+})</code></pre></div>
+<p>When tests are marked as <code>concurrent</code>, Vitest groups them together and runs them with <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all"><code>Promise.all</code></a>. The number of tests running at once is bounded by the <a href="../config/maxconcurrency.html"><code>maxConcurrency</code></a> option.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : When does <code>concurrent</code> actually help?</div><p>Vitest doesn&#39;t create extra workers for concurrent tests — they all run in the same worker as the file they belong to. This means <code>concurrent</code> only speeds things up when your tests spend time <em>waiting</em> (on network requests, timers, file I/O, etc.). Purely synchronous tests won&#39;t benefit because they still block the single JavaScript thread:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// These run one after another despite `concurrent`,</span>
+<span class="hljs-comment">// because there is nothing to await</span>
+test.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;the first test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-number">1</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">1</span>)
+})
+
+test.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;the second test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-number">2</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">2</span>)
+})</code></pre></div>
+</div><p>You can also apply <code>concurrent</code> to an entire suite:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+describe.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;user API&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;fetches profile&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> user = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetchUser</span>(<span class="hljs-number">1</span>)
+    <span class="hljs-title function_">expect</span>(user.<span class="hljs-property">name</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;fetches posts&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> posts = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetchPosts</span>(<span class="hljs-number">1</span>)
+    <span class="hljs-title function_">expect</span>(posts).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">3</span>)
+  })
+})</code></pre></div>
+<p>If you want <em>all</em> tests in your project to run concurrently by default, set <a href="../config/sequence.html#sequence-concurrent"><code>sequence.concurrent</code></a> to <code>true</code> in your config.</p>
+<p>You can opt individual tests or suites out of inherited concurrency with <code>concurrent: false</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;uses a shared resource&#x27;</span>, { <span class="hljs-attr">concurrent</span>: <span class="hljs-literal">false</span> }, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// ...</span>
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;shared resource suite&#x27;</span>, { <span class="hljs-attr">concurrent</span>: <span class="hljs-literal">false</span> }, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;step 1&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;step 2&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+})</code></pre></div>
+<h3 id="hooks-with-concurrent-tests"><a class="anchor" href="#hooks-with-concurrent-tests">#</a>Hooks with Concurrent Tests</h3>
+<p>When tests run concurrently, lifecycle hooks behave differently. <code>beforeAll</code> and <code>afterAll</code> still run once for the group, but <code>beforeEach</code> and <code>afterEach</code> run for each test — potentially at the same time, since the tests themselves overlap.</p>
+<p>The hook execution order is controlled by <a href="../config/sequence.html#sequence-hooks"><code>sequence.hooks</code></a>. With <code>sequence.hooks: &#39;parallel&#39;</code>, hooks are also bounded by the <a href="../config/maxconcurrency.html"><code>maxConcurrency</code></a> limit.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#file-parallelism">File Parallelism</a><a class="toc-2" href="#test-parallelism">Test Parallelism</a><a class="toc-3" href="#hooks-with-concurrent-tests">Hooks with Concurrent Tests</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

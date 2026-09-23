@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>prefer-regex-literals (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/prefer-regex-literals <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/prefer-regex-literals">version en ligne</a></div>
+<h1>prefer-regex-literals</h1><p>There are two ways to create a regular expression:</p>
+<ul>
+<li>Regular expression literals, e.g., <code>/abc/u</code>.</li>
+<li>The <code>RegExp</code> constructor function, e.g., <code>new RegExp(&quot;abc&quot;, &quot;u&quot;)</code> or <code>RegExp(&quot;abc&quot;, &quot;u&quot;)</code>.</li>
+</ul>
+<p>The constructor function is particularly useful when you want to dynamically generate the pattern,
+because it takes string arguments.</p>
+<p>When using the constructor function with string literals, don&#39;t forget that the string escaping rules still apply.
+If you want to put a backslash in the pattern, you need to escape it in the string literal.
+Thus, the following are equivalent:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&quot;^\\d\\.$&quot;</span>);
+
+<span class="hljs-regexp">/^\d\.$/</span>;
+
+<span class="hljs-comment">// matches &quot;0.&quot;, &quot;1.&quot;, &quot;2.&quot; ... &quot;9.&quot;</span></code></pre></div>
+<p>In the above example, the regular expression literal is easier to read and reason about.
+Also, it&#39;s a common mistake to omit the extra <code>\</code> in the string literal, which would produce a completely different regular expression:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&quot;^\d\.$&quot;</span>);
+
+<span class="hljs-comment">// equivalent to /^d.$/, matches &quot;d1&quot;, &quot;d2&quot;, &quot;da&quot;, &quot;db&quot; ...</span></code></pre></div>
+<p>When a regular expression is known in advance, it is considered a best practice to avoid the string literal notation on top
+of the regular expression notation, and use regular expression literals instead of the constructor function.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule disallows the use of the <code>RegExp</code> constructor function with string literals as its arguments.</p>
+<p>This rule also disallows the use of the <code>RegExp</code> constructor function with template literals without expressions
+and <code>String.raw</code> tagged template literals without expressions.</p>
+<p>The rule does not disallow all use of the <code>RegExp</code> constructor. It should be still used for
+dynamically generated regular expressions.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-regex-literals: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&quot;abc&quot;</span>);
+
+<span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&quot;abc&quot;</span>, <span class="hljs-string">&quot;u&quot;</span>);
+
+<span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&quot;abc&quot;</span>);
+
+<span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&quot;abc&quot;</span>, <span class="hljs-string">&quot;u&quot;</span>);
+
+<span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&quot;\\d\\d\\.\\d\\d\\.\\d\\d\\d\\d&quot;</span>);
+
+<span class="hljs-title class_">RegExp</span>(<span class="hljs-string">`^\\d\\.$`</span>);
+
+<span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-title class_">String</span>.<span class="hljs-property">raw</span><span class="hljs-string">`^\d\.$`</span>);</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-regex-literals: &quot;error&quot;*/</span>
+
+/abc/;
+
+<span class="hljs-regexp">/abc/u</span>;
+
+<span class="hljs-regexp">/\d\d\.\d\d\.\d\d\d\d/</span>;
+
+<span class="hljs-regexp">/^\d\.$/</span>;
+
+<span class="hljs-comment">// RegExp constructor is allowed for dynamically generated regular expressions</span>
+
+<span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(pattern);
+
+<span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&quot;abc&quot;</span>, flags);
+
+<span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(prefix + <span class="hljs-string">&quot;abc&quot;</span>);
+
+<span class="hljs-title class_">RegExp</span>(<span class="hljs-string">`<span class="hljs-subst">${prefix}</span>abc`</span>);
+
+<span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-title class_">String</span>.<span class="hljs-property">raw</span><span class="hljs-string">`^\d\. <span class="hljs-subst">${suffix}</span>`</span>);</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has an object option:</p>
+<ul>
+<li><code>disallowRedundantWrapping</code> set to <code>true</code> additionally checks for unnecessarily wrapped regex literals (Default <code>false</code>).</li>
+</ul>
+<h3 id="disallowredundantwrapping"><a class="anchor" href="#disallowredundantwrapping">#</a>disallowRedundantWrapping</h3>
+<p>By default, this rule doesn’t check when a regex literal is unnecessarily wrapped in a <code>RegExp</code> constructor call. When the option <code>disallowRedundantWrapping</code> is set to <code>true</code>, the rule will also disallow such unnecessary patterns.</p>
+<p>Examples of <code>incorrect</code> code for <code>{ &quot;disallowRedundantWrapping&quot;: true }</code></p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-regex-literals: [&quot;error&quot;, {&quot;disallowRedundantWrapping&quot;: true}]*/</span>
+
+<span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-regexp">/abc/</span>);
+
+<span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-regexp">/abc/</span>, <span class="hljs-string">&#x27;u&#x27;</span>);</code></pre></div>
+</div><p>Examples of <code>correct</code> code for <code>{ &quot;disallowRedundantWrapping&quot;: true }</code></p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-regex-literals: [&quot;error&quot;, {&quot;disallowRedundantWrapping&quot;: true}]*/</span>
+
+/abc/;
+
+<span class="hljs-regexp">/abc/u</span>;
+
+<span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-regexp">/abc/</span>, flags);</code></pre></div>
+</div><h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions</a></li><li><a class="ext" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#disallowredundantwrapping">disallowRedundantWrapping</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

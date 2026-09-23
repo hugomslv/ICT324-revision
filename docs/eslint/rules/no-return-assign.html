@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-return-assign (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-return-assign <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-return-assign">version en ligne</a></div>
+<h1>no-return-assign</h1><p>One of the interesting, and sometimes confusing, aspects of JavaScript is that assignment can happen at almost any point. Because of this, an errant equals sign can end up causing assignment when the true intent was to do a comparison. This is especially true when using a <code>return</code> statement. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomething</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> foo = bar + <span class="hljs-number">2</span>;
+}</code></pre></div>
+<p>It is difficult to tell the intent of the <code>return</code> statement here. It&#39;s possible that the function is meant to return the result of <code>bar + 2</code>, but then why is it assigning to <code>foo</code>? It&#39;s also possible that the intent was to use a comparison operator such as <code>==</code> and that this code is an error.</p>
+<p>Because of this ambiguity, it&#39;s considered a best practice to not use assignment in <code>return</code> statements.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule aims to eliminate assignments from <code>return</code> statements. As such, it will warn whenever an assignment is found as part of <code>return</code>.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>The rule takes one option, a string, which must contain one of the following values:</p>
+<ul>
+<li><code>except-parens</code> (default): Disallow assignments unless they are enclosed in parentheses.</li>
+<li><code>always</code>: Disallow all assignments.</li>
+</ul>
+<h3 id="except-parens"><a class="anchor" href="#except-parens">#</a>except-parens</h3>
+<p>This is the default option.
+It disallows assignments unless they are enclosed in parentheses.</p>
+<p>Examples of <strong>incorrect</strong> code for the default <code>&quot;except-parens&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-return-assign: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomething</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> foo = bar + <span class="hljs-number">2</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomethingElse</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> foo += <span class="hljs-number">2</span>;
+}
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">foo</span> = (<span class="hljs-params">a, b</span>) =&gt; a = b
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">bar</span> = (<span class="hljs-params">a, b, c</span>) =&gt; (a = b, c == b)
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomethingMore</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> foo = bar &amp;&amp; foo &gt; <span class="hljs-number">0</span>;
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the default <code>&quot;except-parens&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-return-assign: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomething</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> foo == bar + <span class="hljs-number">2</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomethingElse</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> foo === bar + <span class="hljs-number">2</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomethingMore</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> (foo = bar + <span class="hljs-number">2</span>);
+}
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">foo</span> = (<span class="hljs-params">a, b</span>) =&gt; (a = b)
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">bar</span> = (<span class="hljs-params">a, b, c</span>) =&gt; ((a = b), c == b)
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doAnotherThing</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> (foo = bar) &amp;&amp; foo &gt; <span class="hljs-number">0</span>;
+}</code></pre></div>
+</div><h3 id="always"><a class="anchor" href="#always">#</a>always</h3>
+<p>This option disallows all assignments in <code>return</code> statements.
+All assignments are treated as problems.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>&quot;always&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-return-assign: [&quot;error&quot;, &quot;always&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomething</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> foo = bar + <span class="hljs-number">2</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomethingElse</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> foo += <span class="hljs-number">2</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomethingMore</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> (foo = bar + <span class="hljs-number">2</span>);
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>&quot;always&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-return-assign: [&quot;error&quot;, &quot;always&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomething</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> foo == bar + <span class="hljs-number">2</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomethingElse</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> foo === bar + <span class="hljs-number">2</span>;
+}</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you want to allow the use of assignment operators in a <code>return</code> statement, then you can safely disable this rule.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#except-parens">except-parens</a><a class="toc-3" href="#always">always</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

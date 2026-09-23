@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>require-atomic-updates (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/require-atomic-updates <span class="badge badge-problem">problème</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/require-atomic-updates">version en ligne</a></div>
+<h1>require-atomic-updates</h1><p>When writing asynchronous code, it is possible to create subtle race condition bugs. Consider the following example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">let</span> totalLength = <span class="hljs-number">0</span>;
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">addLengthOfSinglePage</span>(<span class="hljs-params">pageNum</span>) {
+  totalLength += <span class="hljs-keyword">await</span> <span class="hljs-title function_">getPageLength</span>(pageNum);
+}
+
+<span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>([<span class="hljs-title function_">addLengthOfSinglePage</span>(<span class="hljs-number">1</span>), <span class="hljs-title function_">addLengthOfSinglePage</span>(<span class="hljs-number">2</span>)]).<span class="hljs-title function_">then</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;The combined length of both pages is&#x27;</span>, totalLength);
+});</code></pre></div>
+<p>This code looks like it will sum the results of calling <code>getPageLength(1)</code> and <code>getPageLength(2)</code>, but in reality the final value of <code>totalLength</code> will only be the length of one of the two pages. The bug is in the statement <code>totalLength += await getPageLength(pageNum);</code>. This statement first reads an initial value of <code>totalLength</code>, then calls <code>getPageLength(pageNum)</code> and waits for that Promise to fulfill. Finally, it sets the value of <code>totalLength</code> to the sum of <code>await getPageLength(pageNum)</code> and the <em>initial</em> value of <code>totalLength</code>. If the <code>totalLength</code> variable is updated in a separate function call during the time that the <code>getPageLength(pageNum)</code> Promise is pending, that update will be lost because the new value is overwritten without being read.</p>
+<p>One way to fix this issue would be to ensure that <code>totalLength</code> is read at the same time as it&#39;s updated, like this:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">addLengthOfSinglePage</span>(<span class="hljs-params">pageNum</span>) {
+  <span class="hljs-keyword">const</span> lengthOfThisPage = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getPageLength</span>(pageNum);
+
+  totalLength += lengthOfThisPage;
+}</code></pre></div>
+<p>Another solution would be to avoid using a mutable variable reference at all:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>([<span class="hljs-title function_">getPageLength</span>(<span class="hljs-number">1</span>), <span class="hljs-title function_">getPageLength</span>(<span class="hljs-number">2</span>)]).<span class="hljs-title function_">then</span>(<span class="hljs-function"><span class="hljs-params">pageLengths</span> =&gt;</span> {
+  <span class="hljs-keyword">const</span> totalLength = pageLengths.<span class="hljs-title function_">reduce</span>(<span class="hljs-function">(<span class="hljs-params">accumulator, length</span>) =&gt;</span> accumulator + length, <span class="hljs-number">0</span>);
+
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;The combined length of both pages is&#x27;</span>, totalLength);
+});</code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule aims to report assignments to variables or properties in cases where the assignments may be based on outdated values.</p>
+<h3 id="variables"><a class="anchor" href="#variables">#</a>Variables</h3>
+<p>This rule reports an assignment to a variable when it detects the following execution flow in a generator or async function:</p>
+<ol>
+<li>The variable is read.</li>
+<li>A <code>yield</code> or <code>await</code> pauses the function.</li>
+<li>After the function is resumed, a value is assigned to the variable from step 1.</li>
+</ol>
+<p>The assignment in step 3 is reported because it may be incorrectly resolved because the value of the variable from step 1 may have changed between steps 2 and 3. In particular, if the variable can be accessed from other execution contexts (for example, if it is not a local variable and therefore other functions can change it), the value of the variable may have changed elsewhere while the function was paused in step 2.</p>
+<p>Note that the rule does not report the assignment in step 3 in any of the following cases:</p>
+<ul>
+<li>If the variable is read again between steps 2 and 3.</li>
+<li>If the variable cannot be accessed while the function is paused (for example, if it&#39;s a local variable).</li>
+</ul>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint require-atomic-updates: error */</span>
+
+<span class="hljs-keyword">let</span> result;
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    result += <span class="hljs-keyword">await</span> something;
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {
+    result = result + <span class="hljs-keyword">await</span> something;
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">baz</span>(<span class="hljs-params"></span>) {
+    result = result + <span class="hljs-title function_">doSomething</span>(<span class="hljs-keyword">await</span> somethingElse);
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">qux</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">if</span> (!result) {
+        result = <span class="hljs-keyword">await</span> <span class="hljs-title function_">initialize</span>();
+    }
+}
+
+<span class="hljs-keyword">function</span>* <span class="hljs-title function_">generator</span>(<span class="hljs-params"></span>) {
+    result += <span class="hljs-keyword">yield</span>;
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint require-atomic-updates: error */</span>
+
+<span class="hljs-keyword">let</span> result;
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foobar</span>(<span class="hljs-params"></span>) {
+    result = <span class="hljs-keyword">await</span> something + result;
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">baz</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> tmp = <span class="hljs-title function_">doSomething</span>(<span class="hljs-keyword">await</span> somethingElse);
+    result += tmp;
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">qux</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">if</span> (!result) {
+        <span class="hljs-keyword">const</span> tmp = <span class="hljs-keyword">await</span> <span class="hljs-title function_">initialize</span>();
+        <span class="hljs-keyword">if</span> (!result) {
+            result = tmp;
+        }
+    }
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">quux</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">let</span> localVariable = <span class="hljs-number">0</span>;
+    localVariable += <span class="hljs-keyword">await</span> something;
+}
+
+<span class="hljs-keyword">function</span>* <span class="hljs-title function_">generator</span>(<span class="hljs-params"></span>) {
+    result = (<span class="hljs-keyword">yield</span>) + result;
+}</code></pre></div>
+</div><h3 id="properties"><a class="anchor" href="#properties">#</a>Properties</h3>
+<p>This rule reports an assignment to a property through a variable when it detects the following execution flow in a generator or async function:</p>
+<ol>
+<li>The variable or object property is read.</li>
+<li>A <code>yield</code> or <code>await</code> pauses the function.</li>
+<li>After the function is resumed, a value is assigned to a property.</li>
+</ol>
+<p>This logic is similar to the logic for variables, but stricter because the property in step 3 doesn&#39;t have to be the same as the property in step 1. It is assumed that the flow depends on the state of the object as a whole.</p>
+<p>Example of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint require-atomic-updates: error */</span>
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">obj</span>) {
+    <span class="hljs-keyword">if</span> (!obj.<span class="hljs-property">done</span>) {
+        obj.<span class="hljs-property">something</span> = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getSomething</span>();
+    }
+}</code></pre></div>
+</div><p>Example of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint require-atomic-updates: error */</span>
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">obj</span>) {
+    <span class="hljs-keyword">if</span> (!obj.<span class="hljs-property">done</span>) {
+        <span class="hljs-keyword">const</span> tmp = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getSomething</span>();
+        <span class="hljs-keyword">if</span> (!obj.<span class="hljs-property">done</span>) {
+            obj.<span class="hljs-property">something</span> = tmp;
+        }
+    }
+}</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has an object option:</p>
+<ul>
+<li><code>&quot;allowProperties&quot;</code>: When set to <code>true</code>, the rule does not report assignments to properties. Default is <code>false</code>.</li>
+</ul>
+<h3 id="allowproperties"><a class="anchor" href="#allowproperties">#</a>allowProperties</h3>
+<p>Example of <strong>correct</strong> code for this rule with the <code>{ &quot;allowProperties&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint require-atomic-updates: [&quot;error&quot;, { &quot;allowProperties&quot;: true }] */</span>
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">obj</span>) {
+    <span class="hljs-keyword">if</span> (!obj.<span class="hljs-property">done</span>) {
+        obj.<span class="hljs-property">something</span> = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getSomething</span>();
+    }
+}</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you don&#39;t use async or generator functions, you don&#39;t need to enable this rule.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-3" href="#variables">Variables</a><a class="toc-3" href="#properties">Properties</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#allowproperties">allowProperties</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

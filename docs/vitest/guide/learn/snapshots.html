@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snapshot Testing | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/learn/snapshots  <a class="ext small" href="https://vitest.dev/guide/learn/snapshots">version en ligne</a></div>
+<h1 id="snapshot-testing"><a class="anchor" href="#snapshot-testing">#</a>Snapshot Testing</h1>
+<p>Snapshot tests capture the output of a piece of code and save it to a file. On subsequent runs, the output is compared against the saved snapshot. If the output changes, the test fails. Either the change is a bug, or the snapshot needs to be updated.</p>
+<p>This approach is particularly useful when you&#39;re testing something that produces structured output: a function that returns a complex object, a component that renders HTML, or an error formatter that produces multi-line messages. Writing manual assertions for every field or line would be tedious and fragile. Instead, you capture the entire output once, and let Vitest tell you if it ever changes.</p>
+<h2 id="your-first-snapshot"><a class="anchor" href="#your-first-snapshot">#</a>Your First Snapshot</h2>
+<p>To create a snapshot test, pass a value to <a href="../../api/expect.html#tomatchsnapshot"><code>toMatchSnapshot()</code></a>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">generateGreeting</span>(<span class="hljs-params">name</span>) {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">message</span>: <span class="hljs-string">`Hello, <span class="hljs-subst">${name}</span>!`</span>,
+    <span class="hljs-attr">timestamp</span>: <span class="hljs-literal">null</span>,
+    <span class="hljs-attr">version</span>: <span class="hljs-number">2</span>,
+  }
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;generates a greeting&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">generateGreeting</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)).<span class="hljs-title function_">toMatchSnapshot</span>()
+})</code></pre></div>
+<p>The first time you run this test, there&#39;s no existing snapshot to compare against, so Vitest creates one. It stores the snapshot in a <code>__snapshots__</code> directory next to your test file:</p>
+<div class="code"><pre><code class="hljs lang-txt">__snapshots__/
+  example.test.js.snap</code></pre></div>
+<p>If you open that file, you&#39;ll see a serialized representation of the value:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-built_in">exports</span>[<span class="hljs-string">&#x27;generates a greeting 1&#x27;</span>] = <span class="hljs-string">`
+{
+  &quot;message&quot;: &quot;Hello, Alice!&quot;,
+  &quot;timestamp&quot;: null,
+  &quot;version&quot;: 2,
+}
+`</span></code></pre></div>
+<p>From now on, every time you run this test, Vitest serializes the output of <code>generateGreeting(&#39;Alice&#39;)</code> and compares it character-by-character against this stored snapshot. If the output changes (say, someone modifies the message format or bumps the version number), the test fails and shows a clear diff of what changed.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Commit your snapshot files to version control. They serve as a record of the expected output and should be reviewed in code review just like any other test assertion.</p>
+</div><h2 id="inline-snapshots"><a class="anchor" href="#inline-snapshots">#</a>Inline Snapshots</h2>
+<p>External snapshot files work well, but they mean you have to jump to a different file to see what the expected output actually looks like. For smaller values, it&#39;s often more convenient to keep the snapshot right in your test file with <a href="../../api/expect.html#tomatchinlinesnapshot"><code>toMatchInlineSnapshot()</code></a>.</p>
+<p>Start by writing the assertion without any argument:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;generates a greeting&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">generateGreeting</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)).<span class="hljs-title function_">toMatchInlineSnapshot</span>()
+})</code></pre></div>
+<p>When you run the test, Vitest will <strong>automatically fill in</strong> the snapshot as a string argument:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;generates a greeting&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">generateGreeting</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)).<span class="hljs-title function_">toMatchInlineSnapshot</span>(<span class="hljs-string">`
+    {
+      &quot;message&quot;: &quot;Hello, Alice!&quot;,
+      &quot;timestamp&quot;: null,
+      &quot;version&quot;: 2,
+    }
+  `</span>)
+})</code></pre></div>
+<p>Now the expected output lives right next to the code that produces it. You can read the test and immediately understand what <code>generateGreeting</code> is expected to return. When the output changes, Vitest updates the string in place, so you don&#39;t need to manage separate snapshot files.</p>
+<p>Inline snapshots are great for small, focused values. For large outputs (like a full HTML page), external snapshots or file snapshots are a better fit.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Unlike external snapshots, inline snapshots don&#39;t create separate <code>.snap</code> files. The expected value is stored directly in your test file as the argument to <code>toMatchInlineSnapshot()</code>, so there&#39;s nothing extra to commit.</p>
+</div><h2 id="updating-snapshots"><a class="anchor" href="#updating-snapshots">#</a>Updating Snapshots</h2>
+<p>When you intentionally change the output of your code, existing snapshots will be outdated and the tests will fail. This is by design; it&#39;s the whole point of snapshot testing. But once you&#39;ve verified that the new output is correct, you need to update the snapshots.</p>
+<p>There are several ways to do this:</p>
+<ul>
+<li><strong>In watch mode</strong>: press <code>u</code> in the terminal to update all failed snapshots</li>
+<li><strong>From the CLI</strong>: run <code>vitest -u</code> or <code>vitest --update</code> to update snapshots and exit</li>
+<li><strong>In VS Code</strong>: use the &quot;Update Snapshots&quot; command on the test gutter icon from the <a href="https://vitest.dev/vscode">Vitest extension</a></li>
+</ul>
+<div class="code"><pre><code class="hljs lang-bash">vitest -u</code></pre></div>
+<p>For inline snapshots, Vitest modifies your test file directly with the new values. For external snapshots, it rewrites the <code>.snap</code> file.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Be careful when updating snapshots. Always review the diff to confirm the changes are intentional and not a bug. It&#39;s easy to accidentally accept a broken output by blindly pressing <code>u</code>.</p>
+</div><h2 id="file-snapshots"><a class="anchor" href="#file-snapshots">#</a>File Snapshots</h2>
+<p>Sometimes the output you&#39;re testing is large enough that even an external <code>.snap</code> file feels awkward, or you want to view the snapshot with proper syntax highlighting in your editor. <a href="../../api/expect.html#tomatchfilesnapshot"><code>toMatchFileSnapshot()</code></a> lets you save the snapshot to a file with any extension you want:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;renders the component&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> html = <span class="hljs-title function_">renderComponent</span>()
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(html).<span class="hljs-title function_">toMatchFileSnapshot</span>(<span class="hljs-string">&#x27;./fixtures/component.html&#x27;</span>)
+})</code></pre></div>
+<p>The snapshot is stored as a plain <code>.html</code> file that you can open in a browser, view with syntax highlighting, or diff with standard tools. This works well for HTML, SVG, CSS, generated code, or any output where the file format matters for readability.</p>
+<h2 id="when-to-use-snapshots"><a class="anchor" href="#when-to-use-snapshots">#</a>When to Use Snapshots</h2>
+<p>Snapshots shine when you&#39;re working with structured, serializable output that would be painful to assert on manually. Some common use cases:</p>
+<ul>
+<li>A function that returns a complex configuration object with many nested fields</li>
+<li>HTML or markup generated by a rendering function or template engine</li>
+<li>Error messages that include formatted stack traces or context information</li>
+<li>CLI output or log messages with specific formatting</li>
+<li>JSON API responses where you want to catch any unexpected field changes</li>
+</ul>
+<p>On the other hand, snapshots are not always the best tool. If the output changes frequently (for instance, it includes timestamps or random IDs), you&#39;ll spend more time updating snapshots than they save you. And if you only care about one or two specific fields, a targeted assertion like <a href="../../api/expect.html#tomatchobject"><code>toMatchObject</code></a> or <a href="../../api/expect.html#tohaveproperty"><code>toHaveProperty</code></a> expresses your intent more clearly than a snapshot that captures everything.</p>
+<p>The general rule: use snapshots when you want to protect against <em>any</em> change in the output, and use targeted assertions when you only care about <em>specific</em> properties.</p>
+<h2 id="handling-dynamic-values"><a class="anchor" href="#handling-dynamic-values">#</a>Handling Dynamic Values</h2>
+<p>If your output includes values that change every run (like timestamps or IDs), you can use property matchers to pin the structure while ignoring volatile fields. Pass an object with asymmetric matchers as the first argument to <code>toMatchSnapshot()</code> or <code>toMatchInlineSnapshot()</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;user snapshot with dynamic fields&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> user = <span class="hljs-title function_">createUser</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)
+
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toMatchSnapshot</span>({
+    <span class="hljs-attr">id</span>: expect.<span class="hljs-title function_">any</span>(<span class="hljs-title class_">Number</span>),
+    <span class="hljs-attr">createdAt</span>: expect.<span class="hljs-title function_">any</span>(<span class="hljs-title class_">Date</span>),
+  })
+})</code></pre></div>
+<p>The <code>id</code> and <code>createdAt</code> fields are checked against the matchers (any number, any date) instead of being compared to a stored value. All other fields are snapshotted as usual.</p>
+<h2 id="error-snapshots"><a class="anchor" href="#error-snapshots">#</a>Error Snapshots</h2>
+<p>A common use of inline snapshots is capturing error messages. <a href="../../api/expect.html#tothrowerrormatchinginlinesnapshot"><code>toThrowErrorMatchingInlineSnapshot</code></a> combines <code>toThrow</code> with <code>toMatchInlineSnapshot</code> so you can snapshot the error message without a separate <code>.snap</code> file:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;throws on invalid input&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">parse</span>(<span class="hljs-string">&#x27;&#x27;</span>)).<span class="hljs-title function_">toThrowErrorMatchingInlineSnapshot</span>(
+    <span class="hljs-string">`[Error: Unexpected end of input at position 0]`</span>
+  )
+})</code></pre></div>
+<p>This is especially handy for verifying that error messages are clear and don&#39;t accidentally change. Like other inline snapshots, Vitest fills in the string on the first run and updates it when you press <code>u</code>.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>For custom snapshot serializers, snapshot matchers, and advanced configuration, see the <a href="../snapshot.html">Snapshot</a> guide.</p>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#your-first-snapshot">Your First Snapshot</a><a class="toc-2" href="#inline-snapshots">Inline Snapshots</a><a class="toc-2" href="#updating-snapshots">Updating Snapshots</a><a class="toc-2" href="#file-snapshots">File Snapshots</a><a class="toc-2" href="#when-to-use-snapshots">When to Use Snapshots</a><a class="toc-2" href="#handling-dynamic-values">Handling Dynamic Values</a><a class="toc-2" href="#error-snapshots">Error Snapshots</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

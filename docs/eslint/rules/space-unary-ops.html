@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>space-unary-ops (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/space-unary-ops <span class="badge badge-layout">mise en forme (layout)</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/space-unary-ops">version en ligne</a></div>
+<h1>space-unary-ops</h1><p>Some style guides require or disallow spaces before or after unary operators. This is mainly a stylistic issue, however, some JavaScript expressions can be written without spacing which makes it harder to read and maintain.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule enforces consistency regarding the spaces after <code>words</code> unary operators and after/before <code>nonwords</code> unary operators.</p>
+<p>For <code>words</code> operators, this rule only applies when a space is not syntactically required. For instance, <code>delete obj.foo</code> requires the space and will not be considered by this rule. The equivalent <code>delete(obj.foo)</code> has an optional space (<code>delete (obj.foo)</code>), therefore this rule will apply to it.</p>
+<p>Examples of unary <code>words</code> operators:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// new</span>
+<span class="hljs-keyword">var</span> joe = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Person</span>();
+
+<span class="hljs-comment">// delete</span>
+<span class="hljs-keyword">var</span> obj = {
+    <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span>
+};
+<span class="hljs-keyword">delete</span> obj.<span class="hljs-property">foo</span>;
+
+<span class="hljs-comment">// typeof</span>
+<span class="hljs-keyword">typeof</span> {} <span class="hljs-comment">// object</span>
+
+<span class="hljs-comment">// void</span>
+<span class="hljs-keyword">void</span> <span class="hljs-number">0</span> <span class="hljs-comment">// undefined</span></code></pre></div>
+<p>Examples of unary <code>nonwords</code> operators:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">if</span> ([<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>].<span class="hljs-title function_">indexOf</span>(<span class="hljs-number">1</span>) !== -<span class="hljs-number">1</span>) {};
+foo = --foo;
+bar = bar++;
+baz = !foo;
+qux = !!baz;</code></pre></div>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has three options:</p>
+<ul>
+<li><code>words</code> - applies to unary word operators such as: <code>new</code>, <code>delete</code>, <code>typeof</code>, <code>void</code>, <code>yield</code></li>
+<li><code>nonwords</code> - applies to unary operators such as: <code>-</code>, <code>+</code>, <code>--</code>, <code>++</code>, <code>!</code>, <code>!!</code></li>
+<li><code>overrides</code> - specifies overwriting usage of spacing for each
+operator, word or non word. This is empty by default, but can be used
+to enforce or disallow spacing around operators. For example:</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-js">    <span class="hljs-string">&quot;space-unary-ops&quot;</span>: [
+        <span class="hljs-number">2</span>, {
+          <span class="hljs-string">&quot;words&quot;</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-string">&quot;nonwords&quot;</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-string">&quot;overrides&quot;</span>: {
+            <span class="hljs-string">&quot;new&quot;</span>: <span class="hljs-literal">false</span>,
+            <span class="hljs-string">&quot;++&quot;</span>: <span class="hljs-literal">true</span>
+          }
+    }]</code></pre></div>
+<p>In this case, spacing will be disallowed after a <code>new</code> operator and required before/after a <code>++</code> operator.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with the default <code>{&quot;words&quot;: true, &quot;nonwords&quot;: false}</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint space-unary-ops: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">typeof</span>!foo;
+
+<span class="hljs-keyword">void</span>{<span class="hljs-attr">foo</span>:<span class="hljs-number">0</span>};
+
+<span class="hljs-keyword">new</span>[foo][<span class="hljs-number">0</span>];
+
+<span class="hljs-title function_">delete</span>(foo.<span class="hljs-property">bar</span>);
+
+++ foo;
+
+foo --;
+
+- foo;
+
++ <span class="hljs-string">&quot;3&quot;</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint space-unary-ops: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">function</span> *<span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-title function_">yield</span>(<span class="hljs-number">0</span>)
+}</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint space-unary-ops: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">await</span>(bar);
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{&quot;words&quot;: true, &quot;nonwords&quot;: false}</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint space-unary-ops: &quot;error&quot;*/</span>
+
+<span class="hljs-comment">// Word unary operator &quot;typeof&quot; is followed by a whitespace.</span>
+<span class="hljs-keyword">typeof</span> !foo;
+
+<span class="hljs-comment">// Word unary operator &quot;void&quot; is followed by a whitespace.</span>
+<span class="hljs-keyword">void</span> {<span class="hljs-attr">foo</span>:<span class="hljs-number">0</span>};
+
+<span class="hljs-comment">// Word unary operator &quot;new&quot; is followed by a whitespace.</span>
+<span class="hljs-keyword">new</span> [foo][<span class="hljs-number">0</span>];
+
+<span class="hljs-comment">// Word unary operator &quot;delete&quot; is followed by a whitespace.</span>
+<span class="hljs-title function_">delete</span> (foo.<span class="hljs-property">bar</span>);
+
+<span class="hljs-comment">// Unary operator &quot;++&quot; is not followed by whitespace.</span>
+++foo;
+
+<span class="hljs-comment">// Unary operator &quot;--&quot; is not preceded by whitespace.</span>
+foo--;
+
+<span class="hljs-comment">// Unary operator &quot;-&quot; is not followed by whitespace.</span>
+-foo;
+
+<span class="hljs-comment">// Unary operator &quot;+&quot; is not followed by whitespace.</span>
++<span class="hljs-string">&quot;3&quot;</span>;</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint space-unary-ops: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">function</span> *<span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-title function_">yield</span> (<span class="hljs-number">0</span>)
+}</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint space-unary-ops: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">await</span> (bar);
+}</code></pre></div>
+</div>
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

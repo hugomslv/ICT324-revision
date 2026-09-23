@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>id-length (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/id-length <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/id-length">version en ligne</a></div>
+<h1>id-length</h1><p>Very short identifier names like <code>e</code>, <code>x</code>, <code>_t</code> or very long ones like <code>hashGeneratorResultOutputContainerObject</code> can make code harder to read and potentially less maintainable. To prevent this, one may enforce a minimum and/or maximum identifier length.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> x = <span class="hljs-number">5</span>; <span class="hljs-comment">// too short; difficult to understand its purpose without context</span></code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule enforces a minimum and/or maximum identifier length convention.</p>
+<p>This rule counts <a href="https://unicode.org/reports/tr29/#Default_Grapheme_Cluster_Table">graphemes</a> instead of using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/length"><code>String length</code></a>.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>Examples of <strong>incorrect</strong> code for this rule with the default options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint id-length: &quot;error&quot;*/</span>     <span class="hljs-comment">// default is minimum 2-chars ({ &quot;min&quot;: 2 })</span>
+
+<span class="hljs-keyword">const</span> x = <span class="hljs-number">5</span>;
+obj.<span class="hljs-property">e</span> = <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>;
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span> (<span class="hljs-params">e</span>) { };
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-title function_">dangerousStuff</span>();
+} <span class="hljs-keyword">catch</span> (e) {
+    <span class="hljs-comment">// ignore as many do</span>
+}
+<span class="hljs-keyword">const</span> myObj = { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> };
+<span class="hljs-function">(<span class="hljs-params">a</span>) =&gt;</span> { a * a };
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">y</span> { }
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> { <span class="hljs-title function_">x</span>(<span class="hljs-params"></span>) {} }
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Bar</span> { #<span class="hljs-title function_">x</span>(<span class="hljs-params"></span>) {} }
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Baz</span> { x = <span class="hljs-number">1</span> }
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Qux</span> { #x = <span class="hljs-number">1</span> }
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params">...x</span>) { }
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">baz</span>(<span class="hljs-params">[x]</span>) { }
+<span class="hljs-keyword">const</span> [z] = arr;
+<span class="hljs-keyword">const</span> { <span class="hljs-attr">prop</span>: [i]} = {};
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">qux</span>(<span class="hljs-params">{x}</span>) { }
+<span class="hljs-keyword">const</span> { j } = {};
+<span class="hljs-keyword">const</span> { <span class="hljs-attr">prop</span>: a} = {};
+({ <span class="hljs-attr">prop</span>: obj.<span class="hljs-property">x</span> } = {});</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the default options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint id-length: &quot;error&quot;*/</span>     <span class="hljs-comment">// default is minimum 2-chars ({ &quot;min&quot;: 2 })</span>
+
+<span class="hljs-keyword">const</span> num = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">_f</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-number">42</span>; }
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">_func</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-number">42</span>; }
+obj.<span class="hljs-property">el</span> = <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>;
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span> (<span class="hljs-params">evt</span>) { <span class="hljs-comment">/* do stuff */</span> };
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-title function_">dangerousStuff</span>();
+} <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-comment">// ignore as many do</span>
+}
+<span class="hljs-keyword">const</span> myObj = { <span class="hljs-attr">apple</span>: <span class="hljs-number">1</span> };
+<span class="hljs-function">(<span class="hljs-params">num</span>) =&gt;</span> { num * num };
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params">num = <span class="hljs-number">0</span></span>) { }
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MyClass</span> { }
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> { <span class="hljs-title function_">method</span>(<span class="hljs-params"></span>) {} }
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Bar</span> { #<span class="hljs-title function_">method</span>(<span class="hljs-params"></span>) {} }
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Baz</span> { field = <span class="hljs-number">1</span> }
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Qux</span> { #field = <span class="hljs-number">1</span> }
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">baz</span>(<span class="hljs-params">...args</span>) { }
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">qux</span>(<span class="hljs-params">[longName]</span>) { }
+<span class="hljs-keyword">const</span> { prop } = {};
+<span class="hljs-keyword">const</span> { <span class="hljs-attr">prop</span>: [name] } = {};
+<span class="hljs-keyword">const</span> [longName] = arr;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foobar</span>(<span class="hljs-params">{ prop }</span>) { }
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foobaz</span>(<span class="hljs-params">{ a: prop }</span>) { }
+<span class="hljs-keyword">const</span> { <span class="hljs-attr">a</span>: property } = {};
+({ <span class="hljs-attr">prop</span>: obj.<span class="hljs-property">longName</span> } = {});
+<span class="hljs-keyword">const</span> data = { <span class="hljs-string">&quot;x&quot;</span>: <span class="hljs-number">1</span> };  <span class="hljs-comment">// excused because of quotes</span>
+data[<span class="hljs-string">&quot;y&quot;</span>] = <span class="hljs-number">3</span>;  <span class="hljs-comment">// excused because of calculated property access</span></code></pre></div>
+</div><p>This rule has an object option:</p>
+<ul>
+<li><code>&quot;min&quot;</code> (default: <code>2</code>) enforces a minimum identifier length</li>
+<li><code>&quot;max&quot;</code> (default: <code>Infinity</code>) enforces a maximum identifier length</li>
+<li><code>&quot;properties&quot;: always</code> (default) enforces identifier length convention for property names</li>
+<li><code>&quot;properties&quot;: never</code> ignores identifier length convention for property names</li>
+<li><code>&quot;exceptions&quot;</code> allows an array of specified identifier names</li>
+<li><code>&quot;exceptionPatterns&quot;</code> array of strings representing regular expression patterns, allows identifiers that match any of the patterns.</li>
+</ul>
+<h3 id="min"><a class="anchor" href="#min">#</a>min</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>{ &quot;min&quot;: 4 }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint id-length: [&quot;error&quot;, { &quot;min&quot;: 4 }]*/</span>
+
+<span class="hljs-keyword">const</span> val = <span class="hljs-number">5</span>;
+obj.<span class="hljs-property">e</span> = <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span> (<span class="hljs-params">e</span>) { };
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-title function_">dangerousStuff</span>();
+} <span class="hljs-keyword">catch</span> (e) {
+    <span class="hljs-comment">// ignore as many do</span>
+}
+<span class="hljs-keyword">const</span> myObj = { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> };
+<span class="hljs-function">(<span class="hljs-params">val</span>) =&gt;</span> { val * val };
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">y</span> { }
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> { <span class="hljs-title function_">x</span>(<span class="hljs-params"></span>) {} }
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params">...x</span>) { }
+<span class="hljs-keyword">const</span> { x } = {};
+<span class="hljs-keyword">const</span> { <span class="hljs-attr">prop</span>: a} = {};
+<span class="hljs-keyword">const</span> [i] = arr;
+<span class="hljs-keyword">const</span> { <span class="hljs-attr">prop</span>: [num]} = {};
+({ <span class="hljs-attr">prop</span>: obj.<span class="hljs-property">x</span> } = {});</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;min&quot;: 4 }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint id-length: [&quot;error&quot;, { &quot;min&quot;: 4 }]*/</span>
+
+<span class="hljs-keyword">const</span> value = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">func</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-number">42</span>; }
+object.<span class="hljs-property">element</span> = <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>;
+<span class="hljs-keyword">const</span> foobar = <span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) { <span class="hljs-comment">/* do stuff */</span> };
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-title function_">dangerousStuff</span>();
+} <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-comment">// ignore as many do</span>
+}
+<span class="hljs-keyword">const</span> myObj = { <span class="hljs-attr">apple</span>: <span class="hljs-number">1</span> };
+<span class="hljs-function">(<span class="hljs-params">value</span>) =&gt;</span> { value * value };
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foobaz</span>(<span class="hljs-params">value = <span class="hljs-number">0</span></span>) { }
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MyClass</span> { }
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foobar</span> { <span class="hljs-title function_">method</span>(<span class="hljs-params"></span>) {} }
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">barbaz</span>(<span class="hljs-params">...args</span>) { }
+<span class="hljs-keyword">const</span> { prop } = {};
+<span class="hljs-keyword">const</span> [longName] = foo;
+<span class="hljs-keyword">const</span> { <span class="hljs-attr">a</span>: [name] } = {};
+<span class="hljs-keyword">const</span> { <span class="hljs-attr">a</span>: record } = {};
+({ <span class="hljs-attr">prop</span>: object.<span class="hljs-property">name</span> } = {});
+<span class="hljs-keyword">const</span> data = { <span class="hljs-string">&quot;x&quot;</span>: <span class="hljs-number">1</span> };  <span class="hljs-comment">// excused because of quotes</span>
+data[<span class="hljs-string">&quot;y&quot;</span>] = <span class="hljs-number">3</span>;  <span class="hljs-comment">// excused because of calculated property access</span></code></pre></div>
+</div><h3 id="max"><a class="anchor" href="#max">#</a>max</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>{ &quot;max&quot;: 10 }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint id-length: [&quot;error&quot;, { &quot;max&quot;: 10 }]*/</span>
+
+<span class="hljs-keyword">const</span> reallyLongVarName = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">reallyLongFuncName</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-number">42</span>; }
+obj.<span class="hljs-property">reallyLongPropName</span> = <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>;
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span> (<span class="hljs-params">reallyLongArgName</span>) { <span class="hljs-comment">/* do stuff */</span> };
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-title function_">dangerousStuff</span>();
+} <span class="hljs-keyword">catch</span> (reallyLongErrorName) {
+    <span class="hljs-comment">// ignore as many do</span>
+}
+(reallyLongArgName) =&gt; { <span class="hljs-keyword">return</span> !reallyLongArgName; };
+<span class="hljs-keyword">const</span> [reallyLongFirstElementName] = arr;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;max&quot;: 10 }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint id-length: [&quot;error&quot;, { &quot;max&quot;: 10 }]*/</span>
+
+<span class="hljs-keyword">const</span> varName = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">funcName</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-number">42</span>; }
+obj.<span class="hljs-property">propName</span> = <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>;
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span> (<span class="hljs-params">arg</span>) { <span class="hljs-comment">/* do stuff */</span> };
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-title function_">dangerousStuff</span>();
+} <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-comment">// ignore as many do</span>
+}
+(arg) =&gt; { <span class="hljs-keyword">return</span> !arg; };
+<span class="hljs-keyword">const</span> [first] = arr;</code></pre></div>
+</div><h3 id="properties"><a class="anchor" href="#properties">#</a>properties</h3>
+<p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;properties&quot;: &quot;never&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint id-length: [&quot;error&quot;, { &quot;properties&quot;: &quot;never&quot; }]*/</span>
+
+<span class="hljs-keyword">const</span> myObj = { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> };
+({ <span class="hljs-attr">a</span>: obj.<span class="hljs-property">x</span>.<span class="hljs-property">y</span>.<span class="hljs-property">z</span> } = {});
+({ <span class="hljs-attr">prop</span>: obj.<span class="hljs-property">i</span> } = {});</code></pre></div>
+</div><h3 id="exceptions"><a class="anchor" href="#exceptions">#</a>exceptions</h3>
+<p>Examples of additional <strong>correct</strong> code for this rule with the <code>{ &quot;exceptions&quot;: [&quot;x&quot;, &quot;y&quot;, &quot;z&quot;, &quot;ζ&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint id-length: [&quot;error&quot;, { &quot;exceptions&quot;: [&quot;x&quot;, &quot;y&quot;, &quot;z&quot;, &quot;ζ&quot;, &quot;i&quot;] }]*/</span>
+
+<span class="hljs-keyword">const</span> x = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">y</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-number">42</span>; }
+obj.<span class="hljs-property">x</span> = <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>;
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span> (<span class="hljs-params">x</span>) { <span class="hljs-comment">/* do stuff */</span> };
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-title function_">dangerousStuff</span>();
+} <span class="hljs-keyword">catch</span> (x) {
+    <span class="hljs-comment">// ignore as many do</span>
+}
+(x) =&gt; { <span class="hljs-keyword">return</span> x * x; };
+<span class="hljs-keyword">const</span> [i] = arr;
+<span class="hljs-keyword">const</span> { z } = foo;
+<span class="hljs-keyword">const</span> { <span class="hljs-attr">a</span>: ζ } = foo;</code></pre></div>
+</div><h3 id="exceptionpatterns"><a class="anchor" href="#exceptionpatterns">#</a>exceptionPatterns</h3>
+<p>Examples of additional <strong>correct</strong> code for this rule with the <code>{ &quot;exceptionPatterns&quot;: [&quot;E|S&quot;, &quot;[x-z]&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint id-length: [&quot;error&quot;, { &quot;exceptionPatterns&quot;: [&quot;E|S|X&quot;, &quot;[x-z]&quot;] }]*/</span>
+
+<span class="hljs-keyword">const</span> E = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">S</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-number">42</span>; }
+obj.<span class="hljs-property">x</span> = <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>;
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span> (<span class="hljs-params">x</span>) { <span class="hljs-comment">/* do stuff */</span> };
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-title function_">dangerousStuff</span>();
+} <span class="hljs-keyword">catch</span> (x) {
+    <span class="hljs-comment">// ignore as many do</span>
+}
+(y) =&gt; {<span class="hljs-keyword">return</span>  y * y};
+<span class="hljs-keyword">const</span> [X] = arr;
+<span class="hljs-keyword">const</span> { y } = foo;
+<span class="hljs-keyword">const</span> { <span class="hljs-attr">a</span>: z } = foo;</code></pre></div>
+</div><div class="box box-info"><div class="box-title">Règles liées</div><p><a href="new-cap.html"><code>new-cap</code></a>, <a href="func-names.html"><code>func-names</code></a>, <a href="camelcase.html"><code>camelcase</code></a></p></div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#min">min</a><a class="toc-3" href="#max">max</a><a class="toc-3" href="#properties">properties</a><a class="toc-3" href="#exceptions">exceptions</a><a class="toc-3" href="#exceptionpatterns">exceptionPatterns</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

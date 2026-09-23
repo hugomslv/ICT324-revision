@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-shadow (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-shadow <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-shadow">version en ligne</a></div>
+<h1>no-shadow</h1><p>Shadowing is the process by which a local variable shares the same name as a variable in its containing scope. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> a = <span class="hljs-number">3</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">b</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> a = <span class="hljs-number">10</span>;
+}</code></pre></div>
+<p>In this case, the variable <code>a</code> inside of <code>b()</code> is shadowing the variable <code>a</code> in the global scope. This can cause confusion while reading the code and it&#39;s impossible to access the global variable.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule aims to eliminate shadowed variable declarations.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-shadow: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> a = <span class="hljs-number">3</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">b</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> a = <span class="hljs-number">10</span>;
+}
+
+<span class="hljs-keyword">const</span> c = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> a = <span class="hljs-number">10</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">d</span>(<span class="hljs-params">a</span>) {
+    a = <span class="hljs-number">10</span>;
+}
+<span class="hljs-title function_">d</span>(a);
+
+<span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
+    <span class="hljs-keyword">const</span> a = <span class="hljs-number">5</span>;
+}
+
+<span class="hljs-keyword">const</span> f = <span class="hljs-title function_">wrap</span>(<span class="hljs-keyword">function</span> <span class="hljs-title function_">f</span>(<span class="hljs-params"></span>) {});
+
+<span class="hljs-keyword">const</span> C = <span class="hljs-title function_">wrap</span>(<span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {});</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-shadow: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> a = <span class="hljs-number">3</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">b</span>(<span class="hljs-params">c</span>) {
+    <span class="hljs-keyword">const</span> d = <span class="hljs-number">10</span>;
+    <span class="hljs-keyword">if</span> (c) {
+        <span class="hljs-keyword">const</span> e = <span class="hljs-number">20</span>;
+    }
+}
+
+<span class="hljs-comment">/*
+ * Function and class names are allowed to shadow a variable
+ * if the function/class expression is assigned to the variable
+ * as its initializer or default value.
+ */</span>
+<span class="hljs-keyword">const</span> f = <span class="hljs-keyword">function</span> <span class="hljs-title function_">f</span>(<span class="hljs-params"></span>) {};
+<span class="hljs-keyword">const</span> g = foo ? (bar || <span class="hljs-keyword">function</span> <span class="hljs-title function_">g</span>(<span class="hljs-params"></span>) {}) : baz;
+<span class="hljs-keyword">const</span> { h = <span class="hljs-keyword">function</span> <span class="hljs-title function_">h</span>(<span class="hljs-params"></span>) {} } = obj;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">qux</span>(<span class="hljs-params">i = <span class="hljs-keyword">function</span> i() {}</span>) {}
+<span class="hljs-keyword">const</span> C = <span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {};</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule takes one option, an object, with the following properties:</p>
+<ul>
+<li><code>&quot;builtinGlobals&quot;</code></li>
+<li><code>&quot;hoist&quot;</code></li>
+<li><code>&quot;allow&quot;</code></li>
+<li><code>&quot;ignoreOnInitialization&quot;</code></li>
+<li><code>&quot;ignoreTypeValueShadow&quot;</code> (TypeScript only)</li>
+<li><code>&quot;ignoreFunctionTypeParameterNameValueShadow&quot;</code> (TypeScript only)</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;no-shadow&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;builtinGlobals&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;hoist&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;functions&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;allow&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;ignoreOnInitialization&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<h3 id="builtinglobals"><a class="anchor" href="#builtinglobals">#</a>builtinGlobals</h3>
+<p>The <code>builtinGlobals</code> option is <code>false</code> by default.
+If it is <code>true</code>, the rule prevents shadowing of built-in global variables: <code>Object</code>, <code>Array</code>, <code>Number</code>, and so on.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;builtinGlobals&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-shadow: [&quot;error&quot;, { &quot;builtinGlobals&quot;: true }]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> <span class="hljs-title class_">Object</span> = <span class="hljs-number">0</span>;
+}</code></pre></div>
+</div><h3 id="hoist"><a class="anchor" href="#hoist">#</a>hoist</h3>
+<p>The <code>hoist</code> option has five settings:</p>
+<ul>
+<li><code>functions</code> (by default) - reports shadowing before the outer functions are defined.</li>
+<li><code>all</code> - reports all shadowing before the outer variables/functions are defined.</li>
+<li><code>never</code> - never report shadowing before the outer variables/functions are defined.</li>
+<li><code>types</code> (TypeScript only) - reports shadowing before the outer types are defined.</li>
+<li><code>functions-and-types</code> (TypeScript only) - reports shadowing before the outer functions and types are defined.</li>
+</ul>
+<h4 id="hoist-functions"><a class="anchor" href="#hoist-functions">#</a>hoist: functions</h4>
+<p>Examples of <strong>incorrect</strong> code for the default <code>{ &quot;hoist&quot;: &quot;functions&quot; }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-shadow: [&quot;error&quot;, { &quot;hoist&quot;: &quot;functions&quot; }]*/</span>
+
+<span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
+    <span class="hljs-keyword">const</span> b = <span class="hljs-number">6</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">b</span>(<span class="hljs-params"></span>) {}</code></pre></div>
+</div><p>Although <code>const b</code> in the <code>if</code> statement is before the <em>function</em> declaration in the outer scope, it is incorrect.</p>
+<p>Examples of <strong>correct</strong> code for the default <code>{ &quot;hoist&quot;: &quot;functions&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-shadow: [&quot;error&quot;, { &quot;hoist&quot;: &quot;functions&quot; }]*/</span>
+
+<span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
+    <span class="hljs-keyword">const</span> a = <span class="hljs-number">3</span>;
+}
+
+<span class="hljs-keyword">const</span> a = <span class="hljs-number">5</span>;</code></pre></div>
+</div><p>Because <code>const a</code> in the <code>if</code> statement is before the <em>variable</em> declaration in the outer scope, it is correct.</p>
+<h4 id="hoist-all"><a class="anchor" href="#hoist-all">#</a>hoist: all</h4>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;hoist&quot;: &quot;all&quot; }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-shadow: [&quot;error&quot;, { &quot;hoist&quot;: &quot;all&quot; }]*/</span>
+
+<span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
+    <span class="hljs-keyword">const</span> a = <span class="hljs-number">3</span>;
+    <span class="hljs-keyword">const</span> b = <span class="hljs-number">6</span>;
+}
+
+<span class="hljs-keyword">const</span> a = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">b</span>(<span class="hljs-params"></span>) {}</code></pre></div>
+</div><h4 id="hoist-never"><a class="anchor" href="#hoist-never">#</a>hoist: never</h4>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;hoist&quot;: &quot;never&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-shadow: [&quot;error&quot;, { &quot;hoist&quot;: &quot;never&quot; }]*/</span>
+
+<span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
+    <span class="hljs-keyword">const</span> a = <span class="hljs-number">3</span>;
+    <span class="hljs-keyword">const</span> b = <span class="hljs-number">6</span>;
+}
+
+<span class="hljs-keyword">const</span> a = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">b</span>(<span class="hljs-params"></span>) {}</code></pre></div>
+</div><p>Because <code>const a</code> and <code>const b</code> in the <code>if</code> statement are before the declarations in the outer scope, they are correct.</p>
+<h4 id="hoist-types"><a class="anchor" href="#hoist-types">#</a>hoist: types</h4>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;hoist&quot;: &quot;types&quot; }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-shadow: [&quot;error&quot;, { &quot;hoist&quot;: &quot;types&quot; }]*/</span>
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Bar</span>&lt;<span class="hljs-title class_">Foo</span>&gt; = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Foo</span> = <span class="hljs-number">1</span>;</code></pre></div>
+</div><h4 id="hoist-functions-and-types"><a class="anchor" href="#hoist-functions-and-types">#</a>hoist: functions-and-types</h4>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;hoist&quot;: &quot;functions-and-types&quot; }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-shadow: [&quot;error&quot;, { &quot;hoist&quot;: &quot;functions-and-types&quot; }]*/</span>
+
+<span class="hljs-comment">// types</span>
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Bar</span>&lt;<span class="hljs-title class_">Foo</span>&gt; = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Foo</span> = <span class="hljs-number">1</span>;
+
+<span class="hljs-comment">// functions</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
+  <span class="hljs-keyword">const</span> b = <span class="hljs-number">6</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">b</span>(<span class="hljs-params"></span>) {}</code></pre></div>
+</div><h3 id="allow"><a class="anchor" href="#allow">#</a>allow</h3>
+<p>The <code>allow</code> option is an array of identifier names for which shadowing is allowed. For example, <code>&quot;resolve&quot;</code>, <code>&quot;reject&quot;</code>, <code>&quot;done&quot;</code>, <code>&quot;cb&quot;</code>.</p>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;allow&quot;: [&quot;done&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-shadow: [&quot;error&quot;, { &quot;allow&quot;: [&quot;done&quot;] }]*/</span>
+
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;async&#x27;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">done</span>) {
+  <span class="hljs-keyword">async</span>.<span class="hljs-title function_">map</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>], <span class="hljs-keyword">function</span> (<span class="hljs-params">e, done</span>) {
+    <span class="hljs-title function_">done</span>(<span class="hljs-literal">null</span>, e * <span class="hljs-number">2</span>)
+  }, done);
+}
+
+<span class="hljs-title function_">foo</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params">err, result</span>) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>({ err, result });
+});</code></pre></div>
+</div><h3 id="ignoreoninitialization"><a class="anchor" href="#ignoreoninitialization">#</a>ignoreOnInitialization</h3>
+<p>The <code>ignoreOnInitialization</code> option is <code>false</code> by default. If it is <code>true</code>, it prevents reporting shadowing of variables in their initializers when the shadowed variable is presumably still uninitialized.</p>
+<p>The shadowed variable must be on the left side. The shadowing variable must be on the right side and declared in a callback function or in an IIFE.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;ignoreOnInitialization&quot;: &quot;true&quot; }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-shadow: [&quot;error&quot;, { &quot;ignoreOnInitialization&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">x</span> = x =&gt; x;</code></pre></div>
+</div><p>Because the shadowing variable <code>x</code> will shadow the already initialized shadowed variable <code>x</code>.</p>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;ignoreOnInitialization&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-shadow: [&quot;error&quot;, { &quot;ignoreOnInitialization&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> x = <span class="hljs-title function_">foo</span>(<span class="hljs-function"><span class="hljs-params">x</span> =&gt;</span> x)
+
+<span class="hljs-keyword">const</span> y = (<span class="hljs-function"><span class="hljs-params">y</span> =&gt;</span> y)()</code></pre></div>
+</div><p>The rationale for callback functions is the assumption that they will be called during the initialization, so that at the time when the shadowing variable will be used, the shadowed variable has not yet been initialized.</p>
+<h3 id="ignoretypevalueshadow"><a class="anchor" href="#ignoretypevalueshadow">#</a>ignoreTypeValueShadow</h3>
+<p>Whether to ignore types named the same as a variable. Default: <code>true</code>.</p>
+<p>This is generally safe because you cannot use variables in type locations without a typeof operator, so there&#39;s little risk of confusion.</p>
+<p>Examples of <strong>correct</strong> code with <code>{ &quot;ignoreTypeValueShadow&quot;: true }</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-shadow: [&quot;error&quot;, { &quot;ignoreTypeValueShadow&quot;: true }]*/</span>
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Foo</span> = <span class="hljs-built_in">number</span>;
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Bar</span> {
+  <span class="hljs-attr">prop</span>: <span class="hljs-built_in">number</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">f</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> <span class="hljs-title class_">Foo</span> = <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">const</span> <span class="hljs-title class_">Bar</span> = <span class="hljs-string">&#x27;test&#x27;</span>;
+}</code></pre></div>
+</div><p><strong>Note:</strong> Shadowing specifically refers to two identical identifiers that are in different, nested scopes. This is different from redeclaration, which is when two identical identifiers are in the same scope. Redeclaration is covered by the <a href="no-redeclare.html"><code>no-redeclare</code></a> rule instead.</p>
+<h3 id="ignorefunctiontypeparameternamevalueshadow"><a class="anchor" href="#ignorefunctiontypeparameternamevalueshadow">#</a>ignoreFunctionTypeParameterNameValueShadow</h3>
+<p>Whether to ignore function parameters named the same as a variable. Default: <code>true</code>.</p>
+<p>Each of a function type&#39;s arguments creates a value variable within the scope of the function type. This is done so that you can reference the type later using the typeof operator:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">type</span> <span class="hljs-title class_">Func</span> = <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">test</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-keyword">typeof</span> test;
+
+<span class="hljs-keyword">declare</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">fn</span>: <span class="hljs-title class_">Func</span>;
+<span class="hljs-keyword">const</span> result = <span class="hljs-title function_">fn</span>(<span class="hljs-string">&#x27;str&#x27;</span>); <span class="hljs-comment">// typeof result === string</span></code></pre></div>
+<p>This means that function type arguments shadow value variable names in parent scopes:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">let</span> test = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">TestType</span> = <span class="hljs-keyword">typeof</span> test; <span class="hljs-comment">// === number</span>
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Func</span> = <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">test</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-keyword">typeof</span> test; <span class="hljs-comment">// this &quot;test&quot; references the argument, not the variable</span>
+
+<span class="hljs-keyword">declare</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">fn</span>: <span class="hljs-title class_">Func</span>;
+<span class="hljs-keyword">const</span> result = <span class="hljs-title function_">fn</span>(<span class="hljs-string">&#x27;str&#x27;</span>); <span class="hljs-comment">// typeof result === string</span></code></pre></div>
+<p>If you do not use the <code>typeof</code> operator in a function type return type position, you can safely turn this option on.</p>
+<p>Examples of <strong>correct</strong> code with <code>{ &quot;ignoreFunctionTypeParameterNameValueShadow&quot;: true }</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-shadow: [&quot;error&quot;, { &quot;ignoreFunctionTypeParameterNameValueShadow&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> test = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Func</span> = <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">test</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-keyword">typeof</span> test;</code></pre></div>
+</div><h3 id="why-does-the-rule-report-on-enum-members-that-share-the-same-name-as-a-variable-in-a-parent-scope"><a class="anchor" href="#why-does-the-rule-report-on-enum-members-that-share-the-same-name-as-a-variable-in-a-parent-scope">#</a>Why does the rule report on enum members that share the same name as a variable in a parent scope?</h3>
+<p>This isn&#39;t a bug — the rule is working exactly as intended! The report is correct because of a lesser-known aspect of enums: enum members introduce a variable within the enum&#39;s own scope, allowing them to be referenced without needing a qualifier.</p>
+<p>Here&#39;s a simple example to explain:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> A = <span class="hljs-number">2</span>;
+<span class="hljs-keyword">enum</span> <span class="hljs-title class_">Test</span> {
+  A = <span class="hljs-number">1</span>,
+  B = A,
+}
+
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title class_">Test</span>.<span class="hljs-property">B</span>); <span class="hljs-comment">// what should be logged?</span></code></pre></div>
+<p>At first glance, you might think it should log <code>2</code>, because the outer variable A&#39;s value is <code>2</code>. However, it actually logs <code>1</code>, the value of <code>Test.A</code>. This happens because inside the enum <code>B = A</code> is treated as <code>B = Test.A</code>. Due to this behavior, the enum member has shadowed the outer variable declaration.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="no-shadow-restricted-names.html"><code>no-shadow-restricted-names</code></a></p></div><h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://en.wikipedia.org/wiki/Variable_shadowing">https://en.wikipedia.org/wiki/Variable_shadowing</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#builtinglobals">builtinGlobals</a><a class="toc-3" href="#hoist">hoist</a><a class="toc-3" href="#allow">allow</a><a class="toc-3" href="#ignoreoninitialization">ignoreOnInitialization</a><a class="toc-3" href="#ignoretypevalueshadow">ignoreTypeValueShadow</a><a class="toc-3" href="#ignorefunctiontypeparameternamevalueshadow">ignoreFunctionTypeParameterNameValueShadow</a><a class="toc-3" href="#why-does-the-rule-report-on-enum-members-that-share-the-same-name-as-a-variable-in-a-parent-scope">Why does the rule report on enum members that share the same name as a variable in a parent scope?</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

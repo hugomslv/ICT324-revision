@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testing Asynchronous Code | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/learn/async  <a class="ext small" href="https://vitest.dev/guide/learn/async">version en ligne</a></div>
+<h1 id="testing-asynchronous-code"><a class="anchor" href="#testing-asynchronous-code">#</a>Testing Asynchronous Code</h1>
+<p>JavaScript code frequently runs asynchronously. Whether you&#39;re fetching data, reading files, or waiting on timers, Vitest needs to know when the code it is testing has completed before moving on to the next test. Here are the patterns you&#39;ll use most often.</p>
+<h2 id="async-await"><a class="anchor" href="#async-await">#</a>Async/Await</h2>
+<p>The most straightforward approach is to make your test function <code>async</code>. Vitest will automatically wait for the returned promise to resolve before considering the test complete. If the promise rejects, the test fails with the rejection reason.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">fetchUser</span>(<span class="hljs-params">id</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>({ id, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span> })
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;fetches user by id&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> user = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetchUser</span>(<span class="hljs-number">1</span>)
+  <span class="hljs-title function_">expect</span>(user.<span class="hljs-property">name</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)
+})</code></pre></div>
+<p>This is the pattern you&#39;ll use the vast majority of the time. It reads just like synchronous code, and errors propagate naturally through <code>await</code>.</p>
+<h2 id="resolves-and-rejects"><a class="anchor" href="#resolves-and-rejects">#</a>Resolves and Rejects</h2>
+<p>Sometimes you&#39;d rather assert on a promise directly instead of <code>await</code>-ing it into a variable first. The <a href="../../api/expect.html#resolves"><code>.resolves</code></a> and <a href="../../api/expect.html#rejects"><code>.rejects</code></a> helpers let you do this. They unwrap the promise and then apply the matcher to the resolved or rejected value:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;resolves to Alice&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">fetchUser</span>(<span class="hljs-number">1</span>)).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toMatchObject</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span> })
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;rejects with an error&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">fetchInvalidUser</span>()).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;User not found&#x27;</span>)
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Don&#39;t forget the <code>await</code> before <code>expect</code>. Vitest will detect unawaited assertions and fail the test at the end of it.</p>
+</div><h2 id="assertion-counting"><a class="anchor" href="#assertion-counting">#</a>Assertion Counting</h2>
+<p>With async code, there&#39;s a subtle risk: an assertion inside a callback or <code>.then()</code> chain might never execute, and the test would still pass because no assertion failed. <a href="../../api/expect.html#hasassertions"><code>expect.hasAssertions()</code></a> guards against this by verifying that at least one assertion ran during the test:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;callback is invoked&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  expect.<span class="hljs-title function_">hasAssertions</span>()
+
+  <span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetchData</span>()
+  data.<span class="hljs-property">items</span>.<span class="hljs-title function_">forEach</span>(<span class="hljs-function">(<span class="hljs-params">item</span>) =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(item.<span class="hljs-property">id</span>).<span class="hljs-title function_">toBeDefined</span>()
+  })
+  <span class="hljs-comment">// if data.items is empty, the test fails instead of silently passing</span>
+})</code></pre></div>
+<p>When you know exactly how many assertions should run, <a href="../../api/expect.html#assertions"><code>expect.assertions(n)</code></a> is more precise:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;both callbacks are called&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  expect.<span class="hljs-title function_">assertions</span>(<span class="hljs-number">2</span>)
+
+  <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>([
+    <span class="hljs-title function_">fetchUser</span>(<span class="hljs-number">1</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function"><span class="hljs-params">user</span> =&gt;</span> <span class="hljs-title function_">expect</span>(user.<span class="hljs-property">name</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)),
+    <span class="hljs-title function_">fetchUser</span>(<span class="hljs-number">2</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function"><span class="hljs-params">user</span> =&gt;</span> <span class="hljs-title function_">expect</span>(user.<span class="hljs-property">name</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Bob&#x27;</span>)),
+  ])
+})</code></pre></div>
+<p>In most cases, <code>async</code>/<code>await</code> with direct assertions is clear enough and you don&#39;t need assertion counting. It&#39;s most useful when assertions are inside callbacks, loops, or conditional branches where you want to guarantee they actually executed.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If you want every test in your project to require at least one assertion, enable <a href="../../config/expect.html#expect-requireassertions"><code>expect.requireAssertions</code></a> in your config instead of adding <code>expect.hasAssertions()</code> to each test manually.</p>
+</div><h2 id="callbacks"><a class="anchor" href="#callbacks">#</a>Callbacks</h2>
+<p>Some older APIs use callbacks instead of promises. Since Vitest works with promises, the simplest approach is to wrap the callback in a <code>Promise</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">fetchData</span>(<span class="hljs-params">callback</span>) {
+  <span class="hljs-built_in">setTimeout</span>(callback, <span class="hljs-number">100</span>, <span class="hljs-string">&#x27;peanut butter&#x27;</span>)
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;the data is peanut butter&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> {
+    <span class="hljs-title function_">fetchData</span>(resolve)
+  })
+  <span class="hljs-title function_">expect</span>(data).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;peanut butter&#x27;</span>)
+})</code></pre></div>
+<p>This pattern works for any callback-based API. Pass <code>resolve</code> as the success callback, and the test will wait until the callback is invoked.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Most modern Node.js APIs (such as <code>fs/promises</code> and <code>fetch</code>) support promises natively, so you can use <code>async</code>/<code>await</code> directly. The callback wrapping pattern above is mainly useful for older libraries that haven&#39;t adopted promises yet.</p>
+</div><h2 id="timeouts"><a class="anchor" href="#timeouts">#</a>Timeouts</h2>
+<p>By default, each test has a 5-second timeout. If a test takes longer than that (perhaps because a promise never resolves, or a network request hangs), it will fail with a timeout error. This prevents your test suite from getting stuck indefinitely.</p>
+<p>You can set a <a href="../../api/test.html#timeout">custom timeout</a> as the third argument to <code>test</code>, which is useful for tests that legitimately need more time:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;long-running operation&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">someSlowOperation</span>()
+}, <span class="hljs-number">10_000</span>) <span class="hljs-comment">// 10 seconds</span></code></pre></div>
+<p>If you find yourself needing longer timeouts across many tests, you can change the default for all tests with the <a href="../../config/testtimeout.html"><code>testTimeout</code></a> config option:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">testTimeout</span>: <span class="hljs-number">10_000</span>,
+  },
+})</code></pre></div>
+<h2 id="unhandled-rejections"><a class="anchor" href="#unhandled-rejections">#</a>Unhandled Rejections</h2>
+<p>By default, Vitest reports unhandled promise rejections as errors in the test run. If a promise rejects somewhere in your code and nothing catches it, the test run will fail, even if all your assertions passed. This is intentional: unhandled rejections usually indicate real bugs, like a forgotten <code>await</code> or a fire-and-forget promise that silently fails.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;this causes an unhandled rejection error&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// This promise rejects but is never awaited or caught</span>
+  <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">reject</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;oops&#x27;</span>))
+})</code></pre></div>
+<p>To fix this, make sure you <code>await</code> all promises or catch expected rejections:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;handle the rejection&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// Either await the promise</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">reject</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;oops&#x27;</span>))).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;oops&#x27;</span>)
+
+  <span class="hljs-comment">// Or catch it explicitly if you don&#x27;t need to assert on it</span>
+  <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">reject</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;expected&#x27;</span>)).<span class="hljs-title function_">catch</span>(<span class="hljs-function">() =&gt;</span> {})
+})</code></pre></div>
+<p>If your code intentionally produces unhandled rejections, you can filter specific errors with <a href="../../config/onunhandlederror.html"><code>onUnhandledError</code></a> or disable the check entirely with <a href="../../config/dangerouslyignoreunhandlederrors.html"><code>dangerouslyIgnoreUnhandledErrors</code></a>.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#async-await">Async/Await</a><a class="toc-2" href="#resolves-and-rejects">Resolves and Rejects</a><a class="toc-2" href="#assertion-counting">Assertion Counting</a><a class="toc-2" href="#callbacks">Callbacks</a><a class="toc-2" href="#timeouts">Timeouts</a><a class="toc-2" href="#unhandled-rejections">Unhandled Rejections</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

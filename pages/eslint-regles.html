@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2b. ESLint : les règles · ICT-324 Révision</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/hljs.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../index.html">Accueil</a><a class="nav-link" href="../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../pages/vite.html">1. Vite</a><a class="nav-link" href="../pages/eslint.html">2. ESLint (config)</a><a class="nav-link active" href="../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../pages/projets.html">Projets du cours</a><a class="nav-link" href="../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../docs/index.html">Index des docs</a><a class="nav-link" href="../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../docs/vite/index.html">Vite</a><a class="nav-link" href="../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+
+<h1>2b. ESLint : les règles</h1><p class="lead">Chaque consigne en français → la règle à mettre dans eslint.config.js, ses options, et des exemples OK / KO. Toutes les options de cette page ont été validées avec ESLint 10.11.</p><div class="box box-exam"><div class="box-title">🎯 Examen : Méthode pour « trouver la règle dans la documentation »</div><ol>
+<li>Traduis la consigne en mots-clés <strong>anglais</strong> : guillemets = <em>quotes</em>, point-virgule = <em>semi</em>, indentation = <em>indent</em>, accolades = <em>brace</em>, espaces = <em>spacing</em>, longueur = <em>max-len</em>, nommage = <em>camelcase</em> / <em>id-match</em>, égalité = <em>eqeqeq</em>.</li>
+<li>Filtre la <a href="../docs/eslint/rules/index.html">liste de toutes les règles</a> avec ce mot.</li>
+<li>Dans la page de la règle, lis <strong>Options</strong> : la config est <code>&quot;nom-regle&quot;: [ &quot;error&quot;, option, { objet } ]</code>.</li>
+<li>Les exemples ✅ <em>correct</em> / ❌ <em>incorrect</em> montrent ce qui passe ou non.</li>
+<li>Teste : <code>npx eslint fichier.js</code>. Une option mal écrite provoque une erreur claire (<em>« Key &quot;rules&quot;: Key &quot;quotes&quot;: Value ... should be equal to one of the allowed values »</em>).</li>
+</ol>
+</div><h2 id="tableau-recapitulatif-exercices-1-et-2"><a class="anchor" href="#tableau-recapitulatif-exercices-1-et-2">#</a>Tableau récapitulatif (exercices 1 et 2)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Consigne</th>
+<th>Règle et config</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Guillemets doubles au lieu des apostrophes</td>
+<td><code>quotes: [ &quot;error&quot;, &quot;double&quot; ]</code></td>
+</tr>
+<tr>
+<td>Pas de déclaration dans le scope global</td>
+<td><code>&quot;no-implicit-globals&quot;: &quot;error&quot;</code> (⚠️ seulement en mode <em>script</em>, voir plus bas)</td>
+</tr>
+<tr>
+<td>Interdire de redéfinir une constante</td>
+<td><code>&quot;no-const-assign&quot;: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Interdire <code>var</code></td>
+<td><code>&quot;no-var&quot;: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td><code>const</code> si jamais réassignée</td>
+<td><code>&quot;prefer-const&quot;: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Espaces dans les tableaux <code>[ &#39;foo&#39;, &#39;bar&#39; ]</code>, mais pas pour les tableaux dans les tableaux <code>[[1, 2], [3, 4]]</code></td>
+<td><code>&quot;array-bracket-spacing&quot;: [ &quot;error&quot;, &quot;always&quot;, { arraysInArrays: false } ]</code></td>
+</tr>
+<tr>
+<td>Comparaisons triples <code>===</code>, <code>!==</code></td>
+<td><code>eqeqeq: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Pas de <code>;</code> en fin de ligne</td>
+<td><code>semi: [ &quot;error&quot;, &quot;never&quot; ]</code></td>
+</tr>
+<tr>
+<td>Indentation 2 espaces</td>
+<td><code>indent: [ &quot;error&quot;, 2 ]</code></td>
+</tr>
+<tr>
+<td>Indentation avec <strong>tabulation</strong></td>
+<td><code>indent: [ &quot;error&quot;, &quot;tab&quot; ]</code></td>
+</tr>
+<tr>
+<td>Lignes de 80 caractères max</td>
+<td><code>&quot;max-len&quot;: [ &quot;error&quot;, { code: 80 } ]</code></td>
+</tr>
+<tr>
+<td>Variables en <code>snake_case</code></td>
+<td><code>&quot;id-match&quot;: [ &quot;error&quot;, &quot;^[a-z_]+$&quot;, { properties: true, onlyDeclarations: true } ]</code></td>
+</tr>
+<tr>
+<td>Fichiers en <code>snake_case</code></td>
+<td>plugin : <code>&quot;filename-rules/match&quot;: [ &quot;error&quot;, &quot;snake_case&quot; ]</code></td>
+</tr>
+<tr>
+<td>Dossiers en <code>snake_case</code></td>
+<td>plugin avec <code>includePath: true</code> (voir <a href="eslint.html#plugins-exemple-filename-rules">ESLint › plugins</a>)</td>
+</tr>
+<tr>
+<td>Accolades <em>one true brace style</em></td>
+<td><code>&quot;brace-style&quot;: [ &quot;error&quot;, &quot;1tbs&quot; ]</code></td>
+</tr>
+<tr>
+<td>Fins de ligne Unix (LF)</td>
+<td><code>&quot;linebreak-style&quot;: [ &quot;error&quot;, &quot;unix&quot; ]</code></td>
+</tr>
+<tr>
+<td>Variables inutilisées</td>
+<td><code>&quot;no-unused-vars&quot;: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Variables non déclarées</td>
+<td><code>&quot;no-undef&quot;: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Espaces dans les accolades <code>{ a: 1 }</code></td>
+<td><code>&quot;object-curly-spacing&quot;: [ &quot;error&quot;, &quot;always&quot; ]</code></td>
+</tr>
+</tbody></table></div>
+<p>La config complète du corrigé :</p>
+<div class="code"><div class="code-title">cours/1-lint/eslint.config.mjs</div><pre><code class="hljs lang-mjs"><span class="hljs-keyword">import</span> js <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/js&quot;</span>;
+<span class="hljs-keyword">import</span> { plugin <span class="hljs-keyword">as</span> filenameRules } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@maintained/eslint-plugin-filename-rules&#x27;</span>
+<span class="hljs-keyword">import</span> globals <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;globals&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+  { 
+    <span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.{js,mjs,cjs}&quot;</span>], 
+    <span class="hljs-attr">plugins</span>: { js, <span class="hljs-string">&#x27;filename-rules&#x27;</span>: filenameRules }, 
+    <span class="hljs-attr">extends</span>: [<span class="hljs-string">&quot;js/recommended&quot;</span>], 
+    <span class="hljs-attr">languageOptions</span>: { <span class="hljs-attr">globals</span>: globals.<span class="hljs-property">browser</span> },
+    <span class="hljs-attr">rules</span>: {
+      <span class="hljs-attr">quotes</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;double&quot;</span> ],
+      <span class="hljs-string">&quot;no-unused-vars&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-undef&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-implicit-globals&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-const-assign&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-var&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;prefer-const&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;array-bracket-spacing&quot;</span>: [ 
+        <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;always&quot;</span>, { <span class="hljs-string">&quot;arraysInArrays&quot;</span>: <span class="hljs-literal">false</span> } 
+      ],
+      <span class="hljs-attr">eqeqeq</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-attr">semi</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;never&quot;</span> ],
+      <span class="hljs-attr">indent</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-number">2</span> ],
+      <span class="hljs-string">&quot;brace-style&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;1tbs&quot;</span> ],
+      <span class="hljs-string">&quot;linebreak-style&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;unix&quot;</span> ],
+      <span class="hljs-string">&quot;max-len&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, {<span class="hljs-string">&quot;code&quot;</span>:<span class="hljs-number">80</span>} ],
+      <span class="hljs-string">&quot;id-match&quot;</span>: [
+        <span class="hljs-string">&quot;error&quot;</span>,
+        <span class="hljs-string">&quot;^[a-z_]+$&quot;</span>,
+        {
+          <span class="hljs-string">&quot;properties&quot;</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-string">&quot;onlyDeclarations&quot;</span>: <span class="hljs-literal">true</span>
+        }
+      ],
+      <span class="hljs-string">&#x27;filename-rules/match&#x27;</span>: [<span class="hljs-number">2</span>, <span class="hljs-string">&#x27;snake_case&#x27;</span>],
+    }
+  }
+]);</code></pre></div>
+<p class="file-link"><a href="../projets/cours/1-lint/eslint.config.mjs">📄 ouvrir le fichier eslint.config.mjs</a></p><h2 id="les-regles-du-cours-en-detail"><a class="anchor" href="#les-regles-du-cours-en-detail">#</a>Les règles du cours en détail</h2>
+<h3 id="quotes-guillemets"><a class="anchor" href="#quotes-guillemets">#</a>quotes : guillemets</h3>
+<p><a href="../docs/eslint/rules/quotes.html">Doc</a> · options : <code>&quot;double&quot;</code> (défaut), <code>&quot;single&quot;</code>, <code>&quot;backtick&quot;</code> + objet <code>{ avoidEscape: true, allowTemplateLiterals: true }</code></p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-attr">quotes</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;double&quot;</span> ]
+<span class="hljs-attr">quotes</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;double&quot;</span>, { <span class="hljs-attr">avoidEscape</span>: <span class="hljs-literal">true</span> } ] <span class="hljs-comment">// autorise &#x27;il a dit &quot;oui&quot;&#x27;</span></code></pre></div>
+<div class="box box-ko"><div class="box-title">❌ KO</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Demo ESLint&#x27;</span>)   <span class="hljs-comment">// Strings must use doublequote</span></code></pre></div>
+</div><div class="box box-ok"><div class="box-title">✅ OK</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;Demo ESLint&quot;</span>)
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`Bonjour <span class="hljs-subst">${nom}</span>`</span>) <span class="hljs-comment">// les template literals avec ${} sont toujours acceptés</span></code></pre></div>
+</div><h3 id="semi-point-virgule"><a class="anchor" href="#semi-point-virgule">#</a>semi : point-virgule</h3>
+<p><a href="../docs/eslint/rules/semi.html">Doc</a> · <code>&quot;always&quot;</code> (défaut) ou <code>&quot;never&quot;</code></p>
+<div class="box box-ko"><div class="box-title">❌ KO</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>;           <span class="hljs-comment">// Extra semicolon</span></code></pre></div>
+</div><div class="box box-ok"><div class="box-title">✅ OK</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> i = <span class="hljs-number">0</span></code></pre></div>
+</div><h3 id="indent-indentation"><a class="anchor" href="#indent-indentation">#</a>indent : indentation</h3>
+<p><a href="../docs/eslint/rules/indent.html">Doc</a> · nombre d&#39;espaces (défaut 4) ou <code>&quot;tab&quot;</code> · options : <code>{ SwitchCase: 1 }</code> pour indenter les <code>case</code> dans un <code>switch</code></p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-attr">indent</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-number">2</span> ]
+<span class="hljs-attr">indent</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;tab&quot;</span> ]
+<span class="hljs-attr">indent</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-number">2</span>, { <span class="hljs-title class_">SwitchCase</span>: <span class="hljs-number">1</span> } ]</code></pre></div>
+<div class="box box-ko"><div class="box-title">❌ KO</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> y = <span class="hljs-number">0</span>; y &lt; <span class="hljs-number">10</span>; y++) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(y)     <span class="hljs-comment">// Expected indentation of 2 spaces but found 4</span>
+}</code></pre></div>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce</div><p><code>--fix</code> corrige l&#39;indentation automatiquement. Dans VS Code, en bas à droite : « Espaces : 2 » → cliquer pour changer (ou convertir en tabulations).</p>
+</div><h3 id="eqeqeq-egalite-stricte"><a class="anchor" href="#eqeqeq-egalite-stricte">#</a>eqeqeq : égalité stricte</h3>
+<p><a href="../docs/eslint/rules/eqeqeq.html">Doc</a> · <code>&quot;always&quot;</code> (défaut) ou <code>&quot;smart&quot;</code> · <code>[ &quot;error&quot;, &quot;always&quot;, { null: &quot;ignore&quot; } ]</code> autorise <code>== null</code></p>
+<div class="box box-ko"><div class="box-title">❌ KO</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">if</span> (i == <span class="hljs-number">10</span>) {}     <span class="hljs-comment">// Expected &#x27;===&#x27; and instead saw &#x27;==&#x27;</span>
+<span class="hljs-keyword">if</span> (i != <span class="hljs-number">10</span>) {}</code></pre></div>
+</div><div class="box box-ok"><div class="box-title">✅ OK</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">if</span> (i === <span class="hljs-number">10</span>) {}
+<span class="hljs-keyword">if</span> (i !== <span class="hljs-number">10</span>) {}</code></pre></div>
+</div><h3 id="no-var-prefer-const-no-const-assign"><a class="anchor" href="#no-var-prefer-const-no-const-assign">#</a>no-var, prefer-const, no-const-assign</h3>
+<p><a href="../docs/eslint/rules/no-var.html">no-var</a> · <a href="../docs/eslint/rules/prefer-const.html">prefer-const</a> · <a href="../docs/eslint/rules/no-const-assign.html">no-const-assign</a></p>
+<div class="box box-ko"><div class="box-title">❌ KO</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>                 <span class="hljs-comment">// no-var : Unexpected var, use let or const instead</span>
+<span class="hljs-keyword">let</span> arr = [ <span class="hljs-number">1</span>, <span class="hljs-number">2</span> ]        <span class="hljs-comment">// prefer-const : &#x27;arr&#x27; is never reassigned. Use &#x27;const&#x27; instead</span>
+<span class="hljs-keyword">const</span> x = <span class="hljs-number">12</span>
+x = <span class="hljs-number">13</span>                    <span class="hljs-comment">// no-const-assign : &#x27;x&#x27; is constant</span></code></pre></div>
+</div><div class="box box-ok"><div class="box-title">✅ OK</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> arr = [ <span class="hljs-number">1</span>, <span class="hljs-number">2</span> ]
+<span class="hljs-keyword">let</span> compteur = <span class="hljs-number">0</span>
+compteur = compteur + <span class="hljs-number">1</span></code></pre></div>
+</div><h3 id="no-unused-vars-no-undef"><a class="anchor" href="#no-unused-vars-no-undef">#</a>no-unused-vars, no-undef</h3>
+<p><a href="../docs/eslint/rules/no-unused-vars.html">no-unused-vars</a> · <a href="../docs/eslint/rules/no-undef.html">no-undef</a> · les deux sont déjà dans <code>js/recommended</code></p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-string">&quot;no-unused-vars&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, { <span class="hljs-attr">args</span>: <span class="hljs-string">&quot;none&quot;</span> } ]         <span class="hljs-comment">// ignore les paramètres</span>
+<span class="hljs-string">&quot;no-unused-vars&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, { <span class="hljs-attr">argsIgnorePattern</span>: <span class="hljs-string">&quot;^_&quot;</span> } ] <span class="hljs-comment">// ignore _param</span></code></pre></div>
+<div class="box box-ko"><div class="box-title">❌ KO</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> i = <span class="hljs-number">0</span>               <span class="hljs-comment">// &#x27;i&#x27; is assigned a value but never used</span>
+<span class="hljs-keyword">for</span> (y = <span class="hljs-number">0</span>; y &lt; <span class="hljs-number">10</span>; y++)  <span class="hljs-comment">// &#x27;y&#x27; is not defined</span></code></pre></div>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention : no-undef et les globales</div><p><code>document</code>, <code>window</code>, <code>console</code>, <code>fetch</code> : il faut <code>languageOptions: { globals: globals.browser }</code>. <code>process</code>, <code>__dirname</code> : <code>globals.node</code>. <code>describe</code>, <code>test</code>, <code>expect</code> sans import (Vitest <code>globals: true</code>) : <code>globals.vitest</code>.</p>
+</div><h3 id="no-implicit-globals-pas-de-globales"><a class="anchor" href="#no-implicit-globals-pas-de-globales">#</a>no-implicit-globals : pas de globales</h3>
+<p><a href="../docs/eslint/rules/no-implicit-globals.html">Doc</a></p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Testé : sans effet dans un module ES</div><p>La doc le dit : <em>« Top-level declarations in ES modules and CommonJS modules create module-scoped variables »</em>. Avec la config par défaut (<code>sourceType: &quot;module&quot;</code>), <code>var a = 1</code> en haut du fichier <strong>n&#39;est pas signalé</strong> (c&#39;est pour ça qu&#39;il n&#39;apparaît pas dans les 27 erreurs du corrigé). Pour qu&#39;elle agisse, le fichier doit être analysé comme un script :</p>
+<div class="code"><pre><code class="hljs lang-js">{
+  <span class="hljs-attr">files</span>: [ <span class="hljs-string">&quot;**/*.js&quot;</span> ],
+  <span class="hljs-attr">languageOptions</span>: { <span class="hljs-attr">sourceType</span>: <span class="hljs-string">&quot;script&quot;</span> },
+  <span class="hljs-attr">rules</span>: { <span class="hljs-string">&quot;no-implicit-globals&quot;</span>: <span class="hljs-string">&quot;error&quot;</span> },
+}</code></pre></div>
+<p>Résultat : <code>Unexpected &#39;var&#39; declaration in the global scope, wrap in an IIFE for a local variable, assign as global property for a global variable</code>. Par défaut elle ne vérifie que <code>var</code> et <code>function</code> (option <code>{ lexicalBindings: true }</code> pour aussi <code>let</code>, <code>const</code>, <code>class</code>).</p>
+</div><h3 id="array-bracket-spacing-espaces-dans-les-crochets"><a class="anchor" href="#array-bracket-spacing-espaces-dans-les-crochets">#</a>array-bracket-spacing : espaces dans les crochets</h3>
+<p><a href="../docs/eslint/rules/array-bracket-spacing.html">Doc</a> · <code>&quot;never&quot;</code> (défaut) ou <code>&quot;always&quot;</code> + exceptions <code>{ singleValue, objectsInArrays, arraysInArrays }</code></p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-string">&quot;array-bracket-spacing&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;always&quot;</span>, { <span class="hljs-attr">arraysInArrays</span>: <span class="hljs-literal">false</span> } ]</code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Résultat</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>let tab = [ 1, 2, 3 ]</code></td>
+<td>✅ OK</td>
+</tr>
+<tr>
+<td><code>let tab = [1, 2, 3]</code></td>
+<td>❌ KO</td>
+</tr>
+<tr>
+<td><code>let arr = [[ 1 ], [ 2 ]]</code></td>
+<td>✅ OK</td>
+</tr>
+<tr>
+<td><code>let arr = [ [ 1 ], [ 2 ] ]</code></td>
+<td>❌ KO</td>
+</tr>
+<tr>
+<td><code>let arr = [[ 1, 2 ], 2, [ 3, 4 ], 4 ]</code></td>
+<td>✅ OK (le dernier élément n&#39;est pas un tableau → espace avant <code>]</code>)</td>
+</tr>
+<tr>
+<td><code>let vide = []</code></td>
+<td>✅ OK (tableau vide)</td>
+</tr>
+</tbody></table></div>
+<h3 id="object-curly-spacing-espaces-dans-les-accolades"><a class="anchor" href="#object-curly-spacing-espaces-dans-les-accolades">#</a>object-curly-spacing : espaces dans les accolades</h3>
+<p><a href="../docs/eslint/rules/object-curly-spacing.html">Doc</a> · <code>&quot;never&quot;</code> (défaut) ou <code>&quot;always&quot;</code>, exceptions <code>{ arraysInObjects, objectsInObjects }</code></p>
+<div class="box box-ok"><div class="box-title">✅ OK</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> obj = { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }
+<span class="hljs-keyword">import</span> { add, sub } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./math.js&quot;</span></code></pre></div>
+</div><h3 id="brace-style-position-des-accolades"><a class="anchor" href="#brace-style-position-des-accolades">#</a>brace-style : position des accolades</h3>
+<p><a href="../docs/eslint/rules/brace-style.html">Doc</a> · <code>&quot;1tbs&quot;</code> (défaut), <code>&quot;stroustrup&quot;</code>, <code>&quot;allman&quot;</code> · <code>{ allowSingleLine: true }</code></p>
+<div class="box box-ko"><div class="box-title">❌ KO</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">if</span> (i === <span class="hljs-number">10</span>)
+{                        <span class="hljs-comment">// Opening curly brace does not appear on the same line as controlling statement</span>
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;oui&quot;</span>)
+}
+<span class="hljs-keyword">else</span>                     <span class="hljs-comment">// Closing curly brace does not appear on the same line as the subsequent block</span>
+{
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;non&quot;</span>)
+}</code></pre></div>
+</div><div class="box box-ok"><div class="box-title">✅ OK</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">if</span> (i === <span class="hljs-number">10</span>) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;oui&quot;</span>)
+} <span class="hljs-keyword">else</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;non&quot;</span>)
+}</code></pre></div>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention : Testé : les blocs sur une ligne</div><p>Avec <code>&quot;1tbs&quot;</code>, <code>function f() { return 1 }</code> donne 2 erreurs (<em>Statement inside of curly braces should be on next line</em>). Pour l&#39;autoriser : <code>&quot;brace-style&quot;: [ &quot;error&quot;, &quot;1tbs&quot;, { allowSingleLine: true } ]</code>.</p>
+</div><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Style</th>
+<th>Forme</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>1tbs</code></td>
+<td><code>} else {</code> sur la même ligne</td>
+</tr>
+<tr>
+<td><code>stroustrup</code></td>
+<td><code>}</code> puis <code>else {</code> à la ligne</td>
+</tr>
+<tr>
+<td><code>allman</code></td>
+<td>chaque accolade sur sa propre ligne</td>
+</tr>
+</tbody></table></div>
+<h3 id="max-len-longueur-de-ligne"><a class="anchor" href="#max-len-longueur-de-ligne">#</a>max-len : longueur de ligne</h3>
+<p><a href="../docs/eslint/rules/max-len.html">Doc</a> · <code>code</code> (défaut 80), <code>tabWidth</code> (défaut 4), <code>ignoreUrls</code>, <code>ignoreStrings</code>, <code>ignoreTemplateLiterals</code>, <code>ignoreComments</code>, <code>ignoreRegExpLiterals</code>, <code>ignorePattern</code></p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-string">&quot;max-len&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, { <span class="hljs-attr">code</span>: <span class="hljs-number">80</span> } ]
+<span class="hljs-string">&quot;max-len&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, { <span class="hljs-attr">code</span>: <span class="hljs-number">100</span>, <span class="hljs-attr">ignoreUrls</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">ignoreStrings</span>: <span class="hljs-literal">true</span> } ]</code></pre></div>
+<p>Message : <code>This line has a length of 97. Maximum allowed is 80</code>. Pas corrigeable par <code>--fix</code> : il faut couper la ligne soi-même.</p>
+<h3 id="linebreak-style-fins-de-ligne"><a class="anchor" href="#linebreak-style-fins-de-ligne">#</a>linebreak-style : fins de ligne</h3>
+<p><a href="../docs/eslint/rules/linebreak-style.html">Doc</a> · <code>&quot;unix&quot;</code> (LF, défaut) ou <code>&quot;windows&quot;</code> (CRLF)</p>
+<div class="box box-danger"><div class="box-title">🛑 Danger : Piège Windows (vu dans le projet currency-converter : 353 erreurs)</div><p>Les fichiers créés sous Windows sont souvent en CRLF → <code>Expected linebreaks to be &#39;LF&#39; but found &#39;CRLF&#39;</code> sur <strong>chaque ligne</strong>. Solutions : <code>npx eslint . --fix</code> (testé : ça convertit), ou dans VS Code cliquer sur <strong>CRLF</strong> en bas à droite → <strong>LF</strong>, ou réglage <code>&quot;files.eol&quot;: &quot;\n&quot;</code>.</p>
+</div><h3 id="id-match-nom-des-variables-en-snake-case"><a class="anchor" href="#id-match-nom-des-variables-en-snake-case">#</a>id-match : nom des variables en snake_case</h3>
+<p><a href="../docs/eslint/rules/id-match.html">Doc</a> · <code>[ &quot;error&quot;, &quot;regex&quot;, { properties, classFields, onlyDeclarations, ignoreDestructuring } ]</code></p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-string">&quot;id-match&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;^[a-z_]+$&quot;</span>, { <span class="hljs-attr">properties</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">onlyDeclarations</span>: <span class="hljs-literal">true</span> } ]
+<span class="hljs-comment">// autoriser aussi les chiffres :</span>
+<span class="hljs-string">&quot;id-match&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;^[a-z][a-z0-9_]*$&quot;</span>, { <span class="hljs-attr">properties</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">onlyDeclarations</span>: <span class="hljs-literal">true</span> } ]</code></pre></div>
+<div class="box box-ko"><div class="box-title">❌ KO</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> myVariable = <span class="hljs-number">12</span>    <span class="hljs-comment">// Identifier &#x27;myVariable&#x27; does not match the pattern &#x27;^[a-z_]+$&#x27;</span></code></pre></div>
+</div><div class="box box-ok"><div class="box-title">✅ OK</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> my_variable = <span class="hljs-number">12</span></code></pre></div>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention : Conséquences</div><ul>
+<li><code>onlyDeclarations: true</code> : on ne vérifie que les déclarations, pas les usages (sinon <code>console.log</code> et <code>getElementById</code> seraient signalés).</li>
+<li><code>^[a-z_]+$</code> refuse les chiffres (<code>user123</code>) et les MAJUSCULES (<code>MAX_SIZE</code>) : adapte la regex si besoin.</li>
+<li>Les noms de fonctions sont des déclarations : <code>function getRates()</code> est signalé.</li>
+</ul>
+</div><h3 id="camelcase-l-inverse-camelcase"><a class="anchor" href="#camelcase-l-inverse-camelcase">#</a>camelcase : l&#39;inverse (camelCase)</h3>
+<p><a href="../docs/eslint/rules/camelcase.html">Doc</a> · <code>{ properties: &quot;always&quot; | &quot;never&quot;, ignoreDestructuring, ignoreImports, ignoreGlobals, allow: [] }</code></p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-attr">camelcase</span>: [ <span class="hljs-string">&quot;error&quot;</span>, { <span class="hljs-attr">properties</span>: <span class="hljs-string">&quot;always&quot;</span> } ]  <span class="hljs-comment">// my_variable ❌, myVariable ✅</span></code></pre></div>
+<h3 id="noms-de-fichiers-filename-rules-match"><a class="anchor" href="#noms-de-fichiers-filename-rules-match">#</a>Noms de fichiers : filename-rules/match</h3>
+<p>Pas une règle d&#39;ESLint : plugin <code>@maintained/eslint-plugin-filename-rules</code> (voir <a href="eslint.html#plugins-exemple-filename-rules">installation</a>).</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-string">&quot;filename-rules/match&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;snake_case&quot;</span> ]   <span class="hljs-comment">// inDex.js ❌  index.js ✅  mon_fichier.js ✅</span></code></pre></div>
+<p>Message : <code>Filename &#39;inDex.js&#39; does not match snake_case</code>.</p>
+<h2 id="autres-regles-utiles-au-cas-ou"><a class="anchor" href="#autres-regles-utiles-au-cas-ou">#</a>Autres règles utiles (au cas où)</h2>
+<p>Toutes validées avec ESLint 10.11. Clique sur le nom pour la doc hors-ligne.</p>
+<h3 id="espaces-et-mise-en-forme"><a class="anchor" href="#espaces-et-mise-en-forme">#</a>Espaces et mise en forme</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Consigne</th>
+<th>Config</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Virgule finale sur les listes multi-lignes</td>
+<td><a href="../docs/eslint/rules/comma-dangle.html"><code>&quot;comma-dangle&quot;</code></a><code>: [ &quot;error&quot;, &quot;always-multiline&quot; ]</code> (ou <code>&quot;never&quot;</code>)</td>
+</tr>
+<tr>
+<td>Espace après la virgule, pas avant</td>
+<td><a href="../docs/eslint/rules/comma-spacing.html"><code>&quot;comma-spacing&quot;</code></a><code>: [ &quot;error&quot;, { before: false, after: true } ]</code></td>
+</tr>
+<tr>
+<td>Espace après <code>:</code> dans les objets</td>
+<td><a href="../docs/eslint/rules/key-spacing.html"><code>&quot;key-spacing&quot;</code></a><code>: [ &quot;error&quot;, { beforeColon: false, afterColon: true } ]</code></td>
+</tr>
+<tr>
+<td>Espaces autour de <code>if</code>, <code>else</code>, <code>return</code>…</td>
+<td><a href="../docs/eslint/rules/keyword-spacing.html"><code>&quot;keyword-spacing&quot;</code></a><code>: [ &quot;error&quot;, { before: true, after: true } ]</code></td>
+</tr>
+<tr>
+<td>Espace avant <code>{</code> d&#39;un bloc</td>
+<td><a href="../docs/eslint/rules/space-before-blocks.html"><code>&quot;space-before-blocks&quot;</code></a><code>: [ &quot;error&quot;, &quot;always&quot; ]</code></td>
+</tr>
+<tr>
+<td>Espace avant <code>(</code> de fonction</td>
+<td><a href="../docs/eslint/rules/space-before-function-paren.html"><code>&quot;space-before-function-paren&quot;</code></a><code>: [ &quot;error&quot;, &quot;never&quot; ]</code> (ou <code>&quot;always&quot;</code>)</td>
+</tr>
+<tr>
+<td>Espaces autour des opérateurs <code>a + b</code></td>
+<td><a href="../docs/eslint/rules/space-infix-ops.html"><code>&quot;space-infix-ops&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Pas d&#39;espace dans les parenthèses</td>
+<td><a href="../docs/eslint/rules/space-in-parens.html"><code>&quot;space-in-parens&quot;</code></a><code>: [ &quot;error&quot;, &quot;never&quot; ]</code></td>
+</tr>
+<tr>
+<td>Pas d&#39;espace en fin de ligne</td>
+<td><a href="../docs/eslint/rules/no-trailing-spaces.html"><code>&quot;no-trailing-spaces&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Ligne vide à la fin du fichier</td>
+<td><a href="../docs/eslint/rules/eol-last.html"><code>&quot;eol-last&quot;</code></a><code>: [ &quot;error&quot;, &quot;always&quot; ]</code></td>
+</tr>
+<tr>
+<td>Max 1 ligne vide consécutive</td>
+<td><a href="../docs/eslint/rules/no-multiple-empty-lines.html"><code>&quot;no-multiple-empty-lines&quot;</code></a><code>: [ &quot;error&quot;, { max: 1 } ]</code></td>
+</tr>
+<tr>
+<td>Pas d&#39;espaces multiples</td>
+<td><a href="../docs/eslint/rules/no-multi-spaces.html"><code>&quot;no-multi-spaces&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Interdire les tabulations</td>
+<td><a href="../docs/eslint/rules/no-tabs.html"><code>&quot;no-tabs&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Pas de mélange espaces/tabulations</td>
+<td><a href="../docs/eslint/rules/no-mixed-spaces-and-tabs.html"><code>&quot;no-mixed-spaces-and-tabs&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Parenthèses autour des paramètres de flèche <code>(x) =&gt; x</code></td>
+<td><a href="../docs/eslint/rules/arrow-parens.html"><code>&quot;arrow-parens&quot;</code></a><code>: [ &quot;error&quot;, &quot;always&quot; ]</code> (ou <code>&quot;as-needed&quot;</code>)</td>
+</tr>
+<tr>
+<td>Espaces autour de <code>=&gt;</code></td>
+<td><a href="../docs/eslint/rules/arrow-spacing.html"><code>&quot;arrow-spacing&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Espace après <code>//</code></td>
+<td><a href="../docs/eslint/rules/spaced-comment.html"><code>&quot;spaced-comment&quot;</code></a><code>: [ &quot;error&quot;, &quot;always&quot; ]</code></td>
+</tr>
+<tr>
+<td>Guillemets sur les clés d&#39;objet seulement si nécessaire</td>
+<td><a href="../docs/eslint/rules/quote-props.html"><code>&quot;quote-props&quot;</code></a><code>: [ &quot;error&quot;, &quot;as-needed&quot; ]</code></td>
+</tr>
+<tr>
+<td>Pas de lignes vides au début/fin des blocs</td>
+<td><a href="../docs/eslint/rules/padded-blocks.html"><code>&quot;padded-blocks&quot;</code></a><code>: [ &quot;error&quot;, &quot;never&quot; ]</code></td>
+</tr>
+<tr>
+<td>Opérateur en début de ligne quand on coupe</td>
+<td><a href="../docs/eslint/rules/operator-linebreak.html"><code>&quot;operator-linebreak&quot;</code></a><code>: [ &quot;error&quot;, &quot;before&quot; ]</code></td>
+</tr>
+<tr>
+<td>Pas d&#39;espace dans <code>${ }</code></td>
+<td><a href="../docs/eslint/rules/template-curly-spacing.html"><code>&quot;template-curly-spacing&quot;</code></a><code>: [ &quot;error&quot;, &quot;never&quot; ]</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="bonnes-pratiques"><a class="anchor" href="#bonnes-pratiques">#</a>Bonnes pratiques</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Consigne</th>
+<th>Config</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Accolades obligatoires pour <code>if</code>/<code>for</code></td>
+<td><a href="../docs/eslint/rules/curly.html"><code>curly</code></a><code>: [ &quot;error&quot;, &quot;all&quot; ]</code></td>
+</tr>
+<tr>
+<td>Interdire <code>console.log</code></td>
+<td><a href="../docs/eslint/rules/no-console.html"><code>&quot;no-console&quot;</code></a><code>: &quot;warn&quot;</code> (option <code>{ allow: [ &quot;warn&quot;, &quot;error&quot; ] }</code>)</td>
+</tr>
+<tr>
+<td>Interdire <code>alert</code>, <code>confirm</code>, <code>prompt</code></td>
+<td><a href="../docs/eslint/rules/no-alert.html"><code>&quot;no-alert&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Interdire <code>debugger</code></td>
+<td><a href="../docs/eslint/rules/no-debugger.html"><code>&quot;no-debugger&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Interdire <code>eval</code></td>
+<td><a href="../docs/eslint/rules/no-eval.html"><code>&quot;no-eval&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Template literal au lieu de <code>&quot;a&quot; + b</code></td>
+<td><a href="../docs/eslint/rules/prefer-template.html"><code>&quot;prefer-template&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Fonctions fléchées en callback</td>
+<td><a href="../docs/eslint/rules/prefer-arrow-callback.html"><code>&quot;prefer-arrow-callback&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td><code>function f() {}</code> plutôt que <code>const f = function</code></td>
+<td><a href="../docs/eslint/rules/func-style.html"><code>&quot;func-style&quot;</code></a><code>: [ &quot;error&quot;, &quot;declaration&quot; ]</code> (ou <code>&quot;expression&quot;</code>)</td>
+</tr>
+<tr>
+<td>Pas de <code>else</code> après un <code>return</code></td>
+<td><a href="../docs/eslint/rules/no-else-return.html"><code>&quot;no-else-return&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Interdire <code>if (10 === x)</code></td>
+<td><a href="../docs/eslint/rules/yoda.html"><code>yoda</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td><code>default</code> obligatoire dans un <code>switch</code></td>
+<td><a href="../docs/eslint/rules/default-case.html"><code>&quot;default-case&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Pas de variable qui en masque une autre</td>
+<td><a href="../docs/eslint/rules/no-shadow.html"><code>&quot;no-shadow&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Pas d&#39;utilisation avant déclaration</td>
+<td><a href="../docs/eslint/rules/no-use-before-define.html"><code>&quot;no-use-before-define&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Pas de nombres magiques</td>
+<td><a href="../docs/eslint/rules/no-magic-numbers.html"><code>&quot;no-magic-numbers&quot;</code></a><code>: [ &quot;error&quot;, { ignore: [ 0, 1 ] } ]</code></td>
+</tr>
+<tr>
+<td><code>obj.cle</code> plutôt que <code>obj[&quot;cle&quot;]</code></td>
+<td><a href="../docs/eslint/rules/dot-notation.html"><code>&quot;dot-notation&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Raccourcis <code>{ a }</code> au lieu de <code>{ a: a }</code></td>
+<td><a href="../docs/eslint/rules/object-shorthand.html"><code>&quot;object-shorthand&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Interdire <code>i++</code></td>
+<td><a href="../docs/eslint/rules/no-plusplus.html"><code>&quot;no-plusplus&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Une déclaration par <code>const</code>/<code>let</code></td>
+<td><a href="../docs/eslint/rules/one-var.html"><code>&quot;one-var&quot;</code></a><code>: [ &quot;error&quot;, &quot;never&quot; ]</code></td>
+</tr>
+<tr>
+<td>Pas de ternaire imbriqué</td>
+<td><a href="../docs/eslint/rules/no-nested-ternary.html"><code>&quot;no-nested-ternary&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Pas de fonction vide</td>
+<td><a href="../docs/eslint/rules/no-empty-function.html"><code>&quot;no-empty-function&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Pas de modification des paramètres</td>
+<td><a href="../docs/eslint/rules/no-param-reassign.html"><code>&quot;no-param-reassign&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td><code>return</code> cohérent</td>
+<td><a href="../docs/eslint/rules/consistent-return.html"><code>&quot;consistent-return&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td><code>async</code> doit contenir <code>await</code></td>
+<td><a href="../docs/eslint/rules/require-await.html"><code>&quot;require-await&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Un seul import par module</td>
+<td><a href="../docs/eslint/rules/no-duplicate-imports.html"><code>&quot;no-duplicate-imports&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td>Constructeur avec majuscule <code>new Date()</code></td>
+<td><a href="../docs/eslint/rules/new-cap.html"><code>&quot;new-cap&quot;</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+<tr>
+<td><code>parseInt(x, 10)</code> avec la base</td>
+<td><a href="../docs/eslint/rules/radix.html"><code>radix</code></a><code>: &quot;error&quot;</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="limites-de-taille-complexite"><a class="anchor" href="#limites-de-taille-complexite">#</a>Limites de taille / complexité</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Consigne</th>
+<th>Config</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Max N paramètres</td>
+<td><a href="../docs/eslint/rules/max-params.html"><code>&quot;max-params&quot;</code></a><code>: [ &quot;error&quot;, 3 ]</code></td>
+</tr>
+<tr>
+<td>Max N niveaux d&#39;imbrication</td>
+<td><a href="../docs/eslint/rules/max-depth.html"><code>&quot;max-depth&quot;</code></a><code>: [ &quot;error&quot;, 3 ]</code></td>
+</tr>
+<tr>
+<td>Max N lignes par fichier</td>
+<td><a href="../docs/eslint/rules/max-lines.html"><code>&quot;max-lines&quot;</code></a><code>: [ &quot;error&quot;, 300 ]</code></td>
+</tr>
+<tr>
+<td>Max N lignes par fonction</td>
+<td><a href="../docs/eslint/rules/max-lines-per-function.html"><code>&quot;max-lines-per-function&quot;</code></a><code>: [ &quot;error&quot;, 50 ]</code></td>
+</tr>
+<tr>
+<td>Max N instructions par fonction</td>
+<td><a href="../docs/eslint/rules/max-statements.html"><code>&quot;max-statements&quot;</code></a><code>: [ &quot;error&quot;, 15 ]</code></td>
+</tr>
+<tr>
+<td>Complexité cyclomatique</td>
+<td><a href="../docs/eslint/rules/complexity.html"><code>complexity</code></a><code>: [ &quot;error&quot;, 10 ]</code></td>
+</tr>
+<tr>
+<td>Longueur minimum des noms</td>
+<td><a href="../docs/eslint/rules/id-length.html"><code>&quot;id-length&quot;</code></a><code>: [ &quot;error&quot;, { min: 2, exceptions: [ &quot;i&quot; ] } ]</code></td>
+</tr>
+<tr>
+<td>Max callbacks imbriqués</td>
+<td><a href="../docs/eslint/rules/max-nested-callbacks.html"><code>&quot;max-nested-callbacks&quot;</code></a><code>: [ &quot;error&quot;, 3 ]</code></td>
+</tr>
+<tr>
+<td>Une classe par fichier</td>
+<td><a href="../docs/eslint/rules/max-classes-per-file.html"><code>&quot;max-classes-per-file&quot;</code></a><code>: [ &quot;error&quot;, 1 ]</code></td>
+</tr>
+</tbody></table></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#tableau-recapitulatif-exercices-1-et-2">Tableau récapitulatif (exercices 1 et 2)</a><a class="toc-2" href="#les-regles-du-cours-en-detail">Les règles du cours en détail</a><a class="toc-3" href="#quotes-guillemets">quotes : guillemets</a><a class="toc-3" href="#semi-point-virgule">semi : point-virgule</a><a class="toc-3" href="#indent-indentation">indent : indentation</a><a class="toc-3" href="#eqeqeq-egalite-stricte">eqeqeq : égalité stricte</a><a class="toc-3" href="#no-var-prefer-const-no-const-assign">no-var, prefer-const, no-const-assign</a><a class="toc-3" href="#no-unused-vars-no-undef">no-unused-vars, no-undef</a><a class="toc-3" href="#no-implicit-globals-pas-de-globales">no-implicit-globals : pas de globales</a><a class="toc-3" href="#array-bracket-spacing-espaces-dans-les-crochets">array-bracket-spacing : espaces dans les crochets</a><a class="toc-3" href="#object-curly-spacing-espaces-dans-les-accolades">object-curly-spacing : espaces dans les accolades</a><a class="toc-3" href="#brace-style-position-des-accolades">brace-style : position des accolades</a><a class="toc-3" href="#max-len-longueur-de-ligne">max-len : longueur de ligne</a><a class="toc-3" href="#linebreak-style-fins-de-ligne">linebreak-style : fins de ligne</a><a class="toc-3" href="#id-match-nom-des-variables-en-snake-case">id-match : nom des variables en snake_case</a><a class="toc-3" href="#camelcase-l-inverse-camelcase">camelcase : l'inverse (camelCase)</a><a class="toc-3" href="#noms-de-fichiers-filename-rules-match">Noms de fichiers : filename-rules/match</a><a class="toc-2" href="#autres-regles-utiles-au-cas-ou">Autres règles utiles (au cas où)</a><a class="toc-3" href="#espaces-et-mise-en-forme">Espaces et mise en forme</a><a class="toc-3" href="#bonnes-pratiques">Bonnes pratiques</a><a class="toc-3" href="#limites-de-taille-complexite">Limites de taille / complexité</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuration Files (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">ESLint</a> › use/configure/configuration-files  <a class="ext small" href="https://eslint.org/docs/latest/use/configure/configuration-files">version en ligne</a></div>
+<h1>Configuration Files</h1><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This page explains how to use flat config files.</p>
+</div><p>You can put your ESLint project configuration in a configuration file. You can include built-in rules, how you want them enforced, plugins with custom rules, shareable configurations, which files you want rules to apply to, and more.</p>
+<h2 id="configuration-file"><a class="anchor" href="#configuration-file">#</a>Configuration File</h2>
+<p>The ESLint configuration file may be named any of the following:</p>
+<ul>
+<li><code>eslint.config.js</code></li>
+<li><code>eslint.config.mjs</code></li>
+<li><code>eslint.config.cjs</code></li>
+<li><code>eslint.config.ts</code> (requires <a href="#typescript-configuration-files">additional setup</a>)</li>
+<li><code>eslint.config.mts</code> (requires <a href="#typescript-configuration-files">additional setup</a>)</li>
+<li><code>eslint.config.cts</code> (requires <a href="#typescript-configuration-files">additional setup</a>)</li>
+</ul>
+<p>It should be placed in the root directory of your project and export an array of <a href="#configuration-objects">configuration objects</a>. Here&#39;s an example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">semi</span>: <span class="hljs-string">&quot;error&quot;</span>,
+			<span class="hljs-string">&quot;prefer-const&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>In this example, the <code>defineConfig()</code> helper is used to define a configuration array with just one configuration object. The configuration object enables two rules: <code>semi</code> and <code>prefer-const</code>. These rules are applied to all of the files ESLint processes using this config file.</p>
+<p>If your project specifies <code>&quot;type&quot;: &quot;commonjs&quot;</code> in its <code>package.json</code> file, then <code>eslint.config.js</code> must be in CommonJS format, such as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">const</span> { defineConfig } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;eslint/config&quot;</span>);
+
+<span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">semi</span>: <span class="hljs-string">&quot;error&quot;</span>,
+			<span class="hljs-string">&quot;prefer-const&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<h2 id="configuration-objects"><a class="anchor" href="#configuration-objects">#</a>Configuration Objects</h2>
+<p>Each configuration object contains all of the information ESLint needs to execute on a set of files. Each configuration object is made up of these properties:</p>
+<ul>
+<li><code>name</code> - A name for the configuration object. This is used in error messages and <a href="https://github.com/eslint/config-inspector">config inspector</a> to help identify which configuration object is being used. (<a href="#configuration-naming-conventions">Naming Convention</a>)</li>
+<li><code>basePath</code> - A string specifying the path to a subdirectory to which the configuration object should apply to. It can be a relative or an absolute path.</li>
+<li><code>files</code> - An array of glob patterns indicating the files that the configuration object should apply to. If not specified, the configuration object applies to all files matched by any other configuration object.</li>
+<li><code>ignores</code> - An array of glob patterns indicating the files that the configuration object should not apply to. If not specified, the configuration object applies to all files matched by <code>files</code>. If <code>ignores</code> is used without any other keys in the configuration object, then the patterns act as <a href="#globally-ignore-files-with-ignores">global ignores</a> and it gets applied to every configuration object.</li>
+<li><code>extends</code> - An array of strings, configuration objects, or configuration arrays that contain additional configuration to apply.</li>
+<li><code>language</code> - A string specifying the <a href="https://eslint.org/docs/latest/extend/languages" class="ext" title="lien en ligne (non disponible hors-ligne)">language</a> used for linting, in the format <code>&quot;pluginName/languageName&quot;</code>, e.g. <code>&quot;markdown/commonmark&quot;</code>. (default: <code>&quot;js/js&quot;</code> for JavaScript)</li>
+<li><code>languageOptions</code> - An object containing settings related to how the specified language is configured for linting. For JavaScript, the settings are:<ul>
+<li><code>ecmaVersion</code> - The version of ECMAScript to support. May be any year (i.e., <code>2022</code>) or version (i.e., <code>5</code>). Set to <code>&quot;latest&quot;</code> for the most recent supported version. (default: <code>&quot;latest&quot;</code>)</li>
+<li><code>sourceType</code> - The type of JavaScript source code. Possible values are <code>&quot;script&quot;</code> for traditional script files, <code>&quot;module&quot;</code> for ECMAScript modules (ESM), and <code>&quot;commonjs&quot;</code> for CommonJS files. (default: <code>&quot;module&quot;</code> for <code>.js</code> and <code>.mjs</code> files; <code>&quot;commonjs&quot;</code> for <code>.cjs</code> files)</li>
+<li><code>globals</code> - An object specifying additional objects that should be added to the global scope during linting.</li>
+<li><code>parser</code> - An object containing a <code>parse()</code> method or a <code>parseForESLint()</code> method. (default: <a href="https://github.com/eslint/js/tree/main/packages/espree"><code>espree</code></a>)</li>
+<li><code>parserOptions</code> - An object specifying additional options that are passed directly to the <code>parse()</code> or <code>parseForESLint()</code> method on the parser. The available options are parser-dependent.</li>
+</ul>
+</li>
+<li><code>linterOptions</code> - An object containing settings related to the linting process.<ul>
+<li><code>noInlineConfig</code> - A Boolean value indicating if inline configuration is allowed.</li>
+<li><code>reportUnusedDisableDirectives</code> - A severity string indicating if and how unused disable and enable directives should be tracked and reported. For legacy compatibility, <code>true</code> is equivalent to <code>&quot;warn&quot;</code> and <code>false</code> is equivalent to <code>&quot;off&quot;</code>. (default: <code>&quot;warn&quot;</code>).</li>
+<li><code>reportUnusedInlineConfigs</code> - A severity string indicating if and how unused inline configs should be tracked and reported. (default: <code>&quot;off&quot;</code>)</li>
+</ul>
+</li>
+<li><code>processor</code> - Either an object containing <code>preprocess()</code> and <code>postprocess()</code> methods or a string indicating the name of a processor inside of a plugin (i.e., <code>&quot;pluginName/processorName&quot;</code>).</li>
+<li><code>plugins</code> - An object containing a name-value mapping of plugin names to plugin objects. When <code>files</code> is specified, these plugins are only available to the matching files.</li>
+<li><code>rules</code> - An object containing the configured rules. When <code>files</code> or <code>ignores</code> are specified, these rule configurations are only available to the matching files.</li>
+<li><code>settings</code> - An object containing name-value pairs of information that should be available to all rules.</li>
+</ul>
+<h3 id="specify-files-and-ignores"><a class="anchor" href="#specify-files-and-ignores">#</a>Specify <code>files</code> and <code>ignores</code></h3>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Patterns specified in <code>files</code> and <code>ignores</code> use <a href="https://www.npmjs.com/package/minimatch"><code>minimatch</code></a> syntax and are evaluated relative to the location of the <code>eslint.config.js</code> file. If using an alternate config file via the <code>--config</code> command line option, then all patterns are evaluated relative to the current working directory. In case the configuration object has the <code>basePath</code> property with a relative path, the subdirectory it specifies is evaluated relative to the location of the <code>eslint.config.js</code> file (or relative to the current working directory if using an alternate config file via the <code>--config</code> command line option). In configuration objects with the <code>basePath</code> property, patterns specified in <code>files</code> and <code>ignores</code> are evaluated relative to the subdirectory represented by the <code>basePath</code>.</p>
+</div><p>You can use a combination of <code>files</code> and <code>ignores</code> to determine which files the configuration object should apply to and which not. Here&#39;s an example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-comment">// matches all files ending with .js</span>
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>],
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">semi</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+
+	<span class="hljs-comment">// matches all files ending with .js except those in __tests</span>
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>],
+		<span class="hljs-attr">ignores</span>: [<span class="hljs-string">&quot;__tests/**&quot;</span>],
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;no-console&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>Configuration objects without <code>files</code> or <code>ignores</code> are automatically applied to any file that is matched by any other configuration object. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-comment">// matches all files because it doesn&#x27;t specify the `files` or `ignores` key</span>
+	{
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">semi</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>With this configuration, the <code>semi</code> rule is enabled for all files that match the default files in ESLint. So if you pass <code>example.js</code> to ESLint, the <code>semi</code> rule is applied. If you pass a non-JavaScript file, like <code>example.txt</code>, the <code>semi</code> rule is not applied because there are no other configuration objects that match that filename. (ESLint outputs an error message letting you know that the file was ignored due to missing configuration.)</p>
+<div class="box box-important"><div class="box-title">❗ Important</div><p>By default, ESLint lints files that match the patterns <code>**/*.js</code>, <code>**/*.cjs</code>, and <code>**/*.mjs</code>. Those files are always matched unless you explicitly exclude them using <a href="#globally-ignore-files-with-ignores">global ignores</a>.
+If your configuration object includes other patterns, the rules in configuration objects without a <code>files</code> key will also apply to these patterns.</p>
+<p>Therefore, when using ESLint for non-JS files as well, it is more appropriate to create a configuration object that includes <code>files: [&quot;**/*.js&quot;, &quot;**/*.cjs&quot;, &quot;**/*.mjs&quot;]</code> and place the relevant rules there.</p>
+</div><h4 id="specify-files-with-arbitrary-extensions"><a class="anchor" href="#specify-files-with-arbitrary-extensions">#</a>Specify files with arbitrary extensions</h4>
+<p>To lint files with extensions other than the default <code>.js</code>, <code>.cjs</code> and <code>.mjs</code>, include them in <code>files</code> with a pattern in the format of <code>&quot;**/*.extension&quot;</code>. Any pattern will work except if it is <code>*</code> or if it ends with <code>/*</code> or <code>/**</code>.
+For example, to lint TypeScript files with <code>.ts</code>, <code>.cts</code> and <code>.mts</code> extensions, you would specify a configuration object like this:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.ts&quot;</span>, <span class="hljs-string">&quot;**/*.cts&quot;</span>, <span class="hljs-string">&quot;**/*.mts&quot;</span>],
+	},
+	<span class="hljs-comment">// ...other config</span>
+]);</code></pre></div>
+<h4 id="specify-files-without-extension"><a class="anchor" href="#specify-files-without-extension">#</a>Specify files without extension</h4>
+<p>Files without an extension can be matched with the pattern <code>!(*.*)</code>. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/!(*.*)&quot;</span>],
+	},
+	<span class="hljs-comment">// ...other config</span>
+]);</code></pre></div>
+<p>The above config lints files without extension besides the default <code>.js</code>, <code>.cjs</code> and <code>.mjs</code> extensions in all directories.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Filenames starting with a dot, such as <code>.gitignore</code>, are considered to have only an extension without a base name. In the case of <code>.gitignore</code>, the extension is <code>gitignore</code>, so the file matches the pattern <code>&quot;**/.gitignore&quot;</code> but not <code>&quot;**/*.gitignore&quot;</code>.</p>
+</div><h4 id="specify-files-with-an-and-operation"><a class="anchor" href="#specify-files-with-an-and-operation">#</a>Specify files with an AND operation</h4>
+<p>Multiple patterns can be matched against the same file by using an array of strings inside of the <code>files</code> array. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [[<span class="hljs-string">&quot;src/*&quot;</span>, <span class="hljs-string">&quot;**/*.js&quot;</span>]],
+	},
+	<span class="hljs-comment">// ...other config</span>
+]);</code></pre></div>
+<p>The pattern <code>[&quot;src/*&quot;, &quot;**/*.js&quot;]</code> matches when a file is both inside of the <code>src</code> directory and also ends with <code>.js</code>. This approach can be helpful when you&#39;re dynamically calculating the value of the <code>files</code> array and want to avoid potential errors by trying to combine multiple glob patterns into a single string.</p>
+<h4 id="exclude-files-with-ignores"><a class="anchor" href="#exclude-files-with-ignores">#</a>Exclude files with <code>ignores</code></h4>
+<p>You can limit which files a configuration object applies to by specifying a combination of <code>files</code> and <code>ignores</code> patterns. For example, you may want certain rules to apply only to files in your <code>src</code> directory:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;src/**/*.js&quot;</span>],
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">semi</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>Here, only the JavaScript files in the <code>src</code> directory have the <code>semi</code> rule applied. If you run ESLint on files in another directory, this configuration object is skipped. By adding <code>ignores</code>, you can also remove some of the files in <code>src</code> from this configuration object:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;src/**/*.js&quot;</span>],
+		<span class="hljs-attr">ignores</span>: [<span class="hljs-string">&quot;**/*.config.js&quot;</span>],
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">semi</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>This configuration object matches all JavaScript files in the <code>src</code> directory except those that end with <code>.config.js</code>. You can also use negation patterns in <code>ignores</code> to exclude files from the ignore patterns, such as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;src/**/*.js&quot;</span>],
+		<span class="hljs-attr">ignores</span>: [<span class="hljs-string">&quot;**/*.config.js&quot;</span>, <span class="hljs-string">&quot;!**/eslint.config.js&quot;</span>],
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">semi</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>Here, the configuration object excludes files ending with <code>.config.js</code> except for <code>eslint.config.js</code>. That file still has <code>semi</code> applied.</p>
+<p>Non-global <code>ignores</code> patterns can only match file names. A pattern like <code>&quot;dir-to-exclude/&quot;</code> will not ignore anything. To ignore everything in a particular directory, a pattern like <code>&quot;dir-to-exclude/**&quot;</code> should be used instead.</p>
+<p>If <code>ignores</code> is used without <code>files</code> and there are other keys (such as <code>rules</code>), then the configuration object applies to all linted files except the ones excluded by <code>ignores</code>, for example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">ignores</span>: [<span class="hljs-string">&quot;**/*.config.js&quot;</span>],
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">semi</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>This configuration object applies to all JavaScript files except those ending with <code>.config.js</code>. Effectively, this is like having <code>files</code> set to <code>**/*</code>. In general, it&#39;s a good idea to always include <code>files</code> if you are specifying <code>ignores</code>.</p>
+<p>Note that when <code>files</code> is not specified, negated <code>ignores</code> patterns do not cause any matching files to be linted automatically.
+ESLint only lints files that are matched either by default or by a <code>files</code> pattern that is not <code>*</code> and does not end with <code>/*</code> or <code>/**</code>.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Use the <a href="https://github.com/eslint/config-inspector">config inspector</a> (<code>--inspect-config</code> in the CLI) to test which config objects apply to a specific file.</p>
+</div><h4 id="globally-ignore-files-with-ignores"><a class="anchor" href="#globally-ignore-files-with-ignores">#</a>Globally ignore files with <code>ignores</code></h4>
+<p>Depending on how the <code>ignores</code> property is used, it can behave as non-global <code>ignores</code> or as global <code>ignores</code>.</p>
+<ul>
+<li>When <code>ignores</code> is used without any other keys (besides <code>name</code>) in the configuration object, then the patterns act as global ignores. This means they apply to every configuration object (not only to the configuration object in which it is defined). Global <code>ignores</code> allows you not to have to copy and keep the <code>ignores</code> property synchronized in more than one configuration object.</li>
+<li>If <code>ignores</code> is used with other properties in the same configuration object, then the patterns act as non-global ignores. This way <code>ignores</code> applies only to the configuration object in which it is defined.</li>
+</ul>
+<p>Global and non-global <code>ignores</code> have some usage differences:</p>
+<ul>
+<li>patterns in non-global <code>ignores</code> only match the files (<code>dir/filename.js</code>) or files within directories (<code>dir/**</code>)</li>
+<li>patterns in global <code>ignores</code> can match directories (<code>dir/</code>) in addition to the patterns that non-global ignores supports.</li>
+</ul>
+<p>For all uses of <code>ignores</code>:</p>
+<ul>
+<li>The patterns you define are added after the default ESLint patterns, which are <code>[&quot;**/node_modules/&quot;, &quot;.git/&quot;]</code>.</li>
+<li>The patterns always match files and directories that begin with a dot, such as <code>.foo.js</code> or <code>.fixtures</code>, unless those files are explicitly ignored. The only dot directory ignored by default is <code>.git</code>.</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-comment">// Example of global ignores</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+    {
+      <span class="hljs-attr">ignores</span>: [<span class="hljs-string">&quot;.config/&quot;</span>, <span class="hljs-string">&quot;dist/&quot;</span>, <span class="hljs-string">&quot;tsconfig.json&quot;</span>] <span class="hljs-comment">// acts as global ignores, due to the absence of other properties</span>
+    },
+    { ... }, <span class="hljs-comment">// ... other configuration object, inherit global ignores</span>
+    { ... }, <span class="hljs-comment">// ... other configuration object, inherit global ignores</span>
+]);
+
+<span class="hljs-comment">// Example of non-global ignores</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+    {
+      <span class="hljs-attr">ignores</span>: [<span class="hljs-string">&quot;.config/**&quot;</span>, <span class="hljs-string">&quot;dir1/script1.js&quot;</span>],
+      <span class="hljs-attr">rules</span>: { ... } <span class="hljs-comment">// the presence of this property dictates non-global ignores</span>
+    },
+    {
+      <span class="hljs-attr">ignores</span>: [<span class="hljs-string">&quot;other-dir/**&quot;</span>, <span class="hljs-string">&quot;dist/script2.js&quot;</span>],
+      <span class="hljs-attr">rules</span>: { ... } <span class="hljs-comment">// the presence of this property dictates non-global ignores</span>
+    },
+]);</code></pre></div>
+<p>To avoid confusion, use the <code>globalIgnores()</code> helper function to clearly indicate which ignores are meant to be global. Here&#39;s the previous example rewritten to use <code>globalIgnores()</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig, globalIgnores } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-comment">// Example of global ignores</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+    <span class="hljs-title function_">globalIgnores</span>([<span class="hljs-string">&quot;.config/&quot;</span>, <span class="hljs-string">&quot;dist/&quot;</span>, <span class="hljs-string">&quot;tsconfig.json&quot;</span>]),
+    { ... }, <span class="hljs-comment">// ... other configuration object, inherit global ignores</span>
+    { ... }, <span class="hljs-comment">// ... other configuration object, inherit global ignores</span>
+]);
+
+<span class="hljs-comment">// Example of non-global ignores</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+    {
+      <span class="hljs-attr">ignores</span>: [<span class="hljs-string">&quot;.config/**&quot;</span>, <span class="hljs-string">&quot;dir1/script1.js&quot;</span>],
+      <span class="hljs-attr">rules</span>: { ... } <span class="hljs-comment">// the presence of this property dictates non-global ignores</span>
+    },
+    {
+      <span class="hljs-attr">ignores</span>: [<span class="hljs-string">&quot;other-dir/**&quot;</span>, <span class="hljs-string">&quot;dist/script2.js&quot;</span>],
+      <span class="hljs-attr">rules</span>: { ... } <span class="hljs-comment">// the presence of this property dictates non-global ignores</span>
+    },
+]);</code></pre></div>
+<p>For more information and examples on configuring rules regarding <code>ignores</code>, see <a href="ignore.html">Ignore Files</a>.</p>
+<h4 id="specify-base-path"><a class="anchor" href="#specify-base-path">#</a>Specify base path</h4>
+<p>You can optionally specify <code>basePath</code> to apply the configuration object to a specific subdirectory (including its subdirectories).</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-comment">// matches all files in tests and its subdirectories</span>
+	{
+		<span class="hljs-attr">basePath</span>: <span class="hljs-string">&quot;tests&quot;</span>,
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;no-undef&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+
+	<span class="hljs-comment">// matches all files ending with spec.js in tests and its subdirectories</span>
+	{
+		<span class="hljs-attr">basePath</span>: <span class="hljs-string">&quot;tests&quot;</span>,
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.spec.js&quot;</span>],
+		<span class="hljs-attr">languageOptions</span>: {
+			<span class="hljs-attr">globals</span>: {
+				<span class="hljs-attr">it</span>: <span class="hljs-string">&quot;readonly&quot;</span>,
+				<span class="hljs-attr">describe</span>: <span class="hljs-string">&quot;readonly&quot;</span>,
+			},
+		},
+	},
+
+	<span class="hljs-comment">// globally ignores tests/fixtures directory</span>
+	{
+		<span class="hljs-attr">basePath</span>: <span class="hljs-string">&quot;tests&quot;</span>,
+		<span class="hljs-attr">ignores</span>: [<span class="hljs-string">&quot;fixtures/&quot;</span>],
+	},
+]);</code></pre></div>
+<p>In combination with <a href="#extending-configurations"><code>extends</code></a>, multiple configuration objects can be applied to the same subdirectory by specifying <code>basePath</code> only once, like this:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">basePath</span>: <span class="hljs-string">&quot;tests&quot;</span>,
+		<span class="hljs-attr">extends</span>: [
+			<span class="hljs-comment">// matches all files in tests and its subdirectories</span>
+			{
+				<span class="hljs-attr">rules</span>: {
+					<span class="hljs-string">&quot;no-undef&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+				},
+			},
+
+			<span class="hljs-comment">// matches all files ending with spec.js in tests and its subdirectories</span>
+			{
+				<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.spec.js&quot;</span>],
+				<span class="hljs-attr">languageOptions</span>: {
+					<span class="hljs-attr">globals</span>: {
+						<span class="hljs-attr">it</span>: <span class="hljs-string">&quot;readonly&quot;</span>,
+						<span class="hljs-attr">describe</span>: <span class="hljs-string">&quot;readonly&quot;</span>,
+					},
+				},
+			},
+
+			<span class="hljs-comment">// globally ignores tests/fixtures directory</span>
+			{
+				<span class="hljs-attr">ignores</span>: [<span class="hljs-string">&quot;fixtures/&quot;</span>],
+			},
+		],
+	},
+]);</code></pre></div>
+<h4 id="cascading-configuration-objects"><a class="anchor" href="#cascading-configuration-objects">#</a>Cascading Configuration Objects</h4>
+<p>When more than one configuration object matches a given filename, the configuration objects are merged with later objects overriding previous objects when there is a conflict. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>],
+		<span class="hljs-attr">languageOptions</span>: {
+			<span class="hljs-attr">globals</span>: {
+				<span class="hljs-attr">MY_CUSTOM_GLOBAL</span>: <span class="hljs-string">&quot;readonly&quot;</span>,
+			},
+		},
+	},
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;tests/**/*.js&quot;</span>],
+		<span class="hljs-attr">languageOptions</span>: {
+			<span class="hljs-attr">globals</span>: {
+				<span class="hljs-attr">it</span>: <span class="hljs-string">&quot;readonly&quot;</span>,
+				<span class="hljs-attr">describe</span>: <span class="hljs-string">&quot;readonly&quot;</span>,
+			},
+		},
+	},
+]);</code></pre></div>
+<p>Using this configuration, all JavaScript files define a custom global object defined called <code>MY_CUSTOM_GLOBAL</code> while those JavaScript files in the <code>tests</code> directory have <code>it</code> and <code>describe</code> defined as global objects in addition to <code>MY_CUSTOM_GLOBAL</code>. For any JavaScript file in the <code>tests</code> directory, both configuration objects are applied, so <code>languageOptions.globals</code> are merged to create a final result.</p>
+<h3 id="configure-linter-options"><a class="anchor" href="#configure-linter-options">#</a>Configure Linter Options</h3>
+<p>Options specific to the linting process can be configured using the <code>linterOptions</code> object. These effect how linting proceeds and does not affect how the source code of the file is interpreted.</p>
+<h4 id="disable-inline-configuration"><a class="anchor" href="#disable-inline-configuration">#</a>Disable Inline Configuration</h4>
+<p>Inline configuration is implemented using an <code>/*eslint*/</code> comment, such as <code>/*eslint semi: error*/</code>. You can disallow inline configuration by setting <code>noInlineConfig</code> to <code>true</code>. When enabled, all inline configuration is ignored. Here&#39;s an example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>],
+		<span class="hljs-attr">linterOptions</span>: {
+			<span class="hljs-attr">noInlineConfig</span>: <span class="hljs-literal">true</span>,
+		},
+	},
+]);</code></pre></div>
+<h4 id="report-unused-disable-directives"><a class="anchor" href="#report-unused-disable-directives">#</a>Report Unused Disable Directives</h4>
+<p>Disable and enable directives such as <code>/*eslint-disable*/</code>, <code>/*eslint-enable*/</code> and <code>/*eslint-disable-next-line*/</code> are used to disable ESLint rules around certain portions of code. As code changes, it&#39;s possible for these directives to no longer be needed because the code has changed in such a way that the rule is no longer triggered. You can enable reporting of these unused disable directives by setting the <code>reportUnusedDisableDirectives</code> option to a severity string, as in this example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>],
+		<span class="hljs-attr">linterOptions</span>: {
+			<span class="hljs-attr">reportUnusedDisableDirectives</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>This setting defaults to <code>&quot;warn&quot;</code>.</p>
+<p>You can override this setting using the <a href="../command-line-interface.html#--report-unused-disable-directives"><code>--report-unused-disable-directives</code></a> or the <a href="../command-line-interface.html#--report-unused-disable-directives-severity"><code>--report-unused-disable-directives-severity</code></a> command line options.</p>
+<p>For legacy compatibility, <code>true</code> is equivalent to <code>&quot;warn&quot;</code> and <code>false</code> is equivalent to <code>&quot;off&quot;</code>.</p>
+<h4 id="report-unused-inline-configs"><a class="anchor" href="#report-unused-inline-configs">#</a>Report Unused Inline Configs</h4>
+<p>Inline config comments such as <code>/* eslint rule-name: &quot;error&quot; */</code> are used to change ESLint rule severity and/or options around certain portions of code.
+As a project&#39;s ESLint configuration file changes, it&#39;s possible for these directives to no longer be different from what was already set.
+You can enable reporting of these unused inline config comments by setting the <code>reportUnusedInlineConfigs</code> option to a severity string, as in this example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>],
+		<span class="hljs-attr">linterOptions</span>: {
+			<span class="hljs-attr">reportUnusedInlineConfigs</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>You can override this setting using the <a href="../command-line-interface.html#--report-unused-inline-configs"><code>--report-unused-inline-configs</code></a> command line option.</p>
+<h3 id="configure-rules"><a class="anchor" href="#configure-rules">#</a>Configure Rules</h3>
+<p>You can configure any number of rules in a configuration object by adding a <code>rules</code> property containing an object with your rule configurations. The names in this object are the names of the rules and the values are the configurations for each of those rules. Here&#39;s an example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">semi</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>This configuration object specifies that the <a href="../../rules/semi.html"><code>semi</code></a> rule should be enabled with a severity of <code>&quot;error&quot;</code>. You can also provide options to a rule by specifying an array where the first item is the severity and each item after that is an option for the rule. For example, you can switch the <code>semi</code> rule to disallow semicolons by passing <code>&quot;never&quot;</code> as an option:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">semi</span>: [<span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;never&quot;</span>],
+		},
+	},
+]);</code></pre></div>
+<p>Each rule specifies its own options and can be any valid JSON data type. Please check the documentation for the rule you want to configure for more information about its available options.</p>
+<p>For more information on configuring rules, see <a href="rules.html">Configure Rules</a>.</p>
+<h3 id="configure-shared-settings"><a class="anchor" href="#configure-shared-settings">#</a>Configure Shared Settings</h3>
+<p>ESLint supports adding shared settings into configuration files. When you add a <code>settings</code> object to a configuration object, it is supplied to every rule. By convention, plugins namespace the settings they are interested in to avoid collisions with others. Plugins can use <code>settings</code> to specify the information that should be shared across all of their rules. This may be useful if you are adding custom rules and want them to have access to the same information. Here&#39;s an example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">settings</span>: {
+			<span class="hljs-attr">sharedData</span>: <span class="hljs-string">&quot;Hello&quot;</span>,
+		},
+		<span class="hljs-attr">plugins</span>: {
+			<span class="hljs-attr">customPlugin</span>: {
+				<span class="hljs-attr">rules</span>: {
+					<span class="hljs-string">&quot;my-rule&quot;</span>: {
+						<span class="hljs-attr">meta</span>: {
+							<span class="hljs-comment">// custom rule&#x27;s meta information</span>
+						},
+						<span class="hljs-title function_">create</span>(<span class="hljs-params">context</span>) {
+							<span class="hljs-keyword">const</span> sharedData = context.<span class="hljs-property">settings</span>.<span class="hljs-property">sharedData</span>;
+							<span class="hljs-keyword">return</span> {
+								<span class="hljs-comment">// code</span>
+							};
+						},
+					},
+				},
+			},
+		},
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;customPlugin/my-rule&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<h3 id="extending-configurations"><a class="anchor" href="#extending-configurations">#</a>Extending Configurations</h3>
+<p>A configuration object uses <code>extends</code> to inherit all the traits of another configuration object or array (including rules, plugins, and language options) and can then modify all the options. The <code>extends</code> key is an array of values indicating which configurations to extend from. The elements of the <code>extends</code> array can be one of three values:</p>
+<ul>
+<li>a string that specifies the name of a configuration in a plugin</li>
+<li>a configuration object</li>
+<li>a configuration array</li>
+</ul>
+<h4 id="use-configurations-from-plugins"><a class="anchor" href="#use-configurations-from-plugins">#</a>Use Configurations from Plugins</h4>
+<p>ESLint plugins can export predefined configurations. These configurations are referenced using a string and follow the pattern <code>pluginName/configName</code>. The plugin must be specified in the <code>plugins</code> key first. Here&#39;s an example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> examplePlugin <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint-plugin-example&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>],
+		<span class="hljs-attr">plugins</span>: {
+			<span class="hljs-attr">example</span>: examplePlugin,
+		},
+		<span class="hljs-attr">extends</span>: [<span class="hljs-string">&quot;example/recommended&quot;</span>],
+	},
+]);</code></pre></div>
+<p>In this example, the configuration named <code>recommended</code> from <code>eslint-plugin-example</code> is loaded. The plugin configurations can also be referenced by name inside of the configuration array.</p>
+<p>You can also insert plugin configurations directly into the <code>extends</code> array. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> pluginExample <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint-plugin-example&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>],
+		<span class="hljs-attr">plugins</span>: {
+			<span class="hljs-attr">example</span>: pluginExample,
+		},
+		<span class="hljs-attr">extends</span>: [pluginExample.<span class="hljs-property">configs</span>.<span class="hljs-property">recommended</span>],
+	},
+]);</code></pre></div>
+<p>In this case, the configuration named <code>recommended</code> from <code>eslint-plugin-example</code> is accessed directly through the plugin object&#39;s <code>configs</code> property.</p>
+<div class="box box-important"><div class="box-title">❗ Important</div><p>It&#39;s recommended to always use a <code>files</code> key when you use the <code>extends</code> key to ensure that your configuration applies to the correct files. By omitting the <code>files</code> key, the extended configuration may end up applied to all files.</p>
+</div><h4 id="use-predefined-configurations"><a class="anchor" href="#use-predefined-configurations">#</a>Use Predefined Configurations</h4>
+<p>ESLint has two predefined configurations for JavaScript:</p>
+<ul>
+<li><code>js/recommended</code> - enables the rules that ESLint recommends everyone use to avoid potential errors.</li>
+<li><code>js/all</code> - enables all of the rules shipped with ESLint. This configuration is <strong>not recommended</strong> for production use because it changes with every minor and major version of ESLint. Use at your own risk.</li>
+</ul>
+<p>To include these predefined configurations, install the <code>@eslint/js</code> package and then make any modifications to other properties in subsequent configuration objects:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> js <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/js&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>],
+		<span class="hljs-attr">plugins</span>: {
+			js,
+		},
+		<span class="hljs-attr">extends</span>: [<span class="hljs-string">&quot;js/recommended&quot;</span>],
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;no-unused-vars&quot;</span>: <span class="hljs-string">&quot;warn&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>Here, the <code>js/recommended</code> predefined configuration is applied first and then another configuration object adds the desired configuration for <a href="../../rules/no-unused-vars.html"><code>no-unused-vars</code></a>.</p>
+<p>For more information on how to combine predefined configs with your preferences, please see <a href="combine-configs.html">Combine Configs</a>.</p>
+<h4 id="use-a-shareable-configuration-package"><a class="anchor" href="#use-a-shareable-configuration-package">#</a>Use a Shareable Configuration Package</h4>
+<p>A sharable configuration is an npm package that exports a configuration object or array. This package should be installed as a dependency in your project and then referenced from inside of your <code>eslint.config.js</code> file. For example, to use a shareable configuration named <code>eslint-config-example</code>, your configuration file would look like this:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> exampleConfig <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint-config-example&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>],
+		<span class="hljs-attr">extends</span>: [exampleConfig],
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;no-unused-vars&quot;</span>: <span class="hljs-string">&quot;warn&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>In this example, <code>exampleConfig</code> can be either an object or an array, and either way it can be inserted directly into the <code>extends</code> array.</p>
+<p>For more information on how to combine shareable configs with your preferences, please see <a href="combine-configs.html">Combine Configs</a>.</p>
+<h3 id="when-to-use-extends-vs-cascading"><a class="anchor" href="#when-to-use-extends-vs-cascading">#</a>When to Use Extends vs Cascading</h3>
+<p>When to use <code>Extends</code>:</p>
+<ul>
+<li><strong>For reusing configurations</strong> - When you want to inherit and build upon existing configurations from plugins, shareable packages, or predefined configs.</li>
+<li><strong>For plugin configuration</strong> - When applying recommended or specific configurations from ESLint plugins (e.g., <code>example/recommended</code>).</li>
+<li><strong>For shareable configurations</strong> - When using npm packages that export configuration objects (e.g., <code>eslint-config-example</code>).</li>
+<li><strong>For predefined configurations</strong> - When using ESLint&#39;s built-in configurations like <code>js/recommended</code> or <code>js/all</code>.</li>
+<li><strong>For modular configuration</strong> - When you want to compose multiple configuration sources into a single configuration object.</li>
+<li><strong>For maintaining consistency</strong> - When you want to ensure consistent base rules across multiple configuration objects.</li>
+<li><strong>For plugin integration</strong> - When you need to apply configurations that come bundled with plugins.</li>
+</ul>
+<p>When to use <code>Cascading</code>:</p>
+<ul>
+<li><strong>For file-specific rule</strong> - When you need different rules for different file patterns or directories.</li>
+<li><strong>For progressive configuration</strong> - When you want to apply base rules to all files and then add/override rules for specific subsets.</li>
+<li><strong>For environment-specific settings</strong> - When test files, source files, and config files need different rule sets.</li>
+<li><strong>For directory-based configuration</strong> - When different project directories require different linting approaches.</li>
+<li><strong>For rule severity adjustment</strong> - When you want to change rule severity (<code>error</code>/<code>warn</code>/<code>off</code>) for specific file patterns.</li>
+<li><strong>For language option variations</strong> - When different files need different ECMAScript versions or parser options.</li>
+</ul>
+<h3 id="configuration-naming-conventions"><a class="anchor" href="#configuration-naming-conventions">#</a>Configuration Naming Conventions</h3>
+<p>The <code>name</code> property is optional, but it is recommended to provide a name for each configuration object, especially when you are creating shared configurations. The name is used in error messages and the config inspector to help identify which configuration object is being used.</p>
+<p>The name should be descriptive of the configuration object&#39;s purpose and scoped with the configuration name or plugin name using <code>/</code> as a separator. ESLint does not enforce the names to be unique at runtime, but it is recommended that unique names be set to avoid confusion.</p>
+<p>For example, if you are creating a configuration object for a plugin named <code>eslint-plugin-example</code>, you might add <code>name</code> to the configuration objects with the <code>example/</code> prefix:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+	<span class="hljs-attr">configs</span>: {
+		<span class="hljs-attr">recommended</span>: {
+			<span class="hljs-attr">name</span>: <span class="hljs-string">&quot;example/recommended&quot;</span>,
+			<span class="hljs-attr">rules</span>: {
+				<span class="hljs-string">&quot;no-unused-vars&quot;</span>: <span class="hljs-string">&quot;warn&quot;</span>,
+			},
+		},
+		<span class="hljs-attr">strict</span>: {
+			<span class="hljs-attr">name</span>: <span class="hljs-string">&quot;example/strict&quot;</span>,
+			<span class="hljs-attr">rules</span>: {
+				<span class="hljs-string">&quot;no-unused-vars&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+			},
+		},
+	},
+};</code></pre></div>
+<p>When exposing arrays of configuration objects, the <code>name</code> may have extra scoping levels to help identify the configuration object. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+	<span class="hljs-attr">configs</span>: {
+		<span class="hljs-attr">strict</span>: [
+			{
+				<span class="hljs-attr">name</span>: <span class="hljs-string">&quot;example/strict/language-setup&quot;</span>,
+				<span class="hljs-attr">languageOptions</span>: {
+					<span class="hljs-attr">ecmaVersion</span>: <span class="hljs-number">2024</span>,
+				},
+			},
+			{
+				<span class="hljs-attr">name</span>: <span class="hljs-string">&quot;example/strict/sub-config&quot;</span>,
+				<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;src/**/*.js&quot;</span>],
+				<span class="hljs-attr">rules</span>: {
+					<span class="hljs-string">&quot;no-unused-vars&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+				},
+			},
+		],
+	},
+};</code></pre></div>
+<h2 id="configuration-file-resolution"><a class="anchor" href="#configuration-file-resolution">#</a>Configuration File Resolution</h2>
+<p>When ESLint is run on the command line, it determines configuration for each target file by first looking in the directory that contains the file and then searching up ancestor directories until it finds an <code>eslint.config.*</code> file. This behavior improves support for monorepos, where subdirectories can have their own configuration files.</p>
+<p>You can prevent this search by using the <code>-c</code> or <code>--config</code> option on the command line to specify an alternate configuration file, such as:</p>
+<div class="code"><pre><code class="hljs lang-bash">npx eslint --config some-other-file.js **/*.js</code></pre></div>
+<p>In this case, ESLint does not search for configuration files and instead uses <code>some-other-file.js</code>.</p>
+<h2 id="typescript-configuration-files"><a class="anchor" href="#typescript-configuration-files">#</a>TypeScript Configuration Files</h2>
+<p>For Deno and Bun, TypeScript configuration files are natively supported; for Node.js, you must install the optional dev dependency <a href="https://github.com/unjs/jiti"><code>jiti</code></a> in version 2.2.0 or later in your project (this dependency is not automatically installed by ESLint):</p>
+<div class="code"><pre><code class="hljs lang-bash">npm install --save-dev jiti</code></pre></div>
+<p>You can then create a configuration file with a <code>.ts</code>, <code>.mts</code>, or <code>.cts</code> extension, and export an array of <a href="#configuration-objects">configuration objects</a>.</p>
+<div class="box box-important"><div class="box-title">❗ Important</div><p>ESLint does not perform type checking on your configuration file and does not apply any settings from <code>tsconfig.json</code>.</p>
+</div><h3 id="native-typescript-support"><a class="anchor" href="#native-typescript-support">#</a>Native TypeScript Support</h3>
+<p>If you&#39;re using <strong>Node.js &gt;= 22.13.0</strong>, you can load TypeScript configuration files natively without requiring <a href="https://github.com/unjs/jiti"><code>jiti</code></a>. This is possible thanks to the <a href="https://nodejs.org/docs/latest-v22.x/api/cli.html#--experimental-strip-types"><strong><code>--experimental-strip-types</code></strong></a> flag.</p>
+<p>Since this feature is still experimental, you must also enable the <code>unstable_native_nodejs_ts_config</code> flag.</p>
+<div class="code"><pre><code class="hljs lang-bash">npx --node-options=<span class="hljs-string">&#x27;--experimental-strip-types&#x27;</span> eslint --flag unstable_native_nodejs_ts_config</code></pre></div>
+<h3 id="configuration-file-precedence"><a class="anchor" href="#configuration-file-precedence">#</a>Configuration File Precedence</h3>
+<p>If you have multiple ESLint configuration files, ESLint prioritizes JavaScript files over TypeScript files. The order of precedence is as follows:</p>
+<ol>
+<li><code>eslint.config.js</code></li>
+<li><code>eslint.config.mjs</code></li>
+<li><code>eslint.config.cjs</code></li>
+<li><code>eslint.config.ts</code></li>
+<li><code>eslint.config.mts</code></li>
+<li><code>eslint.config.cts</code></li>
+</ol>
+<p>To override this behavior, use the <code>--config</code> or <code>-c</code> command line option to specify a different configuration file:</p>
+<div class="code"><pre><code class="hljs lang-bash">npx eslint --config eslint.config.ts</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#configuration-file">Configuration File</a><a class="toc-2" href="#configuration-objects">Configuration Objects</a><a class="toc-3" href="#specify-files-and-ignores">Specify files and ignores</a><a class="toc-3" href="#configure-linter-options">Configure Linter Options</a><a class="toc-3" href="#configure-rules">Configure Rules</a><a class="toc-3" href="#configure-shared-settings">Configure Shared Settings</a><a class="toc-3" href="#extending-configurations">Extending Configurations</a><a class="toc-3" href="#when-to-use-extends-vs-cascading">When to Use Extends vs Cascading</a><a class="toc-3" href="#configuration-naming-conventions">Configuration Naming Conventions</a><a class="toc-2" href="#configuration-file-resolution">Configuration File Resolution</a><a class="toc-2" href="#typescript-configuration-files">TypeScript Configuration Files</a><a class="toc-3" href="#native-typescript-support">Native TypeScript Support</a><a class="toc-3" href="#configuration-file-precedence">Configuration File Precedence</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>global-require (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/global-require <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/global-require">version en ligne</a></div>
+<h1>global-require</h1><p>In Node.js, module dependencies are included using the <code>require()</code> function, such as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">var</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;fs&quot;</span>);</code></pre></div>
+<p>While <code>require()</code> may be called anywhere in code, some style guides prescribe that it should be called only in the top level of a module to make it easier to identify dependencies. For instance, it&#39;s arguably harder to identify dependencies when they are deeply nested inside of functions and other statements:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">if</span> (condition) {
+        <span class="hljs-keyword">var</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;fs&quot;</span>);
+    }
+}</code></pre></div>
+<p>Since <code>require()</code> does a synchronous load, it can cause performance problems when used in other locations.</p>
+<p>Further, ES6 modules mandate that <code>import</code> and <code>export</code> statements can only occur in the top level of the module&#39;s body.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule requires all calls to <code>require()</code> to be at the top level of the module, similar to ES6 <code>import</code> and <code>export</code> statements, which also can occur only at the top level.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint global-require: &quot;error&quot;*/</span>
+
+<span class="hljs-comment">// calling require() inside of a function is not allowed</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">readFile</span>(<span class="hljs-params">filename, callback</span>) {
+    <span class="hljs-keyword">var</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;fs&quot;</span>);
+    fs.<span class="hljs-title function_">readFile</span>(filename, callback);
+}
+
+<span class="hljs-comment">// conditional requires like this are also not allowed</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-variable constant_">DEBUG</span>) {
+    <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;debug&quot;</span>);
+}
+
+<span class="hljs-comment">// a require() in a switch statement is also flagged</span>
+<span class="hljs-keyword">switch</span> (x) {
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;1&quot;</span>:
+        <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;1&quot;</span>);
+        <span class="hljs-keyword">break</span>;
+}
+
+<span class="hljs-comment">// you may not require() inside an arrow function body</span>
+<span class="hljs-keyword">var</span> <span class="hljs-title function_">getModule</span> = (<span class="hljs-params">name</span>) =&gt; <span class="hljs-built_in">require</span>(name);
+
+<span class="hljs-comment">// you may not require() inside of a function body as well</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getModule</span>(<span class="hljs-params">name</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">require</span>(name);
+}
+
+<span class="hljs-comment">// you may not require() inside of a try/catch block</span>
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-built_in">require</span>(unsafeModule);
+} <span class="hljs-keyword">catch</span> (e) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(e);
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint global-require: &quot;error&quot;*/</span>
+
+<span class="hljs-comment">// all these variations of require() are ok</span>
+<span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;x&quot;</span>);
+<span class="hljs-keyword">var</span> y = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;y&quot;</span>);
+<span class="hljs-keyword">var</span> z;
+z = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;z&quot;</span>).<span class="hljs-title function_">initialize</span>();
+
+<span class="hljs-comment">// requiring a module and using it in a function is ok</span>
+<span class="hljs-keyword">var</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;fs&quot;</span>);
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">readFile</span>(<span class="hljs-params">filename, callback</span>) {
+    fs.<span class="hljs-title function_">readFile</span>(filename, callback);
+}
+
+<span class="hljs-comment">// you can use a ternary to determine which module to require</span>
+<span class="hljs-keyword">var</span> logger = <span class="hljs-variable constant_">DEBUG</span> ? <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;dev-logger&quot;</span>) : <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;logger&quot;</span>);
+
+<span class="hljs-comment">// if you want you can require() at the end of your module</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomethingA</span>(<span class="hljs-params"></span>) {}
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomethingB</span>(<span class="hljs-params"></span>) {}
+<span class="hljs-keyword">var</span> x = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;x&quot;</span>),
+    z = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;z&quot;</span>);</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you have a module that must be initialized with information that comes from the file-system or if a module is only used in very rare situations and will cause significant overhead to load it may make sense to disable the rule. If you need to <code>require()</code> an optional dependency inside of a <code>try</code>/<code>catch</code>, you can disable this rule for just that dependency using the <code>// eslint-disable-line global-require</code> comment.</p>
+
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

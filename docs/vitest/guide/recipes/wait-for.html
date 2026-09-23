@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Waiting for Async Conditions | Recipes (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/recipes/wait-for  <a class="ext small" href="https://vitest.dev/guide/recipes/wait-for">version en ligne</a></div>
+<h1 id="waiting-for-async-conditions"><a class="anchor" href="#waiting-for-async-conditions">#</a>Waiting for Async Conditions</h1>
+<p>Plenty of things in tests don&#39;t happen synchronously. A server takes a moment to boot, or a DOM element renders after a microtask. Waiting with <code>setTimeout</code> tends to land on either a flaky undershoot or a wasteful long sleep, and a manual polling loop is more code than you want to write per test.</p>
+<p>Vitest provides helpers that poll on your behalf, retrying on a fixed interval until the condition holds or a timeout elapses.</p>
+<h2 id="expect-poll-retry-an-assertion"><a class="anchor" href="#expect-poll-retry-an-assertion">#</a><code>expect.poll</code>: retry an assertion</h2>
+<p>Use <a href="../../api/expect.html#poll"><code>expect.poll</code></a> when the wait condition is an assertion. The callback returns the value to assert on, the matcher does the comparison, and Vitest retries the whole expression at each interval until the matcher passes.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { createServer } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./server.ts&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;server starts&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> server = <span class="hljs-title function_">createServer</span>()
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">poll</span>(<span class="hljs-function">() =&gt;</span> server.<span class="hljs-property">isReady</span>, {
+    <span class="hljs-attr">timeout</span>: <span class="hljs-number">500</span>,
+    <span class="hljs-attr">interval</span>: <span class="hljs-number">20</span>
+  }).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">true</span>)
+})</code></pre></div>
+<p>The failure message is the standard <code>expect</code> diff, with no manual <code>throw new Error(&#39;Server not started&#39;)</code> to maintain. This is the right tool for most &quot;wait for X to become Y&quot; cases.</p>
+<p><code>expect.poll</code> makes every assertion asynchronous, so the call must be awaited. Some matchers don&#39;t pair with it: snapshot matchers (which would always succeed under polling), <code>.resolves</code> and <code>.rejects</code> (the condition is already awaited), and <code>toThrow</code> (the value is resolved before the matcher sees it). For any of those, reach for <code>vi.waitFor</code> instead.</p>
+<h2 id="vi-waitfor-wait-and-capture-the-value"><a class="anchor" href="#vi-waitfor-wait-and-capture-the-value">#</a><code>vi.waitFor</code>: wait and capture the value</h2>
+<p><a href="../../api/vi.html#vi-waitfor"><code>vi.waitFor</code></a> is the right tool when the wait condition is the work itself succeeding rather than an assertion you write. It runs the callback at each interval; a thrown error queues another attempt, and the first call that doesn&#39;t throw resolves the wait with whatever the callback returned.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { connect, <span class="hljs-variable constant_">DB_URL</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./db.ts&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;database is reachable&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// `connect` throws ECONNREFUSED until the database accepts connections</span>
+  <span class="hljs-keyword">const</span> client = <span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">waitFor</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">connect</span>(<span class="hljs-variable constant_">DB_URL</span>), {
+    <span class="hljs-attr">timeout</span>: <span class="hljs-number">5000</span>,
+    <span class="hljs-attr">interval</span>: <span class="hljs-number">100</span>,
+  })
+
+  <span class="hljs-keyword">const</span> rows = <span class="hljs-keyword">await</span> client.<span class="hljs-title function_">query</span>(<span class="hljs-string">&#x27;SELECT 1 AS ok&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(rows[<span class="hljs-number">0</span>].<span class="hljs-property">ok</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">1</span>)
+})</code></pre></div>
+<p>The throw that drives the retry comes from <code>connect</code> itself, not from an <code>expect</code> you wrote inside the callback. <code>expect.poll</code> doesn&#39;t fit this shape because it&#39;s built around assertions, and &quot;retry until this call stops throwing and hand me the result&quot; isn&#39;t an assertion. Wrapping the call in a <code>try</code>/<code>catch</code> to fake one would either duplicate the work after the wait or require building the retry loop by hand.</p>
+<h2 id="vi-waituntil-poll-until-truthy-fail-fast-on-errors"><a class="anchor" href="#vi-waituntil-poll-until-truthy-fail-fast-on-errors">#</a><code>vi.waitUntil</code>: poll until truthy, fail fast on errors</h2>
+<p>Use <a href="../../api/vi.html#vi-waituntil"><code>vi.waitUntil</code></a> for a value lookup where any thrown error should fail the test on the spot rather than be retried away. Each interval calls the callback again. A truthy return resolves the wait; a falsy return waits for the next interval. A thrown error fails the test immediately.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { jobResults, startJob } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./worker.ts&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;worker completes the job&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-title function_">startJob</span>(<span class="hljs-string">&#x27;build-42&#x27;</span>)
+
+  <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">waitUntil</span>(
+    <span class="hljs-function">() =&gt;</span> jobResults.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;build-42&#x27;</span>),
+    { <span class="hljs-attr">timeout</span>: <span class="hljs-number">5000</span>, <span class="hljs-attr">interval</span>: <span class="hljs-number">100</span> },
+  )
+
+  <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;ok&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">steps</span>).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">4</span>)
+})</code></pre></div>
+<p><code>jobResults.get(&#39;build-42&#39;)</code> returns <code>JobResult | undefined</code>. <code>waitUntil</code> polls until it returns a truthy value, narrows the resolved type to <code>JobResult</code>, and hands it back for further assertions. If the lookup itself throws because of a programming error like a typo in the import, <code>waitUntil</code> surfaces the error on the first attempt rather than retrying past it.</p>
+<p>In browser mode, prefer <a href="../../api/browser/locators.html"><code>page.locator</code></a> and <a href="../../api/browser/assertions.html"><code>expect.element</code></a> over <code>waitUntil</code> for DOM queries: locators retry on their own and produce richer failure messages.</p>
+<h2 id="picking-between-them"><a class="anchor" href="#picking-between-them">#</a>Picking between them</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><code>expect.poll</code></th>
+<th><code>vi.waitFor</code></th>
+<th><code>vi.waitUntil</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Reach for it when</td>
+<td>the wait is an assertion</td>
+<td>the work might fail until it&#39;s ready</td>
+<td>a lookup might be falsy and that&#39;s fine</td>
+</tr>
+<tr>
+<td>Retries on thrown error</td>
+<td>yes</td>
+<td>yes</td>
+<td>no, fails fast</td>
+</tr>
+<tr>
+<td>Resolves with</td>
+<td>the assertion</td>
+<td>callback&#39;s return value</td>
+<td>callback&#39;s return value</td>
+</tr>
+</tbody></table></div>
+<p>Each of these accepts <code>{ timeout, interval }</code> options, defaulting to a 1000 ms timeout and 50 ms intervals. <code>vi.waitFor</code> and <code>vi.waitUntil</code> also accept a number in place of the options object as shorthand for the timeout.</p>
+<h2 id="fake-timers"><a class="anchor" href="#fake-timers">#</a>Fake timers</h2>
+<p>If <a href="../../api/vi.html#vi-usefaketimers"><code>vi.useFakeTimers</code></a> is active, <code>vi.waitFor</code> automatically calls <code>vi.advanceTimersByTime(interval)</code> between attempts. That keeps <code>setTimeout</code>-based code under test reachable without leaking real time into the test.</p>
+<h2 id="see-also"><a class="anchor" href="#see-also">#</a>See also</h2>
+<ul>
+<li><a href="../../api/expect.html#poll"><code>expect.poll</code></a></li>
+<li><a href="../../api/vi.html#vi-waitfor"><code>vi.waitFor</code></a></li>
+<li><a href="../../api/vi.html#vi-waituntil"><code>vi.waitUntil</code></a></li>
+<li><a href="../../api/vi.html#vi-usefaketimers"><code>vi.useFakeTimers</code></a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#expect-poll-retry-an-assertion">expect.poll : retry an assertion</a><a class="toc-2" href="#vi-waitfor-wait-and-capture-the-value">vi.waitFor : wait and capture the value</a><a class="toc-2" href="#vi-waituntil-poll-until-truthy-fail-fast-on-errors">vi.waitUntil : poll until truthy, fail fast on errors</a><a class="toc-2" href="#picking-between-them">Picking between them</a><a class="toc-2" href="#fake-timers">Fake timers</a><a class="toc-2" href="#see-also">See also</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

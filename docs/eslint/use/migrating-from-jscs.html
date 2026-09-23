@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Migrating from JSCS (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › use/migrating-from-jscs  <a class="ext small" href="https://eslint.org/docs/latest/use/migrating-from-jscs">version en ligne</a></div>
+<h1>Migrating from JSCS</h1><p>In April 2016, we <a href="https://eslint.org/blog/2016/04/welcoming-jscs-to-eslint">announced</a> that the JSCS project was shutting down and the JSCS team would be joining the ESLint team. This guide is intended to help those who are using JSCS to migrate their settings and projects to use ESLint. We&#39;ve tried to automate as much of the conversion as possible, but there are some manual changes that are needed.</p>
+<h2 id="terminology"><a class="anchor" href="#terminology">#</a>Terminology</h2>
+<p>Before beginning the process of migrating to ESLint, it&#39;s helpful to understand some of the terminology that ESLint uses and how it relates to terminology that JSCS uses.</p>
+<ul>
+<li><strong>Configuration File</strong> - In JSCS, the configuration file is <code>.jscsrc</code>, <code>.jscsrc.json</code>, <code>.jscsrc.yaml</code>, or <code>.jscsrs.js</code>. In ESLint, the configuration file can be <code>.eslintrc.json</code>, <code>.eslintrc.yml</code>, <code>.eslintrc.yaml</code>, or <code>.eslintrc.js</code> (there is also a deprecated <code>.eslintrc</code> file format).</li>
+<li><strong>Presets</strong> - In JSCS, there were numerous predefined configurations shipped directly within JSCS. ESLint ships with just one predefined configuration (<code>eslint:recommended</code>) that has no style rules enabled. However, ESLint does support <a href="https://eslint.org/docs/latest/extend/shareable-configs" class="ext" title="lien en ligne (non disponible hors-ligne)">shareable configs</a>. Shareable configs are configurations that are published on their own to npm and there are shareable configs available for almost all of the JSCS presets (see <a href="#converting-presets">the &quot;Converting Presets&quot; section</a> below). Additionally, the <code>preset</code> option in a configuration file is the equivalent of the ESLint <code>extends</code> option.</li>
+</ul>
+<h2 id="convert-configuration-files-using-polyjuice"><a class="anchor" href="#convert-configuration-files-using-polyjuice">#</a>Convert Configuration Files Using Polyjuice</h2>
+<p><a href="https://github.com/brenolf/polyjuice">Polyjuice</a> is a utility for converting JSCS (and JSHint) configuration files into ESLint configuration files automatically. It understands the equivalent rules from each utility and will automatically output an ESLint configuration file that is a good approximation of your existing JSCS file.</p>
+<p>To install Polyjuice:</p>
+<div class="code"><pre><code class="hljs lang-bash">npm install --global polyjuice</code></pre></div>
+<p>Polyjuice works with JSON configuration files, so if you&#39;re using a JavaScript or YAML JSCS configuration file, you should first convert it into a JSON configuration file.</p>
+<p>To convert your configuration file, pass in the location of your <code>.jscs.json</code> file using the <code>--jscs</code> flag:</p>
+<div class="code"><pre><code class="hljs lang-shell">polyjuice --jscs .jscsrc.json &gt; .eslintrc.json</code></pre></div>
+<p>This creates an <code>.eslintrc.json</code> with the equivalent rules from <code>.jscsrc.json</code>.</p>
+<p>If you have multiple <code>.jscsrc.json</code> files, you can pass them all and Polyjuice will combine them into one <code>.eslintrc.json</code> file:</p>
+<div class="code"><pre><code class="hljs lang-shell">polyjuice --jscs .jscsrc.json ./foo/.jscsrc.json &gt; .eslintrc.json</code></pre></div>
+<p><strong>Note:</strong> Polyjuice does a good job of creating a reasonable ESLint configuration from your JSCS configuration, but it may not be 100%. You may still see different warnings than you saw with JSCS, and so you may need to further modify your configuration after using Polyjuice. This is especially true if you&#39;re using inline comments to enable/disable certain rules in JSCS (you&#39;ll need to manually convert those to use ESLint-style comments instead, <a href="#disable-rules-inline">see &quot;Disable Rules Inline&quot;</a> later in this page).</p>
+<h3 id="create-a-new-configuration-from-scratch"><a class="anchor" href="#create-a-new-configuration-from-scratch">#</a>Create a New Configuration From Scratch</h3>
+<p>If you don&#39;t want to convert your JSCS configuration directly into an ESLint configuration, then you can use ESLint&#39;s built-in wizard to get you started. Just run:</p>
+<div class="code"><pre><code class="hljs lang-bash">npm init @eslint/config@latest</code></pre></div>
+<p>You&#39;ll be guided through a series of questions that will help you setup a basic configuration file to get you started.</p>
+<h2 id="converting-presets"><a class="anchor" href="#converting-presets">#</a>Converting Presets</h2>
+<p>There are shareable configs available for most JSCS presets. The equivalent shareable configs for each JSCS preset are listed in the following table:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>JSCS Preset</strong></th>
+<th><strong>ESLint Shareable Config</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>airbnb</code></td>
+<td><a href="https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb-base"><code>eslint-config-airbnb-base</code></a></td>
+</tr>
+<tr>
+<td><code>crockford</code></td>
+<td>(not available)</td>
+</tr>
+<tr>
+<td><code>google</code></td>
+<td><a href="https://github.com/google/eslint-config-google"><code>eslint-config-google</code></a></td>
+</tr>
+<tr>
+<td><code>grunt</code></td>
+<td><a href="https://github.com/markelog/eslint-config-grunt"><code>eslint-config-grunt</code></a></td>
+</tr>
+<tr>
+<td><code>idiomatic</code></td>
+<td><a href="https://github.com/jamespamplin/eslint-config-idiomatic"><code>eslint-config-idiomatic</code></a></td>
+</tr>
+<tr>
+<td><code>jquery</code></td>
+<td><a href="https://github.com/jquery/eslint-config-jquery"><code>eslint-config-jquery</code></a></td>
+</tr>
+<tr>
+<td><code>mdcs</code></td>
+<td><a href="https://github.com/zz85/mrdoobapproves"><code>eslint-config-mdcs</code></a></td>
+</tr>
+<tr>
+<td><code>node-style-guide</code></td>
+<td><a href="https://github.com/pdehaan/eslint-config-node-style-guide"><code>eslint-config-node-style-guide</code></a></td>
+</tr>
+<tr>
+<td><code>wikimedia</code></td>
+<td><a href="https://github.com/wikimedia/eslint-config-wikimedia"><code>eslint-config-wikimedia</code></a></td>
+</tr>
+<tr>
+<td><code>wordpress</code></td>
+<td><a href="https://github.com/WordPress-Coding-Standards/eslint-config-wordpress"><code>eslint-config-wordpress</code></a></td>
+</tr>
+</tbody></table></div>
+<p>As an example, suppose that you are using the <code>airbnb</code> preset, so your <code>.jscsrc</code> file looks like this:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;preset&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;airbnb&quot;</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>In order to get the same functionality in ESLint, you would first need to install the <code>eslint-config-airbnb</code> shareable config package:</p>
+<div class="code"><pre><code class="hljs lang-bash">npm install --save-dev eslint-config-airbnb-base</code></pre></div>
+<p>And then you would modify your configuration file like this:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;extends&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;airbnb-base&quot;</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>ESLint sees <code>&quot;airbnb-base&quot;</code> and will look for <code>eslint-config-airbnb-base</code> (to save you some typing).</p>
+<h2 id="disable-rules-inline"><a class="anchor" href="#disable-rules-inline">#</a>Disable Rules Inline</h2>
+<p>Both JSCS and ESLint use comments inside of files to disable rules around certain parts of your code. The following table lists out the JSCS inline configuration comments and their ESLint equivalents.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Description</strong></th>
+<th><strong>JSCS Comment</strong></th>
+<th><strong>ESLint Comment</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Disable all rules</td>
+<td><code>// jscs:disable</code> or <code>/* jscs:disable */</code></td>
+<td><code>/* eslint-disable */</code></td>
+</tr>
+<tr>
+<td>Enable all rules</td>
+<td><code>// jscs:enable</code> or <code>/* jscs:enable */</code></td>
+<td><code>/* eslint-enable */</code></td>
+</tr>
+<tr>
+<td>Disable one rule</td>
+<td><code>// jscs:disable ruleName</code> or <code>/* jscs:disable ruleName */</code></td>
+<td><code>/* eslint-disable rule-name */</code></td>
+</tr>
+<tr>
+<td>Enable one rule</td>
+<td><code>// jscs:enable ruleName</code> or <code>/* jscs:enable ruleName */</code></td>
+<td><code>/* eslint-enable rule-name */</code></td>
+</tr>
+<tr>
+<td>Disable multiple rules</td>
+<td><code>// jscs:disable ruleName1, ruleName2</code> or <code>/* jscs:disable ruleName1, ruleName2 */</code></td>
+<td><code>/* eslint-disable rule-name1, rule-name2 */</code></td>
+</tr>
+<tr>
+<td>Enable multiple rules</td>
+<td><code>// jscs:enable ruleName1, ruleName2</code> or <code>/* jscs:enable ruleName1, ruleName2 */</code></td>
+<td><code>/* eslint-enable rule-name1, rule-name2 */</code></td>
+</tr>
+<tr>
+<td>Disable one rule on single line</td>
+<td><code>// jscs:ignore ruleName</code></td>
+<td><code>// eslint-disable-line rule-name</code></td>
+</tr>
+</tbody></table></div>
+<h2 id="command-line-options"><a class="anchor" href="#command-line-options">#</a>Command Line Options</h2>
+<p>Both JSCS and ESLint have command line arguments corresponding to many of their configuration options. The following are the ESLint equivalents of JSCS command line options.</p>
+<h3 id="--fix"><a class="anchor" href="#--fix">#</a><code>--fix</code></h3>
+<p>JSCS uses the <code>--fix</code> option to apply automatic fixes to code:</p>
+<div class="code"><pre><code class="hljs lang-shell">jscs --fix file.js</code></pre></div>
+<p>ESLint has the same option:</p>
+<div class="code"><pre><code class="hljs lang-shell">eslint --fix file.js</code></pre></div>
+<h3 id="--auto-configure"><a class="anchor" href="#--auto-configure">#</a><code>--auto-configure</code></h3>
+<p>The JSCS <code>--auto-configure</code> option created a configuration based on what it found in a given file:</p>
+<div class="code"><pre><code class="hljs lang-shell">jscs --auto-configure file.js</code></pre></div>
+<p>In ESLint, there&#39;s a similar option when you use <code>--init</code>. Just select &quot;Inspect your JavaScript file(s)&quot;:</p>
+<div class="code"><pre><code class="hljs lang-shell">eslint --init
+? How would you like to configure ESLint? (Use arrow keys)
+&gt; Answer questions about your style
+  Use a popular style guide
+  Inspect your JavaScript file(s)</code></pre></div>
+<h2 id="--config---c"><a class="anchor" href="#--config---c">#</a><code>--config</code>, <code>-c</code></h2>
+<p>JSCS allows you to specify a configuration file to use on the command line using either <code>--config</code> or <code>-c</code>, such as:</p>
+<div class="code"><pre><code class="hljs lang-shell">jscs --config myconfig.json file.js
+jscs -c myconfig.json file.js</code></pre></div>
+<p>Both flags are also supported by ESLint:</p>
+<div class="code"><pre><code class="hljs lang-shell">eslint --config myconfig.json file.js
+eslint -c myconfig.json file.js</code></pre></div>
+<h2 id="piping-code-into-eslint"><a class="anchor" href="#piping-code-into-eslint">#</a>Piping Code Into ESLint</h2>
+<p>In JSCS, you can pipe code in like this:</p>
+<div class="code"><pre><code class="hljs lang-shell"><span class="hljs-built_in">cat</span> file.js | jscs</code></pre></div>
+<p>In ESLint, you can also pipe in code, but you need to use the <code>--stdin</code> flag:</p>
+<div class="code"><pre><code class="hljs lang-shell"><span class="hljs-built_in">cat</span> file.js | eslint --stdin</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#terminology">Terminology</a><a class="toc-2" href="#convert-configuration-files-using-polyjuice">Convert Configuration Files Using Polyjuice</a><a class="toc-3" href="#create-a-new-configuration-from-scratch">Create a New Configuration From Scratch</a><a class="toc-2" href="#converting-presets">Converting Presets</a><a class="toc-2" href="#disable-rules-inline">Disable Rules Inline</a><a class="toc-2" href="#command-line-options">Command Line Options</a><a class="toc-3" href="#--fix">--fix</a><a class="toc-3" href="#--auto-configure">--auto-configure</a><a class="toc-2" href="#--config---c">--config , -c</a><a class="toc-2" href="#piping-code-into-eslint">Piping Code Into ESLint</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

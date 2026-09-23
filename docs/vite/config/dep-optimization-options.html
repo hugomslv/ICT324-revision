@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dep Optimization Options (Vite) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link active" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vite</a> › config/dep-optimization-options  <a class="ext small" href="https://vite.dev/config/dep-optimization-options">version en ligne</a></div>
+<h1 id="dep-optimization-options"><a class="anchor" href="#dep-optimization-options">#</a>Dep Optimization Options</h1>
+<ul>
+<li><strong>Related:</strong> <a href="../guide/dep-pre-bundling.html">Dependency Pre-Bundling</a></li>
+</ul>
+<p>Unless noted, the options in this section are only applied to the dependency optimizer, which is only used in dev.</p>
+<h2 id="optimizedeps-entries"><a class="anchor" href="#optimizedeps-entries">#</a>optimizeDeps.entries <NonInheritBadge /></h2>
+<ul>
+<li><strong>Type:</strong> <code>string | string[]</code></li>
+</ul>
+<p>By default, Vite will crawl all your <code>.html</code> files to detect dependencies that need to be pre-bundled (ignoring <code>node_modules</code>, <code>build.outDir</code>, <code>__tests__</code> and <code>coverage</code>). If the top-level <a href="shared-options.html#input"><code>input</code></a> or <code>build.rolldownOptions.input</code> is specified, Vite will crawl those entry points instead.</p>
+<p>If neither of these fit your needs, you can specify custom entries using this option - the value should be a <a href="https://superchupu.dev/tinyglobby/comparison"><code>tinyglobby</code> pattern</a> or array of patterns that are relative from Vite project root. This will overwrite default entries inference. Only <code>node_modules</code> and <code>build.outDir</code> folders will be ignored by default when <code>optimizeDeps.entries</code> is explicitly defined. If other folders need to be ignored, you can use an ignore pattern as part of the entries list, marked with an initial <code>!</code>. <code>node_modules</code> will not be ignored for patterns that explicitly include the string <code>node_modules</code>.</p>
+<h2 id="optimizedeps-exclude"><a class="anchor" href="#optimizedeps-exclude">#</a>optimizeDeps.exclude <NonInheritBadge /></h2>
+<ul>
+<li><strong>Type:</strong> <code>string[]</code></li>
+</ul>
+<p>Dependencies to exclude from pre-bundling.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : CommonJS</div><p>CommonJS dependencies should not be excluded from optimization. If an ESM dependency is excluded from optimization, but has a nested CommonJS dependency, the CommonJS dependency should be added to <code>optimizeDeps.include</code>. Example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">optimizeDeps</span>: {
+    <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;esm-dep &gt; cjs-dep&#x27;</span>],
+  },
+})</code></pre></div>
+</div><h2 id="optimizedeps-include"><a class="anchor" href="#optimizedeps-include">#</a>optimizeDeps.include <NonInheritBadge /></h2>
+<ul>
+<li><strong>Type:</strong> <code>string[]</code></li>
+</ul>
+<p>By default, linked packages not inside <code>node_modules</code> are not pre-bundled. Use this option to force a linked package to be pre-bundled.</p>
+<p><strong>Experimental:</strong> If you&#39;re using a library with many deep imports, you can also specify a trailing glob pattern to pre-bundle all deep imports at once. This will avoid constantly pre-bundling whenever a new deep import is used. <a href="https://github.com/vitejs/vite/discussions/15833">Give Feedback</a>. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">optimizeDeps</span>: {
+    <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;my-lib/components/**/*.vue&#x27;</span>],
+  },
+})</code></pre></div>
+<h2 id="optimizedeps-rolldownoptions"><a class="anchor" href="#optimizedeps-rolldownoptions">#</a>optimizeDeps.rolldownOptions <NonInheritBadge /></h2>
+<ul>
+<li><strong>Type:</strong> <code>Omit<<a href="https://rolldown.rs/reference/Interface.RolldownOptions">RolldownOptions</a>, 'input' | 'logLevel' | 'output'> & { output?: Omit<<a href="https://rolldown.rs/reference/#:~:text=Output%20Options">RolldownOutputOptions</a>, 'format' | 'sourcemap' | 'dir' | 'banner'> }</code></li>
+</ul>
+<p>Options to pass to Rolldown during the dep scanning and optimization.</p>
+<p>Certain options are omitted since changing them would not be compatible with Vite&#39;s dep optimization.</p>
+<ul>
+<li><code>plugins</code> are merged with Vite&#39;s dep plugin</li>
+</ul>
+<h2 id="optimizedeps-esbuildoptions"><a class="anchor" href="#optimizedeps-esbuildoptions">#</a>optimizeDeps.esbuildOptions <NonInheritBadge /></h2>
+<ul>
+<li><strong>Type:</strong> <code>Omit<<a href="https://esbuild.github.io/api/#general-options">EsbuildBuildOptions</a>, 'bundle' | 'entryPoints' | 'external' | 'write' | 'watch' | 'outdir' | 'outfile' | 'outbase' | 'outExtension' | 'metafile'></code></li>
+<li><strong>Deprecated</strong></li>
+</ul>
+<p>This option is converted to <code>optimizeDeps.rolldownOptions</code> internally. Use <code>optimizeDeps.rolldownOptions</code> instead.</p>
+<h2 id="optimizedeps-force"><a class="anchor" href="#optimizedeps-force">#</a>optimizeDeps.force <NonInheritBadge /></h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+</ul>
+<p>Set to <code>true</code> to force dependency pre-bundling, ignoring previously cached optimized dependencies.</p>
+<h2 id="optimizedeps-nodiscovery"><a class="anchor" href="#optimizedeps-nodiscovery">#</a>optimizeDeps.noDiscovery <NonInheritBadge /></h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+</ul>
+<p>When set to <code>true</code>, automatic dependency discovery will be disabled and only dependencies listed in <code>optimizeDeps.include</code> will be optimized. CJS-only dependencies must be present in <code>optimizeDeps.include</code> during dev.</p>
+<h2 id="optimizedeps-holduntilcrawlend"><a class="anchor" href="#optimizedeps-holduntilcrawlend">#</a>optimizeDeps.holdUntilCrawlEnd <NonInheritBadge /></h2>
+<ul>
+<li><strong>Experimental:</strong> <a href="https://github.com/vitejs/vite/discussions/15834">Give Feedback</a></li>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+</ul>
+<p>When enabled, it will hold the first optimized deps results until all static imports are crawled on cold start. This avoids the need for full-page reloads when new dependencies are discovered and they trigger the generation of new common chunks. If all dependencies are found by the scanner plus the explicitly defined ones in <code>include</code>, it is better to disable this option to let the browser process more requests in parallel.</p>
+<h2 id="optimizedeps-disabled"><a class="anchor" href="#optimizedeps-disabled">#</a>optimizeDeps.disabled <NonInheritBadge /></h2>
+<ul>
+<li><strong>Deprecated</strong></li>
+<li><strong>Experimental:</strong> <a href="https://github.com/vitejs/vite/discussions/13839">Give Feedback</a></li>
+<li><strong>Type:</strong> <code>boolean | &#39;build&#39; | &#39;dev&#39;</code></li>
+<li><strong>Default:</strong> <code>&#39;build&#39;</code></li>
+</ul>
+<p>This option is deprecated. As of Vite 5.1, pre-bundling of dependencies during build have been removed. Setting <code>optimizeDeps.disabled</code> to <code>true</code> or <code>&#39;dev&#39;</code> disables the optimizer, and configured to <code>false</code> or <code>&#39;build&#39;</code> leaves the optimizer during dev enabled.</p>
+<p>To disable the optimizer completely, use <code>optimizeDeps.noDiscovery: true</code> to disallow automatic discovery of dependencies and leave <code>optimizeDeps.include</code> undefined or empty.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Optimizing dependencies during build time was an <strong>experimental</strong> feature. Projects trying out this strategy also removed <code>@rollup/plugin-commonjs</code> using <code>build.commonjsOptions: { include: [] }</code>. If you did so, a warning will guide you to re-enable it to support CJS only packages while bundling.</p>
+</div><h2 id="optimizedeps-needsinterop"><a class="anchor" href="#optimizedeps-needsinterop">#</a>optimizeDeps.needsInterop <NonInheritBadge /></h2>
+<ul>
+<li><strong>Experimental</strong></li>
+<li><strong>Type:</strong> <code>string[]</code></li>
+</ul>
+<p>Forces ESM interop when importing these dependencies. Vite is able to properly detect when a dependency needs interop, so this option isn&#39;t generally needed. However, different combinations of dependencies could cause some of them to be prebundled differently. Adding these packages to <code>needsInterop</code> can speed up cold start by avoiding full-page reloads. You&#39;ll receive a warning if this is the case for one of your dependencies, suggesting to add the package name to this array in your config.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#optimizedeps-entries">optimizeDeps.entries</a><a class="toc-2" href="#optimizedeps-exclude">optimizeDeps.exclude</a><a class="toc-2" href="#optimizedeps-include">optimizeDeps.include</a><a class="toc-2" href="#optimizedeps-rolldownoptions">optimizeDeps.rolldownOptions</a><a class="toc-2" href="#optimizedeps-esbuildoptions">optimizeDeps.esbuildOptions</a><a class="toc-2" href="#optimizedeps-force">optimizeDeps.force</a><a class="toc-2" href="#optimizedeps-nodiscovery">optimizeDeps.noDiscovery</a><a class="toc-2" href="#optimizedeps-holduntilcrawlend">optimizeDeps.holdUntilCrawlEnd</a><a class="toc-2" href="#optimizedeps-disabled">optimizeDeps.disabled</a><a class="toc-2" href="#optimizedeps-needsinterop">optimizeDeps.needsInterop</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-loop-func (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-loop-func <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-loop-func">version en ligne</a></div>
+<h1>no-loop-func</h1><p>Writing functions within loops tends to result in errors due to the way the function creates a closure around the loop. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; i++) {
+    funcs[i] = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> i;
+    };
+}</code></pre></div>
+<p>In this case, you would expect each function created within the loop to return a different number. In reality, each function returns 10, because that was the last value of <code>i</code> in the scope.</p>
+<p><code>let</code> or <code>const</code> mitigate this problem.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; i++) {
+    funcs[i] = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> i;
+    };
+}</code></pre></div>
+<p>In this case, each function created within the loop returns a different number as expected.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This error is raised to highlight a piece of code that may not work as you expect it to and could also indicate a misunderstanding of how the language works. Your code may run without any problems if you do not fix this error, but in some situations it could behave unexpectedly.</p>
+<p>This rule disallows any function within a loop that contains unsafe references (e.g. to modified variables from the outer scope). This rule ignores IIFEs but not async or generator functions.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-loop-func: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">while</span>(i &lt; <span class="hljs-number">5</span>) {
+    <span class="hljs-keyword">var</span> a = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> i; };
+    <span class="hljs-title function_">a</span>();
+
+    i++;
+}
+
+<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">do</span> {
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">a</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> i; };
+    <span class="hljs-title function_">a</span>();
+
+    i++
+} <span class="hljs-keyword">while</span> (i &lt; <span class="hljs-number">5</span>);
+
+<span class="hljs-keyword">let</span> foo = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; ++i) {
+    <span class="hljs-comment">//Bad, `foo` is not in the loop-block&#x27;s scope and `foo` is modified in/after the loop</span>
+    <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(foo));
+    foo += <span class="hljs-number">1</span>;
+}
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; ++i) {
+    <span class="hljs-comment">//Bad, `foo` is not in the loop-block&#x27;s scope and `foo` is modified in/after the loop</span>
+    <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(foo));
+}
+foo = <span class="hljs-number">100</span>;
+
+<span class="hljs-keyword">var</span> arr = [];
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">5</span>; i++) {
+    arr.<span class="hljs-title function_">push</span>((<span class="hljs-function"><span class="hljs-params">f</span> =&gt;</span> f)(<span class="hljs-function">() =&gt;</span> i));
+}
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">5</span>; i++) {
+    arr.<span class="hljs-title function_">push</span>((<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> i;
+    })());
+}
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">5</span>; i++) {
+    (<span class="hljs-keyword">function</span> <span class="hljs-title function_">fun</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">if</span> (arr.<span class="hljs-title function_">includes</span>(fun)) <span class="hljs-keyword">return</span> i;
+        <span class="hljs-keyword">else</span> arr.<span class="hljs-title function_">push</span>(fun);
+    })();
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-loop-func: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">var</span> a = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i=<span class="hljs-number">10</span>; i; i--) {
+    <span class="hljs-title function_">a</span>();
+}
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i=<span class="hljs-number">10</span>; i; i--) {
+    <span class="hljs-keyword">var</span> a = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}; <span class="hljs-comment">// OK, no references to variables in the outer scopes.</span>
+    <span class="hljs-title function_">a</span>();
+}
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i=<span class="hljs-number">10</span>; i; i--) {
+    <span class="hljs-keyword">var</span> a = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> i; }; <span class="hljs-comment">// OK, all references are referring to block scoped variables in the loop.</span>
+    <span class="hljs-title function_">a</span>();
+}
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> i <span class="hljs-keyword">of</span> foo) {
+    <span class="hljs-keyword">var</span> a = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> i; }; <span class="hljs-comment">// OK, all references are referring to block scoped variables in the loop.</span>
+    <span class="hljs-title function_">a</span>();
+}
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">using</span> i <span class="hljs-keyword">of</span> foo) {
+    <span class="hljs-keyword">var</span> a = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> i; }; <span class="hljs-comment">// OK, all references are referring to block scoped variables in the loop.</span>
+    <span class="hljs-title function_">a</span>();
+}
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i=<span class="hljs-number">10</span>; i; i--) {
+    <span class="hljs-keyword">const</span> foo = <span class="hljs-title function_">getsomething</span>(i);
+    <span class="hljs-keyword">var</span> a = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> foo; }; <span class="hljs-comment">// OK, all references are referring to block scoped variables in the loop.</span>
+    <span class="hljs-title function_">a</span>();
+}
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i=<span class="hljs-number">10</span>; i; i--) {
+    <span class="hljs-keyword">using</span> foo = <span class="hljs-title function_">getsomething</span>(i);
+    <span class="hljs-keyword">var</span> a = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> foo; }; <span class="hljs-comment">// OK, all references are referring to block scoped variables in the loop.</span>
+    <span class="hljs-title function_">a</span>();
+}
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i=<span class="hljs-number">10</span>; i; i--) {
+    <span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> foo = <span class="hljs-title function_">getsomething</span>(i);
+    <span class="hljs-keyword">var</span> a = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> foo; }; <span class="hljs-comment">// OK, all references are referring to block scoped variables in the loop.</span>
+    <span class="hljs-title function_">a</span>();
+}
+
+<span class="hljs-keyword">var</span> foo = <span class="hljs-number">100</span>;
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i=<span class="hljs-number">10</span>; i; i--) {
+    <span class="hljs-keyword">var</span> a = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> foo; }; <span class="hljs-comment">// OK, all references are referring to never modified variables.</span>
+    <span class="hljs-title function_">a</span>();
+}
+<span class="hljs-comment">//... no modifications of foo after this loop ...</span>
+
+<span class="hljs-keyword">var</span> arr = [];
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i=<span class="hljs-number">10</span>; i; i--) {
+    (<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> i; })();
+}
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">5</span>; i++) {
+    arr.<span class="hljs-title function_">push</span>((<span class="hljs-function"><span class="hljs-params">f</span> =&gt;</span> f)((<span class="hljs-function">() =&gt;</span> i)()));
+}
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">5</span>; i++) {
+    arr.<span class="hljs-title function_">push</span>((<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-keyword">return</span> (<span class="hljs-function">() =&gt;</span> i)();
+    })());
+}</code></pre></div>
+</div><p>This rule additionally supports TypeScript type syntax.</p>
+<p>Examples of <strong>correct</strong> TypeScript code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-loop-func: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">MyType</span> = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">let</span> <span class="hljs-attr">someArray</span>: <span class="hljs-title class_">MyType</span>[] = [];
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; i += <span class="hljs-number">1</span>) {
+	someArray = someArray.<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">item</span>: <span class="hljs-title class_">MyType</span></span>) =&gt;</span> !!item);
+}</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has no options.</p>
+<h2 id="known-limitations"><a class="anchor" href="#known-limitations">#</a>Known Limitations</h2>
+<p>The rule cannot identify whether the function instance is just immediately invoked and then discarded, or possibly stored for later use.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> foo = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>];
+<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>;
+
+<span class="hljs-keyword">while</span>(foo.<span class="hljs-title function_">some</span>(<span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> e &gt; i)){
+    i += <span class="hljs-number">1</span>;
+}</code></pre></div>
+<p>Here the <code>some</code> method immediately executes the callback function for each element in the array and then discards the function instance. The function is not stored or reused beyond the scope of the loop iteration. So, this will work as intended.</p>
+<p><code>eslint-disable</code> comments can be used in such cases.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-2" href="#known-limitations">Known Limitations</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

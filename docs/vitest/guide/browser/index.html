@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Browser Mode | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/browser/index  <a class="ext small" href="https://vitest.dev/guide/browser/">version en ligne</a></div>
+<h1 id="browser-mode"><a class="anchor" href="#browser-mode">#</a>Browser Mode</h1>
+<p>This page provides information about the browser mode feature in the Vitest API, which allows you to run your tests in the browser natively, providing access to browser globals like window and document.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If you are looking for documentation for <code>expect</code>, <code>vi</code> or any general API like test projects or type testing, refer to the <a href="../index.html">&quot;Getting Started&quot; guide</a>.</p>
+</div><span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span><h2 id="installation"><a class="anchor" href="#installation">#</a>Installation</h2>
+<p>For easier setup, you can use <code>vitest init browser</code> command to install required dependencies and create browser configuration.</p>
+<div class="code-group"><div class="code"><div class="code-title">npm</div><pre><code class="hljs lang-bash">npx vitest init browser</code></pre></div>
+<div class="code"><div class="code-title">yarn</div><pre><code class="hljs lang-bash">yarn <span class="hljs-built_in">exec</span> vitest init browser</code></pre></div>
+<div class="code"><div class="code-title">pnpm</div><pre><code class="hljs lang-bash">pnpx vitest init browser</code></pre></div>
+<div class="code"><div class="code-title">bun</div><pre><code class="hljs lang-bash">bunx vitest init browser</code></pre></div>
+</div><h3 id="manual-installation"><a class="anchor" href="#manual-installation">#</a>Manual Installation</h3>
+<p>You can also install packages manually. Vitest always requires a provider to be defined. You can chose either <a href="../../config/browser/preview.html"><code>preview</code></a>, <a href="../../config/browser/playwright.html"><code>playwright</code></a> or <a href="../../config/browser/webdriverio.html"><code>webdriverio</code></a>.</p>
+<p>If you want to just preview how your tests look, you can use the <code>preview</code> provider:</p>
+<div class="code-group"><div class="code"><div class="code-title">npm</div><pre><code class="hljs lang-bash">npm install -D vitest @vitest/browser-preview</code></pre></div>
+<div class="code"><div class="code-title">yarn</div><pre><code class="hljs lang-bash">yarn add -D vitest vite @vitest/browser-preview</code></pre></div>
+<div class="code"><div class="code-title">pnpm</div><pre><code class="hljs lang-bash">pnpm add -D vitest @vitest/browser-preview</code></pre></div>
+<div class="code"><div class="code-title">bun</div><pre><code class="hljs lang-bash">bun add -D vitest @vitest/browser-preview</code></pre></div>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>However, to run tests in CI you need to install either <a href="https://npmx.dev/package/playwright"><code>playwright</code></a> or <a href="https://npmx.dev/package/webdriverio"><code>webdriverio</code></a>. We also recommend switching to either one of them for testing locally instead of using the default <code>preview</code> provider since it relies on simulating events instead of using Chrome DevTools Protocol.</p>
+<p>If you don&#39;t already use one of these tools, we recommend starting with Playwright because it supports parallel execution, which makes your tests run faster.</p>
+<p>::: tabs key:provider
+== Playwright
+<a href="https://npmx.dev/package/playwright">Playwright</a> is a framework for Web Testing and Automation.</p>
+<div class="code-group"><div class="code"><div class="code-title">npm</div><pre><code class="hljs lang-bash">npm install -D vitest @vitest/browser-playwright</code></pre></div>
+<div class="code"><div class="code-title">yarn</div><pre><code class="hljs lang-bash">yarn add -D vitest vite @vitest/browser-playwright</code></pre></div>
+<div class="code"><div class="code-title">pnpm</div><pre><code class="hljs lang-bash">pnpm add -D vitest @vitest/browser-playwright</code></pre></div>
+<div class="code"><div class="code-title">bun</div><pre><code class="hljs lang-bash">bun add -D vitest @vitest/browser-playwright</code></pre></div>
+<p>== WebdriverIO</p>
+<p><a href="https://npmx.dev/package/webdriverio">WebdriverIO</a> allows you to run tests locally using the WebDriver protocol.</p>
+<div class="code-group"><div class="code"><div class="code-title">npm</div><pre><code class="hljs lang-bash">npm install -D vitest @vitest/browser-webdriverio</code></pre></div>
+<div class="code"><div class="code-title">yarn</div><pre><code class="hljs lang-bash">yarn add -D vitest vite @vitest/browser-webdriverio</code></pre></div>
+<div class="code"><div class="code-title">pnpm</div><pre><code class="hljs lang-bash">pnpm add -D vitest @vitest/browser-webdriverio</code></pre></div>
+<div class="code"><div class="code-title">bun</div><pre><code class="hljs lang-bash">bun add -D vitest @vitest/browser-webdriverio</code></pre></div>
+</div><h2 id="configuration"><a class="anchor" href="#configuration">#</a>Configuration</h2>
+<p>To activate browser mode in your Vitest configuration, set the <code>browser.enabled</code> field to <code>true</code> in your Vitest configuration file. Here is an example configuration using the browser field:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>(),
+      <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-comment">// at least one instance is required</span>
+      <span class="hljs-attr">instances</span>: [
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> },
+      ],
+    },
+  }
+})</code></pre></div>
+<div class="box box-info"><div class="box-title">ℹ️ Info</div><p>Vitest assigns port <code>63315</code> to avoid conflicts with the development server, allowing you to run both in parallel. You can change that with the <a href="../../config/api.html"><code>api</code></a> option.</p>
+</div><p>If you have not used Vite before, make sure you have your framework&#39;s plugin installed and specified in the config. Some frameworks might require extra configuration to work - check their Vite related documentation to be sure.</p>
+<div class="code-group"><div class="code"><div class="code-title">react</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> react <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitejs/plugin-react&#x27;</span>
+<span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [<span class="hljs-title function_">react</span>()],
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>(),
+      <span class="hljs-attr">instances</span>: [
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> },
+      ],
+    }
+  }
+})</code></pre></div>
+<div class="code"><div class="code-title">vue</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+<span class="hljs-keyword">import</span> vue <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitejs/plugin-vue&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [<span class="hljs-title function_">vue</span>()],
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>(),
+      <span class="hljs-attr">instances</span>: [
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> },
+      ],
+    }
+  }
+})</code></pre></div>
+<div class="code"><div class="code-title">svelte</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> { svelte } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@sveltejs/vite-plugin-svelte&#x27;</span>
+<span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [<span class="hljs-title function_">svelte</span>()],
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>(),
+      <span class="hljs-attr">instances</span>: [
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> },
+      ],
+    }
+  }
+})</code></pre></div>
+<div class="code"><div class="code-title">solid</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> solidPlugin <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite-plugin-solid&#x27;</span>
+<span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [<span class="hljs-title function_">solidPlugin</span>()],
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>(),
+      <span class="hljs-attr">instances</span>: [
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> },
+      ],
+    }
+  }
+})</code></pre></div>
+<div class="code"><div class="code-title">marko</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> marko <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@marko/vite&#x27;</span>
+<span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [<span class="hljs-title function_">marko</span>()],
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>(),
+      <span class="hljs-attr">instances</span>: [
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> },
+      ],
+    }
+  }
+})</code></pre></div>
+<div class="code"><div class="code-title">qwik</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> { qwikVite } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@builder.io/qwik/optimizer&#x27;</span>
+<span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+
+<span class="hljs-comment">// optional, run the tests in SSR mode</span>
+<span class="hljs-keyword">import</span> { testSSR } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-qwik/ssr-plugin&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [<span class="hljs-title function_">testSSR</span>(), <span class="hljs-title function_">qwikVite</span>()],
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>(),
+      <span class="hljs-attr">instances</span>: [{ <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> }]
+    },
+  },
+})</code></pre></div>
+</div><p>If you need to run some tests using Node-based runner, you can define a <a href="../projects.html"><code>projects</code></a> option with separate configurations for different testing strategies:</p>
+<p>{#projects-config}</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-comment">// an example of file based convention,</span>
+          <span class="hljs-comment">// you don&#x27;t have to follow it</span>
+          <span class="hljs-attr">include</span>: [
+            <span class="hljs-string">&#x27;tests/unit/**/*.{test,spec}.ts&#x27;</span>,
+            <span class="hljs-string">&#x27;tests/**/*.unit.{test,spec}.ts&#x27;</span>,
+          ],
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;unit&#x27;</span>,
+          <span class="hljs-attr">environment</span>: <span class="hljs-string">&#x27;node&#x27;</span>,
+        },
+      },
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-comment">// an example of file based convention,</span>
+          <span class="hljs-comment">// you don&#x27;t have to follow it</span>
+          <span class="hljs-attr">include</span>: [
+            <span class="hljs-string">&#x27;tests/browser/**/*.{test,spec}.ts&#x27;</span>,
+            <span class="hljs-string">&#x27;tests/**/*.browser.{test,spec}.ts&#x27;</span>,
+          ],
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;browser&#x27;</span>,
+          <span class="hljs-attr">browser</span>: {
+            <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>(),
+            <span class="hljs-attr">instances</span>: [
+              { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> },
+            ],
+          },
+        },
+      },
+    ],
+  },
+})</code></pre></div>
+<h2 id="browser-option-types"><a class="anchor" href="#browser-option-types">#</a>Browser Option Types</h2>
+<p>The browser option in Vitest depends on the provider. Vitest will fail, if you pass <code>--browser</code> and don&#39;t specify its name in the config file. Available options:</p>
+<ul>
+<li><code>webdriverio</code> supports these browsers:<ul>
+<li><code>firefox</code></li>
+<li><code>chrome</code></li>
+<li><code>edge</code></li>
+<li><code>safari</code></li>
+</ul>
+</li>
+<li><code>playwright</code> supports these browsers:<ul>
+<li><code>firefox</code></li>
+<li><code>webkit</code></li>
+<li><code>chromium</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="browser-compatibility"><a class="anchor" href="#browser-compatibility">#</a>Browser Compatibility</h2>
+<p>Vitest uses <a href="https://vitejs.dev/guide/#browser-support">Vite dev server</a> to run your tests, so we only support features specified in the <a href="https://vitejs.dev/config/shared-options.html#esbuild"><code>esbuild.target</code></a> option (<code>esnext</code> by default).</p>
+<p>By default, Vite targets browsers which support the native <a href="https://caniuse.com/es6-module">ES Modules</a>, native <a href="https://caniuse.com/es6-module-dynamic-import">ESM dynamic import</a>, and <a href="https://caniuse.com/mdn-javascript_operators_import_meta"><code>import.meta</code></a>. On top of that, we utilize <a href="https://caniuse.com/?search=BroadcastChannel"><code>BroadcastChannel</code></a> to communicate between iframes and <code>WeakRef</code> with <code>FinalizationRegistry</code> to track mocks without preventing garbage collection:</p>
+<ul>
+<li>Chrome &gt;=87</li>
+<li>Firefox &gt;=79</li>
+<li>Safari &gt;=15.4</li>
+<li>Edge &gt;=88</li>
+</ul>
+<h2 id="running-tests"><a class="anchor" href="#running-tests">#</a>Running Tests</h2>
+<p>When you specify a browser name in the browser option, Vitest will try to run the specified browser using <code>preview</code> by default, and then run the tests there. If you don&#39;t want to use <code>preview</code>, you can configure the custom browser provider by using <code>browser.provider</code> option.</p>
+<p>To specify a browser using the CLI, use the <code>--browser</code> flag followed by the browser name, like this:</p>
+<div class="code"><pre><code class="hljs lang-sh">npx vitest --browser=chromium</code></pre></div>
+<p>Or you can provide browser options to CLI with dot notation:</p>
+<div class="code"><pre><code class="hljs lang-sh">npx vitest --browser.headless</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Since Vitest 3.2, if you don&#39;t have the <code>browser</code> option in your config but specify the <code>--browser</code> flag, Vitest will fail because it can&#39;t assume that config is meant for the browser and not Node.js tests.</p>
+</div><p>By default, Vitest will automatically open the browser UI for development. Your tests will run inside an iframe in the center. You can configure the viewport by selecting the preferred dimensions, calling <code>page.viewport</code> inside the test, or setting default values in <a href="../../config/browser/viewport.html">the config</a>.</p>
+<p>For an alternative debugging model that captures DOM snapshots for every test instead of showing a live iframe, see <a href="trace-view.html">Trace View</a>.</p>
+<h2 id="headless"><a class="anchor" href="#headless">#</a>Headless</h2>
+<p>Headless mode is another option available in the browser mode. In headless mode, the browser runs in the background without a user interface, which makes it useful for running automated tests. The headless option in Vitest can be set to a boolean value to enable or disable headless mode.</p>
+<p>When using headless mode, Vitest won&#39;t open the UI automatically. If you want to continue using the UI but have tests run headlessly, you can install the <a href="../ui.html"><code>@vitest/ui</code></a> package and pass the <code>--ui</code> flag when running Vitest.</p>
+<p>Here&#39;s an example configuration enabling headless mode:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>(),
+      <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">headless</span>: <span class="hljs-literal">true</span>,
+    },
+  }
+})</code></pre></div>
+<p>You can also set headless mode using the <code>--browser.headless</code> flag in the CLI, like this:</p>
+<div class="code"><pre><code class="hljs lang-sh">npx vitest --browser.headless</code></pre></div>
+<p>In this case, Vitest will run in headless mode using the Chrome browser.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Headless mode is not available by default. You need to use either <a href="https://npmx.dev/package/playwright"><code>playwright</code></a> or <a href="https://npmx.dev/package/webdriverio"><code>webdriverio</code></a> providers to enable this feature.</p>
+</div><h2 id="examples"><a class="anchor" href="#examples">#</a>Examples</h2>
+<p>By default, you don&#39;t need any external packages to work with the Browser Mode:</p>
+<div class="code"><div class="code-title">example.test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+<span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./my-render-function.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;properly handles form inputs&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-title function_">render</span>() <span class="hljs-comment">// mount DOM elements</span>
+
+  <span class="hljs-comment">// Asserts initial state.</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hi, my name is Alice&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+
+  <span class="hljs-comment">// Get the input DOM node by querying the associated label.</span>
+  <span class="hljs-keyword">const</span> usernameInput = page.<span class="hljs-title function_">getByLabelText</span>(<span class="hljs-regexp">/username/i</span>)
+
+  <span class="hljs-comment">// Type the name into the input. This already validates that the input</span>
+  <span class="hljs-comment">// is filled correctly, no need to check the value manually.</span>
+  <span class="hljs-keyword">await</span> usernameInput.<span class="hljs-title function_">fill</span>(<span class="hljs-string">&#x27;Bob&#x27;</span>)
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hi, my name is Bob&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<p>However, Vitest also provides packages to render components for several popular frameworks out of the box:</p>
+<ul>
+<li><a href="https://github.com/vitest-dev/vitest-browser-vue"><code>vitest-browser-vue</code></a> to render <a href="https://vuejs.org">vue</a> components</li>
+<li><a href="https://github.com/vitest-dev/vitest-browser-svelte"><code>vitest-browser-svelte</code></a> to render <a href="https://svelte.dev">svelte</a> components</li>
+<li><a href="https://github.com/vitest-dev/vitest-browser-react"><code>vitest-browser-react</code></a> to render <a href="https://react.dev">react</a> components</li>
+<li><a href="https://github.com/vitest-community/vitest-browser-angular"><code>vitest-browser-angular</code></a> to render <a href="https://angular.dev">Angular</a> components</li>
+</ul>
+<p>Community packages are available for other frameworks:</p>
+<ul>
+<li><a href="https://github.com/EskiMojo14/vitest-browser-lit"><code>vitest-browser-lit</code></a> to render <a href="https://lit.dev">lit</a> components</li>
+<li><a href="https://github.com/JoviDeCroock/vitest-browser-preact"><code>vitest-browser-preact</code></a> to render <a href="https://preactjs.com">preact</a> components</li>
+<li><a href="https://github.com/QwikDev/vitest-browser-qwik"><code>vitest-browser-qwik</code></a> to render <a href="https://qwik.dev">qwik</a> components</li>
+</ul>
+<p>If your framework is not represented, feel free to create your own package - it is a simple wrapper around the framework renderer and <code>page.elementLocator</code> API. We will add a link to it on this page. Make sure it has a name starting with <code>vitest-browser-</code>.</p>
+<p>Besides rendering components and locating elements, you will also need to make assertions. Vitest forks the <a href="https://github.com/testing-library/jest-dom"><code>@testing-library/jest-dom</code></a> library to provide a wide range of DOM assertions out of the box. Read more at the <a href="../../api/browser/assertions.html">Assertions API</a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+<span class="hljs-comment">// element is rendered correctly</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello World&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()</code></pre></div>
+<p>Vitest exposes a <a href="../../api/browser/context.html">Context API</a> with a small set of utilities that might be useful to you in tests. For example, if you need to make an interaction, like clicking an element or typing text into an input, you can use <code>userEvent</code> from <code>vitest/browser</code>. Read more at the <a href="../../api/browser/interactivity.html">Interactivity API</a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+<span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">fill</span>(page.<span class="hljs-title function_">getByLabelText</span>(<span class="hljs-regexp">/username/i</span>), <span class="hljs-string">&#x27;Alice&#x27;</span>)
+<span class="hljs-comment">// or just locator.fill</span>
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByLabelText</span>(<span class="hljs-regexp">/username/i</span>).<span class="hljs-title function_">fill</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)</code></pre></div>
+<div class="code-group"><div class="code"><div class="code-title">vue</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-vue&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Component</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./Component.vue&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;properly handles v-model&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">Component</span>)
+
+  <span class="hljs-comment">// Asserts initial state.</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(screen.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hi, my name is Alice&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+
+  <span class="hljs-comment">// Get the input DOM node by querying the associated label.</span>
+  <span class="hljs-keyword">const</span> usernameInput = screen.<span class="hljs-title function_">getByLabelText</span>(<span class="hljs-regexp">/username/i</span>)
+
+  <span class="hljs-comment">// Type the name into the input. This already validates that the input</span>
+  <span class="hljs-comment">// is filled correctly, no need to check the value manually.</span>
+  <span class="hljs-keyword">await</span> usernameInput.<span class="hljs-title function_">fill</span>(<span class="hljs-string">&#x27;Bob&#x27;</span>)
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(screen.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hi, my name is Bob&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<div class="code"><div class="code-title">svelte</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-svelte&#x27;</span>
+<span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Greeter</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./greeter.svelte&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;greeting appears on click&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">Greeter</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;World&#x27;</span> })
+
+  <span class="hljs-keyword">const</span> button = screen.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>)
+  <span class="hljs-keyword">await</span> button.<span class="hljs-title function_">click</span>()
+  <span class="hljs-keyword">const</span> greeting = screen.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/hello world/iu</span>)
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(greeting).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<div class="code"><div class="code-title">react</div><pre><code class="hljs lang-tsx"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-react&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Fetch</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./fetch&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;loads and displays greeting&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// Render a React element into the DOM</span>
+  <span class="hljs-keyword">const</span> screen = <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Fetch</span> <span class="hljs-attr">url</span>=<span class="hljs-string">&quot;/greeting&quot;</span> /&gt;</span></span>)
+
+  <span class="hljs-keyword">await</span> screen.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Load Greeting&#x27;</span>).<span class="hljs-title function_">click</span>()
+  <span class="hljs-comment">// wait before throwing an error if it cannot find an element</span>
+  <span class="hljs-keyword">const</span> heading = screen.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;heading&#x27;</span>)
+
+  <span class="hljs-comment">// assert that the alert message is correct</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(heading).<span class="hljs-title function_">toHaveTextContent</span>(<span class="hljs-string">&#x27;hello there&#x27;</span>)
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(screen.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>)).<span class="hljs-title function_">toBeDisabled</span>()
+})</code></pre></div>
+<div class="code"><div class="code-title">lit</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-lit&#x27;</span>
+<span class="hljs-keyword">import</span> { html } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;lit&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;./greeter-button&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;greeting appears on click&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> screen = <span class="hljs-title function_">render</span>(html`<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">greeter-button</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;World&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">greeter-button</span>&gt;</span>`</span>)
+
+  <span class="hljs-keyword">const</span> button = screen.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>)
+  <span class="hljs-keyword">await</span> button.<span class="hljs-title function_">click</span>()
+  <span class="hljs-keyword">const</span> greeting = screen.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/hello world/iu</span>)
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(greeting).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<div class="code"><div class="code-title">preact</div><pre><code class="hljs lang-tsx"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-preact&#x27;</span>
+<span class="hljs-keyword">import</span> { createElement } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;preact&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Greeting</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;.Greeting&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;greeting appears on click&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> screen = <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Greeting</span> /&gt;</span></span>)
+
+  <span class="hljs-keyword">const</span> button = screen.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>)
+  <span class="hljs-keyword">await</span> button.<span class="hljs-title function_">click</span>()
+  <span class="hljs-keyword">const</span> greeting = screen.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/hello world/iu</span>)
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(greeting).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<div class="code"><div class="code-title">qwik</div><pre><code class="hljs lang-tsx"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-qwik&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Greeting</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./greeting&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;greeting appears on click&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// renderSSR and renderHook are also available</span>
+  <span class="hljs-keyword">const</span> screen = <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Greeting</span> /&gt;</span></span>)
+
+  <span class="hljs-keyword">const</span> button = screen.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>)
+  <span class="hljs-keyword">await</span> button.<span class="hljs-title function_">click</span>()
+  <span class="hljs-keyword">const</span> greeting = screen.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/hello world/iu</span>)
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(greeting).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+</div><p>Vitest doesn&#39;t support all frameworks out of the box, but you can use external tools to run tests with these frameworks. We also encourage the community to create their own <code>vitest-browser</code> wrappers - if you have one, feel free to add it to the examples above.</p>
+<p>For unsupported frameworks, we recommend using <code>testing-library</code> packages:</p>
+<ul>
+<li><a href="https://testing-library.com/docs/solid-testing-library/intro"><code>@solidjs/testing-library</code></a> to render <a href="https://www.solidjs.com">solid</a> components</li>
+<li><a href="https://testing-library.com/docs/marko-testing-library/intro"><code>@marko/testing-library</code></a> to render <a href="https://markojs.com">marko</a> components</li>
+</ul>
+<p>You can also see more examples in <a href="https://github.com/vitest-tests/browser-examples"><code>browser-examples</code></a> repository.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p><code>testing-library</code> provides a package <code>@testing-library/user-event</code>. We do not recommend using it directly because it simulates events instead of actually triggering them - instead, use <a href="../../api/browser/interactivity.html"><code>userEvent</code></a> imported from <code>vitest/browser</code> that uses Chrome DevTools Protocol or Webdriver (depending on the provider) under the hood.</p>
+</div><div class="code-group"><div class="code"><div class="code-title">solid</div><pre><code class="hljs lang-tsx"><span class="hljs-comment">// based on @testing-library/solid API</span>
+<span class="hljs-comment">// https://testing-library.com/docs/solid-testing-library/api</span>
+
+<span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@testing-library/solid&#x27;</span>
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;uses params&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">App</span> = (<span class="hljs-params"></span>) =&gt; (
+    <span class="language-xml"><span class="hljs-tag">&lt;&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Route</span>
+        <span class="hljs-attr">path</span>=<span class="hljs-string">&quot;/ids/:id&quot;</span>
+        <span class="hljs-attr">component</span>=<span class="hljs-string">{()</span> =&gt;</span> (
+          <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>
+            Id:
+            {useParams()?.id}
+          <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        )}
+      /&gt;
+      <span class="hljs-tag">&lt;<span class="hljs-name">Route</span> <span class="hljs-attr">path</span>=<span class="hljs-string">&quot;/&quot;</span> <span class="hljs-attr">component</span>=<span class="hljs-string">{()</span> =&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Start<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>} /&gt;
+    <span class="hljs-tag">&lt;/&gt;</span></span>
+  )
+  <span class="hljs-keyword">const</span> { baseElement } = <span class="hljs-title function_">render</span>(<span class="hljs-function">() =&gt;</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>, { <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;ids/1234&#x27;</span> })
+  <span class="hljs-keyword">const</span> screen = page.<span class="hljs-title function_">elementLocator</span>(baseElement)
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">screen</span>(screen.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Id: 1234&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<div class="code"><div class="code-title">marko</div><pre><code class="hljs lang-ts"><span class="hljs-comment">// based on @testing-library/marko API</span>
+<span class="hljs-comment">// https://testing-library.com/docs/marko-testing-library/api</span>
+
+<span class="hljs-keyword">import</span> { render, screen } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@marko/testing-library&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Greeting</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./greeting.marko&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;renders a message&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> { baseElement } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">Greeting</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Marko&#x27;</span> })
+  <span class="hljs-keyword">const</span> screen = page.<span class="hljs-title function_">elementLocator</span>(baseElement)
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(screen.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/Marko/</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+  <span class="hljs-title function_">expect</span>(container.<span class="hljs-property">firstChild</span>).<span class="hljs-title function_">toMatchInlineSnapshot</span>(<span class="hljs-string">`
+    &lt;h1&gt;Hello, Marko!&lt;/h1&gt;
+  `</span>)
+})</code></pre></div>
+</div><h2 id="limitations"><a class="anchor" href="#limitations">#</a>Limitations</h2>
+<h3 id="thread-blocking-dialogs"><a class="anchor" href="#thread-blocking-dialogs">#</a>Thread Blocking Dialogs</h3>
+<p>When using Vitest Browser, it&#39;s important to note that thread blocking dialogs like <code>alert</code>, <code>confirm</code> or <code>print</code> cannot be used natively. This is because they block the web page, which means Vitest cannot continue communicating with the page, causing the execution to hang.</p>
+<p>In such situations, Vitest provides default mocks with default returned values for these APIs. This ensures that if the user accidentally uses synchronous popup web APIs, the execution would not hang. However, it&#39;s still recommended for the user to mock these web APIs for a better experience. Read more in <a href="../mocking.html">Mocking</a>.</p>
+<h3 id="spying-on-module-exports"><a class="anchor" href="#spying-on-module-exports">#</a>Spying on Module Exports</h3>
+<p>Browser Mode uses the browser&#39;s native ESM support to serve modules. The module namespace object is sealed and can&#39;t be reconfigured, unlike in Node.js tests where Vitest can patch the Module Runner. This means you can&#39;t call <code>vi.spyOn</code> on an imported object:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> <span class="hljs-variable language_">module</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./module.js&#x27;</span>
+
+vi.<span class="hljs-title function_">spyOn</span>(<span class="hljs-variable language_">module</span>, <span class="hljs-string">&#x27;method&#x27;</span>) <span class="hljs-comment">// ❌ throws an error</span></code></pre></div>
+<p>To bypass this limitation, Vitest supports <code>{ spy: true }</code> option in <code>vi.mock(&#39;./module.js&#39;)</code>. This will automatically spy on every export in the module without replacing them with fake ones.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> <span class="hljs-variable language_">module</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./module.js&#x27;</span>
+
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;./module.js&#x27;</span>, { <span class="hljs-attr">spy</span>: <span class="hljs-literal">true</span> })
+
+vi.<span class="hljs-title function_">mocked</span>(<span class="hljs-variable language_">module</span>.<span class="hljs-property">method</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// ...</span>
+})</code></pre></div>
+<p>However, the only way to mock exported <em>variables</em> is to export a method that will change the internal value:</p>
+<div class="code-group"><div class="code"><div class="code-title">module.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">let</span> <span class="hljs-variable constant_">MODE</span> = <span class="hljs-string">&#x27;test&#x27;</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">changeMode</span>(<span class="hljs-params">newMode</span>) {
+  <span class="hljs-variable constant_">MODE</span> = newMode
+}</code></pre></div>
+<div class="code"><div class="code-title">module.test.ts</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { changeMode, <span class="hljs-variable constant_">MODE</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./module.js&#x27;</span>
+
+<span class="hljs-title function_">changeMode</span>(<span class="hljs-string">&#x27;production&#x27;</span>)
+<span class="hljs-title function_">expect</span>(<span class="hljs-variable constant_">MODE</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;production&#x27;</span>)</code></pre></div>
+</div></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#installation">Installation</a><a class="toc-3" href="#manual-installation">Manual Installation</a><a class="toc-2" href="#configuration">Configuration</a><a class="toc-2" href="#browser-option-types">Browser Option Types</a><a class="toc-2" href="#browser-compatibility">Browser Compatibility</a><a class="toc-2" href="#running-tests">Running Tests</a><a class="toc-2" href="#headless">Headless</a><a class="toc-2" href="#examples">Examples</a><a class="toc-2" href="#limitations">Limitations</a><a class="toc-3" href="#thread-blocking-dialogs">Thread Blocking Dialogs</a><a class="toc-3" href="#spying-on-module-exports">Spying on Module Exports</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>semi (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/semi <span class="badge badge-layout">mise en forme (layout)</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/semi">version en ligne</a></div>
+<h1>semi</h1><p>JavaScript doesn&#39;t require semicolons at the end of each statement. In many cases, the JavaScript engine can determine that a semicolon should be in a certain spot and will automatically add it. This feature is known as <strong>automatic semicolon insertion (ASI)</strong> and is considered one of the more controversial features of JavaScript. For example, the following lines are both valid:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">var</span> name = <span class="hljs-string">&quot;ESLint&quot;</span>
+<span class="hljs-keyword">var</span> website = <span class="hljs-string">&quot;eslint.org&quot;</span>;</code></pre></div>
+<p>On the first line, the JavaScript engine will automatically insert a semicolon, so this is not considered a syntax error. The JavaScript engine still knows how to interpret the line and knows that the line end indicates the end of the statement.</p>
+<p>In the debate over ASI, there are generally two schools of thought. The first is that we should treat ASI as if it didn&#39;t exist and always include semicolons manually. The rationale is that it&#39;s easier to always include semicolons than to try to remember when they are or are not required, and thus decreases the possibility of introducing an error.</p>
+<p>However, the ASI mechanism can sometimes be tricky to people who are using semicolons. For example, consider this code:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">return</span>
+{
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;ESLint&quot;</span>
+};</code></pre></div>
+<p>This may look like a <code>return</code> statement that returns an object literal, however, the JavaScript engine will interpret this code as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">return</span>;
+{
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;ESLint&quot;</span>;
+}</code></pre></div>
+<p>Effectively, a semicolon is inserted after the <code>return</code> statement, causing the code below it (a labeled literal inside a block) to be unreachable. This rule and the <a href="no-unreachable.html">no-unreachable</a> rule will protect your code from such cases.</p>
+<p>On the other side of the argument are those who say that since semicolons are inserted automatically, they are optional and do not need to be inserted manually. However, the ASI mechanism can also be tricky to people who don&#39;t use semicolons. For example, consider this code:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">var</span> globalCounter = { }
+
+(<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">var</span> n = <span class="hljs-number">0</span>
+    globalCounter.<span class="hljs-property">increment</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> ++n
+    }
+})()</code></pre></div>
+<p>In this example, a semicolon will not be inserted after the first line, causing a run-time error (because an empty object is called as if it&#39;s a function). The <a href="no-unexpected-multiline.html">no-unexpected-multiline</a> rule can protect your code from such cases.</p>
+<p>Although ASI allows for more freedom over your coding style, it can also make your code behave in an unexpected way, whether you use semicolons or not. Therefore, it is best to know when ASI takes place and when it does not, and have ESLint protect your code from these potentially unexpected cases. In short, as once described by Isaac Schlueter, a <code>\n</code> character always ends a statement (just like a semicolon) unless one of the following is true:</p>
+<ol>
+<li>The statement has an unclosed paren, array literal, or object literal or ends in some other way that is not a valid way to end a statement. (For instance, ending with <code>.</code> or <code>,</code>.)</li>
+<li>The line is <code>--</code> or <code>++</code> (in which case it will decrement/increment the next token.)</li>
+<li>It is a <code>for()</code>, <code>while()</code>, <code>do</code>, <code>if()</code>, or <code>else</code>, and there is no <code>{</code></li>
+<li>The next line starts with <code>[</code>, <code>(</code>, <code>+</code>, <code>*</code>, <code>/</code>, <code>-</code>, <code>,</code>, <code>.</code>, or some other binary operator that can only be found between two tokens in a single expression.</li>
+</ol>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule enforces consistent use of semicolons.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has two options, a string option and an object option.</p>
+<p>String option:</p>
+<ul>
+<li><code>&quot;always&quot;</code> (default) requires semicolons at the end of statements</li>
+<li><code>&quot;never&quot;</code> disallows semicolons at the end of statements (except to disambiguate statements beginning with <code>[</code>, <code>(</code>, <code>/</code>, <code>+</code>, or <code>-</code>)</li>
+</ul>
+<p>Object option (when <code>&quot;always&quot;</code>):</p>
+<ul>
+<li><code>&quot;omitLastInOneLineBlock&quot;: true</code> disallows the last semicolon in a block in which its braces (and therefore the content of the block) are in the same line</li>
+<li><code>&quot;omitLastInOneLineClassBody&quot;: true</code> disallows the last semicolon in a class body in which its braces (and therefore the content of the class body) are in the same line</li>
+</ul>
+<p>Object option (when <code>&quot;never&quot;</code>):</p>
+<ul>
+<li><code>&quot;beforeStatementContinuationChars&quot;: &quot;any&quot;</code> (default) ignores semicolons (or lacking semicolon) at the end of statements if the next line starts with <code>[</code>, <code>(</code>, <code>/</code>, <code>+</code>, or <code>-</code>.</li>
+<li><code>&quot;beforeStatementContinuationChars&quot;: &quot;always&quot;</code> requires semicolons at the end of statements if the next line starts with <code>[</code>, <code>(</code>, <code>/</code>, <code>+</code>, or <code>-</code>.</li>
+<li><code>&quot;beforeStatementContinuationChars&quot;: &quot;never&quot;</code> disallows semicolons at the end of statements if it doesn&#39;t make ASI hazard even if the next line starts with <code>[</code>, <code>(</code>, <code>/</code>, <code>+</code>, or <code>-</code>.</li>
+</ul>
+<p><strong>Note:</strong> <code>beforeStatementContinuationChars</code> does not apply to class fields because class fields are not statements.</p>
+<h3 id="always"><a class="anchor" href="#always">#</a>always</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the default <code>&quot;always&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint semi: [&quot;error&quot;, &quot;always&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> name = <span class="hljs-string">&quot;ESLint&quot;</span>
+
+object.<span class="hljs-property">method</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> {
+    bar = <span class="hljs-number">1</span>
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the default <code>&quot;always&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint semi: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">var</span> name = <span class="hljs-string">&quot;ESLint&quot;</span>;
+
+object.<span class="hljs-property">method</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> {
+    bar = <span class="hljs-number">1</span>;
+}</code></pre></div>
+</div><h4 id="omitlastinonelineblock"><a class="anchor" href="#omitlastinonelineblock">#</a>omitLastInOneLineBlock</h4>
+<p>Examples of additional <strong>correct</strong> code for this rule with the <code>&quot;always&quot;, { &quot;omitLastInOneLineBlock&quot;: true }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint semi: [&quot;error&quot;, &quot;always&quot;, { &quot;omitLastInOneLineBlock&quot;: true}] */</span>
+
+<span class="hljs-keyword">if</span> (foo) { <span class="hljs-title function_">bar</span>() }
+
+<span class="hljs-keyword">if</span> (foo) { <span class="hljs-title function_">bar</span>(); <span class="hljs-title function_">baz</span>() }
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">f</span>(<span class="hljs-params"></span>) { <span class="hljs-title function_">bar</span>(); <span class="hljs-title function_">baz</span>() }
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+    <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) { <span class="hljs-title function_">bar</span>(); <span class="hljs-title function_">baz</span>() }
+
+    <span class="hljs-keyword">static</span> { <span class="hljs-title function_">bar</span>(); <span class="hljs-title function_">baz</span>() }
+}</code></pre></div>
+</div><h4 id="omitlastinonelineclassbody"><a class="anchor" href="#omitlastinonelineclassbody">#</a>omitLastInOneLineClassBody</h4>
+<p>Examples of additional <strong>correct</strong> code for this rule with the <code>&quot;always&quot;, { &quot;omitLastInOneLineClassBody&quot;: true }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint semi: [&quot;error&quot;, &quot;always&quot;, { &quot;omitLastInOneLineClassBody&quot;: true}] */</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SomeClass</span>{
+    <span class="hljs-title function_">logType</span>(<span class="hljs-params"></span>){
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">type</span>);
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">anotherType</span>);
+    }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Variant1</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">SomeClass</span>{type=<span class="hljs-number">1</span>}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Variant2</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">SomeClass</span>{type=<span class="hljs-number">2</span>; anotherType=<span class="hljs-number">3</span>}</code></pre></div>
+</div><h3 id="never"><a class="anchor" href="#never">#</a>never</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;never&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint semi: [&quot;error&quot;, &quot;never&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> name = <span class="hljs-string">&quot;ESLint&quot;</span>;
+
+object.<span class="hljs-property">method</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> {
+    bar = <span class="hljs-number">1</span>;
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;never&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint semi: [&quot;error&quot;, &quot;never&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> name = <span class="hljs-string">&quot;ESLint&quot;</span>
+
+object.<span class="hljs-property">method</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">var</span> name = <span class="hljs-string">&quot;ESLint&quot;</span>
+
+;(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+})()
+
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;a&quot;</span>
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+})()
+
+<span class="hljs-keyword">import</span> b <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;b&quot;</span>
+;(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+})()
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> {
+    bar = <span class="hljs-number">1</span>
+}</code></pre></div>
+</div><h4 id="beforestatementcontinuationchars"><a class="anchor" href="#beforestatementcontinuationchars">#</a>beforeStatementContinuationChars</h4>
+<p>Examples of additional <strong>incorrect</strong> code for this rule with the <code>&quot;never&quot;, { &quot;beforeStatementContinuationChars&quot;: &quot;always&quot; }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint semi: [&quot;error&quot;, &quot;never&quot;, { &quot;beforeStatementContinuationChars&quot;: &quot;always&quot;}] */</span>
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;a&quot;</span>
+
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+})()</code></pre></div>
+</div><p>Examples of additional <strong>incorrect</strong> code for this rule with the <code>&quot;never&quot;, { &quot;beforeStatementContinuationChars&quot;: &quot;never&quot; }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint semi: [&quot;error&quot;, &quot;never&quot;, { &quot;beforeStatementContinuationChars&quot;: &quot;never&quot;}] */</span>
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;a&quot;</span>
+
+;(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+})()</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you do not want to enforce semicolon usage (or omission) in any particular way, then you can turn this rule off.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="no-extra-semi.html"><code>no-extra-semi</code></a>, <a href="no-unexpected-multiline.html"><code>no-unexpected-multiline</code></a>, <a href="semi-spacing.html"><code>semi-spacing</code></a></p></div><h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://blog.izs.me/2010/12/an-open-letter-to-javascript-leaders-regarding/">https://blog.izs.me/2010/12/an-open-letter-to-javascript-leaders-regarding/</a></li><li><a class="ext" href="https://web.archive.org/web/20200420230322/http://inimino.org/~inimino/blog/javascript_semicolons">https://web.archive.org/web/20200420230322/http://inimino.org/~inimino/blog/javascript_semicolons</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#always">always</a><a class="toc-3" href="#never">never</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

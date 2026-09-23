@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-irregular-whitespace (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-irregular-whitespace <span class="badge badge-problem">problème</span> <span class="badge badge-reco">✅ dans js/recommended</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-irregular-whitespace">version en ligne</a></div>
+<h1>no-irregular-whitespace</h1><p>Invalid or irregular whitespace causes issues with ECMAScript 5 parsers and also makes code harder to debug in a similar nature to mixed tabs and spaces.</p>
+<p>Various whitespace characters can be inputted by programmers by mistake for example from copying or keyboard shortcuts. Pressing Alt + Space on macOS adds in a non breaking space character for example.</p>
+<p>A simple fix for this problem could be to rewrite the offending line from scratch. This might also be a problem introduced by the text editor: if rewriting the line does not fix it, try using a different editor.</p>
+<p>Known issues these spaces cause:</p>
+<ul>
+<li>Ogham Space Mark<ul>
+<li>Is a valid token separator, but is rendered as a visible glyph in most typefaces, which may be misleading in source code.</li>
+</ul>
+</li>
+<li>Mongolian Vowel Separator<ul>
+<li>Is no longer considered a space separator since Unicode 6.3. It will result in a syntax error in current parsers when used in place of a regular token separator.</li>
+</ul>
+</li>
+<li>Line Separator and Paragraph Separator<ul>
+<li>These have always been valid whitespace characters and line terminators, but were considered illegal in string literals prior to ECMAScript 2019.</li>
+</ul>
+</li>
+<li>Zero Width Space<ul>
+<li>Is NOT considered a separator for tokens and is often parsed as an <code>Unexpected token ILLEGAL</code>.</li>
+<li>Is NOT shown in modern browsers making code repository software expected to resolve the visualization.</li>
+</ul>
+</li>
+</ul>
+<p>In JSON, none of the characters listed as irregular whitespace by this rule may appear outside of a string.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule is aimed at catching invalid whitespace that is not a normal tab and space. Some of these characters may cause issues in modern browsers and others will be a debugging issue to spot.</p>
+<p>This rule disallows the following characters except where the options allow:</p>
+<div class="code"><pre><code class="hljs lang-text">\u000B - Line Tabulation (\v) - &lt;VT&gt;
+\u000C - Form Feed (\f) - &lt;FF&gt;
+\u0085 - Next Line - &lt;NEL&gt;
+\u00A0 - No-Break Space - &lt;NBSP&gt;
+\u1680 - Ogham Space Mark - &lt;OGSP&gt;
+\u180E - Mongolian Vowel Separator - &lt;MVS&gt;
+\u2000 - En Quad - &lt;NQSP&gt;
+\u2001 - Em Quad - &lt;MQSP&gt;
+\u2002 - En Space - &lt;ENSP&gt;
+\u2003 - Em Space - &lt;EMSP&gt;
+\u2004 - Three-Per-Em - &lt;THPMSP&gt; - &lt;3/MSP&gt;
+\u2005 - Four-Per-Em - &lt;FPMSP&gt; - &lt;4/MSP&gt;
+\u2006 - Six-Per-Em - &lt;SPMSP&gt; - &lt;6/MSP&gt;
+\u2007 - Figure Space - &lt;FSP&gt;
+\u2008 - Punctuation Space - &lt;PUNCSP&gt;
+\u2009 - Thin Space - &lt;THSP&gt;
+\u200A - Hair Space - &lt;HSP&gt;
+\u200B - Zero Width Space - &lt;ZWSP&gt;
+\u2028 - Line Separator - &lt;LS&gt; - &lt;LSEP&gt;
+\u2029 - Paragraph Separator - &lt;PS&gt; - &lt;PSEP&gt;
+\u202F - Narrow No-Break Space - &lt;NNBSP&gt;
+\u205F - Medium Mathematical Space - &lt;MMSP&gt;
+\u3000 - Ideographic Space - &lt;IDSP&gt;
+\uFEFF - Zero Width No-Break Space - &lt;BOM&gt;</code></pre></div>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has an object option for exceptions:</p>
+<ul>
+<li><code>&quot;skipStrings&quot;: true</code> (default) allows any whitespace characters in string literals</li>
+<li><code>&quot;skipComments&quot;: true</code> allows any whitespace characters in comments</li>
+<li><code>&quot;skipRegExps&quot;: true</code> allows any whitespace characters in regular expression literals</li>
+<li><code>&quot;skipTemplates&quot;: true</code> allows any whitespace characters in template literals</li>
+<li><code>&quot;skipJSXText&quot;: true</code> allows any whitespace characters in JSX text</li>
+</ul>
+<h3 id="skipstrings"><a class="anchor" href="#skipstrings">#</a>skipStrings</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the default <code>{ &quot;skipStrings&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-irregular-whitespace: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> thing = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) <span class="hljs-comment">/*&lt;NBSP&gt;*/</span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;test&#x27;</span>;
+}
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span>(<span class="hljs-params"> <span class="hljs-comment">/*&lt;NBSP&gt;*/</span></span>){
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;test&#x27;</span>;
+}
+
+<span class="hljs-keyword">const</span> bar = <span class="hljs-keyword">function</span> <span class="hljs-comment">/*&lt;NBSP&gt;*/</span>(){
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;test&#x27;</span>;
+}
+
+<span class="hljs-keyword">const</span> baz = <span class="hljs-keyword">function</span> <span class="hljs-comment">/*&lt;Ogham Space Mark&gt;*/</span>(){
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;test&#x27;</span>;
+}
+
+<span class="hljs-keyword">const</span> qux = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;test&#x27;</span>; <span class="hljs-comment">/*&lt;ENSP&gt;*/</span>
+}
+
+<span class="hljs-keyword">const</span> quux = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;test&#x27;</span>; <span class="hljs-comment">/*&lt;NBSP&gt;*/</span>
+}
+
+<span class="hljs-keyword">const</span> item = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// Description &lt;NBSP&gt;: some descriptive text</span>
+}
+
+<span class="hljs-comment">/*
+Description &lt;NBSP&gt;: some descriptive text
+*/</span>
+
+<span class="hljs-keyword">const</span> func = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-regexp">/ &lt;NBSP&gt;regexp/</span>;
+}
+
+<span class="hljs-keyword">const</span> myFunc = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`template &lt;NBSP&gt;string`</span>;
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the default <code>{ &quot;skipStrings&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-irregular-whitespace: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> thing = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27; &lt;NBSP&gt;thing&#x27;</span>;
+}
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;​&lt;ZWSP&gt;thing&#x27;</span>;
+}
+
+<span class="hljs-keyword">const</span> bar = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;th &lt;NBSP&gt;ing&#x27;</span>;
+}</code></pre></div>
+</div><h3 id="skipcomments"><a class="anchor" href="#skipcomments">#</a>skipComments</h3>
+<p>Examples of additional <strong>correct</strong> code for this rule with the <code>{ &quot;skipComments&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-irregular-whitespace: [&quot;error&quot;, { &quot;skipComments&quot;: true }]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">thing</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// Description &lt;NBSP&gt;: some descriptive text</span>
+}
+
+<span class="hljs-comment">/*
+Description &lt;NBSP&gt;: some descriptive text
+*/</span></code></pre></div>
+</div><h3 id="skipregexps"><a class="anchor" href="#skipregexps">#</a>skipRegExps</h3>
+<p>Examples of additional <strong>correct</strong> code for this rule with the <code>{ &quot;skipRegExps&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-irregular-whitespace: [&quot;error&quot;, { &quot;skipRegExps&quot;: true }]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">thing</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-regexp">/ &lt;NBSP&gt;regexp/</span>;
+}</code></pre></div>
+</div><h3 id="skiptemplates"><a class="anchor" href="#skiptemplates">#</a>skipTemplates</h3>
+<p>Examples of additional <strong>correct</strong> code for this rule with the <code>{ &quot;skipTemplates&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-irregular-whitespace: [&quot;error&quot;, { &quot;skipTemplates&quot;: true }]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">thing</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`template &lt;NBSP&gt;string`</span>;
+}</code></pre></div>
+</div><h3 id="skipjsxtext"><a class="anchor" href="#skipjsxtext">#</a>skipJSXText</h3>
+<p>Examples of additional <strong>correct</strong> code for this rule with the <code>{ &quot;skipJSXText&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-comment">/*eslint no-irregular-whitespace: [&quot;error&quot;, { &quot;skipJSXText&quot;: true }]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Thing</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>text in JSX<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>; <span class="hljs-comment">// &lt;NBSP&gt; before `JSX`</span>
+}</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you decide that you wish to use whitespace other than tabs and spaces outside of strings in your application.</p>
+<h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://es5.github.io/#x7.2">https://es5.github.io/#x7.2</a></li><li><a class="ext" href="https://web.archive.org/web/20200414142829/http://timelessrepo.com/json-isnt-a-javascript-subset">https://web.archive.org/web/20200414142829/http://timelessrepo.com/json-isnt-a-javascript-subset</a></li><li><a class="ext" href="https://codepoints.net/U+1680">https://codepoints.net/U+1680</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#skipstrings">skipStrings</a><a class="toc-3" href="#skipcomments">skipComments</a><a class="toc-3" href="#skipregexps">skipRegExps</a><a class="toc-3" href="#skiptemplates">skipTemplates</a><a class="toc-3" href="#skipjsxtext">skipJSXText</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

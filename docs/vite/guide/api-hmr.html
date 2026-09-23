@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HMR API (Vite) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link active" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vite</a> › guide/api-hmr  <a class="ext small" href="https://vite.dev/guide/api-hmr">version en ligne</a></div>
+<h1 id="hmr-api"><a class="anchor" href="#hmr-api">#</a>HMR API</h1>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Note</div><p>This is the client HMR API. For handling HMR update in plugins, see <a href="api-plugin.html#handlehotupdate">handleHotUpdate</a>.</p>
+<p>The manual HMR API is primarily intended for framework and tooling authors. As an end user, HMR is likely already handled for you in the framework specific starter templates.</p>
+</div><p>Vite exposes its manual HMR API via the special <code>import.meta.hot</code> object:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">ModuleNamespace</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite/types/hot.d.ts&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> {
+  <span class="hljs-title class_">CustomEventName</span>,
+  <span class="hljs-title class_">InferCustomEventPayload</span>,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite/types/customEvent.d.ts&#x27;</span>
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">ImportMeta</span> {
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">hot</span>?: <span class="hljs-title class_">ViteHotContext</span>
+}
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">ViteHotContext</span> {
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">data</span>: <span class="hljs-built_in">any</span>
+
+  <span class="hljs-title function_">accept</span>(): <span class="hljs-built_in">void</span>
+  <span class="hljs-title function_">accept</span>(<span class="hljs-attr">cb</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">mod</span>: <span class="hljs-title class_">ModuleNamespace</span> | <span class="hljs-literal">undefined</span></span>) =&gt;</span> <span class="hljs-built_in">void</span>): <span class="hljs-built_in">void</span>
+  <span class="hljs-title function_">accept</span>(<span class="hljs-attr">dep</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">cb</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">mod</span>: <span class="hljs-title class_">ModuleNamespace</span> | <span class="hljs-literal">undefined</span></span>) =&gt;</span> <span class="hljs-built_in">void</span>): <span class="hljs-built_in">void</span>
+  <span class="hljs-title function_">accept</span>(
+    <span class="hljs-attr">deps</span>: <span class="hljs-keyword">readonly</span> <span class="hljs-built_in">string</span>[],
+    <span class="hljs-attr">cb</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">mods</span>: <span class="hljs-title class_">Array</span>&lt;<span class="hljs-title class_">ModuleNamespace</span> | <span class="hljs-literal">undefined</span>&gt;</span>) =&gt;</span> <span class="hljs-built_in">void</span>,
+  ): <span class="hljs-built_in">void</span>
+
+  <span class="hljs-title function_">dispose</span>(<span class="hljs-attr">cb</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">data</span>: <span class="hljs-built_in">any</span></span>) =&gt;</span> <span class="hljs-built_in">void</span>): <span class="hljs-built_in">void</span>
+  <span class="hljs-title function_">prune</span>(<span class="hljs-attr">cb</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">data</span>: <span class="hljs-built_in">any</span></span>) =&gt;</span> <span class="hljs-built_in">void</span>): <span class="hljs-built_in">void</span>
+  <span class="hljs-title function_">invalidate</span>(<span class="hljs-attr">message</span>?: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">void</span>
+
+  on&lt;T <span class="hljs-keyword">extends</span> <span class="hljs-title class_">CustomEventName</span>&gt;(
+    <span class="hljs-attr">event</span>: T,
+    <span class="hljs-attr">cb</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">payload</span>: <span class="hljs-title class_">InferCustomEventPayload</span>&lt;T&gt;</span>) =&gt;</span> <span class="hljs-built_in">void</span>,
+  ): <span class="hljs-built_in">void</span>
+  off&lt;T <span class="hljs-keyword">extends</span> <span class="hljs-title class_">CustomEventName</span>&gt;(
+    <span class="hljs-attr">event</span>: T,
+    <span class="hljs-attr">cb</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">payload</span>: <span class="hljs-title class_">InferCustomEventPayload</span>&lt;T&gt;</span>) =&gt;</span> <span class="hljs-built_in">void</span>,
+  ): <span class="hljs-built_in">void</span>
+  send&lt;T <span class="hljs-keyword">extends</span> <span class="hljs-title class_">CustomEventName</span>&gt;(
+    <span class="hljs-attr">event</span>: T,
+    <span class="hljs-attr">data</span>?: <span class="hljs-title class_">InferCustomEventPayload</span>&lt;T&gt;,
+  ): <span class="hljs-built_in">void</span>
+}</code></pre></div>
+<h2 id="required-conditional-guard"><a class="anchor" href="#required-conditional-guard">#</a>Required Conditional Guard</h2>
+<p>First of all, make sure to guard all HMR API usage with a conditional block so that the code can be tree-shaken in production:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">if</span> (<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>) {
+  <span class="hljs-comment">// HMR code</span>
+}</code></pre></div>
+<h2 id="intellisense-for-typescript"><a class="anchor" href="#intellisense-for-typescript">#</a>IntelliSense for TypeScript</h2>
+<p>Vite provides type definitions for <code>import.meta.hot</code> in <a href="https://github.com/vitejs/vite/blob/main/packages/vite/client.d.ts"><code>vite/client.d.ts</code></a>. You can add &quot;vite/client&quot; in the <code>tsconfig.json</code> so TypeScript picks up the type definitions:</p>
+<div class="code"><div class="code-title">tsconfig.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;compilerOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;types&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;vite/client&quot;</span><span class="hljs-punctuation">]</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<h2 id="hot-accept-cb"><a class="anchor" href="#hot-accept-cb">#</a><code>hot.accept(cb)</code></h2>
+<p>For a module to self-accept, use <code>import.meta.hot.accept</code> with a callback which receives the updated module:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> count = <span class="hljs-number">1</span>
+
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>) {
+  <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>.<span class="hljs-title function_">accept</span>(<span class="hljs-function">(<span class="hljs-params">newModule</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (newModule) {
+      <span class="hljs-comment">// newModule is undefined when SyntaxError happened</span>
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;updated: count is now &#x27;</span>, newModule.<span class="hljs-property">count</span>)
+    }
+  })
+}</code></pre></div>
+<p>A module that &quot;accepts&quot; hot updates is considered an <strong>HMR boundary</strong>.</p>
+<div class="code"><pre><code class="hljs lang-dot">digraph hmr_boundary {
+  rankdir=RL
+  ranksep=0.3
+  node [shape=box style=&quot;rounded,filled&quot; fontname=&quot;Arial&quot; fontsize=11 margin=&quot;0.2,0.1&quot; fontcolor=&quot;${#3c3c43|#ffffff}&quot; color=&quot;${#c2c2c4|#3c3f44}&quot;]
+  edge [color=&quot;${#67676c|#98989f}&quot; fontname=&quot;Arial&quot; fontsize=10 fontcolor=&quot;${#67676c|#98989f}&quot;]
+  bgcolor=&quot;transparent&quot;
+
+  root [label=&quot;main.js&quot; fillcolor=&quot;${#f6f6f7|#2e2e32}&quot;]
+  parent [label=&quot;App.vue&quot; fillcolor=&quot;${#f6f6f7|#2e2e32}&quot;]
+  boundary [label=&quot;Component.vue\n(HMR boundary)\nhot.accept()&quot; fillcolor=&quot;${#def5ed|#15312d}&quot; color=&quot;${#18794e|#3dd68c}&quot; penwidth=2]
+  edited [label=&quot;utils.js\n(edited)&quot; fillcolor=&quot;${#fcf4dc|#38301a}&quot; color=&quot;${#915930|#f9b44e}&quot; penwidth=2]
+
+  boundary -&gt; edited [label=&quot;imports&quot; color=&quot;${#915930|#f9b44e}&quot; style=bold]
+  parent -&gt; boundary [label=&quot;imports&quot; style=dashed]
+  root -&gt; parent [label=&quot;imports&quot; style=dashed]
+}</code></pre></div>
+<p>Vite&#39;s HMR does not actually swap the originally imported module: if an HMR boundary module re-exports imports from a dep, then it is responsible for updating those re-exports (and these exports must be using <code>let</code>). In addition, importers up the chain from the boundary module will not be notified of the change. This simplified HMR implementation is sufficient for most dev use cases, while allowing us to skip the expensive work of generating proxy modules.</p>
+<p>Vite requires that the call to this function appears as <code>import.meta.hot.accept(</code> (whitespace-sensitive) in the source code in order for the module to accept update. This is a requirement of the static analysis that Vite does to enable HMR support for a module.</p>
+<h2 id="hot-accept-deps-cb"><a class="anchor" href="#hot-accept-deps-cb">#</a><code>hot.accept(deps, cb)</code></h2>
+<p>A module can also accept updates from direct dependencies without reloading itself:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> declare <span class="hljs-keyword">const</span> <span class="hljs-attr">foo</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">void</span>
+
+<span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> { foo } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./foo.js&#x27;</span>
+
+<span class="hljs-title function_">foo</span>()
+
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>) {
+  <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>.<span class="hljs-title function_">accept</span>(<span class="hljs-string">&#x27;./foo.js&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">newFoo</span>) =&gt;</span> {
+    <span class="hljs-comment">// the callback receives the updated &#x27;./foo.js&#x27; module</span>
+    newFoo?.<span class="hljs-title function_">foo</span>()
+  })
+
+  <span class="hljs-comment">// Can also accept an array of dep modules:</span>
+  <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>.<span class="hljs-title function_">accept</span>(
+    [<span class="hljs-string">&#x27;./foo.js&#x27;</span>, <span class="hljs-string">&#x27;./bar.js&#x27;</span>],
+    <span class="hljs-function">(<span class="hljs-params">[newFooModule, newBarModule]</span>) =&gt;</span> {
+      <span class="hljs-comment">// The callback receives an array where only the updated module is</span>
+      <span class="hljs-comment">// non null. If the update was not successful (syntax error for ex.),</span>
+      <span class="hljs-comment">// the array is empty</span>
+    },
+  )
+}</code></pre></div>
+<h2 id="hot-dispose-cb"><a class="anchor" href="#hot-dispose-cb">#</a><code>hot.dispose(cb)</code></h2>
+<p>A self-accepting module or a module that expects to be accepted by others can use <code>hot.dispose</code> to clean-up any persistent side effects created by its updated copy:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">setupSideEffect</span>(<span class="hljs-params"></span>) {}
+
+<span class="hljs-title function_">setupSideEffect</span>()
+
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>) {
+  <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>.<span class="hljs-title function_">dispose</span>(<span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> {
+    <span class="hljs-comment">// cleanup side effect</span>
+  })
+}</code></pre></div>
+<h2 id="hot-prune-cb"><a class="anchor" href="#hot-prune-cb">#</a><code>hot.prune(cb)</code></h2>
+<p>Register a callback that will be called when the module is no longer imported on the page. Compared to <code>hot.dispose</code>, this can be used if the source code cleans up side-effects by itself on updates and you only need to clean-up when it&#39;s removed from the page. Vite currently uses this for <code>.css</code> imports.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">setupOrReuseSideEffect</span>(<span class="hljs-params"></span>) {}
+
+<span class="hljs-title function_">setupOrReuseSideEffect</span>()
+
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>) {
+  <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>.<span class="hljs-title function_">prune</span>(<span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> {
+    <span class="hljs-comment">// cleanup side effect</span>
+  })
+}</code></pre></div>
+<h2 id="hot-data"><a class="anchor" href="#hot-data">#</a><code>hot.data</code></h2>
+<p>Vite creates one <code>import.meta.hot.data</code> object for each module path. The object is persisted across successive instances of the same module during HMR. Mutations made during module execution or through the <code>data</code> argument passed to <code>hot.dispose</code> are visible to the next instance of the module.</p>
+<p>When a module is pruned, its <code>hot.dispose</code> and <code>hot.prune</code> callbacks receive the current data object. Vite clears the data after those callbacks complete. If the module is imported again later, it receives a new empty data object.</p>
+<p>Note that re-assignment of <code>data</code> itself is not supported. Instead, you should mutate properties of the <code>data</code> object so information added from other handlers are preserved.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-comment">// ok</span>
+<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>.<span class="hljs-property">data</span>.<span class="hljs-property">someValue</span> = <span class="hljs-string">&#x27;hello&#x27;</span>
+
+<span class="hljs-comment">// not supported</span>
+<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>.<span class="hljs-property">data</span> = { <span class="hljs-attr">someValue</span>: <span class="hljs-string">&#x27;hello&#x27;</span> }</code></pre></div>
+<h2 id="hot-decline"><a class="anchor" href="#hot-decline">#</a><code>hot.decline()</code></h2>
+<p>This is currently a noop and is there for backward compatibility. This could change in the future if there is a new usage for it. To indicate that the module is not hot-updatable, use <code>hot.invalidate()</code>.</p>
+<h2 id="hot-invalidate-message-string"><a class="anchor" href="#hot-invalidate-message-string">#</a><code>hot.invalidate(message?: string)</code></h2>
+<p>A self-accepting module may realize during runtime that it can&#39;t handle a HMR update, and so the update needs to be forcefully propagated to importers. By calling <code>import.meta.hot.invalidate()</code>, the HMR server will invalidate the importers of the caller, as if the caller wasn&#39;t self-accepting. This will log a message both in the browser console and in the terminal. You can pass a message to give some context on why the invalidation happened.</p>
+<p>Note that you should always call <code>import.meta.hot.accept</code> even if you plan to call <code>invalidate</code> immediately afterwards, or else the HMR client won&#39;t listen for future changes to the self-accepting module. To communicate your intent clearly, we recommend calling <code>invalidate</code> within the <code>accept</code> callback like so:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>.<span class="hljs-title function_">accept</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-variable language_">module</span></span>) =&gt;</span> {
+  <span class="hljs-comment">// You may use the new module instance to decide whether to invalidate.</span>
+  <span class="hljs-keyword">if</span> (<span class="hljs-title function_">cannotHandleUpdate</span>(<span class="hljs-variable language_">module</span>)) {
+    <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>.<span class="hljs-title function_">invalidate</span>()
+  }
+})</code></pre></div>
+<h2 id="hot-on-event-cb"><a class="anchor" href="#hot-on-event-cb">#</a><code>hot.on(event, cb)</code></h2>
+<p>Listen to an HMR event.</p>
+<p>The following HMR events are dispatched by Vite automatically:</p>
+<ul>
+<li><code>&#39;vite:beforeUpdate&#39;</code> when an update is about to be applied (e.g. a module will be replaced)</li>
+<li><code>&#39;vite:afterUpdate&#39;</code> when an update has just been applied (e.g. a module has been replaced)</li>
+<li><code>&#39;vite:beforeFullReload&#39;</code> when a full reload is about to occur</li>
+<li><code>&#39;vite:beforePrune&#39;</code> when modules that are no longer needed are about to be pruned</li>
+<li><code>&#39;vite:invalidate&#39;</code> when a module is invalidated with <code>import.meta.hot.invalidate()</code></li>
+<li><code>&#39;vite:error&#39;</code> when an error occurs (e.g. syntax error)</li>
+<li><code>&#39;vite:ws:disconnect&#39;</code> when the WebSocket connection is lost</li>
+<li><code>&#39;vite:ws:connect&#39;</code> when the WebSocket connection is (re-)established</li>
+</ul>
+<p>Custom HMR events can also be sent from plugins. See <a href="api-plugin.html#handlehotupdate">handleHotUpdate</a> for more details.</p>
+<h2 id="hot-off-event-cb"><a class="anchor" href="#hot-off-event-cb">#</a><code>hot.off(event, cb)</code></h2>
+<p>Remove callback from the event listeners.</p>
+<h2 id="hot-send-event-data"><a class="anchor" href="#hot-send-event-data">#</a><code>hot.send(event, data)</code></h2>
+<p>Send custom events back to Vite&#39;s dev server.</p>
+<p>If called before connected, the data will be buffered and sent once the connection is established.</p>
+<p>See <a href="api-plugin.html#client-server-communication">Client-server Communication</a> for more details, including a section on <a href="api-plugin.html#typescript-for-custom-events">Typing Custom Events</a>.</p>
+<h2 id="further-reading"><a class="anchor" href="#further-reading">#</a>Further Reading</h2>
+<p>If you&#39;d like to learn more about how to use the HMR API and how it works under-the-hood. Check out these resources:</p>
+<ul>
+<li><a href="https://bjornlu.com/blog/hot-module-replacement-is-easy">Hot Module Replacement is Easy</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#required-conditional-guard">Required Conditional Guard</a><a class="toc-2" href="#intellisense-for-typescript">IntelliSense for TypeScript</a><a class="toc-2" href="#hot-accept-cb">hot.accept(cb)</a><a class="toc-2" href="#hot-accept-deps-cb">hot.accept(deps, cb)</a><a class="toc-2" href="#hot-dispose-cb">hot.dispose(cb)</a><a class="toc-2" href="#hot-prune-cb">hot.prune(cb)</a><a class="toc-2" href="#hot-data">hot.data</a><a class="toc-2" href="#hot-decline">hot.decline()</a><a class="toc-2" href="#hot-invalidate-message-string">hot.invalidate(message?: string)</a><a class="toc-2" href="#hot-on-event-cb">hot.on(event, cb)</a><a class="toc-2" href="#hot-off-event-cb">hot.off(event, cb)</a><a class="toc-2" href="#hot-send-event-data">hot.send(event, data)</a><a class="toc-2" href="#further-reading">Further Reading</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

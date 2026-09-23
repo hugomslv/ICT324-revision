@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-empty-function (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-empty-function <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-empty-function">version en ligne</a></div>
+<h1>no-empty-function</h1><p>Empty functions can reduce readability because readers need to guess whether it&#39;s intentional or not.
+So writing a clear comment for empty functions is a good practice.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// do nothing.</span>
+}</code></pre></div>
+<p>Especially, the empty block of arrow functions might be confusing developers.
+It&#39;s very similar to an empty object literal.</p>
+<div class="code"><pre><code class="hljs lang-js">list.<span class="hljs-title function_">map</span>(<span class="hljs-function">() =&gt;</span> {});   <span class="hljs-comment">// This is a block, would return undefined.</span>
+list.<span class="hljs-title function_">map</span>(<span class="hljs-function">() =&gt;</span> ({})); <span class="hljs-comment">// This is an empty object.</span></code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule is aimed at eliminating empty functions.
+A function will not be considered a problem if it contains a comment.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-empty-function: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+
+<span class="hljs-keyword">const</span> bar = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">bar1</span> = (<span class="hljs-params"></span>) =&gt; {};
+
+<span class="hljs-keyword">function</span>* <span class="hljs-title function_">baz</span>(<span class="hljs-params"></span>) {}
+
+<span class="hljs-keyword">const</span> bar2 = <span class="hljs-keyword">function</span>*() {};
+
+<span class="hljs-keyword">const</span> obj = {
+    <span class="hljs-attr">foo</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {},
+
+    <span class="hljs-attr">foo</span>: <span class="hljs-keyword">function</span>*() {},
+
+    <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {},
+
+    *<span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {},
+
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">foo</span>() {},
+
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">value</span>) {}
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span>) {}
+
+    <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+
+    *<span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">foo</span>() {}
+
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">value</span>) {}
+
+    <span class="hljs-keyword">static</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+
+    <span class="hljs-keyword">static</span> *<span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">get</span> <span class="hljs-title function_">foo</span>() {}
+
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">set</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">value</span>) {}
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-empty-function: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// do nothing.</span>
+}
+
+<span class="hljs-keyword">const</span> baz = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// any clear comments.</span>
+};
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">baz1</span> = (<span class="hljs-params"></span>) =&gt; {
+    <span class="hljs-title function_">bar</span>();
+};
+
+<span class="hljs-keyword">function</span>* <span class="hljs-title function_">foobar</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// do nothing.</span>
+}
+
+<span class="hljs-keyword">const</span> baz2 = <span class="hljs-keyword">function</span>*() {
+    <span class="hljs-comment">// do nothing.</span>
+};
+
+<span class="hljs-keyword">const</span> obj = {
+    <span class="hljs-attr">foo</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// do nothing.</span>
+    },
+
+    <span class="hljs-attr">foo</span>: <span class="hljs-keyword">function</span>*() {
+        <span class="hljs-comment">// do nothing.</span>
+    },
+
+    <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// do nothing.</span>
+    },
+
+    *<span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// do nothing.</span>
+    },
+
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">foo</span>() {
+        <span class="hljs-comment">// do nothing.</span>
+    },
+
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-comment">// do nothing.</span>
+    }
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// do nothing.</span>
+    }
+
+    <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// do nothing.</span>
+    }
+
+    *<span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// do nothing.</span>
+    }
+
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">foo</span>() {
+        <span class="hljs-comment">// do nothing.</span>
+    }
+
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-comment">// do nothing.</span>
+    }
+
+    <span class="hljs-keyword">static</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// do nothing.</span>
+    }
+
+    <span class="hljs-keyword">static</span> *<span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// do nothing.</span>
+    }
+
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">get</span> <span class="hljs-title function_">foo</span>() {
+        <span class="hljs-comment">// do nothing.</span>
+    }
+
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">set</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-comment">// do nothing.</span>
+    }
+}</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has an option to allow specific kinds of functions to be empty.</p>
+<ul>
+<li><code>allow</code> (<code>string[]</code>) - A list of kind to allow empty functions. List items are some of the following strings. An empty array (<code>[]</code>) by default.<ul>
+<li><code>&quot;functions&quot;</code> - Normal functions.</li>
+<li><code>&quot;arrowFunctions&quot;</code> - Arrow functions.</li>
+<li><code>&quot;generatorFunctions&quot;</code> - Generator functions.</li>
+<li><code>&quot;methods&quot;</code> - Class methods and method shorthands of object literals.</li>
+<li><code>&quot;generatorMethods&quot;</code> - Class methods and method shorthands of object literals with generator.</li>
+<li><code>&quot;getters&quot;</code> - Getters.</li>
+<li><code>&quot;setters&quot;</code> - Setters.</li>
+<li><code>&quot;constructors&quot;</code> - Class constructors.</li>
+<li><code>&quot;asyncFunctions&quot;</code> - Async functions.</li>
+<li><code>&quot;asyncMethods&quot;</code> - Async class methods and method shorthands of object literals.</li>
+<li><code>&quot;privateConstructors&quot;</code> - Private class constructors. (TypeScript only)</li>
+<li><code>&quot;protectedConstructors&quot;</code> - Protected class constructors. (TypeScript only)</li>
+<li><code>&quot;decoratedFunctions&quot;</code> - Class methods with decorators. (TypeScript only)</li>
+<li><code>&quot;overrideMethods&quot;</code> - Methods that use the override keyword. (TypeScript only)</li>
+</ul>
+</li>
+</ul>
+<h3 id="allow-functions"><a class="anchor" href="#allow-functions">#</a>allow: functions</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;allow&quot;: [&quot;functions&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-empty-function: [&quot;error&quot;, { &quot;allow&quot;: [&quot;functions&quot;] }]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+
+<span class="hljs-keyword">const</span> bar = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+
+<span class="hljs-keyword">const</span> obj = {
+    <span class="hljs-attr">foo</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}
+};</code></pre></div>
+</div><h3 id="allow-arrowfunctions"><a class="anchor" href="#allow-arrowfunctions">#</a>allow: arrowFunctions</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;allow&quot;: [&quot;arrowFunctions&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-empty-function: [&quot;error&quot;, { &quot;allow&quot;: [&quot;arrowFunctions&quot;] }]*/</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">foo</span> = (<span class="hljs-params"></span>) =&gt; {};</code></pre></div>
+</div><h3 id="allow-generatorfunctions"><a class="anchor" href="#allow-generatorfunctions">#</a>allow: generatorFunctions</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;allow&quot;: [&quot;generatorFunctions&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-empty-function: [&quot;error&quot;, { &quot;allow&quot;: [&quot;generatorFunctions&quot;] }]*/</span>
+
+<span class="hljs-keyword">function</span>* <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+
+<span class="hljs-keyword">const</span> bar = <span class="hljs-keyword">function</span>*() {};
+
+<span class="hljs-keyword">const</span> obj = {
+    <span class="hljs-attr">foo</span>: <span class="hljs-keyword">function</span>*() {}
+};</code></pre></div>
+</div><h3 id="allow-methods"><a class="anchor" href="#allow-methods">#</a>allow: methods</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;allow&quot;: [&quot;methods&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-empty-function: [&quot;error&quot;, { &quot;allow&quot;: [&quot;methods&quot;] }]*/</span>
+
+<span class="hljs-keyword">const</span> obj = {
+    <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+    <span class="hljs-keyword">static</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+}</code></pre></div>
+</div><h3 id="allow-generatormethods"><a class="anchor" href="#allow-generatormethods">#</a>allow: generatorMethods</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;allow&quot;: [&quot;generatorMethods&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-empty-function: [&quot;error&quot;, { &quot;allow&quot;: [&quot;generatorMethods&quot;] }]*/</span>
+
+<span class="hljs-keyword">const</span> obj = {
+    *<span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    *<span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+    <span class="hljs-keyword">static</span> *<span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+}</code></pre></div>
+</div><h3 id="allow-getters"><a class="anchor" href="#allow-getters">#</a>allow: getters</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;allow&quot;: [&quot;getters&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-empty-function: [&quot;error&quot;, { &quot;allow&quot;: [&quot;getters&quot;] }]*/</span>
+
+<span class="hljs-keyword">const</span> obj = {
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">foo</span>() {}
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">foo</span>() {}
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">get</span> <span class="hljs-title function_">foo</span>() {}
+}</code></pre></div>
+</div><h3 id="allow-setters"><a class="anchor" href="#allow-setters">#</a>allow: setters</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;allow&quot;: [&quot;setters&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-empty-function: [&quot;error&quot;, { &quot;allow&quot;: [&quot;setters&quot;] }]*/</span>
+
+<span class="hljs-keyword">const</span> obj = {
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">value</span>) {}
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">value</span>) {}
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">set</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">value</span>) {}
+}</code></pre></div>
+</div><h3 id="allow-constructors"><a class="anchor" href="#allow-constructors">#</a>allow: constructors</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;allow&quot;: [&quot;constructors&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-empty-function: [&quot;error&quot;, { &quot;allow&quot;: [&quot;constructors&quot;] }]*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span>) {}
+}</code></pre></div>
+</div><h3 id="allow-asyncfunctions"><a class="anchor" href="#allow-asyncfunctions">#</a>allow: asyncFunctions</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;allow&quot;: [&quot;asyncFunctions&quot;] }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-empty-function: [&quot;error&quot;, { &quot;allow&quot;: [&quot;asyncFunctions&quot;] }]*/</span>
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">a</span>(<span class="hljs-params"></span>){}</code></pre></div>
+</div><h3 id="allow-asyncmethods"><a class="anchor" href="#allow-asyncmethods">#</a>allow: asyncMethods</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;allow&quot;: [&quot;asyncMethods&quot;] }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-empty-function: [&quot;error&quot;, { &quot;allow&quot;: [&quot;asyncMethods&quot;] }]*/</span>
+
+<span class="hljs-keyword">const</span> obj = {
+    <span class="hljs-keyword">async</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    <span class="hljs-keyword">async</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">async</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+}</code></pre></div>
+</div><h3 id="allow-privateconstructors"><a class="anchor" href="#allow-privateconstructors">#</a>allow: privateConstructors</h3>
+<p>Examples of <strong>correct</strong> TypeScript code for the <code>{ &quot;allow&quot;: [&quot;privateConstructors&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-empty-function: [&quot;error&quot;, { &quot;allow&quot;: [&quot;privateConstructors&quot;] }]*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    <span class="hljs-keyword">private</span> <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span>) {}
+}</code></pre></div>
+</div><h3 id="allow-protectedconstructors"><a class="anchor" href="#allow-protectedconstructors">#</a>allow: protectedConstructors</h3>
+<p>Examples of <strong>correct</strong> TypeScript code for the <code>{ &quot;allow&quot;: [&quot;protectedConstructors&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-empty-function: [&quot;error&quot;, { &quot;allow&quot;: [&quot;protectedConstructors&quot;] }]*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    <span class="hljs-keyword">protected</span> <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span>) {}
+}</code></pre></div>
+</div><h3 id="allow-decoratedfunctions"><a class="anchor" href="#allow-decoratedfunctions">#</a>allow: decoratedFunctions</h3>
+<p>Examples of <strong>correct</strong> TypeScript code for the <code>{ &quot;allow&quot;: [&quot;decoratedFunctions&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-empty-function: [&quot;error&quot;, { &quot;allow&quot;: [&quot;decoratedFunctions&quot;] }]*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    <span class="hljs-meta">@decorator</span>
+    <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+}</code></pre></div>
+</div><h3 id="allow-overridemethods"><a class="anchor" href="#allow-overridemethods">#</a>allow: overrideMethods</h3>
+<p>Examples of <strong>correct</strong> TypeScript code for the <code>{ &quot;allow&quot;: [&quot;overrideMethods&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-empty-function: [&quot;error&quot;, { &quot;allow&quot;: [&quot;overrideMethods&quot;] }]*/</span>
+
+<span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Base</span> {
+    <span class="hljs-keyword">abstract</span> <span class="hljs-title function_">method</span>(): <span class="hljs-built_in">void</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Derived</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Base</span> {
+    <span class="hljs-keyword">override</span> <span class="hljs-title function_">method</span>(<span class="hljs-params"></span>) {}
+}</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you don&#39;t want to be notified about empty functions, then it&#39;s safe to disable this rule.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="no-empty.html"><code>no-empty</code></a></p></div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#allow-functions">allow: functions</a><a class="toc-3" href="#allow-arrowfunctions">allow: arrowFunctions</a><a class="toc-3" href="#allow-generatorfunctions">allow: generatorFunctions</a><a class="toc-3" href="#allow-methods">allow: methods</a><a class="toc-3" href="#allow-generatormethods">allow: generatorMethods</a><a class="toc-3" href="#allow-getters">allow: getters</a><a class="toc-3" href="#allow-setters">allow: setters</a><a class="toc-3" href="#allow-constructors">allow: constructors</a><a class="toc-3" href="#allow-asyncfunctions">allow: asyncFunctions</a><a class="toc-3" href="#allow-asyncmethods">allow: asyncMethods</a><a class="toc-3" href="#allow-privateconstructors">allow: privateConstructors</a><a class="toc-3" href="#allow-protectedconstructors">allow: protectedConstructors</a><a class="toc-3" href="#allow-decoratedfunctions">allow: decoratedFunctions</a><a class="toc-3" href="#allow-overridemethods">allow: overrideMethods</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

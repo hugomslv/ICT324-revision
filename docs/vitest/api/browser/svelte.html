@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vitest-browser-svelte (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/browser/svelte  <a class="ext small" href="https://vitest.dev/api/browser/svelte">version en ligne</a></div>
+<h1 id="vitest-browser-svelte"><a class="anchor" href="#vitest-browser-svelte">#</a>vitest-browser-svelte</h1>
+<p>The community <a href="https://npmx.dev/package/vitest-browser-svelte"><code>vitest-browser-svelte</code></a> package renders <a href="https://svelte.dev/">Svelte</a> components in <a href="../../guide/browser/index.html">Browser Mode</a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-svelte&#x27;</span>
+<span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Component</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./Component.svelte&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;counter button increments the count&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">Component</span>, {
+    <span class="hljs-attr">initialCount</span>: <span class="hljs-number">1</span>,
+  })
+
+  <span class="hljs-keyword">await</span> screen.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Increment&#x27;</span> }).<span class="hljs-title function_">click</span>()
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(screen.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Count is 2&#x27;</span>)).<span class="hljs-title function_">toBeVisible</span>()
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This library takes inspiration from <a href="https://github.com/testing-library/svelte-testing-library"><code>@testing-library/svelte</code></a>.</p>
+<p>If you have used <code>@testing-library/svelte</code> in your tests before, you can keep using it, however the <code>vitest-browser-svelte</code> package provides certain benefits unique to the Browser Mode that <code>@testing-library/svelte</code> lacks:</p>
+<p><code>vitest-browser-svelte</code> returns APIs that interact well with built-in <a href="locators.html">locators</a>, <a href="interactivity.html">user events</a> and <a href="assertions.html">assertions</a>: for example, Vitest will automatically retry the element until the assertion is successful, even if it was rerendered between the assertions.</p>
+</div><p>The package exposes two entry points: <code>vitest-browser-svelte</code> and <code>vitest-browser-svelte/pure</code>. They expose identical API, but the <code>pure</code> entry point doesn&#39;t add a handler to remove the component before the next test has started.</p>
+<h2 id="render"><a class="anchor" href="#render">#</a>render</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> render&lt;C <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Component</span>&gt;(
+  <span class="hljs-title class_">Component</span>: <span class="hljs-title class_">ComponentImport</span>&lt;C&gt;,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">ComponentOptions</span>&lt;C&gt;,
+  <span class="hljs-attr">renderOptions</span>?: <span class="hljs-title class_">SetupOptions</span>
+): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">RenderResult</span>&lt;C&gt;&gt;</code></pre></div>
+<p>The <code>render</code> function records a <code>svelte.render</code> trace mark, visible in the <a href="../../guide/browser/trace-view.html">Trace View</a>.</p>
+<h3 id="options"><a class="anchor" href="#options">#</a>Options</h3>
+<p>The <code>render</code> function supports either options that you can pass down to <a href="https://svelte.dev/docs/svelte/imperative-component-api#mount"><code>mount</code></a> or props directly:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">Component</span>, {
+  <span class="hljs-attr">props</span>: {
+    <span class="hljs-attr">initialCount</span>: <span class="hljs-number">1</span>,
+  },
+  <span class="hljs-attr">initialCount</span>: <span class="hljs-number">1</span>,
+})</code></pre></div>
+<h4 id="props"><a class="anchor" href="#props">#</a>props</h4>
+<p>Component props.</p>
+<h4 id="target"><a class="anchor" href="#target">#</a>target</h4>
+<p>By default, Vitest will create a <code>div</code>, append it to <code>document.body</code>, and render your component there. If you provide your own <code>HTMLElement</code> container, it will not be appended automatically — you&#39;ll need to call <code>document.body.appendChild(container)</code> before <code>render</code>.</p>
+<p>For example, if you are unit testing a <code>tbody</code> element, it cannot be a child of a <code>div</code>. In this case, you can specify a <code>table</code> as the render container.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> table = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;table&#x27;</span>)
+
+<span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">TableBody</span>, {
+  props,
+  <span class="hljs-comment">// ⚠️ appending the element to `body` manually before rendering</span>
+  <span class="hljs-attr">target</span>: <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-title function_">appendChild</span>(table),
+})</code></pre></div>
+<h4 id="baseelement"><a class="anchor" href="#baseelement">#</a>baseElement</h4>
+<p>This can be passed down in a third argument. You should rarely, if ever, need to use this option.</p>
+<p>If the <code>target</code> is specified, then this defaults to that, otherwise this defaults to <code>document.body</code>. This is used as the base element for the queries as well as what is printed when you use <code>debug()</code>.</p>
+<h3 id="render-result"><a class="anchor" href="#render-result">#</a>Render Result</h3>
+<p>In addition to documented return value, the <code>render</code> function also returns all available <a href="locators.html">locators</a> relative to the <a href="#baseelement"><code>baseElement</code></a>, including <a href="locators.html#custom-locators">custom ones</a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">TableBody</span>, props)
+
+<span class="hljs-keyword">await</span> screen.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;link&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Expand&#x27;</span> }).<span class="hljs-title function_">click</span>()</code></pre></div>
+<h4 id="container"><a class="anchor" href="#container">#</a>container</h4>
+<p>The containing DOM node where your Svelte component is rendered. This is a regular DOM node, so you technically could call <code>container.querySelector</code> etc. to inspect the children.</p>
+<div class="box box-danger"><div class="box-title">🛑 Danger</div><p>If you find yourself using <code>container</code> to query for rendered elements then you should reconsider! The <a href="locators.html">locators</a> are designed to be more resilient to changes that will be made to the component you&#39;re testing. Avoid using <code>container</code> to query for elements!</p>
+</div><h4 id="component"><a class="anchor" href="#component">#</a>component</h4>
+<p>The mounted Svelte component instance. You can use this to access component methods and properties if needed.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> { component } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">Counter</span>, {
+  <span class="hljs-attr">initialCount</span>: <span class="hljs-number">0</span>,
+})
+
+<span class="hljs-comment">// Access component exports if needed</span></code></pre></div>
+<h4 id="locator"><a class="anchor" href="#locator">#</a>locator</h4>
+<p>The <a href="locators.html">locator</a> of your <code>container</code>. It is useful to use queries scoped only to your component, or pass it down to other assertions:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-svelte&#x27;</span>
+
+<span class="hljs-keyword">const</span> { locator } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">NumberDisplay</span>, {
+  <span class="hljs-attr">number</span>: <span class="hljs-number">2</span>,
+})
+
+<span class="hljs-keyword">await</span> locator.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>).<span class="hljs-title function_">click</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(locator).<span class="hljs-title function_">toHaveTextContent</span>(<span class="hljs-string">&#x27;Hello World&#x27;</span>)</code></pre></div>
+<h4 id="debug"><a class="anchor" href="#debug">#</a>debug</h4>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">debug</span>(<span class="hljs-params">
+  <span class="hljs-attr">el</span>?: <span class="hljs-title class_">HTMLElement</span> | <span class="hljs-title class_">HTMLElement</span>[] | <span class="hljs-title class_">Locator</span> | <span class="hljs-title class_">Locator</span>[],
+</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>This method is a shortcut for <code>console.log(prettyDOM(baseElement))</code>. It will print the DOM content of the container or specified elements to the console.</p>
+<h4 id="rerender"><a class="anchor" href="#rerender">#</a>rerender</h4>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">rerender</span>(<span class="hljs-params"><span class="hljs-attr">props</span>: <span class="hljs-title class_">Partial</span>&lt;<span class="hljs-title class_">ComponentProps</span>&lt;T&gt;&gt;</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Updates the component&#39;s props and waits for Svelte to apply the changes. Use this to test how your component responds to prop changes. Also records a <code>svelte.rerender</code> trace mark in the <a href="../../guide/browser/trace-view.html">Trace View</a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-svelte&#x27;</span>
+
+<span class="hljs-keyword">const</span> { rerender } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">NumberDisplay</span>, {
+  <span class="hljs-attr">number</span>: <span class="hljs-number">1</span>,
+})
+
+<span class="hljs-comment">// re-render the same component with different props</span>
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">rerender</span>({ <span class="hljs-attr">number</span>: <span class="hljs-number">2</span> })</code></pre></div>
+<h4 id="unmount"><a class="anchor" href="#unmount">#</a>unmount</h4>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">unmount</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Unmount and destroy the Svelte component. Also records a <code>svelte.unmount</code> trace mark in the <a href="../../guide/browser/trace-view.html">Trace View</a>. This is useful for testing what happens when your component is removed from the page (like testing that you don&#39;t leave event handlers hanging around causing memory leaks).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-svelte&#x27;</span>
+
+<span class="hljs-keyword">const</span> { container, unmount } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">Component</span>)
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">unmount</span>()
+<span class="hljs-comment">// your component has been unmounted and now: container.innerHTML === &#x27;&#x27;</span></code></pre></div>
+<h2 id="cleanup"><a class="anchor" href="#cleanup">#</a>cleanup</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">cleanup</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Remove all components rendered with <a href="#render"><code>render</code></a>.</p>
+<h2 id="extend-queries"><a class="anchor" href="#extend-queries">#</a>Extend Queries</h2>
+<p>To extend locator queries, see <a href="locators.html#custom-locators"><code>&quot;Custom Locators&quot;</code></a>. For example, to make <code>render</code> return a new custom locator, define it using the <code>locators.extend</code> API:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { locators } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+<span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-svelte&#x27;</span>
+
+locators.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-title function_">getByArticleTitle</span>(<span class="hljs-params">title</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`[data-title=&quot;<span class="hljs-subst">${title}</span>&quot;]`</span>
+  },
+})
+
+<span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">Component</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(
+  screen.<span class="hljs-title function_">getByArticleTitle</span>(<span class="hljs-string">&#x27;Hello World&#x27;</span>)
+).<span class="hljs-title function_">toBeVisible</span>()</code></pre></div>
+<h2 id="snippets"><a class="anchor" href="#snippets">#</a>Snippets</h2>
+<p>For simple snippets, you can use a wrapper component and &quot;dummy&quot; children to test them. Setting <code>data-testid</code> attributes can be helpful when testing slots in this manner.</p>
+<div class="code-group"><div class="code"><div class="code-title">basic.test.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-svelte&#x27;</span>
+<span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">SubjectTest</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./basic-snippet.test.svelte&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;basic snippet&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">SubjectTest</span>)
+
+  <span class="hljs-keyword">const</span> heading = screen.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;heading&#x27;</span>)
+  <span class="hljs-keyword">const</span> child = heading.<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;child&#x27;</span>)
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(child).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<div class="code"><div class="code-title">basic-snippet.svelte</div><pre><code class="hljs lang-svelte">&lt;script&gt;
+  let { children } = $props()
+&lt;/script&gt;
+
+&lt;h1&gt;
+  {@render children?.()}
+&lt;/h1&gt;</code></pre></div>
+<div class="code"><div class="code-title">basic-snippet.test.svelte</div><pre><code class="hljs lang-svelte">&lt;script&gt;
+  import Subject from './basic-snippet.svelte'
+&lt;/script&gt;
+
+&lt;Subject&gt;
+  &lt;span data-testid=&quot;child&quot;&gt;&lt;/span&gt;
+&lt;/Subject&gt;</code></pre></div>
+</div><p>For more complex snippets, e.g. where you want to check arguments, you can use Svelte&#39;s <a href="https://svelte.dev/docs/svelte/svelte#createRawSnippet"><code>createRawSnippet</code></a> API.</p>
+<div class="code-group"><div class="code"><div class="code-title">complex-snippet.test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-svelte&#x27;</span>
+<span class="hljs-keyword">import</span> { createRawSnippet } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;svelte&#x27;</span>
+<span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Subject</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./complex-snippet.svelte&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;renders greeting in message snippet&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">Subject</span>, {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span>,
+    <span class="hljs-attr">message</span>: <span class="hljs-title function_">createRawSnippet</span>(<span class="hljs-function"><span class="hljs-params">greeting</span> =&gt;</span> ({
+      <span class="hljs-attr">render</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-string">`&lt;span data-testid=&quot;message&quot;&gt;<span class="hljs-subst">${greeting()}</span>&lt;/span&gt;`</span>,
+    })),
+  })
+
+  <span class="hljs-keyword">const</span> message = screen.<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;message&#x27;</span>)
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(message).<span class="hljs-title function_">toHaveTextContent</span>(<span class="hljs-string">&#x27;Hello, Alice!&#x27;</span>)
+})</code></pre></div>
+<div class="code"><div class="code-title">complex-snippet.svelte</div><pre><code class="hljs lang-svelte">&lt;script&gt;
+  let { name, message } = $props()
+
+  const greeting = $derived(`Hello, ${name}!`)
+&lt;/script&gt;
+
+&lt;p&gt;
+  {@render message?.(greeting)}
+&lt;/p&gt;</code></pre></div>
+</div><h2 id="see-also"><a class="anchor" href="#see-also">#</a>See also</h2>
+<ul>
+<li><a href="https://testing-library.com/docs/svelte-testing-library/intro">Svelte Testing Library documentation</a></li>
+<li><a href="https://github.com/testing-library/svelte-testing-library/tree/main/examples">Svelte Testing Library examples</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#render">render</a><a class="toc-3" href="#options">Options</a><a class="toc-3" href="#render-result">Render Result</a><a class="toc-2" href="#cleanup">cleanup</a><a class="toc-2" href="#extend-queries">Extend Queries</a><a class="toc-2" href="#snippets">Snippets</a><a class="toc-2" href="#see-also">See also</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

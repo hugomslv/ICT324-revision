@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sort-keys (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/sort-keys <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/sort-keys">version en ligne</a></div>
+<h1>sort-keys</h1><p>When declaring multiple properties, some developers prefer to sort property names alphabetically to more easily find and/or diff necessary properties at a later time. Others feel that it adds complexity and becomes burden to maintain.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule checks all property definitions of object expressions and verifies that all variables are sorted alphabetically.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-keys: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> obj1 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">c</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>};
+<span class="hljs-keyword">const</span> obj2 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-string">&quot;c&quot;</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>};
+
+<span class="hljs-comment">// Case-sensitive by default.</span>
+<span class="hljs-keyword">const</span> obj3 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">C</span>: <span class="hljs-number">3</span>};
+
+<span class="hljs-comment">// Non-natural order by default.</span>
+<span class="hljs-keyword">const</span> obj4 = {<span class="hljs-number">1</span>: a, <span class="hljs-number">2</span>: c, <span class="hljs-number">10</span>: b};
+
+<span class="hljs-comment">// This rule checks computed properties which have a simple name as well.</span>
+<span class="hljs-comment">// Simple names are names which are expressed by an Identifier node or a Literal node.</span>
+<span class="hljs-keyword">const</span> S = <span class="hljs-title class_">Symbol</span>(<span class="hljs-string">&quot;s&quot;</span>)
+<span class="hljs-keyword">const</span> obj5 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, [<span class="hljs-string">&quot;c&quot;</span>]: <span class="hljs-number">3</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>};
+<span class="hljs-keyword">const</span> obj6 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, [S]: <span class="hljs-number">3</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>};</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-keys: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> obj1 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">c</span>: <span class="hljs-number">3</span>};
+<span class="hljs-keyword">const</span> obj2 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-string">&quot;b&quot;</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">c</span>: <span class="hljs-number">3</span>};
+
+<span class="hljs-comment">// Case-sensitive by default.</span>
+<span class="hljs-keyword">const</span> obj3 = {<span class="hljs-attr">C</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>};
+
+<span class="hljs-comment">// Non-natural order by default.</span>
+<span class="hljs-keyword">const</span> obj4 = {<span class="hljs-number">1</span>: a, <span class="hljs-number">10</span>: b, <span class="hljs-number">2</span>: c};
+
+<span class="hljs-comment">// This rule checks computed properties which have a simple name as well.</span>
+<span class="hljs-keyword">const</span> obj5 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, [<span class="hljs-string">&quot;b&quot;</span>]: <span class="hljs-number">2</span>, <span class="hljs-attr">c</span>: <span class="hljs-number">3</span>};
+<span class="hljs-keyword">const</span> obj6 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, [b]: <span class="hljs-number">2</span>, <span class="hljs-attr">c</span>: <span class="hljs-number">3</span>};
+
+<span class="hljs-comment">// This rule ignores computed properties which have a non-simple name.</span>
+<span class="hljs-keyword">const</span> obj7 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, [c + d]: <span class="hljs-number">3</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>};
+<span class="hljs-keyword">const</span> obj8 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, [<span class="hljs-string">&quot;c&quot;</span> + <span class="hljs-string">&quot;d&quot;</span>]: <span class="hljs-number">3</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>};
+<span class="hljs-keyword">const</span> obj9 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, [<span class="hljs-string">`<span class="hljs-subst">${c}</span>`</span>]: <span class="hljs-number">3</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>};
+<span class="hljs-keyword">const</span> obj10 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, [tag<span class="hljs-string">`c`</span>]: <span class="hljs-number">3</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>};
+
+<span class="hljs-comment">// This rule does not report unsorted properties that are separated by a spread property.</span>
+<span class="hljs-keyword">const</span> obj11 = {<span class="hljs-attr">b</span>: <span class="hljs-number">1</span>, ...c, <span class="hljs-attr">a</span>: <span class="hljs-number">2</span>};</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;sort-keys&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;asc&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;caseSensitive&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;natural&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;minKeys&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>The 1st option is <code>&quot;asc&quot;</code> or <code>&quot;desc&quot;</code>.</p>
+<ul>
+<li><code>&quot;asc&quot;</code> (default) - enforce properties to be in ascending order.</li>
+<li><code>&quot;desc&quot;</code> - enforce properties to be in descending order.</li>
+</ul>
+<p>The 2nd option is an object which has the following properties.</p>
+<ul>
+<li><code>caseSensitive</code> - if <code>true</code>, enforce properties to be in case-sensitive order. Default is <code>true</code>.</li>
+<li><code>minKeys</code> - Specifies the minimum number of keys that an object should have in order for the object&#39;s unsorted keys to produce an error. Default is <code>2</code>, which means by default all objects with unsorted keys will result in lint errors.</li>
+<li><code>natural</code> - if <code>true</code>, enforce properties to be in natural order. Default is <code>false</code>. Natural Order compares strings containing combination of letters and numbers in the way a human being would sort. It basically sorts numerically, instead of sorting alphabetically. So the number 10 comes after the number 3 in Natural Sorting.</li>
+<li><code>allowLineSeparatedGroups</code> - if <code>true</code>, the rule allows to group object keys through line breaks. In other words, a blank line after a property will reset the sorting of keys. Default is <code>false</code>.</li>
+<li><code>ignoreComputedKeys</code> - if <code>true</code>, the rule ignores all computed keys and doesn&#39;t report unsorted properties separated by them. A computed key will reset the sorting of the following non-computed keys. Default is <code>false</code>.</li>
+</ul>
+<p>Example for a list:</p>
+<p>With <code>natural</code> as <code>true</code>, the ordering would be
+1
+3
+6
+8
+10</p>
+<p>With <code>natural</code> as <code>false</code>, the ordering would be
+1
+10
+3
+6
+8</p>
+<h3 id="desc"><a class="anchor" href="#desc">#</a>desc</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>&quot;desc&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-keys: [&quot;error&quot;, &quot;desc&quot;]*/</span>
+
+<span class="hljs-keyword">const</span> obj1 = {<span class="hljs-attr">b</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">c</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>};
+<span class="hljs-keyword">const</span> obj2 = {<span class="hljs-string">&quot;b&quot;</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">c</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>};
+
+<span class="hljs-comment">// Case-sensitive by default.</span>
+<span class="hljs-keyword">const</span> obj3 = {<span class="hljs-attr">C</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">2</span>};
+
+<span class="hljs-comment">// Non-natural order by default.</span>
+<span class="hljs-keyword">const</span> obj4 = {<span class="hljs-number">10</span>: b, <span class="hljs-number">2</span>: c, <span class="hljs-number">1</span>: a};</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>&quot;desc&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-keys: [&quot;error&quot;, &quot;desc&quot;]*/</span>
+
+<span class="hljs-keyword">const</span> obj1 = {<span class="hljs-attr">c</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>};
+<span class="hljs-keyword">const</span> obj2 = {<span class="hljs-attr">c</span>: <span class="hljs-number">3</span>, <span class="hljs-string">&quot;b&quot;</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>};
+
+<span class="hljs-comment">// Case-sensitive by default.</span>
+<span class="hljs-keyword">const</span> obj3 = {<span class="hljs-attr">b</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">a</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">C</span>: <span class="hljs-number">1</span>};
+
+<span class="hljs-comment">// Non-natural order by default.</span>
+<span class="hljs-keyword">const</span> obj4 = {<span class="hljs-number">2</span>: c, <span class="hljs-number">10</span>: b, <span class="hljs-number">1</span>: a};</code></pre></div>
+</div><h3 id="casesensitive"><a class="anchor" href="#casesensitive">#</a>caseSensitive</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>{caseSensitive: false}</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-keys: [&quot;error&quot;, &quot;asc&quot;, {caseSensitive: false}]*/</span>
+
+<span class="hljs-keyword">const</span> obj1 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">c</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">C</span>: <span class="hljs-number">4</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>};
+<span class="hljs-keyword">const</span> obj2 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">C</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">c</span>: <span class="hljs-number">4</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>};</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{caseSensitive: false}</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-keys: [&quot;error&quot;, &quot;asc&quot;, {caseSensitive: false}]*/</span>
+
+<span class="hljs-keyword">const</span> obj1 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">c</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">C</span>: <span class="hljs-number">4</span>};
+<span class="hljs-keyword">const</span> obj2 = {<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">C</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">c</span>: <span class="hljs-number">4</span>};</code></pre></div>
+</div><h3 id="natural"><a class="anchor" href="#natural">#</a>natural</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>{natural: true}</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-keys: [&quot;error&quot;, &quot;asc&quot;, {natural: true}]*/</span>
+
+<span class="hljs-keyword">const</span> obj = {<span class="hljs-number">1</span>: a, <span class="hljs-number">10</span>: c, <span class="hljs-number">2</span>: b};</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{natural: true}</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-keys: [&quot;error&quot;, &quot;asc&quot;, {natural: true}]*/</span>
+
+<span class="hljs-keyword">const</span> obj = {<span class="hljs-number">1</span>: a, <span class="hljs-number">2</span>: b, <span class="hljs-number">10</span>: c};</code></pre></div>
+</div><h3 id="minkeys"><a class="anchor" href="#minkeys">#</a>minKeys</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>{minKeys: 4}</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-keys: [&quot;error&quot;, &quot;asc&quot;, {minKeys: 4}]*/</span>
+
+<span class="hljs-comment">// 4 keys</span>
+<span class="hljs-keyword">const</span> obj1 = {
+    <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>,
+    <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-comment">// not sorted correctly (should be 1st key)</span>
+    <span class="hljs-attr">c</span>: <span class="hljs-number">3</span>,
+    <span class="hljs-attr">d</span>: <span class="hljs-number">4</span>,
+};
+
+<span class="hljs-comment">// 5 keys</span>
+<span class="hljs-keyword">const</span> obj2 = {
+    <span class="hljs-number">2</span>: <span class="hljs-string">&#x27;a&#x27;</span>,
+    <span class="hljs-number">1</span>: <span class="hljs-string">&#x27;b&#x27;</span>, <span class="hljs-comment">// not sorted correctly (should be 1st key)</span>
+    <span class="hljs-number">3</span>: <span class="hljs-string">&#x27;c&#x27;</span>,
+    <span class="hljs-number">4</span>: <span class="hljs-string">&#x27;d&#x27;</span>,
+    <span class="hljs-number">5</span>: <span class="hljs-string">&#x27;e&#x27;</span>,
+};</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{minKeys: 4}</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-keys: [&quot;error&quot;, &quot;asc&quot;, {minKeys: 4}]*/</span>
+
+<span class="hljs-comment">// 3 keys</span>
+<span class="hljs-keyword">const</span> obj1 = {
+    <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>,
+    <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">c</span>: <span class="hljs-number">3</span>,
+};
+
+<span class="hljs-comment">// 2 keys</span>
+<span class="hljs-keyword">const</span> obj2 = {
+    <span class="hljs-number">2</span>: <span class="hljs-string">&#x27;b&#x27;</span>,
+    <span class="hljs-number">1</span>: <span class="hljs-string">&#x27;a&#x27;</span>,
+};</code></pre></div>
+</div><h3 id="allowlineseparatedgroups"><a class="anchor" href="#allowlineseparatedgroups">#</a>allowLineSeparatedGroups</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>{allowLineSeparatedGroups: true}</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-keys: [&quot;error&quot;, &quot;asc&quot;, {allowLineSeparatedGroups: true}]*/</span>
+
+<span class="hljs-keyword">const</span> obj1 = {
+    <span class="hljs-attr">b</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-title function_">c</span> () {
+
+    },
+    <span class="hljs-attr">a</span>: <span class="hljs-number">3</span>
+}
+
+<span class="hljs-keyword">const</span> obj2 = {
+    <span class="hljs-attr">b</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">c</span>: <span class="hljs-number">2</span>,
+
+    <span class="hljs-title function_">z</span> () {
+
+    },
+    <span class="hljs-attr">y</span>: <span class="hljs-number">3</span>
+}
+
+<span class="hljs-keyword">const</span> obj3 = {
+    <span class="hljs-attr">b</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">c</span>: <span class="hljs-number">2</span>,
+
+    <span class="hljs-title function_">z</span> () {
+
+    },
+    <span class="hljs-comment">// comment</span>
+    <span class="hljs-attr">y</span>: <span class="hljs-number">3</span>,
+}
+
+<span class="hljs-keyword">const</span> obj4 = {
+    <span class="hljs-attr">b</span>: <span class="hljs-number">1</span>
+    <span class="hljs-comment">// comment before comma</span>
+    , <span class="hljs-attr">a</span>: <span class="hljs-number">2</span>
+};</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{allowLineSeparatedGroups: true}</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-keys: [&quot;error&quot;, &quot;asc&quot;, {allowLineSeparatedGroups: true}]*/</span>
+
+<span class="hljs-keyword">const</span> obj1 = {
+    <span class="hljs-attr">e</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">f</span>: <span class="hljs-number">2</span>,
+    <span class="hljs-attr">g</span>: <span class="hljs-number">3</span>,
+
+    <span class="hljs-attr">a</span>: <span class="hljs-number">4</span>,
+    <span class="hljs-attr">b</span>: <span class="hljs-number">5</span>,
+    <span class="hljs-attr">c</span>: <span class="hljs-number">6</span>
+}
+
+<span class="hljs-keyword">const</span> obj2 = {
+    <span class="hljs-attr">b</span>: <span class="hljs-number">1</span>,
+
+    <span class="hljs-comment">// comment</span>
+    <span class="hljs-attr">a</span>: <span class="hljs-number">4</span>,
+    <span class="hljs-attr">c</span>: <span class="hljs-number">5</span>,
+}
+
+<span class="hljs-keyword">const</span> obj3 = {
+    <span class="hljs-attr">c</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">d</span>: <span class="hljs-number">2</span>,
+
+    <span class="hljs-title function_">b</span> () {
+
+    },
+    <span class="hljs-attr">e</span>: <span class="hljs-number">3</span>,
+}
+
+<span class="hljs-keyword">const</span> obj4 = {
+    <span class="hljs-attr">c</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">d</span>: <span class="hljs-number">2</span>,
+    <span class="hljs-comment">// comment</span>
+
+    <span class="hljs-comment">// comment</span>
+    <span class="hljs-title function_">b</span>(<span class="hljs-params"></span>) {
+
+    },
+    <span class="hljs-attr">e</span>: <span class="hljs-number">4</span>
+}
+
+<span class="hljs-keyword">const</span> obj5 = {
+    b,
+
+    [foo + bar]: <span class="hljs-number">1</span>,
+    a
+}
+
+<span class="hljs-keyword">const</span> obj6 = {
+    <span class="hljs-attr">b</span>: <span class="hljs-number">1</span>
+    <span class="hljs-comment">// comment before comma</span>
+
+    ,
+    <span class="hljs-attr">a</span>: <span class="hljs-number">2</span>
+};
+
+<span class="hljs-keyword">const</span> obj7 = {
+    <span class="hljs-attr">b</span>: <span class="hljs-number">1</span>,
+
+    <span class="hljs-attr">a</span>: <span class="hljs-number">2</span>,
+    ...z,
+    <span class="hljs-attr">c</span>: <span class="hljs-number">3</span>
+}</code></pre></div>
+</div><h3 id="ignorecomputedkeys"><a class="anchor" href="#ignorecomputedkeys">#</a>ignoreComputedKeys</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ignoreComputedKeys: true}</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-keys: [&quot;error&quot;, &quot;asc&quot;, {ignoreComputedKeys: true}]*/</span>
+
+<span class="hljs-keyword">const</span> obj1 = {
+    [b]: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">a</span>: <span class="hljs-number">2</span>
+}
+
+<span class="hljs-keyword">const</span> obj2 = {
+    <span class="hljs-attr">c</span>: <span class="hljs-number">1</span>,
+    [b]: <span class="hljs-number">2</span>,
+    <span class="hljs-attr">a</span>: <span class="hljs-number">3</span>
+}
+
+<span class="hljs-keyword">const</span> obj3 = {
+    <span class="hljs-attr">c</span>: <span class="hljs-number">1</span>,
+    [<span class="hljs-string">&quot;b&quot;</span>]: <span class="hljs-number">2</span>,
+    <span class="hljs-attr">a</span>: <span class="hljs-number">3</span>
+}</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you don&#39;t want to notify about properties&#39; order, then it&#39;s safe to disable this rule.</p>
+<h2 id="compatibility"><a class="anchor" href="#compatibility">#</a>Compatibility</h2>
+<ul>
+<li><strong>JSCS:</strong> <a href="https://jscs-dev.github.io/rule/validateOrderInObjectKeys">validateOrderInObjectKeys</a></li>
+</ul>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="sort-imports.html"><code>sort-imports</code></a>, <a href="sort-vars.html"><code>sort-vars</code></a></p></div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#desc">desc</a><a class="toc-3" href="#casesensitive">caseSensitive</a><a class="toc-3" href="#natural">natural</a><a class="toc-3" href="#minkeys">minKeys</a><a class="toc-3" href="#allowlineseparatedgroups">allowLineSeparatedGroups</a><a class="toc-3" href="#ignorecomputedkeys">ignoreComputedKeys</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a><a class="toc-2" href="#compatibility">Compatibility</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

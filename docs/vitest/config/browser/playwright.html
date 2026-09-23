@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuring Playwright (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › config/browser/playwright  <a class="ext small" href="https://vitest.dev/config/browser/playwright">version en ligne</a></div>
+<h1 id="configuring-playwright"><a class="anchor" href="#configuring-playwright">#</a>Configuring Playwright</h1>
+<p>To run tests using playwright, you need to install the <a href="https://npmx.dev/package/@vitest/browser-playwright"><code>@vitest/browser-playwright</code></a> npm package and specify its <code>playwright</code> export in the <code>test.browser.provider</code> property of your config:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>(),
+      <span class="hljs-attr">instances</span>: [{ <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> }]
+    },
+  },
+})</code></pre></div>
+<p>You can configure the <a href="https://playwright.dev/docs/api/class-browsertype#browser-type-launch"><code>launchOptions</code></a>, <a href="https://playwright.dev/docs/api/class-browsertype#browser-type-connect"><code>connectOptions</code></a> and <a href="https://playwright.dev/docs/api/class-browser#browser-new-context"><code>contextOptions</code></a> when calling <code>playwright</code> at the top level or inside instances:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-comment">// shared provider options between all instances</span>
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>({
+        <span class="hljs-attr">launchOptions</span>: {
+          <span class="hljs-attr">slowMo</span>: <span class="hljs-number">50</span>,
+          <span class="hljs-attr">channel</span>: <span class="hljs-string">&#x27;chrome-beta&#x27;</span>,
+        },
+        <span class="hljs-attr">actionTimeout</span>: <span class="hljs-number">5_000</span>,
+      }),
+      <span class="hljs-attr">instances</span>: [
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> },
+        {
+          <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;firefox&#x27;</span>,
+          <span class="hljs-comment">// overriding options only for a single instance</span>
+          <span class="hljs-comment">// this will NOT merge options with the parent one</span>
+          <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>({
+            <span class="hljs-attr">launchOptions</span>: {
+              <span class="hljs-attr">firefoxUserPrefs</span>: {
+                <span class="hljs-string">&#x27;browser.startup.homepage&#x27;</span>: <span class="hljs-string">&#x27;https://example.com&#x27;</span>,
+              },
+            },
+          })
+        }
+      ],
+    },
+  },
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Unlike Playwright test runner, Vitest opens a <em>single</em> page to run all tests that are defined in the same file. This means that isolation is restricted to a single test file, not to every individual test.</p>
+</div><h2 id="launchoptions"><a class="anchor" href="#launchoptions">#</a>launchOptions</h2>
+<p>These options are directly passed down to <code>playwright[browser].launch</code> command. You can read more about the command and available arguments in the <a href="https://playwright.dev/docs/api/class-browsertype#browser-type-launch">Playwright documentation</a>.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Vitest will ignore <code>launch.headless</code> option. Instead, use <a href="headless.html"><code>test.browser.headless</code></a>.</p>
+<p>Note that Vitest will push debugging flags to <code>launch.args</code> if <a href="../../guide/cli.html#inspect"><code>--inspect</code></a> is enabled.</p>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce : Enabling new Chromium headless mode</div><p>Playwright supports a <a href="https://playwright.dev/docs/browsers#chromium-new-headless-mode">new headless mode</a> for Chromium that uses the real Chrome browser instead of the dedicated headless shell. This provides more authentic, reliable test execution and removes the need to install a separate headless Chromium build.</p>
+<p>To opt in, set <code>channel</code> to <code>&#39;chromium&#39;</code> in <code>launchOptions</code>:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">headless</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>({
+        <span class="hljs-attr">launchOptions</span>: {
+          <span class="hljs-attr">channel</span>: <span class="hljs-string">&#x27;chromium&#x27;</span>,
+        },
+      }),
+      <span class="hljs-attr">instances</span>: [{ <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> }],
+    },
+  },
+})</code></pre></div>
+</div><h2 id="connectoptions"><a class="anchor" href="#connectoptions">#</a>connectOptions</h2>
+<p>These options are directly passed down to <code>playwright[browser].connect</code> command. You can read more about the command and available arguments in the <a href="https://playwright.dev/docs/api/class-browsertype#browser-type-connect">Playwright documentation</a>.</p>
+<p>Use <code>connectOptions.wsEndpoint</code> to connect to an existing Playwright server instead of launching browsers locally. This is useful for running browsers in Docker, in CI, or on a remote machine.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Vitest forwards <code>launchOptions</code> to Playwright server via the <code>x-playwright-launch-options</code> header. This works only if the remote Playwright server supports this header, for example when using the <code>playwright run-server</code> CLI.</p>
+</div><details class="box"><summary>Example: Running a Playwright Server in Docker</summary><p>To run browsers in a Docker container (see <a href="https://playwright.dev/docs/docker#remote-connection">Playwright Docker guide</a>):</p>
+<p>Start a Playwright server using Docker Compose:</p>
+<div class="code"><div class="code-title">docker-compose.yml</div><pre><code class="hljs lang-yaml"><span class="hljs-attr">services:</span>
+  <span class="hljs-attr">playwright:</span>
+    <span class="hljs-attr">image:</span> <span class="hljs-string">mcr.microsoft.com/playwright:v1.61.0-noble</span>
+    <span class="hljs-attr">command:</span> <span class="hljs-string">/bin/sh</span> <span class="hljs-string">-c</span> <span class="hljs-string">&quot;npx -y playwright@1.61.0 run-server --port 6677 --host 0.0.0.0&quot;</span>
+    <span class="hljs-attr">init:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-attr">ipc:</span> <span class="hljs-string">host</span>
+    <span class="hljs-attr">user:</span> <span class="hljs-string">pwuser</span>
+    <span class="hljs-attr">ports:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">&#x27;6677:6677&#x27;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-sh">docker compose up -d</code></pre></div>
+<p>Then configure Vitest to connect to it. The <a href="https://playwright.dev/docs/api/class-browsertype#browser-type-connect-option-expose-network"><code>exposeNetwork</code></a> option lets the containerized browser reach Vitest&#39;s dev server on the host:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>({
+        <span class="hljs-attr">connectOptions</span>: {
+          <span class="hljs-attr">wsEndpoint</span>: <span class="hljs-string">&#x27;ws://127.0.0.1:6677/&#x27;</span>,
+          <span class="hljs-attr">exposeNetwork</span>: <span class="hljs-string">&#x27;&lt;loopback&gt;&#x27;</span>,
+        },
+      }),
+      <span class="hljs-attr">instances</span>: [
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> },
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;firefox&#x27;</span> },
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;webkit&#x27;</span> },
+      ],
+    },
+  },
+})</code></pre></div>
+</details><h2 id="contextoptions"><a class="anchor" href="#contextoptions">#</a>contextOptions</h2>
+<p>Vitest creates a new context for every test file by calling <a href="https://playwright.dev/docs/api/class-browsercontext"><code>browser.newContext()</code></a>. You can configure this behaviour by specifying <a href="https://playwright.dev/docs/api/class-browser#browser-new-context">custom arguments</a>.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Note that the context is created for every <em>test file</em>, not every <em>test</em> like in playwright test runner.</p>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Vitest always sets <code>ignoreHTTPSErrors</code> to <code>true</code> in case your server is served via HTTPS and <code>serviceWorkers</code> to <code>&#39;allow&#39;</code> to support module mocking via <a href="https://mswjs.io">MSW</a>.</p>
+<p>It is also recommended to use <a href="headless.html"><code>test.browser.viewport</code></a> instead of specifying it here as it will be lost when tests are running in headless mode.</p>
+</div><h2 id="actiontimeout"><a class="anchor" href="#actiontimeout">#</a><code>actionTimeout</code></h2>
+<ul>
+<li><strong>Default:</strong> no timeout</li>
+</ul>
+<p>This value configures the default timeout it takes for Playwright to wait until all accessibility checks pass and <a href="../../api/browser/interactivity.html">the action</a> is actually done.</p>
+<p>You can also configure the action timeout per-action:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">click</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>), {
+  <span class="hljs-attr">timeout</span>: <span class="hljs-number">1_000</span>,
+})</code></pre></div>
+<h2 id="persistentcontext"><a class="anchor" href="#persistentcontext">#</a><code>persistentContext</code> <Version>4.1.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean | string</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+</ul>
+<p>When enabled, Vitest uses Playwright&#39;s <a href="https://playwright.dev/docs/api/class-browsertype#browser-type-launch-persistent-context">persistent context</a> instead of a regular browser context. This allows browser state (cookies, localStorage, DevTools settings, etc.) to persist between test runs.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This option is ignored when running tests in parallel (e.g. when headless with <a href="../fileparallelism.html"><code>fileParallelism</code></a> enabled) since persistent context cannot be shared across parallel sessions.</p>
+</div><ul>
+<li>When set to <code>true</code>, the user data is stored in <code>./node_modules/.cache/vitest-playwright-user-data</code></li>
+<li>When set to a string, the value is used as the path to the user data directory</li>
+</ul>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>({
+        <span class="hljs-attr">persistentContext</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-comment">// or specify a custom directory:</span>
+        <span class="hljs-comment">// persistentContext: &#x27;./my-browser-data&#x27;,</span>
+      }),
+      <span class="hljs-attr">instances</span>: [{ <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> }],
+    },
+  },
+})</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#launchoptions">launchOptions</a><a class="toc-2" href="#connectoptions">connectOptions</a><a class="toc-2" href="#contextoptions">contextOptions</a><a class="toc-2" href="#actiontimeout">actionTimeout</a><a class="toc-2" href="#persistentcontext">persistentContext 4.1.0</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

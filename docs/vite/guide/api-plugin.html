@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plugin API (Vite) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link active" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vite</a> › guide/api-plugin  <a class="ext small" href="https://vite.dev/guide/api-plugin">version en ligne</a></div>
+<h1 id="plugin-api"><a class="anchor" href="#plugin-api">#</a>Plugin API</h1>
+<p>Vite plugins extends Rolldown&#39;s plugin interface with a few extra Vite-specific options. As a result, you can write a Vite plugin once and have it work for both dev and build.</p>
+<p><strong>It is recommended to go through <a href="https://rolldown.rs/apis/plugin-api">Rolldown&#39;s plugin documentation</a> first before reading the sections below.</strong></p>
+<h2 id="authoring-a-plugin"><a class="anchor" href="#authoring-a-plugin">#</a>Authoring a Plugin</h2>
+<p>Vite strives to offer established patterns out of the box, so before creating a new plugin make sure that you check the <a href="features.html">Features guide</a> to see if your need is covered. Also review available community plugins, both in the form of a <a href="https://github.com/rollup/awesome">compatible Rollup plugin</a> and <a href="https://github.com/vitejs/awesome-vite#plugins">Vite Specific plugins</a>.</p>
+<p>When creating a plugin, you can inline it in your <code>vite.config.js</code>. There is no need to create a new package for it. Once you see that a plugin was useful in your projects, consider sharing it to help others <a href="https://chat.vite.dev">in the ecosystem</a>.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>When learning, debugging, or authoring plugins, we suggest including <a href="https://github.com/antfu/vite-plugin-inspect">vite-plugin-inspect</a> in your project. It allows you to inspect the intermediate state of Vite plugins. After installing, you can visit <code>localhost:5173/__inspect/</code> to inspect the modules and transformation stack of your project. Check out install instructions in the <a href="https://github.com/antfu/vite-plugin-inspect">vite-plugin-inspect docs</a>.
+<span class="img-missing">[image : vite-plugin-inspect]</span></p>
+</div><h2 id="conventions"><a class="anchor" href="#conventions">#</a>Conventions</h2>
+<p>If the plugin doesn&#39;t use Vite specific hooks and can be implemented as a <a href="#rolldown-plugin-compatibility">Compatible Rolldown Plugin</a>, then it is recommended to use the <a href="https://rolldown.rs/apis/plugin-api#conventions">Rolldown Plugin naming conventions</a>.</p>
+<ul>
+<li>Rolldown Plugins should have a clear name with <code>rolldown-plugin-</code> prefix.</li>
+<li>Include <code>rolldown-plugin</code> and <code>vite-plugin</code> keywords in package.json <code>keywords</code> field.</li>
+</ul>
+<p>This exposes the plugin to be also used in pure Rolldown or Rollup based projects.</p>
+<p>For Vite only plugins</p>
+<ul>
+<li>Vite Plugins should have a clear name with <code>vite-plugin-</code> prefix.</li>
+<li>Include <code>vite-plugin</code> keyword in package.json <code>keywords</code> field.</li>
+<li>Include a section in the plugin docs detailing why it is a Vite only plugin (for example, it uses Vite specific plugin hooks).</li>
+</ul>
+<p>If your plugin is only going to work for a particular framework, its name should be included as part of the prefix.</p>
+<ul>
+<li><code>vite-plugin-vue-</code> prefix for Vue Plugins</li>
+<li><code>vite-plugin-react-</code> prefix for React Plugins</li>
+<li><code>vite-plugin-svelte-</code> prefix for Svelte Plugins</li>
+</ul>
+<p>See also <a href="https://rolldown.rs/apis/plugin-api#virtual-modules">Virtual Modules Convention</a>.</p>
+<h2 id="plugins-config"><a class="anchor" href="#plugins-config">#</a>Plugins Config</h2>
+<p>Users will add plugins to the project <code>devDependencies</code> and configure them using the <code>plugins</code> array option.</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> vitePlugin <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite-plugin-feature&#x27;</span>
+<span class="hljs-keyword">import</span> rollupPlugin <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;rollup-plugin-feature&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [<span class="hljs-title function_">vitePlugin</span>(), <span class="hljs-title function_">rollupPlugin</span>()],
+})</code></pre></div>
+<p>Falsy plugins will be ignored, which can be used to easily activate or deactivate plugins.</p>
+<p><code>plugins</code> also accepts presets including several plugins as a single element. This is useful for complex features (like framework integration) that are implemented using several plugins. The array will be flattened internally.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// framework-plugin</span>
+<span class="hljs-keyword">import</span> frameworkRefresh <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite-plugin-framework-refresh&#x27;</span>
+<span class="hljs-keyword">import</span> frameworkDevtools <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite-plugin-framework-devtools&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">framework</span>(<span class="hljs-params">config</span>) {
+  <span class="hljs-keyword">return</span> [<span class="hljs-title function_">frameworkRefresh</span>(config), <span class="hljs-title function_">frameworkDevTools</span>(config)]
+}</code></pre></div>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+<span class="hljs-keyword">import</span> framework <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite-plugin-framework&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [<span class="hljs-title function_">framework</span>()],
+})</code></pre></div>
+<h2 id="simple-examples"><a class="anchor" href="#simple-examples">#</a>Simple Examples</h2>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>It is common convention to author a Vite/Rolldown/Rollup plugin as a factory function that returns the actual plugin object. The function can accept options which allows users to customize the behavior of the plugin.</p>
+</div><h3 id="transforming-custom-file-types"><a class="anchor" href="#transforming-custom-file-types">#</a>Transforming Custom File Types</h3>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> fileRegex = <span class="hljs-regexp">/\.(my-file-ext)$/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">myPlugin</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;transform-file&#x27;</span>,
+
+    <span class="hljs-attr">transform</span>: {
+      <span class="hljs-attr">filter</span>: {
+        <span class="hljs-attr">id</span>: fileRegex,
+      },
+      <span class="hljs-title function_">handler</span>(<span class="hljs-params">src, id</span>) {
+        <span class="hljs-keyword">return</span> {
+          <span class="hljs-attr">code</span>: <span class="hljs-title function_">compileFileToJS</span>(src),
+          <span class="hljs-attr">map</span>: <span class="hljs-literal">null</span>, <span class="hljs-comment">// provide source map if available</span>
+        }
+      },
+    },
+  }
+}</code></pre></div>
+<h3 id="importing-a-virtual-file"><a class="anchor" href="#importing-a-virtual-file">#</a>Importing a Virtual File</h3>
+<p>Virtual modules allow you to pass build time information to the source files using normal ESM import syntax. See <a href="https://rolldown.rs/apis/plugin-api#virtual-modules">Virtual Modules Convention</a> for the full convention.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { exactRegex } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@rolldown/pluginutils&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">myPlugin</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> virtualModuleId = <span class="hljs-string">&#x27;virtual:my-module&#x27;</span>
+  <span class="hljs-keyword">const</span> resolvedVirtualModuleId = <span class="hljs-string">&#x27;\0&#x27;</span> + virtualModuleId
+
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;my-plugin&#x27;</span>, <span class="hljs-comment">// required, will show up in warnings and errors</span>
+    <span class="hljs-attr">resolveId</span>: {
+      <span class="hljs-attr">filter</span>: { <span class="hljs-attr">id</span>: <span class="hljs-title function_">exactRegex</span>(virtualModuleId) },
+      <span class="hljs-title function_">handler</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> resolvedVirtualModuleId
+      },
+    },
+    <span class="hljs-attr">load</span>: {
+      <span class="hljs-attr">filter</span>: { <span class="hljs-attr">id</span>: <span class="hljs-title function_">exactRegex</span>(resolvedVirtualModuleId) },
+      <span class="hljs-title function_">handler</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">`export const msg = &quot;from virtual module&quot;`</span>
+      },
+    },
+  }
+}</code></pre></div>
+<p>Which allows importing the module in JavaScript:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { msg } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;virtual:my-module&#x27;</span>
+
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(msg)</code></pre></div>
+<p>In Vite, since <code>\0</code> is not a permitted char in import URLs, a <code>\0{id}</code> virtual id ends up encoded as <code>/@id/__x00__{id}</code> during dev in the browser. The id is decoded back before entering the plugins pipeline, so this is not seen by plugin hooks code.</p>
+<h2 id="rolldown-hooks"><a class="anchor" href="#rolldown-hooks">#</a>Rolldown Hooks</h2>
+<p>During dev, the Vite dev server creates a plugin container that invokes <a href="https://rolldown.rs/apis/plugin-api#build-hooks">Rolldown Build Hooks</a> the same way Rolldown does it.</p>
+<p>All rolldown hooks are <a href="api-environment-plugins.html#per-environment-hooks-and-global-hooks">per-environment hooks</a>.</p>
+<p>The following hooks are called once on server start:</p>
+<ul>
+<li><a href="https://rolldown.rs/reference/Interface.Plugin#options"><code>options</code></a></li>
+<li><a href="https://rolldown.rs/reference/Interface.Plugin#buildstart"><code>buildStart</code></a></li>
+</ul>
+<p>The following hooks are called on each incoming module request:</p>
+<ul>
+<li><a href="https://rolldown.rs/reference/Interface.Plugin#resolveid"><code>resolveId</code></a></li>
+<li><a href="https://rolldown.rs/reference/Interface.Plugin#load"><code>load</code></a></li>
+<li><a href="https://rolldown.rs/reference/Interface.Plugin#transform"><code>transform</code></a></li>
+</ul>
+<p>These hooks also have an extended <code>options</code> parameter with additional Vite-specific properties. You can read more in the <a href="ssr.html#ssr-specific-plugin-logic">SSR documentation</a>.</p>
+<p>Some <code>resolveId</code> calls&#39; <code>importer</code> value may be an absolute path for a generic <code>index.html</code> at root as it&#39;s not always possible to derive the actual importer due to Vite&#39;s unbundled dev server pattern. For imports handled within Vite&#39;s resolve pipeline, the importer can be tracked during the import analysis phase, providing the correct <code>importer</code> value.</p>
+<p>The following hooks are called when the server is closed:</p>
+<ul>
+<li><a href="https://rolldown.rs/reference/Interface.Plugin#buildend"><code>buildEnd</code></a></li>
+<li><a href="https://rolldown.rs/reference/Interface.Plugin#closebundle"><code>closeBundle</code></a></li>
+</ul>
+<p>Note that the <a href="https://rolldown.rs/reference/Interface.Plugin#moduleparsed"><code>moduleParsed</code></a> hook is <strong>not</strong> called during dev, because Vite avoids full AST parses for better performance.</p>
+<p><a href="https://rolldown.rs/apis/plugin-api#output-generation-hooks">Output Generation Hooks</a> (except <code>closeBundle</code>) are <strong>not</strong> called during dev.</p>
+<h2 id="vite-specific-hooks"><a class="anchor" href="#vite-specific-hooks">#</a>Vite Specific Hooks</h2>
+<p>Vite plugins can also provide hooks that serve Vite-specific purposes. These hooks are ignored by Rollup.</p>
+<h3 id="config"><a class="anchor" href="#config">#</a><code>config</code></h3>
+<ul>
+<li><p><strong>Type:</strong> <code>(config: UserConfig, env: { mode: &#39;build&#39; | &#39;serve&#39;, command: string, isSsrBuild?: boolean, isPreview?: boolean }) =&gt; UserConfig | null | void</code></p>
+</li>
+<li><p><strong>Kind:</strong> <code>async</code>, <code>sequential</code></p>
+</li>
+<li><p><strong>Scope:</strong> <a href="api-environment-plugins.html#per-environment-hooks-and-global-hooks">Global</a></p>
+<p>Modify Vite config before it&#39;s resolved. The hook receives the raw user config (CLI options merged with config file) and the current config env which exposes the <code>mode</code> and <code>command</code> being used. It can return a partial config object that will be deeply merged into existing config, or directly mutate the config (if the default merging cannot achieve the desired result).</p>
+<p><strong>Example:</strong></p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// return partial config (recommended)</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">partialConfigPlugin</span> = (<span class="hljs-params"></span>) =&gt; ({
+  <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;return-partial&#x27;</span>,
+  <span class="hljs-attr">config</span>: <span class="hljs-function">() =&gt;</span> ({
+    <span class="hljs-attr">resolve</span>: {
+      <span class="hljs-attr">alias</span>: {
+        <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span>,
+      },
+    },
+  }),
+})
+
+<span class="hljs-comment">// mutate the config directly (use only when merging doesn&#x27;t work)</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">mutateConfigPlugin</span> = (<span class="hljs-params"></span>) =&gt; ({
+  <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;mutate-config&#x27;</span>,
+  <span class="hljs-title function_">config</span>(<span class="hljs-params">config, { command }</span>) {
+    <span class="hljs-keyword">if</span> (command === <span class="hljs-string">&#x27;build&#x27;</span>) {
+      config.<span class="hljs-property">root</span> = <span class="hljs-string">&#x27;foo&#x27;</span>
+    }
+  },
+})</code></pre></div>
+</li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Note</div><p>  User plugins are resolved before running this hook so injecting other plugins inside the <code>config</code> hook will have no effect.</p>
+</div><h3 id="configresolved"><a class="anchor" href="#configresolved">#</a><code>configResolved</code></h3>
+<ul>
+<li><p><strong>Type:</strong> <code>(config: ResolvedConfig) =&gt; void | Promise&lt;void&gt;</code></p>
+</li>
+<li><p><strong>Kind:</strong> <code>async</code>, <code>parallel</code></p>
+</li>
+<li><p><strong>Scope:</strong> <a href="api-environment-plugins.html#per-environment-hooks-and-global-hooks">Global</a></p>
+<p>Called after the Vite config is resolved. Use this hook to read and store the final resolved config. It is also useful when the plugin needs to do something different based on the command being run.</p>
+<p><strong>Example:</strong></p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> <span class="hljs-title function_">examplePlugin</span> = (<span class="hljs-params"></span>) =&gt; {
+  <span class="hljs-keyword">let</span> config
+
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;read-config&#x27;</span>,
+
+    <span class="hljs-title function_">configResolved</span>(<span class="hljs-params">resolvedConfig</span>) {
+      <span class="hljs-comment">// store the resolved config</span>
+      config = resolvedConfig
+    },
+
+    <span class="hljs-comment">// use stored config in other hooks</span>
+    <span class="hljs-title function_">transform</span>(<span class="hljs-params">code, id</span>) {
+      <span class="hljs-keyword">if</span> (config.<span class="hljs-property">command</span> === <span class="hljs-string">&#x27;serve&#x27;</span>) {
+        <span class="hljs-comment">// dev: plugin invoked by dev server</span>
+      } <span class="hljs-keyword">else</span> {
+        <span class="hljs-comment">// build: plugin invoked by Rollup</span>
+      }
+    },
+  }
+}</code></pre></div>
+<p>Note that the <code>command</code> value is <code>serve</code> in dev (in the cli <code>vite</code>, <code>vite dev</code>, and <code>vite serve</code> are aliases).</p>
+</li>
+</ul>
+<h3 id="configureserver"><a class="anchor" href="#configureserver">#</a><code>configureServer</code></h3>
+<ul>
+<li><p><strong>Type:</strong> <code>(server: ViteDevServer) =&gt; (() =&gt; void) | void | Promise&lt;(() =&gt; void) | void&gt;</code></p>
+</li>
+<li><p><strong>Kind:</strong> <code>async</code>, <code>sequential</code></p>
+</li>
+<li><p><strong>See also:</strong> <a href="api-javascript.html#vitedevserver">ViteDevServer</a></p>
+</li>
+<li><p><strong>Scope:</strong> <a href="api-environment-plugins.html#per-environment-hooks-and-global-hooks">Global</a></p>
+<p>Hook for configuring the dev server. The most common use case is adding custom middlewares to the internal <a href="https://github.com/senchalabs/connect">connect</a> app:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> <span class="hljs-title function_">myPlugin</span> = (<span class="hljs-params"></span>) =&gt; ({
+  <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;configure-server&#x27;</span>,
+  <span class="hljs-title function_">configureServer</span>(<span class="hljs-params">server</span>) {
+    server.<span class="hljs-property">middlewares</span>.<span class="hljs-title function_">use</span>(<span class="hljs-function">(<span class="hljs-params">req, res, next</span>) =&gt;</span> {
+      <span class="hljs-comment">// custom handle request...</span>
+    })
+  },
+})</code></pre></div>
+<p><strong>Injecting Post Middleware</strong></p>
+<p>The <code>configureServer</code> hook is called before internal middlewares are installed, so the custom middlewares will run before internal middlewares by default. If you want to inject a middleware <strong>after</strong> internal middlewares, you can return a function from <code>configureServer</code>, which will be called after internal middlewares are installed:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> <span class="hljs-title function_">myPlugin</span> = (<span class="hljs-params"></span>) =&gt; ({
+  <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;configure-server&#x27;</span>,
+  <span class="hljs-title function_">configureServer</span>(<span class="hljs-params">server</span>) {
+    <span class="hljs-comment">// return a post hook that is called after internal middlewares are</span>
+    <span class="hljs-comment">// installed</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {
+      server.<span class="hljs-property">middlewares</span>.<span class="hljs-title function_">use</span>(<span class="hljs-function">(<span class="hljs-params">req, res, next</span>) =&gt;</span> {
+        <span class="hljs-comment">// custom handle request...</span>
+      })
+    }
+  },
+})</code></pre></div>
+<p><strong>Storing Server Access</strong></p>
+<p>In some cases, other plugin hooks may need access to the dev server instance (e.g. accessing the WebSocket server, the file system watcher, or the module graph). This hook can also be used to store the server instance for access in other hooks:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> <span class="hljs-title function_">myPlugin</span> = (<span class="hljs-params"></span>) =&gt; {
+  <span class="hljs-keyword">let</span> server
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;configure-server&#x27;</span>,
+    <span class="hljs-title function_">configureServer</span>(<span class="hljs-params">_server</span>) {
+      server = _server
+    },
+    <span class="hljs-title function_">transform</span>(<span class="hljs-params">code, id</span>) {
+      <span class="hljs-keyword">if</span> (server) {
+        <span class="hljs-comment">// use server...</span>
+      }
+    },
+  }
+}</code></pre></div>
+<p>Note <code>configureServer</code> is not called when running the production build so your other hooks need to guard against its absence.</p>
+</li>
+</ul>
+<h3 id="configurepreviewserver"><a class="anchor" href="#configurepreviewserver">#</a><code>configurePreviewServer</code></h3>
+<ul>
+<li><p><strong>Type:</strong> <code>(server: PreviewServer) =&gt; (() =&gt; void) | void | Promise&lt;(() =&gt; void) | void&gt;</code></p>
+</li>
+<li><p><strong>Kind:</strong> <code>async</code>, <code>sequential</code></p>
+</li>
+<li><p><strong>See also:</strong> <a href="api-javascript.html#previewserver">PreviewServer</a></p>
+</li>
+<li><p><strong>Scope:</strong> <a href="api-environment-plugins.html#per-environment-hooks-and-global-hooks">Global</a></p>
+<p>Same as <a href="api-plugin.html#configureserver"><code>configureServer</code></a> but for the preview server. Similarly to <code>configureServer</code>, the <code>configurePreviewServer</code> hook is called before other middlewares are installed. If you want to inject a middleware <strong>after</strong> other middlewares, you can return a function from <code>configurePreviewServer</code>, which will be called after internal middlewares are installed:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> <span class="hljs-title function_">myPlugin</span> = (<span class="hljs-params"></span>) =&gt; ({
+  <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;configure-preview-server&#x27;</span>,
+  <span class="hljs-title function_">configurePreviewServer</span>(<span class="hljs-params">server</span>) {
+    <span class="hljs-comment">// return a post hook that is called after other middlewares are</span>
+    <span class="hljs-comment">// installed</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {
+      server.<span class="hljs-property">middlewares</span>.<span class="hljs-title function_">use</span>(<span class="hljs-function">(<span class="hljs-params">req, res, next</span>) =&gt;</span> {
+        <span class="hljs-comment">// custom handle request...</span>
+      })
+    }
+  },
+})</code></pre></div>
+</li>
+</ul>
+<h3 id="closeserver"><a class="anchor" href="#closeserver">#</a><code>closeServer</code></h3>
+<ul>
+<li><p><strong>Type:</strong> <code>(context: { reason: &#39;restart&#39; | &#39;close&#39; }) =&gt; void | Promise&lt;void&gt;</code></p>
+</li>
+<li><p><strong>Kind:</strong> <code>async</code>, <code>parallel</code></p>
+</li>
+<li><p><strong>Scope:</strong> <a href="api-environment-plugins.html#per-environment-hooks-and-global-hooks">Global</a></p>
+<p>Called when the dev server is restarted or closed, after the server has been torn down. Typically used to dispose resources created in <a href="api-plugin.html#configureserver"><code>configureServer</code></a>.</p>
+<p>The <code>context.reason</code> distinguishes the two cases:</p>
+<ul>
+<li><code>&#39;restart&#39;</code>: the server is restarting (e.g. a config file change or a call to <code>server.restart()</code>).</li>
+<li><code>&#39;close&#39;</code>: the server is shutting down (e.g. the <code>q</code> shortcut, or a call to <code>server.close()</code>).</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> <span class="hljs-title function_">myPlugin</span> = (<span class="hljs-params"></span>) =&gt; {
+  <span class="hljs-keyword">let</span> resource
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;close-server&#x27;</span>,
+    <span class="hljs-title function_">configureServer</span>(<span class="hljs-params">server</span>) {
+      resource = <span class="hljs-title function_">createResource</span>()
+    },
+    <span class="hljs-keyword">async</span> <span class="hljs-title function_">closeServer</span>(<span class="hljs-params">{ reason }</span>) {
+      <span class="hljs-keyword">if</span> (reason === <span class="hljs-string">&#x27;close&#x27;</span>) {
+        <span class="hljs-keyword">await</span> resource.<span class="hljs-title function_">dispose</span>()
+      }
+    },
+  }
+}</code></pre></div>
+</li>
+</ul>
+<h3 id="closepreviewserver"><a class="anchor" href="#closepreviewserver">#</a><code>closePreviewServer</code></h3>
+<ul>
+<li><p><strong>Type:</strong> <code>() =&gt; void | Promise&lt;void&gt;</code></p>
+</li>
+<li><p><strong>Kind:</strong> <code>async</code>, <code>parallel</code></p>
+</li>
+<li><p><strong>Scope:</strong> <a href="api-environment-plugins.html#per-environment-hooks-and-global-hooks">Global</a></p>
+<p>Same as <a href="api-plugin.html#closeserver"><code>closeServer</code></a> but for the preview server. The preview server never restarts, so there is no <code>reason</code>.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> <span class="hljs-title function_">myPlugin</span> = (<span class="hljs-params"></span>) =&gt; {
+  <span class="hljs-keyword">let</span> resource
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;close-preview-server&#x27;</span>,
+    <span class="hljs-title function_">configurePreviewServer</span>(<span class="hljs-params">server</span>) {
+      resource = <span class="hljs-title function_">createResource</span>()
+    },
+    <span class="hljs-keyword">async</span> <span class="hljs-title function_">closePreviewServer</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-keyword">await</span> resource.<span class="hljs-title function_">dispose</span>()
+    },
+  }
+}</code></pre></div>
+</li>
+</ul>
+<h3 id="transformindexhtml"><a class="anchor" href="#transformindexhtml">#</a><code>transformIndexHtml</code></h3>
+<ul>
+<li><p><strong>Type:</strong> <code>IndexHtmlTransformHook | { order?: &#39;pre&#39; | &#39;post&#39;, handler: IndexHtmlTransformHook }</code></p>
+</li>
+<li><p><strong>Kind:</strong> <code>async</code>, <code>sequential</code></p>
+</li>
+<li><p><strong>Scope:</strong> <a href="api-environment-plugins.html#per-environment-hooks-and-global-hooks">Per-environment</a></p>
+<p>Dedicated hook for transforming HTML entry point files such as <code>index.html</code>. The hook receives the current HTML string and a transform context. The context exposes the <a href="api-javascript.html#vitedevserver"><code>ViteDevServer</code></a> instance during dev, and exposes the Rollup output bundle during build.</p>
+<p>The hook can be async and can return one of the following:</p>
+<ul>
+<li>Transformed HTML string</li>
+<li>An array of tag descriptor objects (<code>{ tag, attrs, children }</code>) to inject to the existing HTML. Each tag can also specify where it should be injected to (default is prepending to <code>&lt;head&gt;</code>)</li>
+<li>An object containing both as <code>{ html, tags }</code></li>
+</ul>
+<p>By default <code>order</code> is <code>undefined</code>, with this hook applied after the HTML has been transformed. In order to inject a script that should go through the Vite plugins pipeline, <code>order: &#39;pre&#39;</code> will apply the hook before processing the HTML. <code>order: &#39;post&#39;</code> applies the hook after all hooks with <code>order</code> undefined are applied.</p>
+<p><strong>Basic Example:</strong></p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> <span class="hljs-title function_">htmlPlugin</span> = (<span class="hljs-params"></span>) =&gt; {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;html-transform&#x27;</span>,
+    <span class="hljs-title function_">transformIndexHtml</span>(<span class="hljs-params">html</span>) {
+      <span class="hljs-keyword">return</span> html.<span class="hljs-title function_">replace</span>(
+        <span class="hljs-regexp">/&lt;title&gt;(.*?)&lt;\/title&gt;/</span>,
+        <span class="hljs-string">`&lt;title&gt;Title replaced!&lt;/title&gt;`</span>,
+      )
+    },
+  }
+}</code></pre></div>
+<p><strong>Full Hook Signature:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">type</span> <span class="hljs-title class_">IndexHtmlTransformHook</span> = <span class="hljs-function">(<span class="hljs-params">
+  <span class="hljs-attr">html</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">ctx</span>: {
+    path: <span class="hljs-built_in">string</span>
+    filename: <span class="hljs-built_in">string</span>
+    server?: ViteDevServer
+    bundle?: <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;rolldown&#x27;</span>).OutputBundle
+    chunk?: <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;rolldown&#x27;</span>).OutputChunk
+    originalUrl?: <span class="hljs-built_in">string</span>
+  },
+</span>) =&gt;</span>
+  <span class="hljs-title class_">IndexHtmlTransformResult</span> | <span class="hljs-built_in">void</span> | <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">IndexHtmlTransformResult</span> | <span class="hljs-built_in">void</span>&gt;
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">IndexHtmlTransformResult</span> =
+  | <span class="hljs-built_in">string</span>
+  | <span class="hljs-title class_">HtmlTagDescriptor</span>[]
+  | {
+      <span class="hljs-attr">html</span>: <span class="hljs-built_in">string</span>
+      <span class="hljs-attr">tags</span>: <span class="hljs-title class_">HtmlTagDescriptor</span>[]
+    }
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">HtmlTagDescriptor</span> {
+  <span class="hljs-attr">tag</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-comment">/**
+   * attribute values will be escaped automatically if needed
+   */</span>
+  <span class="hljs-attr">attrs</span>?: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span> | <span class="hljs-built_in">boolean</span>&gt;
+  <span class="hljs-attr">children</span>?: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">HtmlTagDescriptor</span>[]
+  <span class="hljs-comment">/**
+   * default: &#x27;head-prepend&#x27;
+   */</span>
+  <span class="hljs-attr">injectTo</span>?: <span class="hljs-string">&#x27;head&#x27;</span> | <span class="hljs-string">&#x27;body&#x27;</span> | <span class="hljs-string">&#x27;head-prepend&#x27;</span> | <span class="hljs-string">&#x27;body-prepend&#x27;</span>
+}</code></pre></div>
+</li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Note</div><p>  This hook won&#39;t be called if you are using a framework that has custom handling of entry files (for example <a href="https://github.com/sveltejs/kit/discussions/8269#discussioncomment-4509145">SvelteKit</a>).</p>
+</div><h3 id="handlehotupdate"><a class="anchor" href="#handlehotupdate">#</a><code>handleHotUpdate</code></h3>
+<ul>
+<li><p><strong>Type:</strong> <code>(ctx: HmrContext) =&gt; Array&lt;ModuleNode&gt; | void | Promise&lt;Array&lt;ModuleNode&gt; | void&gt;</code></p>
+</li>
+<li><p><strong>Kind:</strong> <code>async</code>, <code>sequential</code></p>
+</li>
+<li><p><strong>See also:</strong> <a href="api-hmr.html">HMR API</a></p>
+</li>
+<li><p><strong>Scope:</strong> <a href="api-environment-plugins.html#per-environment-hooks-and-global-hooks">Per-environment</a></p>
+<p>Perform custom HMR update handling. The hook receives a context object with the following signature:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">HmrContext</span> {
+  <span class="hljs-attr">file</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">timestamp</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-attr">modules</span>: <span class="hljs-title class_">Array</span>&lt;<span class="hljs-title class_">ModuleNode</span>&gt;
+  <span class="hljs-attr">read</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">string</span> | <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">string</span>&gt;
+  <span class="hljs-attr">server</span>: <span class="hljs-title class_">ViteDevServer</span>
+}</code></pre></div>
+<ul>
+<li><p><code>modules</code> is an array of modules that are affected by the changed file. It&#39;s an array because a single file may map to multiple served modules (e.g. Vue SFCs).</p>
+</li>
+<li><p><code>read</code> is an async read function that returns the content of the file. This is provided because on some systems, the file change callback may fire too fast before the editor finishes updating the file and direct <code>fs.readFile</code> will return empty content. The read function passed in normalizes this behavior.</p>
+</li>
+</ul>
+<p>The hook can choose to:</p>
+<ul>
+<li><p>Filter and narrow down the affected module list so that the HMR is more accurate.</p>
+</li>
+<li><p>Return an empty array and perform a full reload:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">handleHotUpdate</span>(<span class="hljs-params">{ server, modules, timestamp }</span>) {
+  <span class="hljs-comment">// Invalidate modules manually</span>
+  <span class="hljs-keyword">const</span> invalidatedModules = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>()
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> mod <span class="hljs-keyword">of</span> modules) {
+    server.<span class="hljs-property">moduleGraph</span>.<span class="hljs-title function_">invalidateModule</span>(
+      mod,
+      invalidatedModules,
+      timestamp,
+      <span class="hljs-literal">true</span>
+    )
+  }
+  server.<span class="hljs-property">ws</span>.<span class="hljs-title function_">send</span>({ <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;full-reload&#x27;</span> })
+  <span class="hljs-keyword">return</span> []
+}</code></pre></div>
+</li>
+<li><p>Return an empty array and perform complete custom HMR handling by sending custom events to the client:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">handleHotUpdate</span>(<span class="hljs-params">{ server }</span>) {
+  server.<span class="hljs-property">ws</span>.<span class="hljs-title function_">send</span>({
+    <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;custom&#x27;</span>,
+    <span class="hljs-attr">event</span>: <span class="hljs-string">&#x27;special-update&#x27;</span>,
+    <span class="hljs-attr">data</span>: {}
+  })
+  <span class="hljs-keyword">return</span> []
+}</code></pre></div>
+<p>Client code should register corresponding handler using the <a href="api-hmr.html">HMR API</a> (this could be injected by the same plugin&#39;s <code>transform</code> hook):</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">if</span> (<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>) {
+  <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;special-update&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> {
+    <span class="hljs-comment">// perform custom update</span>
+  })
+}</code></pre></div>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="plugin-context-meta"><a class="anchor" href="#plugin-context-meta">#</a>Plugin Context Meta</h2>
+<p>For plugin hooks that have access to the plugin context, Vite exposes additional properties on <code>this.meta</code>:</p>
+<ul>
+<li><code>this.meta.viteVersion</code>: The current Vite version string (e.g. <code>&quot;8.0.0&quot;</code>).</li>
+</ul>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Detecting Rolldown powered Vite</div><p><a href="https://rolldown.rs/reference/Interface.PluginContextMeta#rolldownversion"><code>this.meta.rolldownVersion</code></a> is only available for Rolldown powered Vite (i.e. Vite 8+). You can use it to detect whether the current Vite instance is powered by Rolldown:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">versionCheckPlugin</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Plugin</span> {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;version-check&#x27;</span>,
+    <span class="hljs-title function_">buildStart</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">rolldownVersion</span>) {
+        <span class="hljs-comment">// only do something if running on a Rolldown powered Vite</span>
+      } <span class="hljs-keyword">else</span> {
+        <span class="hljs-comment">// do something else if running on a Rollup powered Vite</span>
+      }
+    },
+  }
+}</code></pre></div>
+</div><h2 id="output-bundle-metadata"><a class="anchor" href="#output-bundle-metadata">#</a>Output Bundle Metadata</h2>
+<p>During build, Vite augments Rolldown&#39;s build output objects with a Vite-specific <code>viteMetadata</code> field.</p>
+<p>This is available through:</p>
+<ul>
+<li><code>RenderedChunk</code> (for example in <code>renderChunk</code> and <code>augmentChunkHash</code>)</li>
+<li><code>OutputChunk</code> and <code>OutputAsset</code> (for example in <code>generateBundle</code> and <code>writeBundle</code>)</li>
+</ul>
+<p><code>viteMetadata</code> provides:</p>
+<ul>
+<li><code>viteMetadata.importedCss: Set&lt;string&gt;</code></li>
+<li><code>viteMetadata.importedAssets: Set&lt;string&gt;</code></li>
+</ul>
+<p>This is useful when writing plugins that need to inspect emitted CSS and static assets without relying on <a href="../config/build-options.html#build-manifest"><code>build.manifest</code></a>.</p>
+<p>Example:</p>
+<div class="code"><div class="code-title">vite.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">outputMetadataPlugin</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Plugin</span> {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;output-metadata-plugin&#x27;</span>,
+    <span class="hljs-attr">enforce</span>: <span class="hljs-string">&#x27;post&#x27;</span>,
+    <span class="hljs-title function_">generateBundle</span>(<span class="hljs-params">_, bundle</span>) {
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> output <span class="hljs-keyword">of</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">values</span>(bundle)) {
+        <span class="hljs-keyword">const</span> css = output.<span class="hljs-property">viteMetadata</span>?.<span class="hljs-property">importedCss</span>
+        <span class="hljs-keyword">const</span> assets = output.<span class="hljs-property">viteMetadata</span>?.<span class="hljs-property">importedAssets</span>
+        <span class="hljs-keyword">if</span> (!css?.<span class="hljs-property">size</span> &amp;&amp; !assets?.<span class="hljs-property">size</span>) <span class="hljs-keyword">continue</span>
+
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(output.<span class="hljs-property">fileName</span>, {
+          <span class="hljs-attr">css</span>: css ? [...css] : [],
+          <span class="hljs-attr">assets</span>: assets ? [...assets] : [],
+        })
+      }
+    },
+  }
+}</code></pre></div>
+<h2 id="referencing-emitted-assets"><a class="anchor" href="#referencing-emitted-assets">#</a>Referencing Emitted Assets</h2>
+<p>To emit an asset from a plugin, call <a href="https://rolldown.rs/reference/Interface.PluginContext#in-depth-type-asset"><code>this.emitFile({ type: &#39;asset&#39;, ... })</code></a>. It returns a <code>referenceId</code> that you can use to generate the asset&#39;s URL, since its final file name isn&#39;t known until the bundle is generated.</p>
+<h3 id="in-javascript"><a class="anchor" href="#in-javascript">#</a>In JavaScript</h3>
+<p>Use <code>import.meta.ROLLDOWN_FILE_URL_&lt;referenceId&gt;</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> referenceId = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">emitFile</span>({
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;asset&#x27;</span>,
+  <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;icon.png&#x27;</span>,
+  <span class="hljs-attr">source</span>: fileContent,
+})
+
+<span class="hljs-comment">// it&#x27;s a JavaScript expression, so append any query or hash with string concatenation</span>
+<span class="hljs-keyword">return</span> <span class="hljs-string">`export default import.meta.ROLLDOWN_FILE_URL_<span class="hljs-subst">${referenceId}</span> + &#x27;#frag&#x27;`</span></code></pre></div>
+<h3 id="in-css-or-html"><a class="anchor" href="#in-css-or-html">#</a>In CSS or HTML</h3>
+<p><code>import.meta.ROLLDOWN_FILE_URL_&lt;referenceId&gt;</code> only works in JavaScript expression position. In CSS or HTML, use the <code>__VITE_ASSET__&lt;referenceId&gt;__</code> token instead, appending any query or hash right after it:</p>
+<div class="code"><pre><code class="hljs lang-css"><span class="hljs-attribute">background</span>: <span class="hljs-built_in">url</span>(<span class="hljs-string">__VITE_ASSET__&lt;referenceId&gt;__#frag</span>);</code></pre></div>
+<h2 id="plugin-ordering"><a class="anchor" href="#plugin-ordering">#</a>Plugin Ordering</h2>
+<p>A Vite plugin can additionally specify an <code>enforce</code> property (similar to webpack loaders) to adjust its application order. The value of <code>enforce</code> can be either <code>&quot;pre&quot;</code> or <code>&quot;post&quot;</code>. The resolved plugins will be in the following order:</p>
+<ul>
+<li>Alias</li>
+<li>User plugins with <code>enforce: &#39;pre&#39;</code></li>
+<li>Vite core plugins</li>
+<li>User plugins without enforce value</li>
+<li>Vite build plugins</li>
+<li>User plugins with <code>enforce: &#39;post&#39;</code></li>
+<li>Vite post build plugins (minify, manifest, reporting)</li>
+</ul>
+<p>Note that this is separate from hooks ordering, those are still separately subject to their <a href="https://rolldown.rs/reference/TypeAlias.ObjectHook#order"><code>order</code> attribute</a> as usual for Rolldown hooks.</p>
+<h2 id="conditional-application"><a class="anchor" href="#conditional-application">#</a>Conditional Application</h2>
+<p>By default plugins are invoked for both serve and build. In cases where a plugin needs to be conditionally applied only during serve or build, use the <code>apply</code> property to only invoke them during <code>&#39;build&#39;</code> or <code>&#39;serve&#39;</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">myPlugin</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;build-only&#x27;</span>,
+    <span class="hljs-attr">apply</span>: <span class="hljs-string">&#x27;build&#x27;</span>, <span class="hljs-comment">// or &#x27;serve&#x27;</span>
+  }
+}</code></pre></div>
+<p>A function can also be used for more precise control:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">apply</span>(<span class="hljs-params">config, { command }</span>) {
+  <span class="hljs-comment">// apply only on build but not for SSR</span>
+  <span class="hljs-keyword">return</span> command === <span class="hljs-string">&#x27;build&#x27;</span> &amp;&amp; !config.<span class="hljs-property">build</span>.<span class="hljs-property">ssr</span>
+}</code></pre></div>
+<h2 id="rolldown-plugin-compatibility"><a class="anchor" href="#rolldown-plugin-compatibility">#</a>Rolldown Plugin Compatibility</h2>
+<p>A fair number of Rolldown / Rollup plugins will work directly as a Vite plugin (e.g. <code>@rollup/plugin-alias</code> or <code>@rollup/plugin-json</code>), but not all of them, since some plugin hooks do not make sense in an unbundled dev server context.</p>
+<p>In general, as long as a Rolldown / Rollup plugin fits the following criteria then it should just work as a Vite plugin:</p>
+<ul>
+<li>It doesn&#39;t use the <a href="https://rolldown.rs/reference/Interface.Plugin#moduleparsed"><code>moduleParsed</code></a> hook.</li>
+<li>It doesn&#39;t rely on the Rolldown specific options like <a href="https://rolldown.rs/reference/InputOptions.transform#inject"><code>transform.inject</code></a></li>
+<li>It doesn&#39;t have strong coupling between bundle-phase hooks and output-phase hooks.</li>
+</ul>
+<p>If a Rolldown / Rollup plugin only makes sense for the build phase, then it can be specified under <code>build.rolldownOptions.plugins</code> instead. It will work the same as a Vite plugin with <code>enforce: &#39;post&#39;</code> and <code>apply: &#39;build&#39;</code>.</p>
+<p>You can also augment an existing Rolldown / Rollup plugin with Vite-only properties:</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> example <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;rolldown-plugin-example&#x27;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [
+    {
+      ...<span class="hljs-title function_">example</span>(),
+      <span class="hljs-attr">enforce</span>: <span class="hljs-string">&#x27;post&#x27;</span>,
+      <span class="hljs-attr">apply</span>: <span class="hljs-string">&#x27;build&#x27;</span>,
+    },
+  ],
+})</code></pre></div>
+<h2 id="path-normalization"><a class="anchor" href="#path-normalization">#</a>Path Normalization</h2>
+<p>Vite normalizes paths while resolving ids to use POSIX separators ( / ) while preserving the volume in Windows. On the other hand, Rollup keeps resolved paths untouched by default, so resolved ids have win32 separators ( \ ) in Windows. However, Rollup plugins use a <a href="https://github.com/rollup/plugins/tree/master/packages/pluginutils#normalizepath"><code>normalizePath</code> utility function</a> from <code>@rollup/pluginutils</code> internally, which converts separators to POSIX before performing comparisons. This means that when these plugins are used in Vite, the <code>include</code> and <code>exclude</code> config pattern and other similar paths against resolved ids comparisons work correctly.</p>
+<p>So, for Vite plugins, when comparing paths against resolved ids it is important to first normalize the paths to use POSIX separators. An equivalent <code>normalizePath</code> utility function is exported from the <code>vite</code> module.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { normalizePath } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-title function_">normalizePath</span>(<span class="hljs-string">&#x27;foo\\bar&#x27;</span>) <span class="hljs-comment">// &#x27;foo/bar&#x27;</span>
+<span class="hljs-title function_">normalizePath</span>(<span class="hljs-string">&#x27;foo/bar&#x27;</span>) <span class="hljs-comment">// &#x27;foo/bar&#x27;</span></code></pre></div>
+<h2 id="filtering-include-exclude-pattern"><a class="anchor" href="#filtering-include-exclude-pattern">#</a>Filtering, include/exclude pattern</h2>
+<p>Vite exposes <a href="https://github.com/rollup/plugins/tree/master/packages/pluginutils#createfilter"><code>@rollup/pluginutils</code>&#39;s <code>createFilter</code></a> function to encourage Vite specific plugins and integrations to use the standard include/exclude filtering pattern, which is also used in Vite core itself.</p>
+<h3 id="hook-filters"><a class="anchor" href="#hook-filters">#</a>Hook Filters</h3>
+<p>Rolldown introduced a <a href="https://rolldown.rs/apis/plugin-api/hook-filters">hook filter feature</a> to reduce the communication overhead between the Rust and JavaScript runtimes. This feature allows plugins to specify patterns that determine when hooks should be called, improving performance by avoiding unnecessary hook invocations.</p>
+<p>This is also supported by Rollup 4.38.0+ and Vite 6.3.0+. To make your plugin backward compatible with older versions, make sure to also run the filter inside the hook handlers.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">myPlugin</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> jsFileRegex = <span class="hljs-regexp">/\.js$/</span>
+
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;my-plugin&#x27;</span>,
+    <span class="hljs-comment">// Example: only call transform for .js files</span>
+    <span class="hljs-attr">transform</span>: {
+      <span class="hljs-attr">filter</span>: {
+        <span class="hljs-attr">id</span>: jsFileRegex,
+      },
+      <span class="hljs-title function_">handler</span>(<span class="hljs-params">code, id</span>) {
+        <span class="hljs-comment">// Additional check for backward compatibility</span>
+        <span class="hljs-keyword">if</span> (!jsFileRegex.<span class="hljs-title function_">test</span>(id)) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>
+
+        <span class="hljs-keyword">return</span> {
+          <span class="hljs-attr">code</span>: <span class="hljs-title function_">transformCode</span>(code),
+          <span class="hljs-attr">map</span>: <span class="hljs-literal">null</span>,
+        }
+      },
+    },
+  }
+}</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p><a href="https://www.npmjs.com/package/@rolldown/pluginutils"><code>@rolldown/pluginutils</code></a> exports some utilities for hook filters like <code>exactRegex</code> and <code>prefixRegex</code>. These are also re-exported from <code>rolldown/filter</code> for convenience.</p>
+</div><h2 id="chunk-import-map-information"><a class="anchor" href="#chunk-import-map-information">#</a>Chunk Import Map Information</h2>
+<div class="box box-info"><div class="box-title">ℹ️ Info : Experimental</div><p>This feature is experimental and may change in the future.</p>
+</div><p>When <a href="../config/build-options.html#build-chunkimportmap"><code>build.chunkImportMap</code></a> option is enabled, the import statements in the generated chunks will use a unique ID for each chunk instead of the file path.</p>
+<p>To get the mapping from the chunk ID to the file path, you can access the import map emitted to the bundle in the <code>generateBundle</code> hook or the <code>writeBundle</code> hook. The import map has the name specified by <a href="https://rolldown.rs/reference/InputOptions.experimental#chunkimportmap"><code>build.rolldownOptions.experimental.chunkImportMap.fileName</code></a> (defaults to <code>importmap.json</code>).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">accessImportMap</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">let</span> <span class="hljs-attr">config</span>: <span class="hljs-title class_">ResolvedConfig</span>
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;access-import-map&#x27;</span>,
+    <span class="hljs-title function_">configResolved</span>(<span class="hljs-params">resolvedConfig</span>) {
+      config = resolvedConfig
+    },
+    <span class="hljs-title function_">generateBundle</span>(<span class="hljs-params">options, bundle</span>) {
+      <span class="hljs-keyword">const</span> chunkImportMap =
+        config.<span class="hljs-property">build</span>.<span class="hljs-property">rolldownOptions</span>.<span class="hljs-property">experimental</span>?.<span class="hljs-property">chunkImportMap</span>
+      <span class="hljs-keyword">if</span> (chunkImportMap) {
+        <span class="hljs-keyword">const</span> importMapFilename =
+          <span class="hljs-keyword">typeof</span> chunkImportMap === <span class="hljs-string">&#x27;object&#x27;</span> &amp;&amp; chunkImportMap.<span class="hljs-property">fileName</span>
+            ? chunkImportMap.<span class="hljs-property">fileName</span>
+            : <span class="hljs-string">&#x27;importmap.json&#x27;</span>
+        <span class="hljs-keyword">const</span> importMap = bundle[importMapFilename]! <span class="hljs-keyword">as</span> <span class="hljs-title class_">OutputAsset</span>
+        <span class="hljs-keyword">const</span> mapping = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(importMap.<span class="hljs-property">source</span>).<span class="hljs-property">imports</span>
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(mapping)
+        <span class="hljs-comment">// { &quot;./entry.hash1.js&quot;: &quot;./entry.hash2.js&quot; }</span>
+      }
+    },
+  }
+}</code></pre></div>
+<h2 id="client-server-communication"><a class="anchor" href="#client-server-communication">#</a>Client-server Communication</h2>
+<p>Since Vite 2.9, we provide some utilities for plugins to help handle the communication with clients.</p>
+<h3 id="server-to-client"><a class="anchor" href="#server-to-client">#</a>Server to Client</h3>
+<p>On the plugin side, we could use <code>server.ws.send</code> to broadcast events to the client:</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [
+    {
+      <span class="hljs-comment">// ...</span>
+      <span class="hljs-title function_">configureServer</span>(<span class="hljs-params">server</span>) {
+        server.<span class="hljs-property">ws</span>.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;connection&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+          server.<span class="hljs-property">ws</span>.<span class="hljs-title function_">send</span>(<span class="hljs-string">&#x27;my:greetings&#x27;</span>, { <span class="hljs-attr">msg</span>: <span class="hljs-string">&#x27;hello&#x27;</span> })
+        })
+      },
+    },
+  ],
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce : NOTE</div><p>We recommend <strong>always prefixing</strong> your event names to avoid collisions with other plugins.</p>
+</div><p>On the client side, use <a href="api-hmr.html#hot-on-event-cb"><code>hot.on</code></a> to listen to the events:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-comment">// client side</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>) {
+  <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;my:greetings&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(data.<span class="hljs-property">msg</span>) <span class="hljs-comment">// hello</span>
+  })
+}</code></pre></div>
+<h3 id="client-to-server"><a class="anchor" href="#client-to-server">#</a>Client to Server</h3>
+<p>To send events from the client to the server, we can use <a href="api-hmr.html#hot-send-event-data"><code>hot.send</code></a>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// client side</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>) {
+  <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>.<span class="hljs-title function_">send</span>(<span class="hljs-string">&#x27;my:from-client&#x27;</span>, { <span class="hljs-attr">msg</span>: <span class="hljs-string">&#x27;Hey!&#x27;</span> })
+}</code></pre></div>
+<p>Then use <code>server.ws.on</code> and listen to the events on the server side:</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [
+    {
+      <span class="hljs-comment">// ...</span>
+      <span class="hljs-title function_">configureServer</span>(<span class="hljs-params">server</span>) {
+        server.<span class="hljs-property">ws</span>.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;my:from-client&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">data, client</span>) =&gt;</span> {
+          <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Message from client:&#x27;</span>, data.<span class="hljs-property">msg</span>) <span class="hljs-comment">// Hey!</span>
+          <span class="hljs-comment">// reply only to the client (if needed)</span>
+          client.<span class="hljs-title function_">send</span>(<span class="hljs-string">&#x27;my:ack&#x27;</span>, { <span class="hljs-attr">msg</span>: <span class="hljs-string">&#x27;Hi! I got your message!&#x27;</span> })
+        })
+      },
+    },
+  ],
+})</code></pre></div>
+<h3 id="typescript-for-custom-events"><a class="anchor" href="#typescript-for-custom-events">#</a>TypeScript for Custom Events</h3>
+<p>Internally, vite infers the type of a payload from the <code>CustomEventMap</code> interface, it is possible to type custom events by extending the interface:</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Note</div><p>Make sure to include the <code>.d.ts</code> extension when specifying TypeScript declaration files. Otherwise, TypeScript may not know which file the module is trying to extend.</p>
+</div><div class="code"><div class="code-title">events.d.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/types/customEvent.d.ts&#x27;</span>
+
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vite/types/customEvent.d.ts&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">CustomEventMap</span> {
+    <span class="hljs-string">&#x27;custom:foo&#x27;</span>: { <span class="hljs-attr">msg</span>: <span class="hljs-built_in">string</span> }
+    <span class="hljs-comment">// &#x27;event-key&#x27;: payload</span>
+  }
+}</code></pre></div>
+<p>This interface extension is utilized by <code>InferCustomEventPayload&lt;T&gt;</code> to infer the payload type for event <code>T</code>. For more information on how this interface is utilized, refer to the <a href="api-hmr.html#hmr-api">HMR API Documentation</a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">InferCustomEventPayload</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite/types/customEvent.d.ts&#x27;</span>
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vite/types/customEvent.d.ts&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">CustomEventMap</span> {
+    <span class="hljs-string">&#x27;custom:foo&#x27;</span>: { <span class="hljs-attr">msg</span>: <span class="hljs-built_in">string</span> }
+  }
+}
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">CustomFooPayload</span> = <span class="hljs-title class_">InferCustomEventPayload</span>&lt;<span class="hljs-string">&#x27;custom:foo&#x27;</span>&gt;
+<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>?.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;custom:foo&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">payload</span>) =&gt;</span> {
+  <span class="hljs-comment">// The type of payload will be { msg: string }</span>
+})
+<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>?.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;unknown:event&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">payload</span>) =&gt;</span> {
+  <span class="hljs-comment">// The type of payload will be any</span>
+})</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#authoring-a-plugin">Authoring a Plugin</a><a class="toc-2" href="#conventions">Conventions</a><a class="toc-2" href="#plugins-config">Plugins Config</a><a class="toc-2" href="#simple-examples">Simple Examples</a><a class="toc-3" href="#transforming-custom-file-types">Transforming Custom File Types</a><a class="toc-3" href="#importing-a-virtual-file">Importing a Virtual File</a><a class="toc-2" href="#rolldown-hooks">Rolldown Hooks</a><a class="toc-2" href="#vite-specific-hooks">Vite Specific Hooks</a><a class="toc-3" href="#config">config</a><a class="toc-3" href="#configresolved">configResolved</a><a class="toc-3" href="#configureserver">configureServer</a><a class="toc-3" href="#configurepreviewserver">configurePreviewServer</a><a class="toc-3" href="#closeserver">closeServer</a><a class="toc-3" href="#closepreviewserver">closePreviewServer</a><a class="toc-3" href="#transformindexhtml">transformIndexHtml</a><a class="toc-3" href="#handlehotupdate">handleHotUpdate</a><a class="toc-2" href="#plugin-context-meta">Plugin Context Meta</a><a class="toc-2" href="#output-bundle-metadata">Output Bundle Metadata</a><a class="toc-2" href="#referencing-emitted-assets">Referencing Emitted Assets</a><a class="toc-3" href="#in-javascript">In JavaScript</a><a class="toc-3" href="#in-css-or-html">In CSS or HTML</a><a class="toc-2" href="#plugin-ordering">Plugin Ordering</a><a class="toc-2" href="#conditional-application">Conditional Application</a><a class="toc-2" href="#rolldown-plugin-compatibility">Rolldown Plugin Compatibility</a><a class="toc-2" href="#path-normalization">Path Normalization</a><a class="toc-2" href="#filtering-include-exclude-pattern">Filtering, include/exclude pattern</a><a class="toc-3" href="#hook-filters">Hook Filters</a><a class="toc-2" href="#chunk-import-map-information">Chunk Import Map Information</a><a class="toc-2" href="#client-server-communication">Client-server Communication</a><a class="toc-3" href="#server-to-client">Server to Client</a><a class="toc-3" href="#client-to-server">Client to Server</a><a class="toc-3" href="#typescript-for-custom-events">TypeScript for Custom Events</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

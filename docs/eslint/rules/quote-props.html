@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>quote-props (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/quote-props <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/quote-props">version en ligne</a></div>
+<h1>quote-props</h1><p>Object literal property names can be defined in two ways: using literals or using strings. For example, these two objects are equivalent:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">var</span> object1 = {
+    <span class="hljs-attr">property</span>: <span class="hljs-literal">true</span>
+};
+
+<span class="hljs-keyword">var</span> object2 = {
+    <span class="hljs-string">&quot;property&quot;</span>: <span class="hljs-literal">true</span>
+};</code></pre></div>
+<p>In many cases, it doesn&#39;t matter if you choose to use an identifier instead of a string or vice-versa. Even so, you might decide to enforce a consistent style in your code.</p>
+<p>There are, however, some occasions when you must use quotes:</p>
+<ol>
+<li>If you are using an ECMAScript 3 JavaScript engine (such as IE8) and you want to use a keyword (such as <code>if</code>) as a property name. This restriction was removed in ECMAScript 5.</li>
+<li>You want to use a non-identifier character in your property name, such as having a property with a space like <code>&quot;one two&quot;</code>.</li>
+</ol>
+<p>Another example where quotes do matter is when using numeric literals as property keys:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">var</span> object = {
+    <span class="hljs-number">1e2</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-number">100</span>: <span class="hljs-number">2</span>
+};</code></pre></div>
+<p>This may look alright at first sight, but this code in fact throws a syntax error in ECMAScript 5 strict mode. This happens because <code>1e2</code> and <code>100</code> are coerced into strings before getting used as the property name. Both <code>String(1e2)</code> and <code>String(100)</code> happen to be equal to <code>&quot;100&quot;</code>, which causes the &quot;Duplicate data property in object literal not allowed in strict mode&quot; error. Issues like that can be tricky to debug, so some prefer to require quotes around all property names.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule requires quotes around object literal property names.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has two options, a string option and an object option.</p>
+<p>String option:</p>
+<ul>
+<li><code>&quot;always&quot;</code> (default) requires quotes around all object literal property names</li>
+<li><code>&quot;as-needed&quot;</code> disallows quotes around object literal property names that are not strictly required</li>
+<li><code>&quot;consistent&quot;</code> enforces a consistent quote style; in a given object, either all of the properties should be quoted, or none of the properties should be quoted</li>
+<li><code>&quot;consistent-as-needed&quot;</code> requires quotes around all object literal property names if any name strictly requires quotes, otherwise disallows quotes around object property names</li>
+</ul>
+<p>Object option:</p>
+<ul>
+<li><code>&quot;keywords&quot;: true</code> requires quotes around language keywords used as object property names (only applies when using <code>as-needed</code> or <code>consistent-as-needed</code>)</li>
+<li><code>&quot;unnecessary&quot;: true</code> (default) disallows quotes around object literal property names that are not strictly required (only applies when using <code>as-needed</code>)</li>
+<li><code>&quot;unnecessary&quot;: false</code> allows quotes around object literal property names that are not strictly required (only applies when using <code>as-needed</code>)</li>
+<li><code>&quot;numbers&quot;: true</code> requires quotes around numbers used as object property names (only applies when using <code>as-needed</code>)</li>
+</ul>
+<h3 id="always"><a class="anchor" href="#always">#</a>always</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the default <code>&quot;always&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint quote-props: [&quot;error&quot;, &quot;always&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> object = {
+    <span class="hljs-attr">foo</span>: <span class="hljs-string">&quot;bar&quot;</span>,
+    <span class="hljs-attr">baz</span>: <span class="hljs-number">42</span>
+};</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the default <code>&quot;always&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint quote-props: [&quot;error&quot;, &quot;always&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> object1 = {
+    <span class="hljs-string">&quot;foo&quot;</span>: <span class="hljs-string">&quot;bar&quot;</span>,
+    <span class="hljs-string">&quot;baz&quot;</span>: <span class="hljs-number">42</span>,
+    <span class="hljs-string">&quot;qux-lorem&quot;</span>: <span class="hljs-literal">true</span>
+};
+
+<span class="hljs-keyword">var</span> object2 = {
+    <span class="hljs-string">&#x27;foo&#x27;</span>: <span class="hljs-string">&#x27;bar&#x27;</span>,
+    <span class="hljs-string">&#x27;baz&#x27;</span>: <span class="hljs-number">42</span>,
+    <span class="hljs-string">&#x27;qux-lorem&#x27;</span>: <span class="hljs-literal">true</span>
+};
+
+<span class="hljs-keyword">var</span> object3 = {
+    <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span>;
+    }
+};</code></pre></div>
+</div><h3 id="as-needed"><a class="anchor" href="#as-needed">#</a>as-needed</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;as-needed&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint quote-props: [&quot;error&quot;, &quot;as-needed&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> object = {
+    <span class="hljs-string">&quot;a&quot;</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-string">&quot;0&quot;</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-string">&quot;true&quot;</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-string">&quot;null&quot;</span>: <span class="hljs-number">0</span>
+};</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;as-needed&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint quote-props: [&quot;error&quot;, &quot;as-needed&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> object1 = {
+    <span class="hljs-string">&quot;a-b&quot;</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-string">&quot;0x0&quot;</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-string">&quot;1e2&quot;</span>: <span class="hljs-number">0</span>
+};
+
+<span class="hljs-keyword">var</span> object2 = {
+    <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span>,
+    <span class="hljs-attr">baz</span>: <span class="hljs-number">42</span>,
+    <span class="hljs-attr">true</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-number">0</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-string">&#x27;qux-lorem&#x27;</span>: <span class="hljs-literal">true</span>
+};
+
+<span class="hljs-keyword">var</span> object3 = {
+    <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span>;
+    }
+};</code></pre></div>
+</div><h3 id="consistent"><a class="anchor" href="#consistent">#</a>consistent</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;consistent&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint quote-props: [&quot;error&quot;, &quot;consistent&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> object1 = {
+    <span class="hljs-attr">foo</span>: <span class="hljs-string">&quot;bar&quot;</span>,
+    <span class="hljs-string">&quot;baz&quot;</span>: <span class="hljs-number">42</span>,
+    <span class="hljs-string">&quot;qux-lorem&quot;</span>: <span class="hljs-literal">true</span>
+};
+
+<span class="hljs-keyword">var</span> object2 = {
+    <span class="hljs-string">&#x27;foo&#x27;</span>: <span class="hljs-string">&#x27;bar&#x27;</span>,
+    <span class="hljs-attr">baz</span>: <span class="hljs-number">42</span>
+};</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;consistent&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint quote-props: [&quot;error&quot;, &quot;consistent&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> object1 = {
+    <span class="hljs-string">&quot;foo&quot;</span>: <span class="hljs-string">&quot;bar&quot;</span>,
+    <span class="hljs-string">&quot;baz&quot;</span>: <span class="hljs-number">42</span>,
+    <span class="hljs-string">&quot;qux-lorem&quot;</span>: <span class="hljs-literal">true</span>
+};
+
+<span class="hljs-keyword">var</span> object2 = {
+    <span class="hljs-string">&#x27;foo&#x27;</span>: <span class="hljs-string">&#x27;bar&#x27;</span>,
+    <span class="hljs-string">&#x27;baz&#x27;</span>: <span class="hljs-number">42</span>
+};
+
+<span class="hljs-keyword">var</span> object3 = {
+    <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span>,
+    <span class="hljs-attr">baz</span>: <span class="hljs-number">42</span>
+};</code></pre></div>
+</div><h3 id="consistent-as-needed"><a class="anchor" href="#consistent-as-needed">#</a>consistent-as-needed</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;consistent-as-needed&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint quote-props: [&quot;error&quot;, &quot;consistent-as-needed&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> object1 = {
+    <span class="hljs-attr">foo</span>: <span class="hljs-string">&quot;bar&quot;</span>,
+    <span class="hljs-string">&quot;baz&quot;</span>: <span class="hljs-number">42</span>,
+    <span class="hljs-string">&quot;qux-lorem&quot;</span>: <span class="hljs-literal">true</span>
+};
+
+<span class="hljs-keyword">var</span> object2 = {
+    <span class="hljs-string">&#x27;foo&#x27;</span>: <span class="hljs-string">&#x27;bar&#x27;</span>,
+    <span class="hljs-string">&#x27;baz&#x27;</span>: <span class="hljs-number">42</span>
+};</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;consistent-as-needed&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint quote-props: [&quot;error&quot;, &quot;consistent-as-needed&quot;]*/</span>
+
+<span class="hljs-keyword">var</span> object1 = {
+    <span class="hljs-string">&quot;foo&quot;</span>: <span class="hljs-string">&quot;bar&quot;</span>,
+    <span class="hljs-string">&quot;baz&quot;</span>: <span class="hljs-number">42</span>,
+    <span class="hljs-string">&quot;qux-lorem&quot;</span>: <span class="hljs-literal">true</span>
+};
+
+<span class="hljs-keyword">var</span> object2 = {
+    <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span>,
+    <span class="hljs-attr">baz</span>: <span class="hljs-number">42</span>
+};</code></pre></div>
+</div><h3 id="keywords"><a class="anchor" href="#keywords">#</a>keywords</h3>
+<p>Examples of additional <strong>incorrect</strong> code for this rule with the <code>&quot;as-needed&quot;, { &quot;keywords&quot;: true }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint quote-props: [&quot;error&quot;, &quot;as-needed&quot;, { &quot;keywords&quot;: true }]*/</span>
+
+<span class="hljs-keyword">var</span> x = {
+    <span class="hljs-attr">while</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">volatile</span>: <span class="hljs-string">&quot;foo&quot;</span>
+};</code></pre></div>
+</div><p>Examples of additional <strong>incorrect</strong> code for this rule with the <code>&quot;consistent-as-needed&quot;, { &quot;keywords&quot;: true }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint quote-props: [&quot;error&quot;, &quot;consistent-as-needed&quot;, { &quot;keywords&quot;: true }]*/</span>
+
+<span class="hljs-keyword">var</span> x = {
+    <span class="hljs-string">&quot;prop&quot;</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-string">&quot;bar&quot;</span>: <span class="hljs-string">&quot;foo&quot;</span>
+};</code></pre></div>
+</div><h3 id="unnecessary"><a class="anchor" href="#unnecessary">#</a>unnecessary</h3>
+<p>Examples of additional <strong>correct</strong> code for this rule with the <code>&quot;as-needed&quot;, { &quot;unnecessary&quot;: false }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint quote-props: [&quot;error&quot;, &quot;as-needed&quot;, { &quot;keywords&quot;: true, &quot;unnecessary&quot;: false }]*/</span>
+
+<span class="hljs-keyword">var</span> x = {
+    <span class="hljs-string">&quot;while&quot;</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-string">&quot;foo&quot;</span>: <span class="hljs-string">&quot;bar&quot;</span>  <span class="hljs-comment">// Would normally have caused a warning</span>
+};</code></pre></div>
+</div><h3 id="numbers"><a class="anchor" href="#numbers">#</a>numbers</h3>
+<p>Examples of additional <strong>incorrect</strong> code for this rule with the <code>&quot;as-needed&quot;, { &quot;numbers&quot;: true }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint quote-props: [&quot;error&quot;, &quot;as-needed&quot;, { &quot;numbers&quot;: true }]*/</span>
+
+<span class="hljs-keyword">var</span> x = {
+    <span class="hljs-number">100</span>: <span class="hljs-number">1</span>
+}</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you don&#39;t care if property names are consistently wrapped in quotes or not, and you don&#39;t target legacy ES3 environments, turn this rule off.</p>
+<h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://compat-table.github.io/compat-table/es5/#test-Object/array_literal_extensions_Reserved_words_as_property_names">https://compat-table.github.io/compat-table/es5/#test-Object/array_literal_extensions_Reserved_words_as_property_names</a></li><li><a class="ext" href="https://mathiasbynens.be/notes/javascript-properties">https://mathiasbynens.be/notes/javascript-properties</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#always">always</a><a class="toc-3" href="#as-needed">as-needed</a><a class="toc-3" href="#consistent">consistent</a><a class="toc-3" href="#consistent-as-needed">consistent-as-needed</a><a class="toc-3" href="#keywords">keywords</a><a class="toc-3" href="#unnecessary">unnecessary</a><a class="toc-3" href="#numbers">numbers</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

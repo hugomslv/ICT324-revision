@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hooks (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › api/hooks  <a class="ext small" href="https://vitest.dev/api/hooks">version en ligne</a></div>
+<h1 id="hooks"><a class="anchor" href="#hooks">#</a>Hooks</h1>
+<p>These functions allow you to hook into the life cycle of tests to avoid repeating setup and teardown code. They apply to the current context: the file if they are used at the top-level or the current suite if they are inside a <code>describe</code> block. These hooks are not called, when you are running Vitest as a <a href="../guide/testing-types.html">type checker</a>.</p>
+<p>Test hooks are called in a stack order (&quot;after&quot; hooks are reversed) by default, but you can configure it via <a href="../config/sequence.html#sequence-hooks"><code>sequence.hooks</code></a> option.</p>
+<h2 id="beforeeach"><a class="anchor" href="#beforeeach">#</a>beforeEach</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">beforeEach</span>(<span class="hljs-params">
+  <span class="hljs-attr">body</span>: (context: TestContext) =&gt; <span class="hljs-built_in">unknown</span>,
+  <span class="hljs-attr">timeout</span>?: <span class="hljs-built_in">number</span>,
+</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Register a callback to be called before each of the tests in the current suite runs.
+If the function returns a promise, Vitest waits until the promise resolve before running the test.</p>
+<p>Optionally, you can pass a timeout (in milliseconds) defining how long to wait before terminating. The default is 10 seconds, and can be configured globally with <a href="../config/hooktimeout.html"><code>hookTimeout</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { beforeEach } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">beforeEach</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// Clear mocks and add some testing data before each test run</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">stopMocking</span>()
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">addUser</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;John&#x27;</span> })
+})</code></pre></div>
+<p>Here, the <code>beforeEach</code> ensures that user is added for each test.</p>
+<p><code>beforeEach</code> can also return an optional cleanup function. It&#39;s similar to <a href="#aftereach"><code>afterEach</code></a>. The only difference is that it&#39;s executed after all other <code>afterEach</code> hooks:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { beforeEach } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">beforeEach</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// called once before each test run</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">prepareSomething</span>()
+
+  <span class="hljs-comment">// clean up function, called once after each test run, after afterEach hooks</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">resetSomething</span>()
+  }
+})</code></pre></div>
+<h2 id="aftereach"><a class="anchor" href="#aftereach">#</a>afterEach</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">afterEach</span>(<span class="hljs-params">
+  <span class="hljs-attr">body</span>: (context: TestContext) =&gt; <span class="hljs-built_in">unknown</span>,
+  <span class="hljs-attr">timeout</span>?: <span class="hljs-built_in">number</span>,
+</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Register a callback to be called after each one of the tests in the current suite completes.
+If the function returns a promise, Vitest waits until the promise resolve before continuing.</p>
+<p>Optionally, you can provide a timeout (in milliseconds) for specifying how long to wait before terminating. The default is 10 seconds, and can be configured globally with <a href="../config/hooktimeout.html"><code>hookTimeout</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { afterEach } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">afterEach</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">clearTestingData</span>() <span class="hljs-comment">// clear testing data after each test run</span>
+})</code></pre></div>
+<p>Here, the <code>afterEach</code> ensures that testing data is cleared after each test runs.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You can also use <a href="#ontestfinished"><code>onTestFinished</code></a> during the test execution to cleanup any state after the test has finished running.</p>
+</div><h2 id="beforeall"><a class="anchor" href="#beforeall">#</a>beforeAll</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">beforeAll</span>(<span class="hljs-params">
+  <span class="hljs-attr">body</span>: (context: ModuleContext) =&gt; <span class="hljs-built_in">unknown</span>,
+  <span class="hljs-attr">timeout</span>?: <span class="hljs-built_in">number</span>,
+</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Register a callback to be called once before starting to run all tests in the current suite.
+If the function returns a promise, Vitest waits until the promise resolve before running tests.</p>
+<p>Optionally, you can provide a timeout (in milliseconds) for specifying how long to wait before terminating. The default is 10 seconds, and can be configured globally with <a href="../config/hooktimeout.html"><code>hookTimeout</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { beforeAll } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">beforeAll</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">startMocking</span>() <span class="hljs-comment">// called once before all tests run</span>
+})</code></pre></div>
+<p>Here the <code>beforeAll</code> ensures that the mock data is set up before tests run.</p>
+<p><code>beforeAll</code> can also return an optional cleanup function. It&#39;s similar to <a href="#afterall"><code>afterAll</code></a>. The only difference is that it&#39;s executed after all other <code>afterAll</code> hooks:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { beforeAll } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">beforeAll</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// called once before all tests run</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">startMocking</span>()
+
+  <span class="hljs-comment">// clean up function, called once after all tests run, after afterAll hooks</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">stopMocking</span>()
+  }
+})</code></pre></div>
+<h2 id="afterall"><a class="anchor" href="#afterall">#</a>afterAll</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">afterAll</span>(<span class="hljs-params">
+  <span class="hljs-attr">body</span>: (context: ModuleContext) =&gt; <span class="hljs-built_in">unknown</span>,
+  <span class="hljs-attr">timeout</span>?: <span class="hljs-built_in">number</span>,
+</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Register a callback to be called once after all tests have run in the current suite.
+If the function returns a promise, Vitest waits until the promise resolve before continuing.</p>
+<p>Optionally, you can provide a timeout (in milliseconds) for specifying how long to wait before terminating. The default is 10 seconds, and can be configured globally with <a href="../config/hooktimeout.html"><code>hookTimeout</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { afterAll } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">afterAll</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">stopMocking</span>() <span class="hljs-comment">// this method is called after all tests run</span>
+})</code></pre></div>
+<p>Here the <code>afterAll</code> ensures that <code>stopMocking</code> method is called after all tests run.</p>
+<h2 id="aroundeach"><a class="anchor" href="#aroundeach">#</a>aroundEach</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">aroundEach</span>(<span class="hljs-params">
+  <span class="hljs-attr">body</span>: (
+    runTest: () =&gt; <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;,
+    context: TestContext,
+  ) =&gt; <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;,
+  <span class="hljs-attr">timeout</span>?: <span class="hljs-built_in">number</span>,
+</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Register a callback function that wraps around each test within the current suite. The callback receives a <code>runTest</code> function that <strong>must</strong> be called to run the test.</p>
+<p>The <code>runTest()</code> function runs <code>beforeEach</code> hooks, the test itself, fixtures accessed in the test, and <code>afterEach</code> hooks. Fixtures that are accessed in the <code>aroundEach</code> callback are initialized before <code>runTest()</code> is called and are torn down after the aroundEach teardown code completes, allowing you to safely use them in both setup and teardown phases.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>You <strong>must</strong> call <code>runTest()</code> within your callback. If <code>runTest()</code> is not called, the test will fail with an error.</p>
+</div><p>Optionally, you can provide a timeout (in milliseconds) for specifying how long to wait before terminating. The timeout applies independently to the setup phase (before <code>runTest()</code>) and teardown phase (after <code>runTest()</code>). The default is 10 seconds, and can be configured globally with <a href="../config/hooktimeout.html"><code>hookTimeout</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { aroundEach, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">aroundEach</span>(<span class="hljs-title function_">async</span> (runTest) =&gt; {
+  <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">transaction</span>(runTest)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;insert user&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">insert</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span> })
+  <span class="hljs-comment">// transaction is automatically rolled back after the test</span>
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce : When to use <code>aroundEach</code></div><p>Use <code>aroundEach</code> when your test needs to run <strong>inside a context</strong> that wraps around it, such as:</p>
+<ul>
+<li>Wrapping tests in <a href="https://nodejs.org/api/async_context.html#class-asynclocalstorage">AsyncLocalStorage</a> context</li>
+<li>Wrapping tests with tracing spans</li>
+<li>Database transactions</li>
+</ul>
+<p>If you just need to run code before and after tests, prefer using <a href="#beforeeach"><code>beforeEach</code></a> with a cleanup return function:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">beforeEach</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> database.<span class="hljs-title function_">connect</span>()
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">await</span> database.<span class="hljs-title function_">disconnect</span>()
+  }
+})</code></pre></div>
+</div><h3 id="multiple-hooks"><a class="anchor" href="#multiple-hooks">#</a>Multiple Hooks</h3>
+<p>When multiple <code>aroundEach</code> hooks are registered, they are nested inside each other. The first registered hook is the outermost wrapper:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">aroundEach</span>(<span class="hljs-title function_">async</span> (runTest) =&gt; {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;outer before&#x27;</span>)
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">runTest</span>()
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;outer after&#x27;</span>)
+})
+
+<span class="hljs-title function_">aroundEach</span>(<span class="hljs-title function_">async</span> (runTest) =&gt; {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;inner before&#x27;</span>)
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">runTest</span>()
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;inner after&#x27;</span>)
+})
+
+<span class="hljs-comment">// Output order:</span>
+<span class="hljs-comment">//  outer before</span>
+<span class="hljs-comment">//    inner before</span>
+<span class="hljs-comment">//      test</span>
+<span class="hljs-comment">//    inner after</span>
+<span class="hljs-comment">//  outer after</span></code></pre></div>
+<h3 id="context-and-fixtures"><a class="anchor" href="#context-and-fixtures">#</a>Context and Fixtures</h3>
+<p>The callback receives the test context as the second argument which means that you can use fixtures with <code>aroundEach</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { aroundEach, test <span class="hljs-keyword">as</span> base } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> test = base.<span class="hljs-property">extend</span>&lt;{ <span class="hljs-attr">db</span>: <span class="hljs-title class_">Database</span>; <span class="hljs-attr">user</span>: <span class="hljs-title class_">User</span> }&gt;({
+  <span class="hljs-attr">db</span>: <span class="hljs-title function_">async</span> ({}, use) =&gt; {
+    <span class="hljs-comment">// db is created before `aroundEach` hook</span>
+    <span class="hljs-keyword">const</span> db = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createTestDatabase</span>()
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">use</span>(db)
+    <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">close</span>()
+  },
+  <span class="hljs-attr">user</span>: <span class="hljs-title function_">async</span> ({ db }, use) =&gt; {
+    <span class="hljs-comment">// `user` runs as part of the transaction</span>
+    <span class="hljs-comment">// because it&#x27;s accessed inside the `test`</span>
+    <span class="hljs-keyword">const</span> user = <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">createUser</span>()
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">use</span>(user)
+  },
+})
+
+<span class="hljs-comment">// note that `aroundEach` is available on test</span>
+<span class="hljs-comment">// for a better TypeScript support of fixtures</span>
+test.<span class="hljs-title function_">aroundEach</span>(<span class="hljs-title function_">async</span> (runTest, { db }) =&gt; {
+  <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">transaction</span>(runTest)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;insert user&#x27;</span>, <span class="hljs-title function_">async</span> ({ db, user }) =&gt; {
+  <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">insert</span>(user)
+})</code></pre></div>
+<h2 id="aroundall"><a class="anchor" href="#aroundall">#</a>aroundAll</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">aroundAll</span>(<span class="hljs-params">
+  <span class="hljs-attr">body</span>: (
+    runSuite: () =&gt; <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;,
+    context: ModuleContext,
+  ) =&gt; <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;,
+  <span class="hljs-attr">timeout</span>?: <span class="hljs-built_in">number</span>,
+</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Register a callback function that wraps around all tests within the current suite. The callback receives a <code>runSuite</code> function that <strong>must</strong> be called to run the suite&#39;s tests.</p>
+<p>The <code>runSuite()</code> function runs all tests in the suite, including <code>beforeAll</code>/<code>afterAll</code>/<code>beforeEach</code>/<code>afterEach</code> hooks, <code>aroundEach</code> hooks, and fixtures.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>You <strong>must</strong> call <code>runSuite()</code> within your callback. If <code>runSuite()</code> is not called, the hook will fail with an error and all tests in the suite will be skipped.</p>
+</div><p>Optionally, you can provide a timeout (in milliseconds) for specifying how long to wait before terminating. The timeout applies independently to the setup phase (before <code>runSuite()</code>) and teardown phase (after <code>runSuite()</code>). The default is 10 seconds, and can be configured globally with <a href="../config/hooktimeout.html"><code>hookTimeout</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { aroundAll, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">aroundAll</span>(<span class="hljs-title function_">async</span> (runSuite) =&gt; {
+  <span class="hljs-keyword">await</span> tracer.<span class="hljs-title function_">trace</span>(<span class="hljs-string">&#x27;test-suite&#x27;</span>, runSuite)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;test 1&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// Runs within the tracing span</span>
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;test 2&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// Also runs within the same tracing span</span>
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce : When to use <code>aroundAll</code></div><p>Use <code>aroundAll</code> when your suite needs to run <strong>inside a context</strong> that wraps around all tests, such as:</p>
+<ul>
+<li>Wrapping an entire suite in <a href="https://nodejs.org/api/async_context.html#class-asynclocalstorage">AsyncLocalStorage</a> context</li>
+<li>Wrapping a suite with tracing spans</li>
+<li>Database transactions</li>
+</ul>
+<p>If you just need to run code once before and after all tests, prefer using <a href="#beforeall"><code>beforeAll</code></a> with a cleanup return function:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">beforeAll</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> server.<span class="hljs-title function_">start</span>()
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">await</span> server.<span class="hljs-title function_">stop</span>()
+  }
+})</code></pre></div>
+</div><h3 id="multiple-hooks-2"><a class="anchor" href="#multiple-hooks-2">#</a>Multiple Hooks</h3>
+<p>When multiple <code>aroundAll</code> hooks are registered, they are nested inside each other. The first registered hook is the outermost wrapper:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">aroundAll</span>(<span class="hljs-title function_">async</span> (runSuite) =&gt; {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;outer before&#x27;</span>)
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">runSuite</span>()
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;outer after&#x27;</span>)
+})
+
+<span class="hljs-title function_">aroundAll</span>(<span class="hljs-title function_">async</span> (runSuite) =&gt; {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;inner before&#x27;</span>)
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">runSuite</span>()
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;inner after&#x27;</span>)
+})
+
+<span class="hljs-comment">// Output order: outer before → inner before → tests → inner after → outer after</span></code></pre></div>
+<p>Each suite has its own independent <code>aroundAll</code> hooks. Parent suite&#39;s <code>aroundAll</code> wraps around child suite&#39;s execution:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">AsyncLocalStorage</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:async_hooks&#x27;</span>
+<span class="hljs-keyword">import</span> { aroundAll, describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> context = <span class="hljs-keyword">new</span> <span class="hljs-title class_">AsyncLocalStorage</span>&lt;{ <span class="hljs-attr">suiteId</span>: <span class="hljs-built_in">string</span> }&gt;()
+
+<span class="hljs-title function_">aroundAll</span>(<span class="hljs-title function_">async</span> (runSuite) =&gt; {
+  <span class="hljs-keyword">await</span> context.<span class="hljs-title function_">run</span>({ <span class="hljs-attr">suiteId</span>: <span class="hljs-string">&#x27;root&#x27;</span> }, runSuite)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;root test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// context.getStore() returns { suiteId: &#x27;root&#x27; }</span>
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;nested&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">aroundAll</span>(<span class="hljs-title function_">async</span> (runSuite) =&gt; {
+    <span class="hljs-comment">// Parent&#x27;s context is available here</span>
+    <span class="hljs-keyword">await</span> context.<span class="hljs-title function_">run</span>({ <span class="hljs-attr">suiteId</span>: <span class="hljs-string">&#x27;nested&#x27;</span> }, runSuite)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;nested test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// context.getStore() returns { suiteId: &#x27;nested&#x27; }</span>
+  })
+})</code></pre></div>
+<h2 id="test-hooks"><a class="anchor" href="#test-hooks">#</a>Test Hooks</h2>
+<p>Vitest provides a few hooks that you can call <em>during</em> the test execution to cleanup the state when the test has finished running.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>These hooks will throw an error if they are called outside of the test body.</p>
+</div><h3 id="ontestfinished"><a class="anchor" href="#ontestfinished">#</a>onTestFinished</h3>
+<p>This hook is always called after the test has finished running. It is called after <code>afterEach</code> hooks since they can influence the test result. It receives an <code>TestContext</code> object like <code>beforeEach</code> and <code>afterEach</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { onTestFinished, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;performs a query&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> db = <span class="hljs-title function_">connectDb</span>()
+  <span class="hljs-title function_">onTestFinished</span>(<span class="hljs-function">() =&gt;</span> db.<span class="hljs-title function_">close</span>())
+  db.<span class="hljs-title function_">query</span>(<span class="hljs-string">&#x27;SELECT * FROM users&#x27;</span>)
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If you are running tests concurrently, you should always use <code>onTestFinished</code> hook from the test context since Vitest doesn&#39;t track concurrent tests in global hooks:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+test.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;performs a query&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ onTestFinished }</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> db = <span class="hljs-title function_">connectDb</span>()
+  <span class="hljs-title function_">onTestFinished</span>(<span class="hljs-function">() =&gt;</span> db.<span class="hljs-title function_">close</span>())
+  db.<span class="hljs-title function_">query</span>(<span class="hljs-string">&#x27;SELECT * FROM users&#x27;</span>)
+})</code></pre></div>
+</div><p>This hook is particularly useful when creating reusable logic:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// this can be in a separate file</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getTestDb</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> db = <span class="hljs-title function_">connectMockedDb</span>()
+  <span class="hljs-title function_">onTestFinished</span>(<span class="hljs-function">() =&gt;</span> db.<span class="hljs-title function_">close</span>())
+  <span class="hljs-keyword">return</span> db
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;performs a user query&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> db = <span class="hljs-title function_">getTestDb</span>()
+  <span class="hljs-title function_">expect</span>(
+    <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">query</span>(<span class="hljs-string">&#x27;SELECT * from users&#x27;</span>).<span class="hljs-title function_">perform</span>()
+  ).<span class="hljs-title function_">toEqual</span>([])
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;performs an organization query&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> db = <span class="hljs-title function_">getTestDb</span>()
+  <span class="hljs-title function_">expect</span>(
+    <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">query</span>(<span class="hljs-string">&#x27;SELECT * from organizations&#x27;</span>).<span class="hljs-title function_">perform</span>()
+  ).<span class="hljs-title function_">toEqual</span>([])
+})</code></pre></div>
+<p>It is also a good practice to cleanup your spies after each test, so they don&#39;t leak into other tests. You can do so by enabling <a href="../config/restoremocks.html"><code>restoreMocks</code></a> config globally, or restoring the spy inside <code>onTestFinished</code> (if you try to restore the mock at the end of the test, it won&#39;t be restored if one of the assertions fails - using <code>onTestFinished</code> ensures the code always runs):</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { onTestFinished, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;performs a query&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">spyOn</span>(db, <span class="hljs-string">&#x27;query&#x27;</span>)
+  <span class="hljs-title function_">onTestFinished</span>(<span class="hljs-function">() =&gt;</span> spy.<span class="hljs-title function_">mockClear</span>())
+
+  db.<span class="hljs-title function_">query</span>(<span class="hljs-string">&#x27;SELECT * FROM users&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-title function_">toHaveBeenCalled</span>()
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This hook is always called in reverse order and is not affected by <a href="../config/sequence.html#sequence-hooks"><code>sequence.hooks</code></a> option.</p>
+</div><h3 id="ontestfailed"><a class="anchor" href="#ontestfailed">#</a>onTestFailed</h3>
+<p>This hook is called only after the test has failed. It is called after <code>afterEach</code> hooks since they can influence the test result. It receives a <code>TestContext</code> object like <code>beforeEach</code> and <code>afterEach</code>. This hook is useful for debugging.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { onTestFailed, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;performs a query&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> db = <span class="hljs-title function_">connectDb</span>()
+  <span class="hljs-title function_">onTestFailed</span>(<span class="hljs-function">(<span class="hljs-params">{ task }</span>) =&gt;</span> {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(task.<span class="hljs-property">result</span>.<span class="hljs-property">errors</span>)
+  })
+  db.<span class="hljs-title function_">query</span>(<span class="hljs-string">&#x27;SELECT * FROM users&#x27;</span>)
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If you are running tests concurrently, you should always use <code>onTestFailed</code> hook from the test context since Vitest doesn&#39;t track concurrent tests in global hooks:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+test.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;performs a query&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ onTestFailed }</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> db = <span class="hljs-title function_">connectDb</span>()
+  <span class="hljs-title function_">onTestFailed</span>(<span class="hljs-function">(<span class="hljs-params">{ task }</span>) =&gt;</span> {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(task.<span class="hljs-property">result</span>.<span class="hljs-property">errors</span>)
+  })
+  db.<span class="hljs-title function_">query</span>(<span class="hljs-string">&#x27;SELECT * FROM users&#x27;</span>)
+})</code></pre></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#beforeeach">beforeEach</a><a class="toc-2" href="#aftereach">afterEach</a><a class="toc-2" href="#beforeall">beforeAll</a><a class="toc-2" href="#afterall">afterAll</a><a class="toc-2" href="#aroundeach">aroundEach</a><a class="toc-3" href="#multiple-hooks">Multiple Hooks</a><a class="toc-3" href="#context-and-fixtures">Context and Fixtures</a><a class="toc-2" href="#aroundall">aroundAll</a><a class="toc-3" href="#multiple-hooks-2">Multiple Hooks</a><a class="toc-2" href="#test-hooks">Test Hooks</a><a class="toc-3" href="#ontestfinished">onTestFinished</a><a class="toc-3" href="#ontestfailed">onTestFailed</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

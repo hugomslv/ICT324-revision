@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Static Asset Handling (Vite) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link active" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vite</a> › guide/assets  <a class="ext small" href="https://vite.dev/guide/assets">version en ligne</a></div>
+<h1 id="static-asset-handling"><a class="anchor" href="#static-asset-handling">#</a>Static Asset Handling</h1>
+<ul>
+<li>Related: <a href="build.html#public-base-path">Public Base Path</a></li>
+<li>Related: <a href="../config/shared-options.html#assetsinclude"><code>assetsInclude</code> config option</a></li>
+</ul>
+<h2 id="importing-asset-as-url"><a class="anchor" href="#importing-asset-as-url">#</a>Importing Asset as URL</h2>
+<p>Importing a static asset will return the resolved public URL when it is served:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> imgUrl <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./img.png&#x27;</span>
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;hero-img&#x27;</span>).<span class="hljs-property">src</span> = imgUrl</code></pre></div>
+<p>For example, <code>imgUrl</code> will be <code>/src/img.png</code> during development, and become <code>/assets/img.2d8efhg.png</code> in the production build.</p>
+<p>The behavior is similar to webpack&#39;s <code>file-loader</code>. The difference is that the import can be either using absolute public paths (based on project root during dev) or relative paths.</p>
+<ul>
+<li><p><code>url()</code> references in CSS are handled the same way.</p>
+</li>
+<li><p>If using the Vue plugin, asset references in Vue SFC templates are automatically converted into imports.</p>
+</li>
+<li><p>Common image, media, and font filetypes are detected as assets automatically. You can extend the internal list using the <a href="../config/shared-options.html#assetsinclude"><code>assetsInclude</code> option</a>.</p>
+</li>
+<li><p>Referenced assets are included as part of the build assets graph, will get hashed file names, and can be processed by plugins for optimization.</p>
+</li>
+<li><p>Assets smaller in bytes than the <a href="../config/build-options.html#build-assetsinlinelimit"><code>assetsInlineLimit</code> option</a> will be inlined as base64 data URLs.</p>
+</li>
+<li><p>Git LFS placeholders are automatically excluded from inlining because they do not contain the content of the file they represent. To get inlining, make sure to download the file contents via Git LFS before building.</p>
+</li>
+<li><p>TypeScript, by default, does not recognize static asset imports as valid modules. To fix this, include <a href="features.html#client-types"><code>vite/client</code></a>.</p>
+</li>
+</ul>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Inlining SVGs through <code>url()</code></div><p>When passing a URL of SVG to a manually constructed <code>url()</code> by JS, the variable should be wrapped within double quotes.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> imgUrl <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./img.svg&#x27;</span>
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;hero-img&#x27;</span>).<span class="hljs-property">style</span>.<span class="hljs-property">background</span> = <span class="hljs-string">`url(&quot;<span class="hljs-subst">${imgUrl}</span>&quot;)`</span></code></pre></div>
+</div><h3 id="explicit-url-imports"><a class="anchor" href="#explicit-url-imports">#</a>Explicit URL Imports</h3>
+<p>Assets that are not included in the internal list or in <code>assetsInclude</code> can be explicitly imported as a URL using the <code>?url</code> suffix. This is useful, for example, to import <a href="https://developer.mozilla.org/en-US/docs/Web/API/CSS/paintWorklet_static">Houdini Paint Worklets</a>.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> workletURL <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;extra-scalloped-border/worklet.js?url&#x27;</span>
+<span class="hljs-variable constant_">CSS</span>.<span class="hljs-property">paintWorklet</span>.<span class="hljs-title function_">addModule</span>(workletURL)</code></pre></div>
+<h3 id="explicit-inline-handling"><a class="anchor" href="#explicit-inline-handling">#</a>Explicit Inline Handling</h3>
+<p>Assets can be explicitly imported with inlining or no inlining using the <code>?inline</code> or <code>?no-inline</code> suffix respectively.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> imgUrl1 <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./img.svg?no-inline&#x27;</span>
+<span class="hljs-keyword">import</span> imgUrl2 <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./img.png?inline&#x27;</span></code></pre></div>
+<h3 id="importing-asset-as-string"><a class="anchor" href="#importing-asset-as-string">#</a>Importing Asset as String</h3>
+<p>Assets can be imported as strings using the <code>?raw</code> suffix.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> shaderString <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./shader.glsl?raw&#x27;</span></code></pre></div>
+<h3 id="importing-script-as-a-worker"><a class="anchor" href="#importing-script-as-a-worker">#</a>Importing Script as a Worker</h3>
+<p>Scripts can be imported as web workers with the <code>?worker</code> or <code>?sharedworker</code> suffix.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-comment">// Separate chunk in the production build</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Worker</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./shader.js?worker&#x27;</span>
+<span class="hljs-keyword">const</span> worker = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Worker</span>()</code></pre></div>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-comment">// sharedworker</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">SharedWorker</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./shader.js?sharedworker&#x27;</span>
+<span class="hljs-keyword">const</span> sharedWorker = <span class="hljs-keyword">new</span> <span class="hljs-title class_">SharedWorker</span>()</code></pre></div>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-comment">// Inlined as base64 strings</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">InlineWorker</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./shader.js?worker&amp;inline&#x27;</span></code></pre></div>
+<p>Check out the <a href="features.html#web-workers">Web Worker section</a> for more details.</p>
+<h2 id="the-public-directory"><a class="anchor" href="#the-public-directory">#</a>The <code>public</code> Directory</h2>
+<p>If you have assets that are:</p>
+<ul>
+<li>Never referenced in source code (e.g. <code>robots.txt</code>)</li>
+<li>Must retain the exact same file name (without hashing)</li>
+<li>...or you simply don&#39;t want to have to import an asset first just to get its URL</li>
+</ul>
+<p>Then you can place the asset in a special <code>public</code> directory under your project root. Assets in this directory will be served at root path <code>/</code> during dev, and copied to the root of the dist directory as-is.</p>
+<p>The directory defaults to <code>&lt;root&gt;/public</code>, but can be configured via the <a href="../config/shared-options.html#publicdir"><code>publicDir</code> option</a>.</p>
+<p>Note that you should always reference <code>public</code> assets using root absolute path - for example, <code>public/icon.png</code> should be referenced in source code as <code>/icon.png</code>.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Choosing between imports and the <code>public</code> directory</div><p>In general, prefer <strong>importing assets</strong> unless you specifically need the guarantees provided by the <code>public</code> directory.</p>
+</div><h2 id="new-url-url-import-meta-url"><a class="anchor" href="#new-url-url-import-meta-url">#</a>new URL(url, import.meta.url)</h2>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import.meta">import.meta.url</a> is a native ESM feature that exposes the current module&#39;s URL. Combining it with the native <a href="https://developer.mozilla.org/en-US/docs/Web/API/URL">URL constructor</a>, we can obtain the full, resolved URL of a static asset using relative path from a JavaScript module:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> imgUrl = <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(<span class="hljs-string">&#x27;./img.png&#x27;</span>, <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">url</span>).<span class="hljs-property">href</span>
+
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;hero-img&#x27;</span>).<span class="hljs-property">src</span> = imgUrl</code></pre></div>
+<p>This works natively in modern browsers - in fact, Vite doesn&#39;t need to process this code at all during development!</p>
+<p>This pattern also supports dynamic URLs via template literals:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getImageUrl</span>(<span class="hljs-params">name</span>) {
+  <span class="hljs-comment">// note that this does not include files in subdirectories</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(<span class="hljs-string">`./dir/<span class="hljs-subst">${name}</span>.png`</span>, <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">url</span>).<span class="hljs-property">href</span>
+}</code></pre></div>
+<p>During the production build, Vite will perform necessary transforms so that the URLs still point to the correct location even after bundling and asset hashing. However, the URL string must be static so it can be analyzed, otherwise the code will be left as is, which can cause runtime errors if <code>build.target</code> does not support <code>import.meta.url</code>.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// Vite will not transform this</span>
+<span class="hljs-keyword">const</span> imgUrl = <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(imagePath, <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">url</span>).<span class="hljs-property">href</span></code></pre></div>
+<details class="box"><summary>How it works</summary><p>Vite will transform the <code>getImageUrl</code> function to:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> __img0png <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./dir/img0.png&#x27;</span>
+<span class="hljs-keyword">import</span> __img1png <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./dir/img1.png&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getImageUrl</span>(<span class="hljs-params">name</span>) {
+  <span class="hljs-keyword">const</span> modules = {
+    <span class="hljs-string">&#x27;./dir/img0.png&#x27;</span>: __img0png,
+    <span class="hljs-string">&#x27;./dir/img1.png&#x27;</span>: __img1png,
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(modules[<span class="hljs-string">`./dir/<span class="hljs-subst">${name}</span>.png`</span>], <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">url</span>).<span class="hljs-property">href</span>
+}</code></pre></div>
+</details><div class="box box-warning"><div class="box-title">⚠️ Attention : Does not work with SSR</div><p>This pattern does not work if you are using Vite for Server-Side Rendering, because <code>import.meta.url</code> has different semantics in browsers vs. Node.js. The server bundle also cannot determine the client host URL ahead of time.</p>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#importing-asset-as-url">Importing Asset as URL</a><a class="toc-3" href="#explicit-url-imports">Explicit URL Imports</a><a class="toc-3" href="#explicit-inline-handling">Explicit Inline Handling</a><a class="toc-3" href="#importing-asset-as-string">Importing Asset as String</a><a class="toc-3" href="#importing-script-as-a-worker">Importing Script as a Worker</a><a class="toc-2" href="#the-public-directory">The public Directory</a><a class="toc-2" href="#new-url-url-import-meta-url">new URL(url, import.meta.url)</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

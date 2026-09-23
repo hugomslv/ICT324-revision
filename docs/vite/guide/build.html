@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Building for Production (Vite) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link active" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vite</a> › guide/build  <a class="ext small" href="https://vite.dev/guide/build">version en ligne</a></div>
+<h1 id="building-for-production"><a class="anchor" href="#building-for-production">#</a>Building for Production</h1>
+<p>When it is time to deploy your app for production, simply run the <code>vite build</code> command. By default, it uses <code>&lt;root&gt;/index.html</code> as the build entry point, and produces an application bundle that is suitable to be served over a static hosting service. Check out the <a href="static-deploy.html">Deploying a Static Site</a> for guides about popular services.</p>
+<p><ScrimbaLink href="https://scrimba.com/intro-to-vite-c03p6pbbdq/~037q?via=vite" title="Building for Production">Watch an interactive lesson on Scrimba</ScrimbaLink></p>
+<h2 id="browser-compatibility"><a class="anchor" href="#browser-compatibility">#</a>Browser Compatibility</h2>
+<p>By default, the production bundle targets the minimum browser versions compatible with <a href="https://web-platform-dx.github.io/baseline/">Baseline</a> Widely Available as of a date fixed for each major release. The default browser support range for this major is:</p>
+<!-- Search for the `ESBUILD_BASELINE_WIDELY_AVAILABLE_TARGET` constant for more information --><ul>
+<li>Chrome &gt;=111</li>
+<li>Edge &gt;=111</li>
+<li>Firefox &gt;=114</li>
+<li>Safari &gt;=16.4</li>
+</ul>
+<p>You can specify custom targets via the <a href="../config/build-options.html#build-target"><code>build.target</code> config option</a>, where the lowest target is <code>es2015</code>. If a lower target is set, Vite will still require these minimum browser support ranges as it relies on <a href="https://caniuse.com/es6-module-dynamic-import">native ESM dynamic import</a>, and <a href="https://caniuse.com/mdn-javascript_operators_import_meta"><code>import.meta</code></a>:</p>
+<!-- Search for the `defaultEsbuildSupported` constant for more information --><ul>
+<li>Chrome &gt;=64</li>
+<li>Firefox &gt;=67</li>
+<li>Safari &gt;=11.1</li>
+<li>Edge &gt;=79</li>
+</ul>
+<p>Note that by default, Vite only handles syntax transforms and <strong>does not cover polyfills</strong>. You can check out <a href="https://cdnjs.cloudflare.com/polyfill/">https://cdnjs.cloudflare.com/polyfill/</a> which automatically generates polyfill bundles based on the user&#39;s browser UserAgent string.</p>
+<p>Legacy browsers can be supported via <a href="https://github.com/vitejs/vite/tree/main/packages/plugin-legacy">@vitejs/plugin-legacy</a>, which will automatically generate legacy chunks and corresponding ES language feature polyfills. The legacy chunks are conditionally loaded only in browsers that do not have native ESM support.</p>
+<h2 id="public-base-path"><a class="anchor" href="#public-base-path">#</a>Public Base Path</h2>
+<ul>
+<li>Related: <a href="assets.html">Asset Handling</a></li>
+</ul>
+<p>If you are deploying your project under a nested public path, simply specify the <a href="../config/shared-options.html#base"><code>base</code> config option</a> and all asset paths will be rewritten accordingly. This option can also be specified as a command line flag, e.g. <code>vite build --base=/my/public/path/</code>.</p>
+<p>JS-imported asset URLs, CSS <code>url()</code> references, and asset references in your <code>.html</code> files are all automatically adjusted to respect this option during build.</p>
+<p>The exception is when you need to dynamically concatenate URLs on the fly. In this case, you can use the globally injected <code>import.meta.env.BASE_URL</code> variable which will be the public base path. Note this variable is statically replaced during build so it must appear exactly as-is (i.e. <code>import.meta.env[&#39;BASE_URL&#39;]</code> won&#39;t work).</p>
+<p>For advanced base path control, check out <a href="#advanced-base-options">Advanced Base Options</a>.</p>
+<h3 id="relative-base"><a class="anchor" href="#relative-base">#</a>Relative base</h3>
+<p>If you don&#39;t know the base path in advance, you may set a relative base path with <code>&quot;base&quot;: &quot;./&quot;</code> or <code>&quot;base&quot;: &quot;&quot;</code>. This will make all generated URLs to be relative to each file.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Support for older browsers when using relative bases</div><p><code>import.meta</code> support is required for relative bases. If you need to support <a href="https://caniuse.com/mdn-javascript_operators_import_meta">browsers that do not support <code>import.meta</code></a>, you can use <a href="https://github.com/vitejs/vite/tree/main/packages/plugin-legacy">the <code>legacy</code> plugin</a>.</p>
+</div><h2 id="customizing-the-build"><a class="anchor" href="#customizing-the-build">#</a>Customizing the Build</h2>
+<p>The build can be customized via various <a href="../config/build-options.html">build config options</a>. Specifically, you can directly adjust the underlying <a href="https://rolldown.rs/reference/">Rolldown options</a> via <code>build.rolldownOptions</code>:</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">build</span>: {
+    <span class="hljs-attr">rolldownOptions</span>: {
+      <span class="hljs-comment">// https://rolldown.rs/reference/</span>
+    },
+  },
+})</code></pre></div>
+<p>For example, you can specify multiple Rolldown outputs with plugins that are only applied during build.</p>
+<h2 id="chunking-strategy"><a class="anchor" href="#chunking-strategy">#</a>Chunking Strategy</h2>
+<p>You can configure how chunks are split using <a href="https://rolldown.rs/reference/OutputOptions.codeSplitting"><code>build.rolldownOptions.output.codeSplitting</code></a> (see <a href="https://rolldown.rs/in-depth/manual-code-splitting">Rolldown docs</a>). If you use a framework, refer to their documentation for configuring how chunks are split.</p>
+<h2 id="load-error-handling"><a class="anchor" href="#load-error-handling">#</a>Load Error Handling</h2>
+<p>Vite emits <code>vite:preloadError</code> event when it fails to load dynamic imports. <code>event.payload</code> contains the original import error. If you call <code>event.preventDefault()</code>, the error will not be thrown.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-variable language_">window</span>.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;vite:preloadError&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+  <span class="hljs-variable language_">window</span>.<span class="hljs-property">location</span>.<span class="hljs-title function_">reload</span>() <span class="hljs-comment">// for example, refresh the page</span>
+})</code></pre></div>
+<p>When a new deployment occurs, the hosting service may delete the assets from previous deployments. As a result, a user who visited your site before the new deployment might encounter an import error. This error happens because the assets running on that user&#39;s device are outdated and the code tries to import the corresponding old chunk, which is deleted. This event is useful for addressing this situation. In this case, make sure to set <code>Cache-Control: no-cache</code> on the HTML file, otherwise the old assets will be still referenced.</p>
+<h2 id="rebuild-on-files-changes"><a class="anchor" href="#rebuild-on-files-changes">#</a>Rebuild on Files Changes</h2>
+<p>You can enable Rolldown watcher with <code>vite build --watch</code>. Or, you can directly adjust the underlying <a href="https://rolldown.rs/reference/InputOptions.watch"><code>WatcherOptions</code></a> via <code>build.watch</code>:</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">build</span>: {
+    <span class="hljs-attr">watch</span>: {
+      <span class="hljs-comment">// https://rolldown.rs/reference/InputOptions.watch</span>
+    },
+  },
+})</code></pre></div>
+<p>With the <code>--watch</code> flag enabled, changes to files to be bundled will trigger a rebuild. Note that changes to the config and its dependencies require restarting the build command.</p>
+<h2 id="multi-page-app"><a class="anchor" href="#multi-page-app">#</a>Multi-Page App</h2>
+<p>Suppose you have the following source code structure:</p>
+<div class="code"><pre><code class="hljs lang-txt">├── package.json
+├── vite.config.js
+├── index.html
+├── main.js
+└── nested
+    ├── index.html
+    └── nested.js</code></pre></div>
+<p>During dev, simply navigate or link to <code>/nested/</code> - it works as expected, just like for a normal static file server.</p>
+<p>During build, all you need to do is to specify multiple <code>.html</code> files as entry points:</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { resolve } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:path&#x27;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">input</span>: {
+    <span class="hljs-attr">main</span>: <span class="hljs-title function_">resolve</span>(<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">dirname</span>, <span class="hljs-string">&#x27;index.html&#x27;</span>),
+    <span class="hljs-attr">nested</span>: <span class="hljs-title function_">resolve</span>(<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">dirname</span>, <span class="hljs-string">&#x27;nested/index.html&#x27;</span>),
+  },
+})</code></pre></div>
+<p>If you specify a different root, remember that <code>import.meta.dirname</code> will still be the folder of your <code>vite.config.js</code> file when resolving the input paths. Therefore, you will need to add your <code>root</code> entry to the arguments for <code>resolve</code>.</p>
+<p>Note that for HTML files, Vite ignores the name given to the entry in the <code>rolldownOptions.input</code> object and instead respects the resolved id of the file when generating the HTML asset in the dist folder. This ensures a consistent structure with the way the dev server works.</p>
+<h2 id="library-mode"><a class="anchor" href="#library-mode">#</a>Library Mode</h2>
+<p>When you are developing a browser-oriented library, you are likely spending most of the time on a test/demo page that imports your actual library. With Vite, you can use your <code>index.html</code> for that purpose to get the smooth development experience.</p>
+<p>When it is time to bundle your library for distribution, use the <a href="../config/build-options.html#build-lib"><code>build.lib</code> config option</a>. Make sure to also externalize any dependencies that you do not want to bundle into your library, e.g. <code>vue</code> or <code>react</code>:</p>
+<div class="code-group"><div class="code"><div class="code-title">vite.config.js (single entry)</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { resolve } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:path&#x27;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">build</span>: {
+    <span class="hljs-attr">lib</span>: {
+      <span class="hljs-attr">entry</span>: <span class="hljs-title function_">resolve</span>(<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">dirname</span>, <span class="hljs-string">&#x27;lib/main.js&#x27;</span>),
+      <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;MyLib&#x27;</span>,
+      <span class="hljs-comment">// the proper extensions will be added</span>
+      <span class="hljs-attr">fileName</span>: <span class="hljs-string">&#x27;my-lib&#x27;</span>,
+    },
+    <span class="hljs-attr">rolldownOptions</span>: {
+      <span class="hljs-comment">// make sure to externalize deps that shouldn&#x27;t be bundled</span>
+      <span class="hljs-comment">// into your library</span>
+      <span class="hljs-attr">external</span>: [<span class="hljs-string">&#x27;vue&#x27;</span>],
+      <span class="hljs-attr">output</span>: {
+        <span class="hljs-comment">// Provide global variables to use in the UMD build</span>
+        <span class="hljs-comment">// for externalized deps</span>
+        <span class="hljs-attr">globals</span>: {
+          <span class="hljs-attr">vue</span>: <span class="hljs-string">&#x27;Vue&#x27;</span>,
+        },
+      },
+    },
+  },
+})</code></pre></div>
+<div class="code"><div class="code-title">vite.config.js (multiple entries)</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { resolve } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:path&#x27;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">build</span>: {
+    <span class="hljs-attr">lib</span>: {
+      <span class="hljs-attr">entry</span>: {
+        <span class="hljs-string">&#x27;my-lib&#x27;</span>: <span class="hljs-title function_">resolve</span>(<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">dirname</span>, <span class="hljs-string">&#x27;lib/main.js&#x27;</span>),
+        <span class="hljs-attr">secondary</span>: <span class="hljs-title function_">resolve</span>(<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">dirname</span>, <span class="hljs-string">&#x27;lib/secondary.js&#x27;</span>),
+      },
+      <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;MyLib&#x27;</span>,
+    },
+    <span class="hljs-attr">rolldownOptions</span>: {
+      <span class="hljs-comment">// make sure to externalize deps that shouldn&#x27;t be bundled</span>
+      <span class="hljs-comment">// into your library</span>
+      <span class="hljs-attr">external</span>: [<span class="hljs-string">&#x27;vue&#x27;</span>],
+      <span class="hljs-attr">output</span>: {
+        <span class="hljs-comment">// Provide global variables to use in the UMD build</span>
+        <span class="hljs-comment">// for externalized deps</span>
+        <span class="hljs-attr">globals</span>: {
+          <span class="hljs-attr">vue</span>: <span class="hljs-string">&#x27;Vue&#x27;</span>,
+        },
+      },
+    },
+  },
+})</code></pre></div>
+</div><p>The entry file would contain exports that can be imported by users of your package:</p>
+<div class="code"><div class="code-title">lib/main.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-title class_">Foo</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./Foo.vue&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Bar</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./Bar.vue&#x27;</span>
+<span class="hljs-keyword">export</span> { <span class="hljs-title class_">Foo</span>, <span class="hljs-title class_">Bar</span> }</code></pre></div>
+<p>Running <code>vite build</code> with this config uses a Rollup preset that is oriented towards shipping libraries and produces two bundle formats:</p>
+<ul>
+<li><code>es</code> and <code>umd</code> (for single entry)</li>
+<li><code>es</code> and <code>cjs</code> (for multiple entries)</li>
+</ul>
+<p>The formats can be configured with the <a href="../config/build-options.html#build-lib"><code>build.lib.formats</code></a> option.</p>
+<div class="code"><pre><code class="hljs lang-txt">$ vite build
+building for production...
+dist/my-lib.js      0.08 kB / gzip: 0.07 kB
+dist/my-lib.umd.cjs 0.30 kB / gzip: 0.16 kB</code></pre></div>
+<p>Recommended <code>package.json</code> for your lib:</p>
+<div class="code-group"><div class="code"><div class="code-title">package.json (single entry)</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;my-lib&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;module&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;files&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;dist&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;main&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./dist/my-lib.umd.cjs&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;module&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./dist/my-lib.js&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;exports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;.&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;import&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./dist/my-lib.js&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;require&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./dist/my-lib.umd.cjs&quot;</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<div class="code"><div class="code-title">package.json (multiple entries)</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;my-lib&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;module&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;files&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;dist&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;main&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./dist/my-lib.cjs&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;module&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./dist/my-lib.js&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;exports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;.&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;import&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./dist/my-lib.js&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;require&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./dist/my-lib.cjs&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;./secondary&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;import&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./dist/secondary.js&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;require&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./dist/secondary.cjs&quot;</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+</div><h3 id="css-support"><a class="anchor" href="#css-support">#</a>CSS support</h3>
+<p>If your library imports any CSS, it will be bundled as a single CSS file besides the built JS files, e.g. <code>dist/my-lib.css</code>. The name defaults to <code>build.lib.fileName</code>, but can also be changed with <a href="../config/build-options.html#build-lib"><code>build.lib.cssFileName</code></a>.</p>
+<p>You can export the CSS file in your <code>package.json</code> to be imported by users:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;my-lib&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;module&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;files&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;dist&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;main&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./dist/my-lib.umd.cjs&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;module&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./dist/my-lib.js&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;exports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;.&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;import&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./dist/my-lib.js&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;require&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./dist/my-lib.umd.cjs&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;./style.css&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./dist/my-lib.css&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce : File Extensions</div><p>If the <code>package.json</code> does not contain <code>&quot;type&quot;: &quot;module&quot;</code>, Vite will generate different file extensions for Node.js compatibility. <code>.js</code> will become <code>.mjs</code> and <code>.cjs</code> will become <code>.js</code>.</p>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce : Environment Variables</div><p>In library mode, all <a href="env-and-mode.html"><code>import.meta.env.*</code></a> usage are statically replaced when building for production. However, <code>process.env.*</code> usage are not, so that consumers of your library can dynamically change it. If this is undesirable, you can use <code>define: { &#39;process.env.NODE_ENV&#39;: &#39;&quot;production&quot;&#39; }</code> for example to statically replace them, or use <a href="https://github.com/benmccann/esm-env"><code>esm-env</code></a> for better compatibility with bundlers and runtimes.</p>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention : Advanced Usage</div><p>Library mode includes a simple and opinionated configuration for browser-oriented and JS framework libraries. If you are building non-browser libraries, or require advanced build flows, you can use <a href="https://tsdown.dev/">tsdown</a> or <a href="https://rolldown.rs/">Rolldown</a> directly.</p>
+</div><h2 id="advanced-base-options"><a class="anchor" href="#advanced-base-options">#</a>Advanced Base Options</h2>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This feature is experimental. <a href="https://github.com/vitejs/vite/discussions/13834">Give Feedback</a>.</p>
+</div><p>For advanced use cases, the deployed assets and public files may be in different paths, for example to use different cache strategies.
+A user may choose to deploy in three different paths:</p>
+<ul>
+<li>The generated entry HTML files (which may be processed during SSR)</li>
+<li>The generated hashed assets (JS, CSS, and other file types like images)</li>
+<li>The copied <a href="assets.html#the-public-directory">public files</a></li>
+</ul>
+<p>A single static <a href="#public-base-path">base</a> isn&#39;t enough in these scenarios. Vite provides experimental support for advanced base options during build, using <code>experimental.renderBuiltUrl</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">UserConfig</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+<span class="hljs-comment">// prettier-ignore</span>
+<span class="hljs-keyword">const</span> <span class="hljs-attr">config</span>: <span class="hljs-title class_">UserConfig</span> = {
+<span class="hljs-attr">experimental</span>: {
+  <span class="hljs-title function_">renderBuiltUrl</span>(<span class="hljs-params">filename, { hostType }</span>) {
+    <span class="hljs-keyword">if</span> (hostType === <span class="hljs-string">&#x27;js&#x27;</span>) {
+      <span class="hljs-keyword">return</span> { <span class="hljs-attr">runtime</span>: <span class="hljs-string">`window.__toCdnUrl(<span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(filename)}</span>)`</span> }
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-keyword">return</span> { <span class="hljs-attr">relative</span>: <span class="hljs-literal">true</span> }
+    }
+  },
+},
+}</code></pre></div>
+<p>If the hashed assets and public files aren&#39;t deployed together, options for each group can be defined independently using asset <code>type</code> included in the second <code>context</code> param given to the function.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">UserConfig</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+<span class="hljs-keyword">import</span> path <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:path&#x27;</span>
+<span class="hljs-comment">// prettier-ignore</span>
+<span class="hljs-keyword">const</span> <span class="hljs-attr">config</span>: <span class="hljs-title class_">UserConfig</span> = {
+<span class="hljs-attr">experimental</span>: {
+  <span class="hljs-title function_">renderBuiltUrl</span>(<span class="hljs-params">filename, { hostId, hostType, <span class="hljs-keyword">type</span> }</span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">type</span> === <span class="hljs-string">&#x27;public&#x27;</span>) {
+      <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;https://www.domain.com/&#x27;</span> + filename
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (path.<span class="hljs-title function_">extname</span>(hostId) === <span class="hljs-string">&#x27;.js&#x27;</span>) {
+      <span class="hljs-keyword">return</span> {
+        <span class="hljs-attr">runtime</span>: <span class="hljs-string">`window.__assetsPath(<span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(filename)}</span>)`</span>
+      }
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;https://cdn.domain.com/assets/&#x27;</span> + filename
+    }
+  },
+},
+}</code></pre></div>
+<p>Note that the <code>filename</code> passed is a decoded URL, and if the function returns a URL string, it should also be decoded. Vite will handle the encoding automatically when rendering the URLs. If an object with <code>runtime</code> is returned, encoding should be handled yourself where needed as the runtime code will be rendered as is.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#browser-compatibility">Browser Compatibility</a><a class="toc-2" href="#public-base-path">Public Base Path</a><a class="toc-3" href="#relative-base">Relative base</a><a class="toc-2" href="#customizing-the-build">Customizing the Build</a><a class="toc-2" href="#chunking-strategy">Chunking Strategy</a><a class="toc-2" href="#load-error-handling">Load Error Handling</a><a class="toc-2" href="#rebuild-on-files-changes">Rebuild on Files Changes</a><a class="toc-2" href="#multi-page-app">Multi-Page App</a><a class="toc-2" href="#library-mode">Library Mode</a><a class="toc-3" href="#css-support">CSS support</a><a class="toc-2" href="#advanced-base-options">Advanced Base Options</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

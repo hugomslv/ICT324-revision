@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test Filtering | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/filtering  <a class="ext small" href="https://vitest.dev/guide/filtering">version en ligne</a></div>
+<h1 id="test-filtering"><a class="anchor" href="#test-filtering">#</a>Test Filtering</h1>
+<p>As your test suite grows, running every test on every change becomes slow and distracting. If you&#39;re fixing a bug in a single module, you don&#39;t need to wait for hundreds of unrelated tests to finish. Test filtering lets you narrow down which tests run so you can stay focused on the code you&#39;re actively working on.</p>
+<p>Vitest offers several ways to filter tests: from the command line, inside your test files, and through tags. Each approach is useful in different situations.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Performance Note</div><p>Filters like <code>-t</code>, <code>--tags-filter</code>, <code>.only</code>, and <code>.skip</code> are applied <em>per test file</em> — Vitest still has to run each test file to discover which tests match. In a large project, this overhead adds up even if only a few tests actually execute.</p>
+<p>To avoid this, always pass a file path alongside your filter so Vitest only loads the files you care about:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest utils.test.ts -t <span class="hljs-string">&quot;handles empty input&quot;</span></code></pre></div>
+<p>Alternatively, you can use the <a href="../config/experimental.html#experimental-preparse"><code>--experimental.preParse</code></a> flag, which parses test files to discover test names without fully executing them:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest --experimental.preParse -t <span class="hljs-string">&quot;handles empty input&quot;</span></code></pre></div>
+</div><h2 id="filtering-by-file-name"><a class="anchor" href="#filtering-by-file-name">#</a>Filtering by File Name</h2>
+<p>The simplest way to run a subset of tests is to pass a filename pattern as a CLI argument. Vitest will only run test files whose path contains the given string:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest basic</code></pre></div>
+<p>This matches any test file with <code>basic</code> in its path:</p>
+<div class="code"><pre><code class="hljs lang-txt">basic.test.ts
+basic-foo.test.ts
+basic/foo.test.ts</code></pre></div>
+<p>This is useful when you know which file you need to work on and want to skip everything else.</p>
+<h2 id="filtering-by-test-name"><a class="anchor" href="#filtering-by-test-name">#</a>Filtering by Test Name</h2>
+<p>Sometimes the test you care about is buried in a file with many other tests. The <code>-t</code> (or <code>--testNamePattern</code>) option filters by the test&#39;s name rather than the filename. It accepts a regex pattern and matches against the full test name, which is the enclosing <code>describe</code> block names and the test name joined with <code>&#39; &gt; &#39;</code> (for example <code>math &gt; adds</code>):</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest -t <span class="hljs-string">&quot;handles empty input&quot;</span></code></pre></div>
+<p>You can combine this with a file filter to narrow things down further:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest utils -t <span class="hljs-string">&quot;handles empty input&quot;</span></code></pre></div>
+<p>This runs only tests whose name matches <code>&quot;handles empty input&quot;</code> inside files matching <code>utils</code>.</p>
+<h2 id="filtering-by-line-number"><a class="anchor" href="#filtering-by-line-number">#</a>Filtering by Line Number</h2>
+<p>When you&#39;re looking at a specific test in your editor, you often just want to run <em>that one test</em>. You can point directly to a line number:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest basic/foo.test.ts:10</code></pre></div>
+<p>Vitest will run the test that contains line 10. This requires the full filename (relative or absolute):</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest basic/foo.test.ts:10 <span class="hljs-comment"># ✅</span>
+vitest ./basic/foo.test.ts:10 <span class="hljs-comment"># ✅</span>
+vitest /users/project/basic/foo.test.ts:10 <span class="hljs-comment"># ✅</span>
+vitest foo:10 <span class="hljs-comment"># ❌ partial name won&#x27;t work</span>
+vitest ./basic/foo:10 <span class="hljs-comment"># ❌ missing file extension</span></code></pre></div>
+<p>To run multiple specific tests, separate them with spaces:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest basic/foo.test.ts:10 basic/foo.test.ts:25 <span class="hljs-comment"># ✅</span>
+vitest basic/foo.test.ts:10-25 <span class="hljs-comment"># ❌ ranges are not supported</span></code></pre></div>
+<h2 id="filtering-by-tags"><a class="anchor" href="#filtering-by-tags">#</a>Filtering by Tags</h2>
+<p>For larger projects, you may want to categorize tests and run them by category. <a href="test-tags.html">Tags</a> let you label tests and then filter by those labels from the CLI:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;renders a form&#x27;</span>, { <span class="hljs-attr">tags</span>: [<span class="hljs-string">&#x27;frontend&#x27;</span>] }, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// ...</span>
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;calls an external API&#x27;</span>, { <span class="hljs-attr">tags</span>: [<span class="hljs-string">&#x27;backend&#x27;</span>] }, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// ...</span>
+})</code></pre></div>
+<div class="code"><pre><code class="hljs lang-bash">vitest --tags-filter=frontend</code></pre></div>
+<p>This is particularly helpful in CI pipelines where you might want to run frontend and backend tests in separate jobs, or skip slow integration tests during quick checks.</p>
+<h2 id="focusing-on-specific-tests-with-only"><a class="anchor" href="#focusing-on-specific-tests-with-only">#</a>Focusing on Specific Tests with <code>.only</code></h2>
+<p>When you&#39;re debugging a failing test, you want to run just that test without modifying CLI arguments every time. Adding <code>.only</code> to a test or suite tells Vitest to skip everything else in the file:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+describe.<span class="hljs-title function_">only</span>(<span class="hljs-string">&#x27;suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// This runs because the suite is marked with .only</span>
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">2</span>)
+  })
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;another suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;skipped test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// This does not run</span>
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">2</span>)
+  })
+
+  it.<span class="hljs-title function_">only</span>(<span class="hljs-string">&#x27;focused test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// This also runs because it is marked with .only</span>
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">2</span>)
+  })
+})</code></pre></div>
+<p>You can use <code>.only</code> on both <code>describe</code> blocks and individual tests. When any test or suite in a file is marked with <code>.only</code>, all unmarked tests in that file are skipped.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Remember to remove <code>.only</code> before committing. By default, Vitest will fail the entire test run if it encounters <code>.only</code> in CI (when <code>process.env.CI</code> is set), preventing you from accidentally skipping tests in your pipeline. This behavior is controlled by the <a href="../config/allowonly.html"><code>allowOnly</code></a> option.</p>
+<p>To catch <code>.only</code> even earlier, the <a href="https://github.com/vitest-dev/eslint-plugin-vitest/blob/main/docs/rules/no-focused-tests.md"><code>no-focused-tests</code></a> ESLint rule (also available in <a href="https://oxc.rs/docs/guide/usage/linter/rules/jest/no-focused-tests.html">oxlint</a>) can flag it in your editor before you commit.</p>
+</div><h2 id="skipping-tests-with-skip"><a class="anchor" href="#skipping-tests-with-skip">#</a>Skipping Tests with <code>.skip</code></h2>
+<p>The opposite of <code>.only</code> is <code>.skip</code>. Use it to temporarily disable a test or suite without deleting it. Skipped tests still show up in the report so you don&#39;t forget about them:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+describe.<span class="hljs-title function_">skip</span>(<span class="hljs-string">&#x27;skipped suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// This entire suite is skipped</span>
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">2</span>)
+  })
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  it.<span class="hljs-title function_">skip</span>(<span class="hljs-string">&#x27;skipped test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// Just this one test is skipped</span>
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">2</span>)
+  })
+})</code></pre></div>
+<p>This is useful when a test is flaky or depends on an external service that&#39;s temporarily down. It lets you keep the test in place as a reminder while unblocking the rest of the suite.</p>
+<h2 id="placeholder-tests-with-todo"><a class="anchor" href="#placeholder-tests-with-todo">#</a>Placeholder Tests with <code>.todo</code></h2>
+<p>When planning new features, you might know what tests you&#39;ll need before you write the actual implementation. <code>.todo</code> marks a test as planned but not yet written. It shows up in the report as a reminder:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+describe.<span class="hljs-title function_">todo</span>(<span class="hljs-string">&#x27;unimplemented suite&#x27;</span>)
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  it.<span class="hljs-title function_">todo</span>(<span class="hljs-string">&#x27;unimplemented test&#x27;</span>)
+})</code></pre></div>
+<p>Unlike <code>.skip</code>, a <code>.todo</code> test has no test body. It&#39;s purely a placeholder for future work.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#filtering-by-file-name">Filtering by File Name</a><a class="toc-2" href="#filtering-by-test-name">Filtering by Test Name</a><a class="toc-2" href="#filtering-by-line-number">Filtering by Line Number</a><a class="toc-2" href="#filtering-by-tags">Filtering by Tags</a><a class="toc-2" href="#focusing-on-specific-tests-with-only">Focusing on Specific Tests with .only</a><a class="toc-2" href="#skipping-tests-with-skip">Skipping Tests with .skip</a><a class="toc-2" href="#placeholder-tests-with-todo">Placeholder Tests with .todo</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

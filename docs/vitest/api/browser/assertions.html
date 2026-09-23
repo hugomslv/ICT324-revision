@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assertion API | Browser Mode (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/browser/assertions  <a class="ext small" href="https://vitest.dev/api/browser/assertions">version en ligne</a></div>
+<h1 id="assertion-api"><a class="anchor" href="#assertion-api">#</a>Assertion API</h1>
+<p>Vitest provides a wide range of DOM assertions out of the box forked from <a href="https://github.com/testing-library/jest-dom"><code>@testing-library/jest-dom</code></a> library with the added support for locators and built-in retry-ability.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : TypeScript Support</div><p>If you are using <a href="../../guide/browser/index.html#typescript">TypeScript</a> or want to have correct type hints in <code>expect</code>, make sure you have <code>vitest/browser</code> referenced somewhere. If you never imported from there, you can add a <code>reference</code> comment in any file that&#39;s covered by your <code>tsconfig.json</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/// &lt;reference types=&quot;vitest/browser&quot; /&gt;</span></code></pre></div>
+</div><p>Tests in the browser might fail inconsistently due to their asynchronous nature. Because of this, it is important to have a way to guarantee that assertions succeed even if the condition is delayed (by a timeout, network request, or animation, for example). For this purpose, Vitest provides retriable assertions out of the box via the <a href="../expect.html#poll"><code>expect.poll</code></a> and <code>expect.element</code> APIs:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;error banner is rendered&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-title function_">triggerError</span>()
+
+  <span class="hljs-comment">// This creates a locator that will try to find the element</span>
+  <span class="hljs-comment">// when any of its methods are called.</span>
+  <span class="hljs-comment">// This call by itself doesn&#x27;t check the existence of the element.</span>
+  <span class="hljs-keyword">const</span> banner = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;alert&#x27;</span>, {
+    <span class="hljs-attr">name</span>: <span class="hljs-regexp">/error/i</span>,
+  })
+
+  <span class="hljs-comment">// Vitest provides `expect.element` with built-in retry-ability</span>
+  <span class="hljs-comment">// It will repeatedly check that the element exists in the DOM and that</span>
+  <span class="hljs-comment">// the content of `element.textContent` is equal to &quot;Error!&quot;</span>
+  <span class="hljs-comment">// until all the conditions are met</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(banner).<span class="hljs-title function_">toMatchTextContent</span>(<span class="hljs-string">&#x27;Error!&#x27;</span>)
+})</code></pre></div>
+<p>We recommend to always use <code>expect.element</code> when working with <code>page.getBy*</code> locators to reduce test flakiness. Note that <code>expect.element</code> accepts a second option:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">ExpectPollOptions</span> {
+  <span class="hljs-comment">// The interval to retry the assertion for in milliseconds</span>
+  <span class="hljs-comment">// Defaults to &quot;expect.poll.interval&quot; config option</span>
+  <span class="hljs-attr">interval</span>?: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">// Time to retry the assertion for in milliseconds</span>
+  <span class="hljs-comment">// Defaults to &quot;expect.poll.timeout&quot; config option</span>
+  <span class="hljs-attr">timeout</span>?: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">// The message printed when the assertion fails</span>
+  <span class="hljs-attr">message</span>?: <span class="hljs-built_in">string</span>
+}</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Like <a href="../expect.html#poll"><code>expect.poll</code></a>, <code>expect.element</code> retries DOM assertions until they pass or the timeout is reached. When it receives a locator, Vitest resolves it with <a href="locators.html#findelement"><code>locator.findElement()</code></a> before running the DOM assertion. The <code>timeout</code> option applies to the whole retry operation. The <code>interval</code> option controls how often failed DOM assertions are retried, but locator resolution uses <code>findElement</code>&#39;s own increasing retry intervals.</p>
+<p><code>toMatchTextContent</code> and all other assertions are still available on a regular <code>expect</code> without a built-in retry-ability mechanism:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// will fail immediately if .textContent is not `&#x27;Error!&#x27;`</span>
+<span class="hljs-title function_">expect</span>(banner).<span class="hljs-title function_">toMatchTextContent</span>(<span class="hljs-string">&#x27;Error!&#x27;</span>)</code></pre></div>
+</div><h2 id="tobedisabled"><a class="anchor" href="#tobedisabled">#</a>toBeDisabled</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toBeDisabled</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Allows you to check whether an element is disabled from the user&#39;s perspective.</p>
+<p>Matches if the element is a form control and the <code>disabled</code> attribute is specified on this element or the
+element is a descendant of a form element with a <code>disabled</code> attribute.</p>
+<p>Note that only native control elements such as HTML <code>button</code>, <code>input</code>, <code>select</code>, <code>textarea</code>, <code>option</code>, <code>optgroup</code>
+can be disabled by setting &quot;disabled&quot; attribute. &quot;disabled&quot; attribute on other elements is ignored, unless it&#39;s a custom element.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">button</span>
+  <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;button&quot;</span>
+  <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;submit&quot;</span>
+  <span class="hljs-attr">disabled</span>
+&gt;</span>
+  submit
+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;button&#x27;</span>)).<span class="hljs-title function_">toBeDisabled</span>() <span class="hljs-comment">// ✅</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;button&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeDisabled</span>() <span class="hljs-comment">// ❌</span></code></pre></div>
+<h2 id="tobeenabled"><a class="anchor" href="#tobeenabled">#</a>toBeEnabled</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toBeEnabled</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Allows you to check whether an element is not disabled from the user&#39;s perspective.</p>
+<p>Works like <a href="#tobedisabled"><code>not.toBeDisabled()</code></a>. Use this matcher to avoid double negation in your tests.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">button</span>
+  <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;button&quot;</span>
+  <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;submit&quot;</span>
+  <span class="hljs-attr">disabled</span>
+&gt;</span>
+  submit
+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;button&#x27;</span>)).<span class="hljs-title function_">toBeEnabled</span>() <span class="hljs-comment">// ✅</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;button&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeEnabled</span>() <span class="hljs-comment">// ❌</span></code></pre></div>
+<h2 id="tobeemptydomelement"><a class="anchor" href="#tobeemptydomelement">#</a>toBeEmptyDOMElement</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toBeEmptyDOMElement</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to assert whether an element has no visible content for the user. It ignores comments but will fail if the element contains white-space.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;not-empty&quot;</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;empty&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;with-whitespace&quot;</span>&gt;</span> <span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;with-comment&quot;</span>&gt;</span><span class="hljs-comment">&lt;!-- comment --&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;empty&#x27;</span>)).<span class="hljs-title function_">toBeEmptyDOMElement</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;not-empty&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeEmptyDOMElement</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(
+  <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;with-whitespace&#x27;</span>)
+).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeEmptyDOMElement</span>()</code></pre></div>
+<h2 id="tobeinthedocument"><a class="anchor" href="#tobeinthedocument">#</a>toBeInTheDocument</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toBeInTheDocument</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Assert whether an element is present in the document or not.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">svg</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;svg-element&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">svg</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;svg-element&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;does-not-exist&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeInTheDocument</span>()</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This matcher does not find detached elements. The element must be added to the document to be found by <code>toBeInTheDocument</code>. If you desire to search in a detached element, please use: <a href="#tocontainelement"><code>toContainElement</code></a>.</p>
+</div><h2 id="tobeinvalid"><a class="anchor" href="#tobeinvalid">#</a>toBeInvalid</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toBeInvalid</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to check if an element, is currently invalid.</p>
+<p>An element is invalid if it has an <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-invalid"><code>aria-invalid</code> attribute</a> with no value or a value of <code>&quot;true&quot;</code>, or if the result of <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation"><code>checkValidity()</code></a> is <code>false</code>.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;no-aria-invalid&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-invalid&quot;</span> <span class="hljs-attr">aria-invalid</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-invalid-value&quot;</span> <span class="hljs-attr">aria-invalid</span>=<span class="hljs-string">&quot;true&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-invalid-false&quot;</span> <span class="hljs-attr">aria-invalid</span>=<span class="hljs-string">&quot;false&quot;</span> /&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;valid-form&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> /&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;invalid-form&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">required</span> /&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;no-aria-invalid&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeInvalid</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-invalid&#x27;</span>)).<span class="hljs-title function_">toBeInvalid</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-invalid-value&#x27;</span>)).<span class="hljs-title function_">toBeInvalid</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-invalid-false&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeInvalid</span>()
+
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;valid-form&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeInvalid</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;invalid-form&#x27;</span>)).<span class="hljs-title function_">toBeInvalid</span>()</code></pre></div>
+<h2 id="toberequired"><a class="anchor" href="#toberequired">#</a>toBeRequired</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toBeRequired</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to check if a form element is currently required.</p>
+<p>An element is required if it is having a <code>required</code> or <code>aria-required=&quot;true&quot;</code> attribute.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;required-input&quot;</span> <span class="hljs-attr">required</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-required-input&quot;</span> <span class="hljs-attr">aria-required</span>=<span class="hljs-string">&quot;true&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;conflicted-input&quot;</span> <span class="hljs-attr">required</span> <span class="hljs-attr">aria-required</span>=<span class="hljs-string">&quot;false&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-not-required-input&quot;</span> <span class="hljs-attr">aria-required</span>=<span class="hljs-string">&quot;false&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;optional-input&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;unsupported-type&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;image&quot;</span> <span class="hljs-attr">required</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">select</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;select&quot;</span> <span class="hljs-attr">required</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">select</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">textarea</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;textarea&quot;</span> <span class="hljs-attr">required</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">textarea</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;supported-role&quot;</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;tree&quot;</span> <span class="hljs-attr">required</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;supported-role-aria&quot;</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;tree&quot;</span> <span class="hljs-attr">aria-required</span>=<span class="hljs-string">&quot;true&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;required-input&#x27;</span>)).<span class="hljs-title function_">toBeRequired</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-required-input&#x27;</span>)).<span class="hljs-title function_">toBeRequired</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;conflicted-input&#x27;</span>)).<span class="hljs-title function_">toBeRequired</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-not-required-input&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeRequired</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;optional-input&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeRequired</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;unsupported-type&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeRequired</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;select&#x27;</span>)).<span class="hljs-title function_">toBeRequired</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;textarea&#x27;</span>)).<span class="hljs-title function_">toBeRequired</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;supported-role&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeRequired</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;supported-role-aria&#x27;</span>)).<span class="hljs-title function_">toBeRequired</span>()</code></pre></div>
+<h2 id="tobevalid"><a class="anchor" href="#tobevalid">#</a>toBeValid</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toBeValid</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to check if the value of an element, is currently valid.</p>
+<p>An element is valid if it has no <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-invalid"><code>aria-invalid</code> attribute</a> or an attribute value of &quot;false&quot;. The result of <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation"><code>checkValidity()</code></a> must also be <code>true</code> if it&#39;s a form element.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;no-aria-invalid&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-invalid&quot;</span> <span class="hljs-attr">aria-invalid</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-invalid-value&quot;</span> <span class="hljs-attr">aria-invalid</span>=<span class="hljs-string">&quot;true&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-invalid-false&quot;</span> <span class="hljs-attr">aria-invalid</span>=<span class="hljs-string">&quot;false&quot;</span> /&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;valid-form&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> /&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;invalid-form&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">required</span> /&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;no-aria-invalid&#x27;</span>)).<span class="hljs-title function_">toBeValid</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-invalid&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeValid</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-invalid-value&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeValid</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-invalid-false&#x27;</span>)).<span class="hljs-title function_">toBeValid</span>()
+
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;valid-form&#x27;</span>)).<span class="hljs-title function_">toBeValid</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;invalid-form&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeValid</span>()</code></pre></div>
+<h2 id="tobevisible"><a class="anchor" href="#tobevisible">#</a>toBeVisible</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toBeVisible</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to check if an element is currently visible to the user.</p>
+<p>Element is considered visible when it has non-empty bounding box and does not have <code>visibility:hidden</code> computed style.</p>
+<p>Note that according to this definition:</p>
+<ul>
+<li>Elements of zero size <strong>are not</strong> considered visible.</li>
+<li>Elements with <code>display:none</code> <strong>are not</strong> considered visible.</li>
+<li>Elements with <code>opacity:0</code> <strong>are</strong> considered visible.</li>
+</ul>
+<p>To check that at least one element from the list is visible, use <code>locator.first()</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// A specific element is visible.</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Welcome&#x27;</span>)).<span class="hljs-title function_">toBeVisible</span>()
+
+<span class="hljs-comment">// At least one item in the list is visible.</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;todo-item&#x27;</span>).<span class="hljs-title function_">first</span>()).<span class="hljs-title function_">toBeVisible</span>()
+
+<span class="hljs-comment">// At least one of the two elements is visible, possibly both.</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(
+  page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Sign in&#x27;</span> })
+    .<span class="hljs-title function_">or</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Sign up&#x27;</span> }))
+    .<span class="hljs-title function_">first</span>()
+).<span class="hljs-title function_">toBeVisible</span>()</code></pre></div>
+<h2 id="tobeinviewport"><a class="anchor" href="#tobeinviewport">#</a>toBeInViewport <Version>4.0.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toBeInViewport</span>(<span class="hljs-params"><span class="hljs-attr">options</span>: { ratio?: <span class="hljs-built_in">number</span> }</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to check if an element is currently in viewport with <a href="https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API">IntersectionObserver API</a>.</p>
+<p>You can pass <code>ratio</code> argument as option, which means the minimal ratio of the element should be in viewport. <code>ratio</code> should be in 0~1.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// A specific element is in viewport.</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Welcome&#x27;</span>)).<span class="hljs-title function_">toBeInViewport</span>()
+
+<span class="hljs-comment">// 50% of a specific element should be in viewport</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;To&#x27;</span>)).<span class="hljs-title function_">toBeInViewport</span>({ <span class="hljs-attr">ratio</span>: <span class="hljs-number">0.5</span> })
+
+<span class="hljs-comment">// Full of a specific element should be in viewport</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Vitest&#x27;</span>)).<span class="hljs-title function_">toBeInViewport</span>({ <span class="hljs-attr">ratio</span>: <span class="hljs-number">1</span> })</code></pre></div>
+<h2 id="tocontainelement"><a class="anchor" href="#tocontainelement">#</a>toContainElement</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toContainElement</span>(<span class="hljs-params"><span class="hljs-attr">element</span>: <span class="hljs-title class_">HTMLElement</span> | <span class="hljs-title class_">SVGElement</span> | <span class="hljs-title class_">Locator</span> | <span class="hljs-literal">null</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to assert whether an element contains another element as a descendant or not.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;ancestor&quot;</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;descendant&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> ancestor = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;ancestor&#x27;</span>)
+<span class="hljs-keyword">const</span> descendant = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;descendant&#x27;</span>)
+<span class="hljs-keyword">const</span> nonExistingElement = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;does-not-exist&#x27;</span>)
+
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(ancestor).<span class="hljs-title function_">toContainElement</span>(descendant)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(descendant).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContainElement</span>(ancestor)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(ancestor).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContainElement</span>(nonExistingElement)</code></pre></div>
+<h2 id="tocontainhtml"><a class="anchor" href="#tocontainhtml">#</a>toContainHTML</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toContainHTML</span>(<span class="hljs-params"><span class="hljs-attr">htmlText</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Assert whether a string representing a HTML element is contained in another element. The string should contain valid html, and not any incomplete html.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;parent&quot;</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;child&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// These are valid usages</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;parent&#x27;</span>)).<span class="hljs-title function_">toContainHTML</span>(<span class="hljs-string">&#x27;&lt;span data-testid=&quot;child&quot;&gt;&lt;/span&gt;&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;parent&#x27;</span>)).<span class="hljs-title function_">toContainHTML</span>(<span class="hljs-string">&#x27;&lt;span data-testid=&quot;child&quot; /&gt;&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;parent&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContainHTML</span>(<span class="hljs-string">&#x27;&lt;br /&gt;&#x27;</span>)
+
+<span class="hljs-comment">// These won&#x27;t work</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;parent&#x27;</span>)).<span class="hljs-title function_">toContainHTML</span>(<span class="hljs-string">&#x27;data-testid=&quot;child&quot;&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;parent&#x27;</span>)).<span class="hljs-title function_">toContainHTML</span>(<span class="hljs-string">&#x27;data-testid&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;parent&#x27;</span>)).<span class="hljs-title function_">toContainHTML</span>(<span class="hljs-string">&#x27;&lt;/span&gt;&#x27;</span>)</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Chances are you probably do not need to use this matcher. We encourage testing from the perspective of how the user perceives the app in a browser. That&#39;s why testing against a specific DOM structure is not advised.</p>
+<p>It could be useful in situations where the code being tested renders html that was obtained from an external source, and you want to validate that html code was used as intended.</p>
+<p>It should not be used to check DOM structure that you control. Please, use <a href="#tocontainelement"><code>toContainElement</code></a> instead.</p>
+</div><h2 id="tohaveaccessibledescription"><a class="anchor" href="#tohaveaccessibledescription">#</a>toHaveAccessibleDescription</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toHaveAccessibleDescription</span>(<span class="hljs-params"><span class="hljs-attr">description</span>?: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to assert that an element has the expected
+<a href="https://w3c.github.io/accname/">accessible description</a>.</p>
+<p>You can pass the exact string of the expected accessible description, or you can
+make a partial match passing a regular expression, or by using
+<a href="../expect.html#expect-stringcontaining"><code>expect.stringContaining</code></a> or <a href="../expect.html#expect-stringmatching"><code>expect.stringMatching</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">a</span>
+  <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;link&quot;</span>
+  <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/&quot;</span>
+  <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Home page&quot;</span>
+  <span class="hljs-attr">title</span>=<span class="hljs-string">&quot;A link to start over&quot;</span>
+  &gt;</span>Start&lt;/a
+&gt;
+<span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;extra-link&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/about&quot;</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;About page&quot;</span>&gt;</span>About<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;avatar.jpg&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;avatar&quot;</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;User profile pic&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">img</span>
+  <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;logo.jpg&quot;</span>
+  <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;logo&quot;</span>
+  <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;Company logo&quot;</span>
+  <span class="hljs-attr">aria-describedby</span>=<span class="hljs-string">&quot;t1&quot;</span>
+/&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;t1&quot;</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;presentation&quot;</span>&gt;</span>The logo of Our Company<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">img</span>
+  <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;logo.jpg&quot;</span>
+  <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;logo2&quot;</span>
+  <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;Company logo&quot;</span>
+  <span class="hljs-attr">aria-description</span>=<span class="hljs-string">&quot;The logo of Our Company&quot;</span>
+/&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;link&#x27;</span>)).<span class="hljs-title function_">toHaveAccessibleDescription</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;link&#x27;</span>)).<span class="hljs-title function_">toHaveAccessibleDescription</span>(<span class="hljs-string">&#x27;A link to start over&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;link&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveAccessibleDescription</span>(<span class="hljs-string">&#x27;Home page&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;extra-link&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveAccessibleDescription</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;avatar&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveAccessibleDescription</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;logo&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveAccessibleDescription</span>(<span class="hljs-string">&#x27;Company logo&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;logo&#x27;</span>)).<span class="hljs-title function_">toHaveAccessibleDescription</span>(
+  <span class="hljs-string">&#x27;The logo of Our Company&#x27;</span>,
+)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;logo2&#x27;</span>)).<span class="hljs-title function_">toHaveAccessibleDescription</span>(
+  <span class="hljs-string">&#x27;The logo of Our Company&#x27;</span>,
+)</code></pre></div>
+<h2 id="tohaveaccessibleerrormessage"><a class="anchor" href="#tohaveaccessibleerrormessage">#</a>toHaveAccessibleErrorMessage</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toHaveAccessibleErrorMessage</span>(<span class="hljs-params"><span class="hljs-attr">message</span>?: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to assert that an element has the expected
+<a href="https://w3c.github.io/aria/#aria-errormessage">accessible error message</a>.</p>
+<p>You can pass the exact string of the expected accessible error message.
+Alternatively, you can perform a partial match by passing a regular expression
+or by using
+<a href="../expect.html#expect-stringcontaining"><code>expect.stringContaining</code></a> or <a href="../expect.html#expect-stringmatching"><code>expect.stringMatching</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span>
+  <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Has Error&quot;</span>
+  <span class="hljs-attr">aria-invalid</span>=<span class="hljs-string">&quot;true&quot;</span>
+  <span class="hljs-attr">aria-errormessage</span>=<span class="hljs-string">&quot;error-message&quot;</span>
+/&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;error-message&quot;</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;alert&quot;</span>&gt;</span>This field is invalid<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;No Error Attributes&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span>
+  <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Not Invalid&quot;</span>
+  <span class="hljs-attr">aria-invalid</span>=<span class="hljs-string">&quot;false&quot;</span>
+  <span class="hljs-attr">aria-errormessage</span>=<span class="hljs-string">&quot;error-message&quot;</span>
+/&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// Inputs with Valid Error Messages</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Has Error&#x27;</span> })).<span class="hljs-title function_">toHaveAccessibleErrorMessage</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Has Error&#x27;</span> })).<span class="hljs-title function_">toHaveAccessibleErrorMessage</span>(
+  <span class="hljs-string">&#x27;This field is invalid&#x27;</span>,
+)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Has Error&#x27;</span> })).<span class="hljs-title function_">toHaveAccessibleErrorMessage</span>(
+  <span class="hljs-regexp">/invalid/i</span>,
+)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(
+  <span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Has Error&#x27;</span> }),
+).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveAccessibleErrorMessage</span>(<span class="hljs-string">&#x27;This field is absolutely correct!&#x27;</span>)
+
+<span class="hljs-comment">// Inputs without Valid Error Messages</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(
+  <span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;No Error Attributes&#x27;</span> }),
+).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveAccessibleErrorMessage</span>()
+
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(
+  <span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Not Invalid&#x27;</span> }),
+).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveAccessibleErrorMessage</span>()</code></pre></div>
+<h2 id="tohaveaccessiblename"><a class="anchor" href="#tohaveaccessiblename">#</a>toHaveAccessibleName</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toHaveAccessibleName</span>(<span class="hljs-params"><span class="hljs-attr">name</span>?: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to assert that an element has the expected
+<a href="https://w3c.github.io/accname/">accessible name</a>. It is useful, for instance,
+to assert that form elements and buttons are properly labelled.</p>
+<p>You can pass the exact string of the expected accessible name, or you can make a
+partial match passing a regular expression, or by using
+<a href="../expect.html#expect-stringcontaining"><code>expect.stringContaining</code></a> or <a href="../expect.html#expect-stringmatching"><code>expect.stringMatching</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;img-alt&quot;</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;&quot;</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;Test alt&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;img-empty-alt&quot;</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;&quot;</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">svg</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;svg-title&quot;</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Test title<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">svg</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;button-img-alt&quot;</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;&quot;</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;Test&quot;</span> /&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;img-paragraph&quot;</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;&quot;</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;&quot;</span> /&gt;</span> Test content<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;svg-button&quot;</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">svg</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Test<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">svg</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">svg</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;svg-without-title&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">svg</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;input-title&quot;</span> <span class="hljs-attr">title</span>=<span class="hljs-string">&quot;test&quot;</span> /&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-javascript"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;img-alt&#x27;</span>)).<span class="hljs-title function_">toHaveAccessibleName</span>(<span class="hljs-string">&#x27;Test alt&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;img-empty-alt&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveAccessibleName</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;svg-title&#x27;</span>)).<span class="hljs-title function_">toHaveAccessibleName</span>(<span class="hljs-string">&#x27;Test title&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;button-img-alt&#x27;</span>)).<span class="hljs-title function_">toHaveAccessibleName</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;img-paragraph&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveAccessibleName</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;svg-button&#x27;</span>)).<span class="hljs-title function_">toHaveAccessibleName</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;svg-without-title&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveAccessibleName</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;input-title&#x27;</span>)).<span class="hljs-title function_">toHaveAccessibleName</span>()</code></pre></div>
+<h2 id="tohaveattribute"><a class="anchor" href="#tohaveattribute">#</a>toHaveAttribute</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toHaveAttribute</span>(<span class="hljs-params"><span class="hljs-attr">attribute</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">value</span>?: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to check whether the given element has an attribute or not. You
+can also optionally check that the attribute has a specific expected value or
+partial match using <a href="../expect.html#expect-stringcontaining"><code>expect.stringContaining</code></a> or <a href="../expect.html#expect-stringmatching"><code>expect.stringMatching</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;ok-button&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;submit&quot;</span> <span class="hljs-attr">disabled</span>&gt;</span>ok<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> button = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;ok-button&#x27;</span>)
+
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-title function_">toHaveAttribute</span>(<span class="hljs-string">&#x27;disabled&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-title function_">toHaveAttribute</span>(<span class="hljs-string">&#x27;type&#x27;</span>, <span class="hljs-string">&#x27;submit&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveAttribute</span>(<span class="hljs-string">&#x27;type&#x27;</span>, <span class="hljs-string">&#x27;button&#x27;</span>)
+
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-title function_">toHaveAttribute</span>(
+  <span class="hljs-string">&#x27;type&#x27;</span>,
+  expect.<span class="hljs-title function_">stringContaining</span>(<span class="hljs-string">&#x27;sub&#x27;</span>)
+)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-title function_">toHaveAttribute</span>(
+  <span class="hljs-string">&#x27;type&#x27;</span>,
+  expect.<span class="hljs-property">not</span>.<span class="hljs-title function_">stringContaining</span>(<span class="hljs-string">&#x27;but&#x27;</span>)
+)</code></pre></div>
+<h2 id="tohaveclass"><a class="anchor" href="#tohaveclass">#</a>toHaveClass</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toHaveClass</span>(<span class="hljs-params">...<span class="hljs-attr">classNames</span>: <span class="hljs-built_in">string</span>[], <span class="hljs-attr">options</span>?: { exact: <span class="hljs-built_in">boolean</span> }</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">toHaveClass</span>(<span class="hljs-params">...<span class="hljs-attr">classNames</span>: (<span class="hljs-built_in">string</span> | <span class="hljs-built_in">RegExp</span>)[]</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to check whether the given element has certain classes within
+its <code>class</code> attribute. You must provide at least one class, unless you are
+asserting that an element does not have any classes.</p>
+<p>The list of class names may include strings and regular expressions. Regular
+expressions are matched against each individual class in the target element, and
+it is NOT matched against its full <code>class</code> attribute value as whole.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that you cannot use <code>exact: true</code> option when only regular expressions are provided.</p>
+</div><div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;delete-button&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;btn extra btn-danger&quot;</span>&gt;</span>
+  Delete item
+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;no-classes&quot;</span>&gt;</span>No Classes<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> deleteButton = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;delete-button&#x27;</span>)
+<span class="hljs-keyword">const</span> noClasses = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;no-classes&#x27;</span>)
+
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(deleteButton).<span class="hljs-title function_">toHaveClass</span>(<span class="hljs-string">&#x27;extra&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(deleteButton).<span class="hljs-title function_">toHaveClass</span>(<span class="hljs-string">&#x27;btn-danger btn&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(deleteButton).<span class="hljs-title function_">toHaveClass</span>(<span class="hljs-regexp">/danger/</span>, <span class="hljs-string">&#x27;btn&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(deleteButton).<span class="hljs-title function_">toHaveClass</span>(<span class="hljs-string">&#x27;btn-danger&#x27;</span>, <span class="hljs-string">&#x27;btn&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(deleteButton).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveClass</span>(<span class="hljs-string">&#x27;btn-link&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(deleteButton).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveClass</span>(<span class="hljs-regexp">/link/</span>)
+
+<span class="hljs-comment">// ⚠️ regexp matches against individual classes, not the whole classList</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(deleteButton).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveClass</span>(<span class="hljs-regexp">/btn extra/</span>)
+
+<span class="hljs-comment">// the element has EXACTLY a set of classes (in any order)</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(deleteButton).<span class="hljs-title function_">toHaveClass</span>(<span class="hljs-string">&#x27;btn-danger extra btn&#x27;</span>, {
+  <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span>
+})
+<span class="hljs-comment">// if it has more than expected it is going to fail</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(deleteButton).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveClass</span>(<span class="hljs-string">&#x27;btn-danger extra&#x27;</span>, {
+  <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span>
+})
+
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(noClasses).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveClass</span>()</code></pre></div>
+<h2 id="tohavefocus"><a class="anchor" href="#tohavefocus">#</a>toHaveFocus</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toHaveFocus</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to assert whether an element has focus or not.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;element-to-focus&quot;</span> /&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> input = page.<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;element-to-focus&#x27;</span>)
+input.<span class="hljs-title function_">element</span>().<span class="hljs-title function_">focus</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(input).<span class="hljs-title function_">toHaveFocus</span>()
+input.<span class="hljs-title function_">element</span>().<span class="hljs-title function_">blur</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(input).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveFocus</span>()</code></pre></div>
+<h2 id="tohaveformvalues"><a class="anchor" href="#tohaveformvalues">#</a>toHaveFormValues</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toHaveFormValues</span>(<span class="hljs-params"><span class="hljs-attr">expectedValues</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt;</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to check if a form or fieldset contains form controls for each given name, and having the specified value.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>It is important to stress that this matcher can only be invoked on a <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement">form</a> or a <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLFieldSetElement">fieldset</a> element.</p>
+<p>This allows it to take advantage of the <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements"><code>.elements</code></a> property in <code>form</code> and <code>fieldset</code> to reliably fetch all form controls within them.</p>
+<p>This also avoids the possibility that users provide a container that contains more than one <code>form</code>, thereby intermixing form controls that are not related, and could even conflict with one another.</p>
+</div><p>This matcher abstracts away the particularities with which a form control value
+is obtained depending on the type of form control. For instance, <code>&lt;input&gt;</code>
+elements have a <code>value</code> attribute, but <code>&lt;select&gt;</code> elements do not. Here&#39;s a list
+of all cases covered:</p>
+<ul>
+<li><code>&lt;input type=&quot;number&quot;&gt;</code> elements return the value as a <strong>number</strong>, instead of
+a string.</li>
+<li><code>&lt;input type=&quot;checkbox&quot;&gt;</code> elements:<ul>
+<li>if there&#39;s a single one with the given <code>name</code> attribute, it is treated as a
+<strong>boolean</strong>, returning <code>true</code> if the checkbox is checked, <code>false</code> if
+unchecked.</li>
+<li>if there&#39;s more than one checkbox with the same <code>name</code> attribute, they are
+all treated collectively as a single form control, which returns the value
+as an <strong>array</strong> containing all the values of the selected checkboxes in the
+collection.</li>
+</ul>
+</li>
+<li><code>&lt;input type=&quot;radio&quot;&gt;</code> elements are all grouped by the <code>name</code> attribute, and
+such a group treated as a single form control. This form control returns the
+value as a <strong>string</strong> corresponding to the <code>value</code> attribute of the selected
+radio button within the group.</li>
+<li><code>&lt;input type=&quot;text&quot;&gt;</code> elements return the value as a <strong>string</strong>. This also
+applies to <code>&lt;input&gt;</code> elements having any other possible <code>type</code> attribute
+that&#39;s not explicitly covered in different rules above (e.g. <code>search</code>,
+<code>email</code>, <code>date</code>, <code>password</code>, <code>hidden</code>, etc.)</li>
+<li><code>&lt;select&gt;</code> elements without the <code>multiple</code> attribute return the value as a
+<strong>string</strong> corresponding to the <code>value</code> attribute of the selected <code>option</code>, or
+<code>undefined</code> if there&#39;s no selected option.</li>
+<li><code>&lt;select multiple&gt;</code> elements return the value as an <strong>array</strong> containing all
+the values of the <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLSelectElement/selectedOptions">selected options</a>.</li>
+<li><code>&lt;textarea&gt;</code> elements return their value as a <strong>string</strong>. The value
+corresponds to their node content.</li>
+</ul>
+<p>The above rules make it easy, for instance, to switch from using a single select
+control to using a group of radio buttons. Or to switch from a multi select
+control, to using a group of checkboxes. The resulting set of form values used
+by this matcher to compare against would be the same.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;login-form&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;username&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;jane.doe&quot;</span> /&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;password&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;password&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;12345678&quot;</span> /&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;rememberMe&quot;</span> <span class="hljs-attr">checked</span> /&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;submit&quot;</span>&gt;</span>Sign in<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;login-form&#x27;</span>)).<span class="hljs-title function_">toHaveFormValues</span>({
+  <span class="hljs-attr">username</span>: <span class="hljs-string">&#x27;jane.doe&#x27;</span>,
+  <span class="hljs-attr">rememberMe</span>: <span class="hljs-literal">true</span>,
+})</code></pre></div>
+<h2 id="tohavestyle"><a class="anchor" href="#tohavestyle">#</a>toHaveStyle</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toHaveStyle</span>(<span class="hljs-params"><span class="hljs-attr">css</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">Partial</span>&lt;<span class="hljs-title class_">CSSStyleDeclaration</span>&gt;</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to check if a certain element has some specific css properties
+with specific values applied. It matches only if the element has <em>all</em> the
+expected properties applied, not just some of them.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">button</span>
+  <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;delete-button&quot;</span>
+  <span class="hljs-attr">style</span>=<span class="hljs-string">&quot;display: none; background-color: red&quot;</span>
+&gt;</span>
+  Delete item
+<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> button = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;delete-button&#x27;</span>)
+
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-title function_">toHaveStyle</span>(<span class="hljs-string">&#x27;display: none&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-title function_">toHaveStyle</span>({ <span class="hljs-attr">display</span>: <span class="hljs-string">&#x27;none&#x27;</span> })
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-title function_">toHaveStyle</span>(<span class="hljs-string">`
+  background-color: red;
+  display: none;
+`</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-title function_">toHaveStyle</span>({
+  <span class="hljs-attr">backgroundColor</span>: <span class="hljs-string">&#x27;red&#x27;</span>,
+  <span class="hljs-attr">display</span>: <span class="hljs-string">&#x27;none&#x27;</span>,
+})
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveStyle</span>(<span class="hljs-string">`
+  background-color: blue;
+  display: none;
+`</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveStyle</span>({
+  <span class="hljs-attr">backgroundColor</span>: <span class="hljs-string">&#x27;blue&#x27;</span>,
+  <span class="hljs-attr">display</span>: <span class="hljs-string">&#x27;none&#x27;</span>,
+})</code></pre></div>
+<p>This also works with rules that are applied to the element via a class name for
+which some rules are defined in a stylesheet currently active in the document.
+The usual rules of css precedence apply.</p>
+<h2 id="tohavetextcontent"><a class="anchor" href="#tohavetextcontent">#</a>toHaveTextContent</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toHaveTextContent</span>(<span class="hljs-params">
+  <span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span> | <span class="hljs-built_in">number</span>,
+  <span class="hljs-attr">options</span>?: { normalizeWhitespace: <span class="hljs-built_in">boolean</span> }
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This matcher allows you to validate that an element&#39;s text matches provided string exactly. This
+supports elements, but also text nodes and fragments.</p>
+<p>If you wish to perform a partial check or do a case-sensitive match, use <a href="#tomatchtextcontent"><code>toMatchTextContent</code></a> instead.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;text-content&quot;</span>&gt;</span>Text Content<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> element = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;text-content&#x27;</span>)
+
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(element).<span class="hljs-title function_">toHaveTextContent</span>(<span class="hljs-string">&#x27;Text Content&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(element).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveTextContent</span>(<span class="hljs-string">&#x27;Content&#x27;</span>)</code></pre></div>
+<h2 id="tomatchtextcontent"><a class="anchor" href="#tomatchtextcontent">#</a>toMatchTextContent</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toMatchTextContent</span>(<span class="hljs-params">
+  <span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span> | <span class="hljs-built_in">number</span> | <span class="hljs-title class_">RegExp</span>,
+  <span class="hljs-attr">options</span>?: { normalizeWhitespace: <span class="hljs-built_in">boolean</span> }
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This matcher allows you to check whether the given node has a text content or not. This
+supports elements, but also text nodes and fragments.</p>
+<p>When a <code>string</code> argument is passed through, it will perform a partial
+case-sensitive match to the node content.</p>
+<p>To perform a case-insensitive match, you can use a <code>RegExp</code> with the <code>/i</code>
+modifier.</p>
+<p>If you want to match the whole content, you can use a <code>RegExp</code> to do it or <a href="#tohavetextcontent"><code>toHaveTextContent</code></a> matcher instead.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;text-content&quot;</span>&gt;</span>Text Content<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> element = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;text-content&#x27;</span>)
+
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(element).<span class="hljs-title function_">toMatchTextContent</span>(<span class="hljs-string">&#x27;Content&#x27;</span>)
+<span class="hljs-comment">// to match the whole content</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(element).<span class="hljs-title function_">toMatchTextContent</span>(<span class="hljs-regexp">/^Text Content$/</span>)
+<span class="hljs-comment">// to use case-insensitive match</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(element).<span class="hljs-title function_">toMatchTextContent</span>(<span class="hljs-regexp">/content$/i</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(element).<span class="hljs-property">not</span>.<span class="hljs-title function_">toMatchTextContent</span>(<span class="hljs-string">&#x27;content&#x27;</span>)</code></pre></div>
+<h2 id="tohavevalue"><a class="anchor" href="#tohavevalue">#</a>toHaveValue</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toHaveValue</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">string</span> | <span class="hljs-built_in">string</span>[] | <span class="hljs-built_in">number</span> | <span class="hljs-literal">null</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to check whether the given form element has the specified value.
+It accepts <code>&lt;input&gt;</code>, <code>&lt;select&gt;</code> and <code>&lt;textarea&gt;</code> elements with the exception of
+<code>&lt;input type=&quot;checkbox&quot;&gt;</code> and <code>&lt;input type=&quot;radio&quot;&gt;</code>, which can be meaningfully
+matched only using <a href="#tobechecked"><code>toBeChecked</code></a> or
+<a href="#tohaveformvalues"><code>toHaveFormValues</code></a>.</p>
+<p>It also accepts elements with roles <code>meter</code>, <code>progressbar</code>, <code>slider</code> or
+<code>spinbutton</code> and checks their <code>aria-valuenow</code> attribute (as a number).</p>
+<p>For all other form elements, the value is matched using the same algorithm as in
+<a href="#tohaveformvalues"><code>toHaveFormValues</code></a> does.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;text&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;input-text&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;number&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;5&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;input-number&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;input-empty&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">select</span> <span class="hljs-attr">multiple</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;select-number&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;first&quot;</span>&gt;</span>First Value<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;second&quot;</span> <span class="hljs-attr">selected</span>&gt;</span>Second Value<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;third&quot;</span> <span class="hljs-attr">selected</span>&gt;</span>Third Value<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">select</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> textInput = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;input-text&#x27;</span>)
+<span class="hljs-keyword">const</span> numberInput = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;input-number&#x27;</span>)
+<span class="hljs-keyword">const</span> emptyInput = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;input-empty&#x27;</span>)
+<span class="hljs-keyword">const</span> selectInput = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;select-number&#x27;</span>)
+
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(textInput).<span class="hljs-title function_">toHaveValue</span>(<span class="hljs-string">&#x27;text&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(numberInput).<span class="hljs-title function_">toHaveValue</span>(<span class="hljs-number">5</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(emptyInput).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveValue</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(selectInput).<span class="hljs-title function_">toHaveValue</span>([<span class="hljs-string">&#x27;second&#x27;</span>, <span class="hljs-string">&#x27;third&#x27;</span>])</code></pre></div>
+<h2 id="tohavedisplayvalue"><a class="anchor" href="#tohavedisplayvalue">#</a>toHaveDisplayValue</h2>
+<div class="code"><pre><code class="hljs lang-typescript"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toHaveDisplayValue</span>(<span class="hljs-params">
+  <span class="hljs-attr">value</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span> | (<span class="hljs-built_in">string</span> | <span class="hljs-built_in">RegExp</span>)[]
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to check whether the given form element has the specified
+displayed value (the one the end user will see). It accepts <code>&lt;input&gt;</code>,
+<code>&lt;select&gt;</code> and <code>&lt;textarea&gt;</code> elements with the exception of
+<code>&lt;input type=&quot;checkbox&quot;&gt;</code> and <code>&lt;input type=&quot;radio&quot;&gt;</code>, which can be meaningfully
+matched only using <a href="#tobechecked"><code>toBeChecked</code></a> or
+<a href="#tohaveformvalues"><code>toHaveFormValues</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">&quot;input-example&quot;</span>&gt;</span>First name<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text&quot;</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;input-example&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;Luca&quot;</span> /&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">&quot;textarea-example&quot;</span>&gt;</span>Description<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">textarea</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;textarea-example&quot;</span>&gt;</span>An example description here.<span class="hljs-tag">&lt;/<span class="hljs-name">textarea</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">&quot;single-select-example&quot;</span>&gt;</span>Fruit<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">select</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;single-select-example&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;&quot;</span>&gt;</span>Select a fruit...<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;banana&quot;</span>&gt;</span>Banana<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;ananas&quot;</span>&gt;</span>Ananas<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;avocado&quot;</span>&gt;</span>Avocado<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">select</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">&quot;multiple-select-example&quot;</span>&gt;</span>Fruits<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">select</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;multiple-select-example&quot;</span> <span class="hljs-attr">multiple</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;&quot;</span>&gt;</span>Select a fruit...<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;banana&quot;</span> <span class="hljs-attr">selected</span>&gt;</span>Banana<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;ananas&quot;</span>&gt;</span>Ananas<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;avocado&quot;</span> <span class="hljs-attr">selected</span>&gt;</span>Avocado<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">select</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> input = page.<span class="hljs-title function_">getByLabelText</span>(<span class="hljs-string">&#x27;First name&#x27;</span>)
+<span class="hljs-keyword">const</span> textarea = page.<span class="hljs-title function_">getByLabelText</span>(<span class="hljs-string">&#x27;Description&#x27;</span>)
+<span class="hljs-keyword">const</span> selectSingle = page.<span class="hljs-title function_">getByLabelText</span>(<span class="hljs-string">&#x27;Fruit&#x27;</span>)
+<span class="hljs-keyword">const</span> selectMultiple = page.<span class="hljs-title function_">getByLabelText</span>(<span class="hljs-string">&#x27;Fruits&#x27;</span>)
+
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(input).<span class="hljs-title function_">toHaveDisplayValue</span>(<span class="hljs-string">&#x27;Luca&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(input).<span class="hljs-title function_">toHaveDisplayValue</span>(<span class="hljs-regexp">/Luc/</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(textarea).<span class="hljs-title function_">toHaveDisplayValue</span>(<span class="hljs-string">&#x27;An example description here.&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(textarea).<span class="hljs-title function_">toHaveDisplayValue</span>(<span class="hljs-regexp">/example/</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(selectSingle).<span class="hljs-title function_">toHaveDisplayValue</span>(<span class="hljs-string">&#x27;Select a fruit...&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(selectSingle).<span class="hljs-title function_">toHaveDisplayValue</span>(<span class="hljs-regexp">/Select/</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(selectMultiple).<span class="hljs-title function_">toHaveDisplayValue</span>([<span class="hljs-regexp">/Avocado/</span>, <span class="hljs-string">&#x27;Banana&#x27;</span>])</code></pre></div>
+<h2 id="tobechecked"><a class="anchor" href="#tobechecked">#</a>toBeChecked</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toBeChecked</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to check whether the given element is checked. It accepts an
+<code>input</code> of type <code>checkbox</code> or <code>radio</code> and elements with a <code>role</code> of <code>checkbox</code>,
+<code>radio</code> or <code>switch</code> with a valid <code>aria-checked</code> attribute of <code>&quot;true&quot;</code> or
+<code>&quot;false&quot;</code>.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">checked</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;input-checkbox-checked&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;input-checkbox-unchecked&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">aria-checked</span>=<span class="hljs-string">&quot;true&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-checkbox-checked&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span>
+  <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;checkbox&quot;</span>
+  <span class="hljs-attr">aria-checked</span>=<span class="hljs-string">&quot;false&quot;</span>
+  <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-checkbox-unchecked&quot;</span>
+/&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;radio&quot;</span> <span class="hljs-attr">checked</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;foo&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;input-radio-checked&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;radio&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;foo&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;input-radio-unchecked&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;radio&quot;</span> <span class="hljs-attr">aria-checked</span>=<span class="hljs-string">&quot;true&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-radio-checked&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;radio&quot;</span> <span class="hljs-attr">aria-checked</span>=<span class="hljs-string">&quot;false&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-radio-unchecked&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;switch&quot;</span> <span class="hljs-attr">aria-checked</span>=<span class="hljs-string">&quot;true&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-switch-checked&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;switch&quot;</span> <span class="hljs-attr">aria-checked</span>=<span class="hljs-string">&quot;false&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-switch-unchecked&quot;</span> /&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> inputCheckboxChecked = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;input-checkbox-checked&#x27;</span>)
+<span class="hljs-keyword">const</span> inputCheckboxUnchecked = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;input-checkbox-unchecked&#x27;</span>)
+<span class="hljs-keyword">const</span> ariaCheckboxChecked = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-checkbox-checked&#x27;</span>)
+<span class="hljs-keyword">const</span> ariaCheckboxUnchecked = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-checkbox-unchecked&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(inputCheckboxChecked).<span class="hljs-title function_">toBeChecked</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(inputCheckboxUnchecked).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeChecked</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(ariaCheckboxChecked).<span class="hljs-title function_">toBeChecked</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(ariaCheckboxUnchecked).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeChecked</span>()
+
+<span class="hljs-keyword">const</span> inputRadioChecked = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;input-radio-checked&#x27;</span>)
+<span class="hljs-keyword">const</span> inputRadioUnchecked = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;input-radio-unchecked&#x27;</span>)
+<span class="hljs-keyword">const</span> ariaRadioChecked = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-radio-checked&#x27;</span>)
+<span class="hljs-keyword">const</span> ariaRadioUnchecked = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-radio-unchecked&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(inputRadioChecked).<span class="hljs-title function_">toBeChecked</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(inputRadioUnchecked).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeChecked</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(ariaRadioChecked).<span class="hljs-title function_">toBeChecked</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(ariaRadioUnchecked).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeChecked</span>()
+
+<span class="hljs-keyword">const</span> ariaSwitchChecked = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-switch-checked&#x27;</span>)
+<span class="hljs-keyword">const</span> ariaSwitchUnchecked = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-switch-unchecked&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(ariaSwitchChecked).<span class="hljs-title function_">toBeChecked</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(ariaSwitchUnchecked).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeChecked</span>()</code></pre></div>
+<h2 id="tobepartiallychecked"><a class="anchor" href="#tobepartiallychecked">#</a>toBePartiallyChecked</h2>
+<div class="code"><pre><code class="hljs lang-typescript"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toBePartiallyChecked</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to check whether the given element is partially checked. It
+accepts an <code>input</code> of type <code>checkbox</code> and elements with a <code>role</code> of <code>checkbox</code>
+with a <code>aria-checked=&quot;mixed&quot;</code>, or <code>input</code> of type <code>checkbox</code> with
+<code>indeterminate</code> set to <code>true</code></p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">aria-checked</span>=<span class="hljs-string">&quot;mixed&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-checkbox-mixed&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">checked</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;input-checkbox-checked&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;input-checkbox-unchecked&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">aria-checked</span>=<span class="hljs-string">&quot;true&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-checkbox-checked&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span>
+  <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;checkbox&quot;</span>
+  <span class="hljs-attr">aria-checked</span>=<span class="hljs-string">&quot;false&quot;</span>
+  <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;aria-checkbox-unchecked&quot;</span>
+/&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;input-checkbox-indeterminate&quot;</span> /&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> ariaCheckboxMixed = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-checkbox-mixed&#x27;</span>)
+<span class="hljs-keyword">const</span> inputCheckboxChecked = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;input-checkbox-checked&#x27;</span>)
+<span class="hljs-keyword">const</span> inputCheckboxUnchecked = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;input-checkbox-unchecked&#x27;</span>)
+<span class="hljs-keyword">const</span> ariaCheckboxChecked = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-checkbox-checked&#x27;</span>)
+<span class="hljs-keyword">const</span> ariaCheckboxUnchecked = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;aria-checkbox-unchecked&#x27;</span>)
+<span class="hljs-keyword">const</span> inputCheckboxIndeterminate = <span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;input-checkbox-indeterminate&#x27;</span>)
+
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(ariaCheckboxMixed).<span class="hljs-title function_">toBePartiallyChecked</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(inputCheckboxChecked).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBePartiallyChecked</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(inputCheckboxUnchecked).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBePartiallyChecked</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(ariaCheckboxChecked).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBePartiallyChecked</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(ariaCheckboxUnchecked).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBePartiallyChecked</span>()
+
+inputCheckboxIndeterminate.<span class="hljs-title function_">element</span>().<span class="hljs-property">indeterminate</span> = <span class="hljs-literal">true</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(inputCheckboxIndeterminate).<span class="hljs-title function_">toBePartiallyChecked</span>()</code></pre></div>
+<h2 id="tohaverole"><a class="anchor" href="#tohaverole">#</a>toHaveRole</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toHaveRole</span>(<span class="hljs-params"><span class="hljs-attr">role</span>: <span class="hljs-title class_">ARIARole</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows you to assert that an element has the expected <a href="https://www.w3.org/TR/html-aria/#docconformance">role</a>.</p>
+<p>This is useful in cases where you already have access to an element via some query other than the role itself, and want to make additional assertions regarding its accessibility.</p>
+<p>The role can match either an explicit role (via the <code>role</code> attribute), or an implicit one via the <a href="https://www.w3.org/TR/html-aria/#docconformance">implicit ARIA semantics</a>.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;button&quot;</span>&gt;</span>Continue<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;button&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;button-explicit&quot;</span>&gt;</span>Continue<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;switch button&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;button-explicit-multiple&quot;</span>&gt;</span>Continue<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/about&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;link&quot;</span>&gt;</span>About<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;link-invalid&quot;</span>&gt;</span>Invalid link<span class="hljs-tag">&lt;<span class="hljs-name">a</span>/&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;button&#x27;</span>)).<span class="hljs-title function_">toHaveRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;button-explicit&#x27;</span>)).<span class="hljs-title function_">toHaveRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;button-explicit-multiple&#x27;</span>)).<span class="hljs-title function_">toHaveRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;button-explicit-multiple&#x27;</span>)).<span class="hljs-title function_">toHaveRole</span>(<span class="hljs-string">&#x27;switch&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;link&#x27;</span>)).<span class="hljs-title function_">toHaveRole</span>(<span class="hljs-string">&#x27;link&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;link-invalid&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveRole</span>(<span class="hljs-string">&#x27;link&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;link-invalid&#x27;</span>)).<span class="hljs-title function_">toHaveRole</span>(<span class="hljs-string">&#x27;generic&#x27;</span>)</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Roles are matched literally by string equality, without inheriting from the ARIA role hierarchy. As a result, querying a superclass role like <code>checkbox</code> will not include elements with a subclass role like <code>switch</code>.</p>
+<p>Also note that unlike <code>testing-library</code>, Vitest ignores all custom roles except the first valid one, following Playwright&#39;s behaviour:</p>
+<div class="code"><pre><code class="hljs lang-jsx">&lt;div data-testid=<span class="hljs-string">&quot;switch&quot;</span> role=<span class="hljs-string">&quot;switch alert&quot;</span>&gt;&lt;/div&gt;
+
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;switch&#x27;</span>)).<span class="hljs-title function_">toHaveRole</span>(<span class="hljs-string">&#x27;switch&#x27;</span>) <span class="hljs-comment">// ✅</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;switch&#x27;</span>)).<span class="hljs-title function_">toHaveRole</span>(<span class="hljs-string">&#x27;alert&#x27;</span>) <span class="hljs-comment">// ❌</span></code></pre></div>
+</div><h2 id="tohaveselection"><a class="anchor" href="#tohaveselection">#</a>toHaveSelection</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toHaveSelection</span>(<span class="hljs-params"><span class="hljs-attr">selection</span>?: <span class="hljs-built_in">string</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This allows to assert that an element has a
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/Selection">text selection</a>.</p>
+<p>This is useful to check if text or part of the text is selected within an
+element. The element can be either an input of type text, a textarea, or any
+other element that contains text, such as a paragraph, span, div etc.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>The expected selection is a string, it does not allow to check for
+selection range indices.</p>
+</div><div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;text selected text&quot;</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;text&quot;</span> /&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">textarea</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;textarea&quot;</span>&gt;</span>text selected text<span class="hljs-tag">&lt;/<span class="hljs-name">textarea</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;prev&quot;</span>&gt;</span>prev<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;parent&quot;</span>&gt;</span>
+    text <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;child&quot;</span>&gt;</span>selected<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span> text
+  <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;next&quot;</span>&gt;</span>next<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;text&#x27;</span>).<span class="hljs-title function_">element</span>().<span class="hljs-title function_">setSelectionRange</span>(<span class="hljs-number">5</span>, <span class="hljs-number">13</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;text&#x27;</span>)).<span class="hljs-title function_">toHaveSelection</span>(<span class="hljs-string">&#x27;selected&#x27;</span>)
+
+<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;textarea&#x27;</span>).<span class="hljs-title function_">element</span>().<span class="hljs-title function_">setSelectionRange</span>(<span class="hljs-number">0</span>, <span class="hljs-number">5</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-string">&#x27;textarea&#x27;</span>).<span class="hljs-title function_">toHaveSelection</span>(<span class="hljs-string">&#x27;text &#x27;</span>)
+
+<span class="hljs-keyword">const</span> selection = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getSelection</span>()
+<span class="hljs-keyword">const</span> range = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createRange</span>()
+selection.<span class="hljs-title function_">removeAllRanges</span>()
+selection.<span class="hljs-title function_">empty</span>()
+selection.<span class="hljs-title function_">addRange</span>(range)
+
+<span class="hljs-comment">// selection of child applies to the parent as well</span>
+range.<span class="hljs-title function_">selectNodeContents</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;child&#x27;</span>).<span class="hljs-title function_">element</span>())
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;child&#x27;</span>)).<span class="hljs-title function_">toHaveSelection</span>(<span class="hljs-string">&#x27;selected&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;parent&#x27;</span>)).<span class="hljs-title function_">toHaveSelection</span>(<span class="hljs-string">&#x27;selected&#x27;</span>)
+
+<span class="hljs-comment">// selection that applies from prev all, parent text before child, and part child.</span>
+range.<span class="hljs-title function_">setStart</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;prev&#x27;</span>).<span class="hljs-title function_">element</span>(), <span class="hljs-number">0</span>)
+range.<span class="hljs-title function_">setEnd</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;child&#x27;</span>).<span class="hljs-title function_">element</span>().<span class="hljs-property">childNodes</span>[<span class="hljs-number">0</span>], <span class="hljs-number">3</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">queryByTestId</span>(<span class="hljs-string">&#x27;prev&#x27;</span>)).<span class="hljs-title function_">toHaveSelection</span>(<span class="hljs-string">&#x27;prev&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">queryByTestId</span>(<span class="hljs-string">&#x27;child&#x27;</span>)).<span class="hljs-title function_">toHaveSelection</span>(<span class="hljs-string">&#x27;sel&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">queryByTestId</span>(<span class="hljs-string">&#x27;parent&#x27;</span>)).<span class="hljs-title function_">toHaveSelection</span>(<span class="hljs-string">&#x27;text sel&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">queryByTestId</span>(<span class="hljs-string">&#x27;next&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveSelection</span>()
+
+<span class="hljs-comment">// selection that applies from part child, parent text after child and part next.</span>
+range.<span class="hljs-title function_">setStart</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;child&#x27;</span>).<span class="hljs-title function_">element</span>().<span class="hljs-property">childNodes</span>[<span class="hljs-number">0</span>], <span class="hljs-number">3</span>)
+range.<span class="hljs-title function_">setEnd</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;next&#x27;</span>).<span class="hljs-title function_">element</span>().<span class="hljs-property">childNodes</span>[<span class="hljs-number">0</span>], <span class="hljs-number">2</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">queryByTestId</span>(<span class="hljs-string">&#x27;child&#x27;</span>)).<span class="hljs-title function_">toHaveSelection</span>(<span class="hljs-string">&#x27;ected&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">queryByTestId</span>(<span class="hljs-string">&#x27;parent&#x27;</span>)).<span class="hljs-title function_">toHaveSelection</span>(<span class="hljs-string">&#x27;ected text&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">queryByTestId</span>(<span class="hljs-string">&#x27;prev&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveSelection</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">queryByTestId</span>(<span class="hljs-string">&#x27;next&#x27;</span>)).<span class="hljs-title function_">toHaveSelection</span>(<span class="hljs-string">&#x27;ne&#x27;</span>)</code></pre></div>
+<h2 id="tomatchscreenshot"><a class="anchor" href="#tomatchscreenshot">#</a>toMatchScreenshot <Experimental /></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toMatchScreenshot</span>(<span class="hljs-params">
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">ScreenshotMatcherOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">toMatchScreenshot</span>(<span class="hljs-params">
+  <span class="hljs-attr">name</span>?: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">ScreenshotMatcherOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>The <code>toMatchScreenshot</code> assertion can be configured globally in your
+<a href="../../config/browser/expect.html#tomatchscreenshot">Vitest config</a>.</p>
+</div><p>This assertion allows you to perform visual regression testing by comparing
+screenshots of elements or pages against stored reference images.</p>
+<p>When differences are detected beyond the configured threshold, the test fails.
+To help identify the changes, the assertion generates:</p>
+<ul>
+<li>The actual screenshot captured during the test</li>
+<li>The expected reference screenshot</li>
+<li>A diff image highlighting the differences (when possible)</li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Screenshots Stability</div><p>The assertion automatically retries taking screenshots until two consecutive
+captures yield the same result. This helps reduce flakiness caused by
+animations, loading states, or other dynamic content. You can control this
+behavior with the <code>timeout</code> option.</p>
+<p>However, browser rendering can vary across:</p>
+<ul>
+<li>Different browsers and browser versions</li>
+<li>Operating systems (Windows, macOS, Linux)</li>
+<li>Screen resolutions and pixel densities</li>
+<li>GPU drivers and hardware acceleration</li>
+<li>Font rendering and system fonts</li>
+</ul>
+<p>It is recommended to read the
+<a href="../../guide/browser/visual-regression-testing.html">Visual Regression Testing guide</a> to
+implement this testing strategy efficiently.</p>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>When a screenshot comparison fails due to <strong>intentional changes</strong>, you can
+update the reference screenshot by pressing the <code>u</code> key in watch mode, or by
+running tests with the <code>-u</code> or <code>--update</code> flags.</p>
+</div><div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">data-testid</span>=<span class="hljs-string">&quot;button&quot;</span>&gt;</span>Fancy Button<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// basic usage, auto-generates screenshot name</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;button&#x27;</span>)).<span class="hljs-title function_">toMatchScreenshot</span>()
+
+<span class="hljs-comment">// with custom name</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;button&#x27;</span>)).<span class="hljs-title function_">toMatchScreenshot</span>(<span class="hljs-string">&#x27;fancy-button&#x27;</span>)
+
+<span class="hljs-comment">// with options</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;button&#x27;</span>)).<span class="hljs-title function_">toMatchScreenshot</span>({
+  <span class="hljs-attr">comparatorName</span>: <span class="hljs-string">&#x27;pixelmatch&#x27;</span>,
+  <span class="hljs-attr">comparatorOptions</span>: {
+    <span class="hljs-attr">allowedMismatchedPixelRatio</span>: <span class="hljs-number">0.01</span>,
+  },
+})
+
+<span class="hljs-comment">// with both name and options</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;button&#x27;</span>)).<span class="hljs-title function_">toMatchScreenshot</span>(<span class="hljs-string">&#x27;fancy-button&#x27;</span>, {
+  <span class="hljs-attr">comparatorName</span>: <span class="hljs-string">&#x27;pixelmatch&#x27;</span>,
+  <span class="hljs-attr">comparatorOptions</span>: {
+    <span class="hljs-attr">allowedMismatchedPixelRatio</span>: <span class="hljs-number">0.01</span>,
+  },
+})</code></pre></div>
+<h3 id="options"><a class="anchor" href="#options">#</a>Options</h3>
+<ul>
+<li><p><code>comparatorName: &quot;pixelmatch&quot; = &quot;pixelmatch&quot;</code></p>
+<p>The algorithm/library used for comparing images.</p>
+<p><code>&quot;pixelmatch&quot;</code> is the only built-in comparator, but you can use custom ones by <a href="../../config/browser/expect.html#browser-expect-tomatchscreenshot-comparators">registering them in the config file</a>.</p>
+</li>
+<li><p><code>comparatorOptions: object</code></p>
+<p>These options allow changing the behavior of the comparator. What properties
+can be set depends on the chosen comparator algorithm.</p>
+<p>Vitest has set default values out of the box, but they can be overridden.</p>
+<ul>
+<li><a href="#pixelmatch-comparator-options"><code>&quot;pixelmatch&quot;</code> options</a></li>
+</ul>
+</li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>  <strong>Always explicitly set <code>comparatorName</code> to get proper type inference for
+  <code>comparatorOptions</code></strong>.</p>
+<p>  Without it, TypeScript won&#39;t know which options are valid:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// ❌ TypeScript can&#x27;t infer the correct options</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-title function_">toMatchScreenshot</span>({
+  <span class="hljs-attr">comparatorOptions</span>: {
+    <span class="hljs-comment">// might error when new comparators are added</span>
+    <span class="hljs-attr">allowedMismatchedPixelRatio</span>: <span class="hljs-number">0.01</span>,
+  },
+})
+
+<span class="hljs-comment">// ✅ TypeScript knows these are pixelmatch options</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-title function_">toMatchScreenshot</span>({
+  <span class="hljs-attr">comparatorName</span>: <span class="hljs-string">&#x27;pixelmatch&#x27;</span>,
+  <span class="hljs-attr">comparatorOptions</span>: {
+    <span class="hljs-attr">allowedMismatchedPixelRatio</span>: <span class="hljs-number">0.01</span>,
+  },
+})</code></pre></div>
+</div><ul>
+<li><p><code>screenshotOptions: object</code></p>
+<p>The same options allowed by
+<a href="locators.html#screenshot"><code>locator.screenshot()</code></a>, except for:</p>
+<ul>
+<li><code>&#39;base64&#39;</code></li>
+<li><code>&#39;path&#39;</code></li>
+<li><code>&#39;save&#39;</code></li>
+<li><code>&#39;type&#39;</code></li>
+</ul>
+</li>
+<li><p><code>timeout: number = 5_000</code></p>
+<p>Time to wait until a stable screenshot is found.</p>
+<p>Setting this value to <code>0</code> disables the timeout, but if a stable screenshot
+can&#39;t be determined the process will not end.</p>
+</li>
+</ul>
+<h4 id="pixelmatch-comparator-options"><a class="anchor" href="#pixelmatch-comparator-options">#</a><code>&quot;pixelmatch&quot;</code> comparator options</h4>
+<p>The <code>&quot;pixelmatch&quot;</code> comparator uses <a href="https://blazediff.dev/docs/core"><code>@blazediff/core</code></a> under the hood. The following options are available when using it:</p>
+<ul>
+<li><p><code>allowedMismatchedPixelRatio: number | undefined = undefined</code></p>
+<p>The maximum allowed ratio of differing pixels between the captured screenshot
+and the reference image.</p>
+<p>Must be a value between <code>0</code> and <code>1</code>.</p>
+<p>For example, <code>allowedMismatchedPixelRatio: 0.02</code> means the test will pass
+if up to 2% of pixels differ, but fail if more than 2% differ.</p>
+</li>
+<li><p><code>allowedMismatchedPixels: number | undefined = undefined</code></p>
+<p>The maximum number of pixels that are allowed to differ between the captured
+screenshot and the stored reference image.</p>
+<p>If set to <code>undefined</code>, any non-zero difference will cause the test to fail.</p>
+<p>For example, <code>allowedMismatchedPixels: 10</code> means the test will pass if 10 or
+fewer pixels differ, but fail if 11 or more differ.</p>
+</li>
+<li><p><code>threshold: number = 0.1</code></p>
+<p>Acceptable perceived color difference between the same pixel in two images.</p>
+<p>Value ranges from <code>0</code> (strict) to <code>1</code> (very lenient). Lower values mean small
+differences will be detected.</p>
+<p>The comparison uses the <a href="https://en.wikipedia.org/wiki/YIQ">YIQ color space</a>.</p>
+</li>
+<li><p><code>includeAA: boolean = false</code></p>
+<p>If <code>true</code>, disables detection and ignoring of anti-aliased pixels.</p>
+</li>
+<li><p><code>alpha: number = 0.1</code></p>
+<p>Blending level of unchanged pixels in the diff image.</p>
+<p>Ranges from <code>0</code> (white) to <code>1</code> (original brightness).</p>
+</li>
+<li><p><code>aaColor: [r: number, g: number, b: number] = [255, 255, 0]</code></p>
+<p>Color used for anti-aliased pixels in the diff image.</p>
+</li>
+<li><p><code>diffColor: [r: number, g: number, b: number] = [255, 0, 0]</code></p>
+<p>Color used for differing pixels in the diff image.</p>
+</li>
+<li><p><code>diffColorAlt: [r: number, g: number, b: number] | undefined = undefined</code></p>
+<p>Optional alternative color for dark-on-light differences, to help show what&#39;s
+added vs. removed.</p>
+<p>If not set, <code>diffColor</code> is used for all differences.</p>
+</li>
+<li><p><code>diffMask: boolean = false</code></p>
+<p>If <code>true</code>, shows only the diff as a mask on a transparent background, instead
+of overlaying it on the original image.</p>
+<p>Anti-aliased pixels won&#39;t be shown (if detected).</p>
+</li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>When both <code>allowedMismatchedPixels</code> and <code>allowedMismatchedPixelRatio</code> are set,
+the more restrictive value is used.</p>
+<p>For example, if you allow 100 pixels or 2% ratio, and your image has 10,000
+pixels, the effective limit would be 100 pixels instead of 200.</p>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#tobedisabled">toBeDisabled</a><a class="toc-2" href="#tobeenabled">toBeEnabled</a><a class="toc-2" href="#tobeemptydomelement">toBeEmptyDOMElement</a><a class="toc-2" href="#tobeinthedocument">toBeInTheDocument</a><a class="toc-2" href="#tobeinvalid">toBeInvalid</a><a class="toc-2" href="#toberequired">toBeRequired</a><a class="toc-2" href="#tobevalid">toBeValid</a><a class="toc-2" href="#tobevisible">toBeVisible</a><a class="toc-2" href="#tobeinviewport">toBeInViewport 4.0.0</a><a class="toc-2" href="#tocontainelement">toContainElement</a><a class="toc-2" href="#tocontainhtml">toContainHTML</a><a class="toc-2" href="#tohaveaccessibledescription">toHaveAccessibleDescription</a><a class="toc-2" href="#tohaveaccessibleerrormessage">toHaveAccessibleErrorMessage</a><a class="toc-2" href="#tohaveaccessiblename">toHaveAccessibleName</a><a class="toc-2" href="#tohaveattribute">toHaveAttribute</a><a class="toc-2" href="#tohaveclass">toHaveClass</a><a class="toc-2" href="#tohavefocus">toHaveFocus</a><a class="toc-2" href="#tohaveformvalues">toHaveFormValues</a><a class="toc-2" href="#tohavestyle">toHaveStyle</a><a class="toc-2" href="#tohavetextcontent">toHaveTextContent</a><a class="toc-2" href="#tomatchtextcontent">toMatchTextContent</a><a class="toc-2" href="#tohavevalue">toHaveValue</a><a class="toc-2" href="#tohavedisplayvalue">toHaveDisplayValue</a><a class="toc-2" href="#tobechecked">toBeChecked</a><a class="toc-2" href="#tobepartiallychecked">toBePartiallyChecked</a><a class="toc-2" href="#tohaverole">toHaveRole</a><a class="toc-2" href="#tohaveselection">toHaveSelection</a><a class="toc-2" href="#tomatchscreenshot">toMatchScreenshot</a><a class="toc-3" href="#options">Options</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

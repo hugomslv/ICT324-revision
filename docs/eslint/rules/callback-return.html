@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>callback-return (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/callback-return <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/callback-return">version en ligne</a></div>
+<h1>callback-return</h1><p>The callback pattern is at the heart of most I/O and event-driven programming
+ in JavaScript.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomething</span>(<span class="hljs-params">err, callback</span>) {
+    <span class="hljs-keyword">if</span> (err) {
+        <span class="hljs-keyword">return</span> <span class="hljs-title function_">callback</span>(err);
+    }
+    <span class="hljs-title function_">callback</span>();
+}</code></pre></div>
+<p>To prevent calling the callback multiple times it is important to <code>return</code> anytime the callback is triggered outside
+ of the main function body. Neglecting this technique often leads to issues where you do something more than once.
+ For example, in the case of an HTTP request, you may try to send HTTP headers more than once leading Node.js to <code>throw</code>
+ a <code>Can&#39;t render headers after they are sent to the client.</code> error.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule is aimed at ensuring that callbacks used outside of the main function block are always part-of or immediately
+preceding a <code>return</code> statement. This rule decides what is a callback based on the name of the function being called.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>The rule takes a single option - an array of possible callback names - which may include object methods. The default callback names are <code>callback</code>, <code>cb</code>, <code>next</code>.</p>
+<h3 id="default-callback-names"><a class="anchor" href="#default-callback-names">#</a>Default callback names</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the default <code>[&quot;callback&quot;, &quot;cb&quot;, &quot;next&quot;]</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint callback-return: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">err, callback</span>) {
+    <span class="hljs-keyword">if</span> (err) {
+        <span class="hljs-title function_">callback</span>(err);
+    }
+    <span class="hljs-title function_">callback</span>();
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the default <code>[&quot;callback&quot;, &quot;cb&quot;, &quot;next&quot;]</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint callback-return: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">err, callback</span>) {
+    <span class="hljs-keyword">if</span> (err) {
+        <span class="hljs-keyword">return</span> <span class="hljs-title function_">callback</span>(err);
+    }
+    <span class="hljs-title function_">callback</span>();
+}</code></pre></div>
+</div><h3 id="supplied-callback-names"><a class="anchor" href="#supplied-callback-names">#</a>Supplied callback names</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the option <code>[&quot;done&quot;, &quot;send.error&quot;, &quot;send.success&quot;]</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint callback-return: [&quot;error&quot;, [&quot;done&quot;, &quot;send.error&quot;, &quot;send.success&quot;]]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">err, done</span>) {
+    <span class="hljs-keyword">if</span> (err) {
+        <span class="hljs-title function_">done</span>(err);
+    }
+    <span class="hljs-title function_">done</span>();
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params">err, send</span>) {
+    <span class="hljs-keyword">if</span> (err) {
+        send.<span class="hljs-title function_">error</span>(err);
+    }
+    send.<span class="hljs-title function_">success</span>();
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the option <code>[&quot;done&quot;, &quot;send.error&quot;, &quot;send.success&quot;]</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint callback-return: [&quot;error&quot;, [&quot;done&quot;, &quot;send.error&quot;, &quot;send.success&quot;]]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">err, done</span>) {
+    <span class="hljs-keyword">if</span> (err) {
+        <span class="hljs-keyword">return</span> <span class="hljs-title function_">done</span>(err);
+    }
+    <span class="hljs-title function_">done</span>();
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params">err, send</span>) {
+    <span class="hljs-keyword">if</span> (err) {
+        <span class="hljs-keyword">return</span> send.<span class="hljs-title function_">error</span>(err);
+    }
+    send.<span class="hljs-title function_">success</span>();
+}</code></pre></div>
+</div><h2 id="known-limitations"><a class="anchor" href="#known-limitations">#</a>Known Limitations</h2>
+<p>Because it is difficult to understand the meaning of a program through static analysis, this rule has limitations:</p>
+<ul>
+<li><em>false negatives</em> when this rule reports correct code, but the program calls the callback more than one time (which is incorrect behavior)</li>
+<li><em>false positives</em> when this rule reports incorrect code, but the program calls the callback only one time (which is correct behavior)</li>
+</ul>
+<h3 id="passing-the-callback-by-reference"><a class="anchor" href="#passing-the-callback-by-reference">#</a>Passing the callback by reference</h3>
+<p>The static analysis of this rule does not detect that the program calls the callback if it is an argument of a function (for example,  <code>setTimeout</code>).</p>
+<p>Example of a <em>false negative</em> when this rule reports correct code:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint callback-return: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">err, callback</span>) {
+    <span class="hljs-keyword">if</span> (err) {
+        <span class="hljs-built_in">setTimeout</span>(callback, <span class="hljs-number">0</span>); <span class="hljs-comment">// this is bad, but WILL NOT warn</span>
+    }
+    <span class="hljs-title function_">callback</span>();
+}</code></pre></div>
+<h3 id="triggering-the-callback-within-a-nested-function"><a class="anchor" href="#triggering-the-callback-within-a-nested-function">#</a>Triggering the callback within a nested function</h3>
+<p>The static analysis of this rule does not detect that the program calls the callback from within a nested function or an immediately-invoked function expression (IIFE).</p>
+<p>Example of a <em>false negative</em> when this rule reports correct code:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint callback-return: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">err, callback</span>) {
+    <span class="hljs-keyword">if</span> (err) {
+        process.<span class="hljs-title function_">nextTick</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-title function_">callback</span>(); <span class="hljs-comment">// this is bad, but WILL NOT warn</span>
+        });
+    }
+    <span class="hljs-title function_">callback</span>();
+}</code></pre></div>
+<h3 id="ifelse-statements"><a class="anchor" href="#ifelse-statements">#</a>If/else statements</h3>
+<p>The static analysis of this rule does not detect that the program calls the callback only one time in each branch of an <code>if</code> statement.</p>
+<p>Example of a <em>false positive</em> when this rule reports incorrect code:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint callback-return: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">err, callback</span>) {
+    <span class="hljs-keyword">if</span> (err) {
+        <span class="hljs-title function_">callback</span>(err); <span class="hljs-comment">// this is fine, but WILL warn</span>
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-title function_">callback</span>();    <span class="hljs-comment">// this is fine, but WILL warn</span>
+    }
+}</code></pre></div>
+<h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>There are some cases where you might want to call a callback function more than once. In those cases this rule
+ may lead to incorrect behavior. In those cases you may want to reserve a special name for those callbacks and
+ not include that in the list of callbacks that trigger warnings.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="handle-callback-err.html"><code>handle-callback-err</code></a></p></div><h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://github.com/maxogden/art-of-node#callbacks">https://github.com/maxogden/art-of-node#callbacks</a></li><li><a class="ext" href="https://web.archive.org/web/20171224042620/https://docs.nodejitsu.com/articles/errors/what-are-the-error-conventions/">https://web.archive.org/web/20171224042620/https://docs.nodejitsu.com/articles/errors/what-are-the-error-conventions/</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#default-callback-names">Default callback names</a><a class="toc-3" href="#supplied-callback-names">Supplied callback names</a><a class="toc-2" href="#known-limitations">Known Limitations</a><a class="toc-3" href="#passing-the-callback-by-reference">Passing the callback by reference</a><a class="toc-3" href="#triggering-the-callback-within-a-nested-function">Triggering the callback within a nested function</a><a class="toc-3" href="#ifelse-statements">If/else statements</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

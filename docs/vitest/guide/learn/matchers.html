@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Using Matchers | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/learn/matchers  <a class="ext small" href="https://vitest.dev/guide/learn/matchers">version en ligne</a></div>
+<h1 id="using-matchers"><a class="anchor" href="#using-matchers">#</a>Using Matchers</h1>
+<p>Vitest uses <code>expect</code> with &quot;matchers&quot; to assert that values meet certain conditions. This page covers the matchers you&#39;ll use most often. For the complete list, see the <a href="../../api/expect.html">Expect API Reference</a>.</p>
+<h2 id="common-matchers"><a class="anchor" href="#common-matchers">#</a>Common Matchers</h2>
+<p>The simplest way to test a value is with exact equality. When you write <code>expect(2 + 2).toBe(4)</code>, the <a href="../../api/expect.html#tobe"><code>toBe</code></a> matcher checks that the value is exactly <code>4</code> using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is"><code>Object.is</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;two plus two is four&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-number">2</span> + <span class="hljs-number">2</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">4</span>)
+})</code></pre></div>
+<p>This works great for primitive values like numbers, strings, and booleans. But when you&#39;re comparing objects, <code>toBe</code> checks <em>identity</em> (whether they&#39;re the exact same object in memory), not whether they have the same shape. That&#39;s where <a href="../../api/expect.html#toequal"><code>toEqual</code></a> comes in. It recursively compares every field of an object or element of an array, ignoring object identity:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;object assignment&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> data = { <span class="hljs-attr">one</span>: <span class="hljs-number">1</span> }
+  data.<span class="hljs-property">two</span> = <span class="hljs-number">2</span>
+
+  <span class="hljs-title function_">expect</span>(data).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">one</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">two</span>: <span class="hljs-number">2</span> })
+})</code></pre></div>
+<p>Here&#39;s an example that shows the difference more clearly. Two objects with the same content are <code>toEqual</code> but not <code>toBe</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;toBe vs toEqual&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> a = { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span> }
+  <span class="hljs-keyword">const</span> b = { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span> }
+
+  <span class="hljs-comment">// These are different objects in memory</span>
+  <span class="hljs-title function_">expect</span>(a).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBe</span>(b)
+
+  <span class="hljs-comment">// But they have the same structure</span>
+  <span class="hljs-title function_">expect</span>(a).<span class="hljs-title function_">toEqual</span>(b)
+})</code></pre></div>
+<p>There&#39;s also <a href="../../api/expect.html#tostrictequal"><code>toStrictEqual</code></a>, which is stricter than <code>toEqual</code> in three ways: it checks <code>undefined</code> properties, distinguishes sparse arrays from <code>undefined</code> values, and verifies that objects have the same type (not just the same shape):</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;toEqual vs toStrictEqual&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// toEqual ignores undefined properties</span>
+  <span class="hljs-title function_">expect</span>({ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-literal">undefined</span> })
+
+  <span class="hljs-comment">// toStrictEqual catches them</span>
+  <span class="hljs-title function_">expect</span>({ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }).<span class="hljs-property">not</span>.<span class="hljs-title function_">toStrictEqual</span>({ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-literal">undefined</span> })
+
+  <span class="hljs-comment">// toEqual doesn&#x27;t check object types</span>
+  <span class="hljs-keyword">class</span> <span class="hljs-title class_">User</span> {
+    <span class="hljs-title function_">constructor</span>(<span class="hljs-params">name</span>) {
+      <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = name
+    }
+  }
+  <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span> })
+  <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toStrictEqual</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span> })
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>A good rule of thumb: use <code>toBe</code> for primitives (numbers, strings, booleans), <code>toEqual</code> for comparing structure, and <code>toStrictEqual</code> when you also care about types and explicit <code>undefined</code> values.</p>
+</div><p>You can also negate any matcher by inserting <code>.not</code> before it. This is useful when you want to verify that something is <em>not</em> the case:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;adding positive numbers is not zero&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-number">1</span> + <span class="hljs-number">2</span>).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBe</span>(<span class="hljs-number">0</span>)
+})</code></pre></div>
+<h2 id="truthiness"><a class="anchor" href="#truthiness">#</a>Truthiness</h2>
+<p>In tests you sometimes need to distinguish between <code>undefined</code>, <code>null</code>, and <code>false</code>. Other times you don&#39;t care about the exact value and just want to know if something is truthy or falsy. Vitest provides matchers for both situations:</p>
+<ul>
+<li><a href="../../api/expect.html#tobenull"><code>toBeNull</code></a> matches only <code>null</code></li>
+<li><a href="../../api/expect.html#tobeundefined"><code>toBeUndefined</code></a> matches only <code>undefined</code></li>
+<li><a href="../../api/expect.html#tobedefined"><code>toBeDefined</code></a> is the opposite of <code>toBeUndefined</code>. It passes for anything that isn&#39;t <code>undefined</code></li>
+<li><a href="../../api/expect.html#tobetruthy"><code>toBeTruthy</code></a> matches anything that an <code>if</code> statement would treat as true</li>
+<li><a href="../../api/expect.html#tobefalsy"><code>toBeFalsy</code></a> matches anything that an <code>if</code> statement would treat as false</li>
+</ul>
+<p>You should pick the matcher that most precisely describes what you&#39;re checking. Using <code>toBeTruthy</code> when you really mean <code>toBeDefined</code> can hide bugs, because <code>0</code> and <code>&quot;&quot;</code> are both defined but falsy.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;null checks&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> n = <span class="hljs-literal">null</span>
+
+  <span class="hljs-title function_">expect</span>(n).<span class="hljs-title function_">toBeNull</span>()
+  <span class="hljs-title function_">expect</span>(n).<span class="hljs-title function_">toBeDefined</span>()
+  <span class="hljs-title function_">expect</span>(n).<span class="hljs-title function_">toBeFalsy</span>()
+  <span class="hljs-title function_">expect</span>(n).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeTruthy</span>()
+  <span class="hljs-title function_">expect</span>(n).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeUndefined</span>()
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;zero&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> z = <span class="hljs-number">0</span>
+
+  <span class="hljs-title function_">expect</span>(z).<span class="hljs-title function_">toBeDefined</span>() <span class="hljs-comment">// passes: 0 is defined</span>
+  <span class="hljs-title function_">expect</span>(z).<span class="hljs-title function_">toBeFalsy</span>() <span class="hljs-comment">// passes: 0 is falsy</span>
+  <span class="hljs-title function_">expect</span>(z).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeNull</span>() <span class="hljs-comment">// passes: 0 is not null</span>
+})</code></pre></div>
+<h2 id="numbers"><a class="anchor" href="#numbers">#</a>Numbers</h2>
+<p>Most number comparisons are straightforward. Vitest provides the matchers you&#39;d expect for greater-than, less-than, and equality checks:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;number comparisons&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> value = <span class="hljs-number">2</span> + <span class="hljs-number">2</span>
+
+  <span class="hljs-title function_">expect</span>(value).<span class="hljs-title function_">toBeGreaterThan</span>(<span class="hljs-number">3</span>)
+  <span class="hljs-title function_">expect</span>(value).<span class="hljs-title function_">toBeGreaterThanOrEqual</span>(<span class="hljs-number">3.5</span>)
+  <span class="hljs-title function_">expect</span>(value).<span class="hljs-title function_">toBeLessThan</span>(<span class="hljs-number">5</span>)
+  <span class="hljs-title function_">expect</span>(value).<span class="hljs-title function_">toBeLessThanOrEqual</span>(<span class="hljs-number">4.5</span>)
+
+  <span class="hljs-comment">// For exact equality, both toBe and toEqual work the same for numbers</span>
+  <span class="hljs-title function_">expect</span>(value).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">4</span>)
+  <span class="hljs-title function_">expect</span>(value).<span class="hljs-title function_">toEqual</span>(<span class="hljs-number">4</span>)
+})</code></pre></div>
+<p>There is one common gotcha with floating point arithmetic. In JavaScript, <code>0.1 + 0.2</code> doesn&#39;t equal <code>0.3</code> exactly (it&#39;s <code>0.30000000000000004</code>). This means a <code>toBe(0.3)</code> check will fail. Use <a href="../../api/expect.html#tobecloseto"><code>toBeCloseTo</code></a> instead, which compares numbers within a small rounding error:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;adding floating point numbers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> value = <span class="hljs-number">0.1</span> + <span class="hljs-number">0.2</span>
+
+  <span class="hljs-comment">// This won&#x27;t work because of floating point rounding</span>
+  <span class="hljs-comment">// expect(value).toBe(0.3)</span>
+
+  <span class="hljs-comment">// This works</span>
+  <span class="hljs-title function_">expect</span>(value).<span class="hljs-title function_">toBeCloseTo</span>(<span class="hljs-number">0.3</span>)
+})</code></pre></div>
+<h2 id="strings"><a class="anchor" href="#strings">#</a>Strings</h2>
+<p>You can test strings against regular expressions with <a href="../../api/expect.html#tomatch"><code>toMatch</code></a>. This is especially handy when you care about a pattern rather than an exact value, like checking that an error message contains a certain word or that a URL matches a particular format:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;there is no I in team&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-string">&#x27;team&#x27;</span>).<span class="hljs-property">not</span>.<span class="hljs-title function_">toMatch</span>(<span class="hljs-regexp">/I/</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;version string matches semver format&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-string">&#x27;vitest@1.0.0&#x27;</span>).<span class="hljs-title function_">toMatch</span>(<span class="hljs-regexp">/vitest@\d+\.\d+\.\d+/</span>)
+})</code></pre></div>
+<h2 id="arrays-and-iterables"><a class="anchor" href="#arrays-and-iterables">#</a>Arrays and Iterables</h2>
+<p><a href="../../api/expect.html#tocontain"><code>toContain</code></a> checks that an array (or any iterable, like a <code>Set</code>) includes a particular item. It uses <code>===</code> for comparison, so it works well for primitives:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;the shopping list has milk in it&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> shoppingList = [<span class="hljs-string">&#x27;milk&#x27;</span>, <span class="hljs-string">&#x27;bread&#x27;</span>, <span class="hljs-string">&#x27;eggs&#x27;</span>, <span class="hljs-string">&#x27;butter&#x27;</span>]
+
+  <span class="hljs-title function_">expect</span>(shoppingList).<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&#x27;milk&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>(shoppingList)).<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&#x27;milk&#x27;</span>)
+})</code></pre></div>
+<p>If you need to check that an array contains an object with a particular structure, use <a href="../../api/expect.html#tocontainequal"><code>toContainEqual</code></a> instead. It works like <code>toEqual</code> but for individual items inside an array.</p>
+<h2 id="objects"><a class="anchor" href="#objects">#</a>Objects</h2>
+<p>When testing objects, you often want to check only a few important fields without specifying every property. <a href="../../api/expect.html#tomatchobject"><code>toMatchObject</code></a> lets you do exactly that. It verifies that the object contains at least the properties you specify, and ignores any additional ones:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;user has expected fields&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> user = {
+    <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span>,
+    <span class="hljs-attr">email</span>: <span class="hljs-string">&#x27;alice@example.com&#x27;</span>,
+    <span class="hljs-attr">createdAt</span>: <span class="hljs-string">&#x27;2024-01-01&#x27;</span>
+  }
+
+  <span class="hljs-comment">// We only care about name and email here</span>
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toMatchObject</span>({
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span>,
+    <span class="hljs-attr">email</span>: <span class="hljs-string">&#x27;alice@example.com&#x27;</span>,
+  })
+})</code></pre></div>
+<p>For checking individual properties, especially nested ones, <a href="../../api/expect.html#tohaveproperty"><code>toHaveProperty</code></a> is more readable. You pass a dot-separated path and optionally an expected value:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;object has property&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> user = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span>,
+    <span class="hljs-attr">address</span>: { <span class="hljs-attr">city</span>: <span class="hljs-string">&#x27;Paris&#x27;</span>, <span class="hljs-attr">zip</span>: <span class="hljs-string">&#x27;75001&#x27;</span> }
+  }
+
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;name&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;name&#x27;</span>, <span class="hljs-string">&#x27;Alice&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;address.city&#x27;</span>, <span class="hljs-string">&#x27;Paris&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;address.zip&#x27;</span>)
+})</code></pre></div>
+<h2 id="asymmetric-matchers"><a class="anchor" href="#asymmetric-matchers">#</a>Asymmetric Matchers</h2>
+<p>Sometimes you don&#39;t know the exact value, but you know its type or shape. Asymmetric matchers let you describe what a value should <em>look like</em> without pinning down the exact content. They work inside any matcher that does deep comparison, like <code>toEqual</code> or <code>toMatchObject</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;user has the right shape&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> user = <span class="hljs-title function_">createUser</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)
+
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toEqual</span>({
+    <span class="hljs-attr">id</span>: expect.<span class="hljs-title function_">any</span>(<span class="hljs-title class_">Number</span>),
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span>,
+    <span class="hljs-attr">email</span>: expect.<span class="hljs-title function_">stringContaining</span>(<span class="hljs-string">&#x27;@&#x27;</span>),
+    <span class="hljs-attr">roles</span>: expect.<span class="hljs-title function_">arrayContaining</span>([<span class="hljs-string">&#x27;viewer&#x27;</span>]),
+  })
+})</code></pre></div>
+<p>The most common asymmetric matchers are:</p>
+<ul>
+<li><a href="../../api/expect.html#expect-any"><code>expect.any(Constructor)</code></a> matches any value created with the given constructor (e.g., <code>Number</code>, <code>String</code>, <code>Array</code>)</li>
+<li><a href="../../api/expect.html#expect-stringcontaining"><code>expect.stringContaining(str)</code></a> matches a string that includes the given substring</li>
+<li><a href="../../api/expect.html#expect-stringmatching"><code>expect.stringMatching(regex)</code></a> matches a string against a regular expression</li>
+<li><a href="../../api/expect.html#expect-arraycontaining"><code>expect.arrayContaining(arr)</code></a> matches an array that includes all items in the expected array (order doesn&#39;t matter, extra items are allowed)</li>
+<li><a href="../../api/expect.html#expect-objectcontaining"><code>expect.objectContaining(obj)</code></a> matches an object that includes at least the specified properties</li>
+</ul>
+<h2 id="exceptions"><a class="anchor" href="#exceptions">#</a>Exceptions</h2>
+<p>To verify that a function throws an error, use <a href="../../api/expect.html#tothrow"><code>toThrow</code></a>. You need to wrap the call in another function so that Vitest can catch the error instead of letting it crash the test:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">compileCode</span>(<span class="hljs-params">code</span>) {
+  <span class="hljs-keyword">if</span> (code === <span class="hljs-string">&#x27;&#x27;</span>) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;Cannot compile empty string&#x27;</span>)
+  }
+  <span class="hljs-keyword">return</span> code
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;compiling an empty string throws&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// Check that it throws at all</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">compileCode</span>(<span class="hljs-string">&#x27;&#x27;</span>)).<span class="hljs-title function_">toThrow</span>()
+
+  <span class="hljs-comment">// Check the error message</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">compileCode</span>(<span class="hljs-string">&#x27;&#x27;</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;Cannot compile empty string&#x27;</span>)
+
+  <span class="hljs-comment">// Check the message with a regex</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">compileCode</span>(<span class="hljs-string">&#x27;&#x27;</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-regexp">/empty string/</span>)
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>The wrapping function <code>() =&gt; compileCode(&#39;&#39;)</code> is important. If you wrote <code>expect(compileCode(&#39;&#39;)).toThrow()</code>, the error would be thrown <em>before</em> <code>expect</code> gets a chance to catch it, and the test would fail with an unhandled error instead.</p>
+</div><h2 id="soft-assertions"><a class="anchor" href="#soft-assertions">#</a>Soft Assertions</h2>
+<p>Normally, a failing assertion stops the test immediately. That&#39;s useful most of the time, but sometimes you want to check several independent things and see all the failures at once rather than fixing them one by one.</p>
+<p><a href="../../api/expect.html#soft"><code>expect.soft</code></a> does exactly that. It records the failure but lets the test keep running:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;check multiple fields&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> user = { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">30</span>, <span class="hljs-attr">role</span>: <span class="hljs-string">&#x27;admin&#x27;</span> }
+
+  expect.<span class="hljs-title function_">soft</span>(user.<span class="hljs-property">name</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)
+  expect.<span class="hljs-title function_">soft</span>(user.<span class="hljs-property">age</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">25</span>) <span class="hljs-comment">// this fails but execution continues</span>
+  expect.<span class="hljs-title function_">soft</span>(user.<span class="hljs-property">role</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;admin&#x27;</span>)
+  <span class="hljs-comment">// the test report will show that age didn&#x27;t match</span>
+})</code></pre></div>
+<p>This is especially useful for validating the shape of an API response or a complex object where multiple fields might be wrong at the same time.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#common-matchers">Common Matchers</a><a class="toc-2" href="#truthiness">Truthiness</a><a class="toc-2" href="#numbers">Numbers</a><a class="toc-2" href="#strings">Strings</a><a class="toc-2" href="#arrays-and-iterables">Arrays and Iterables</a><a class="toc-2" href="#objects">Objects</a><a class="toc-2" href="#asymmetric-matchers">Asymmetric Matchers</a><a class="toc-2" href="#exceptions">Exceptions</a><a class="toc-2" href="#soft-assertions">Soft Assertions</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

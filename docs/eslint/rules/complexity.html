@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>complexity (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/complexity <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/complexity">version en ligne</a></div>
+<h1>complexity</h1><p>Cyclomatic complexity measures the number of linearly independent paths through a program&#39;s source code. This rule allows setting a cyclomatic complexity threshold.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">x</span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
+        <span class="hljs-keyword">return</span> x; <span class="hljs-comment">// 1st path</span>
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-literal">false</span>) {
+        <span class="hljs-keyword">return</span> x+<span class="hljs-number">1</span>; <span class="hljs-comment">// 2nd path</span>
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-number">4</span>; <span class="hljs-comment">// 3rd path</span>
+    }
+}</code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule is aimed at reducing code complexity by capping the amount of cyclomatic complexity allowed in a program. As such, it will warn when the cyclomatic complexity crosses the configured threshold (default is <code>20</code>).</p>
+<p>Examples of <strong>incorrect</strong> code for a maximum of <code>2</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint complexity: [&quot;error&quot;, 2]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">x</span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
+        <span class="hljs-keyword">return</span> x;
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-literal">false</span>) {
+        <span class="hljs-keyword">return</span> x+<span class="hljs-number">1</span>;
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-number">4</span>; <span class="hljs-comment">// 3rd path</span>
+    }
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">b</span>(<span class="hljs-params"></span>) {
+    foo ||= <span class="hljs-number">1</span>;
+    bar &amp;&amp;= <span class="hljs-number">1</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">c</span>(<span class="hljs-params">a = {}</span>) { <span class="hljs-comment">// default parameter -&gt; 2nd path</span>
+    <span class="hljs-keyword">const</span> { b = <span class="hljs-string">&#x27;default&#x27;</span> } = a; <span class="hljs-comment">// default value during destructuring -&gt; 3rd path</span>
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">d</span>(<span class="hljs-params">a</span>) {
+    <span class="hljs-keyword">return</span> a?.<span class="hljs-property">b</span>?.<span class="hljs-property">c</span>; <span class="hljs-comment">// optional chaining with two optional properties creates two additional branches</span>
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for a maximum of <code>2</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint complexity: [&quot;error&quot;, 2]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">x</span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
+        <span class="hljs-keyword">return</span> x;
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-number">4</span>;
+    }
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">b</span>(<span class="hljs-params"></span>) {
+    foo ||= <span class="hljs-number">1</span>;
+}</code></pre></div>
+</div><p>Class field initializers and class static blocks are implicit functions. Therefore, their complexity is calculated separately for each initializer and each static block, and it doesn&#39;t contribute to the complexity of the enclosing code.</p>
+<p>Examples of additional <strong>incorrect</strong> code for a maximum of <code>2</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint complexity: [&quot;error&quot;, 2]*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+    x = a || b || c; <span class="hljs-comment">// this initializer has complexity = 3</span>
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">D</span> { <span class="hljs-comment">// this static block has complexity = 3</span>
+    <span class="hljs-keyword">static</span> {
+        <span class="hljs-keyword">if</span> (foo) {
+            bar = baz || qux;
+        }
+    }
+}</code></pre></div>
+</div><p>Examples of additional <strong>correct</strong> code for a maximum of <code>2</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint complexity: [&quot;error&quot;, 2]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) { <span class="hljs-comment">// this function has complexity = 1</span>
+    <span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+        x = a + b; <span class="hljs-comment">// this initializer has complexity = 1</span>
+        y = c || d; <span class="hljs-comment">// this initializer has complexity = 2</span>
+        z = e &amp;&amp; f; <span class="hljs-comment">// this initializer has complexity = 2</span>
+
+        <span class="hljs-keyword">static</span> p = g || h; <span class="hljs-comment">// this initializer has complexity = 2</span>
+        <span class="hljs-keyword">static</span> q = i ? j : k; <span class="hljs-comment">// this initializer has complexity = 2</span>
+
+        <span class="hljs-keyword">static</span> { <span class="hljs-comment">// this static block has complexity = 2</span>
+            <span class="hljs-keyword">if</span> (foo) {
+                baz = bar;
+            }
+        }
+
+        <span class="hljs-keyword">static</span> { <span class="hljs-comment">// this static block has complexity = 2</span>
+            qux = baz || quux;
+        }
+    }
+}</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has a number or object option:</p>
+<ul>
+<li><p><code>&quot;max&quot;</code> (default: <code>20</code>) enforces a maximum complexity</p>
+</li>
+<li><p><code>&quot;variant&quot;: &quot;classic&quot; | &quot;modified&quot;</code> (default: <code>&quot;classic&quot;</code>) cyclomatic complexity variant to use</p>
+</li>
+</ul>
+<h3 id="max"><a class="anchor" href="#max">#</a>max</h3>
+<p>Customize the threshold with the <code>max</code> property.</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;complexity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;max&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p><strong>Deprecated:</strong> the object property <code>maximum</code> is deprecated. Please use the property <code>max</code> instead.</p>
+<p>Or use the shorthand syntax:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;complexity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-number">2</span><span class="hljs-punctuation">]</span></code></pre></div>
+<h3 id="variant"><a class="anchor" href="#variant">#</a>variant</h3>
+<p>Cyclomatic complexity variant to use:</p>
+<ul>
+<li><code>&quot;classic&quot;</code> (default) - Classic McCabe cyclomatic complexity</li>
+<li><code>&quot;modified&quot;</code> - Modified cyclomatic complexity</li>
+</ul>
+<p><em>Modified cyclomatic complexity</em> is the same as the classic cyclomatic complexity, but each <code>switch</code> statement only increases the complexity value by <code>1</code>, regardless of how many <code>case</code> statements it contains.</p>
+<p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;max&quot;: 3, &quot;variant&quot;: &quot;modified&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint complexity: [&quot;error&quot;, {&quot;max&quot;: 3, &quot;variant&quot;: &quot;modified&quot;}]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">x</span>) {     <span class="hljs-comment">// initial modified complexity is 1</span>
+    <span class="hljs-keyword">switch</span> (x) {    <span class="hljs-comment">// switch statement increases modified complexity by 1</span>
+        <span class="hljs-keyword">case</span> <span class="hljs-number">1</span>:
+            <span class="hljs-number">1</span>;
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-number">2</span>:
+            <span class="hljs-number">2</span>;
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-number">3</span>:
+            <span class="hljs-keyword">if</span> (x === <span class="hljs-string">&#x27;foo&#x27;</span>) {  <span class="hljs-comment">// if block increases modified complexity by 1</span>
+                <span class="hljs-number">3</span>;
+            }
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-attr">default</span>:
+            <span class="hljs-number">4</span>;
+    }
+}</code></pre></div>
+</div><p>The classic cyclomatic complexity of the above function is <code>5</code>, but the modified cyclomatic complexity is only <code>3</code>.</p>
+<h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you can&#39;t determine an appropriate complexity limit for your code, then it&#39;s best to disable this rule.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="max-depth.html"><code>max-depth</code></a>, <a href="max-lines.html"><code>max-lines</code></a>, <a href="max-lines-per-function.html"><code>max-lines-per-function</code></a>, <a href="max-nested-callbacks.html"><code>max-nested-callbacks</code></a>, <a href="max-params.html"><code>max-params</code></a>, <a href="max-statements.html"><code>max-statements</code></a></p></div><h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://en.wikipedia.org/wiki/Cyclomatic_complexity">https://en.wikipedia.org/wiki/Cyclomatic_complexity</a></li><li><a class="ext" href="https://ariya.io/2012/12/complexity-analysis-of-javascript-code">https://ariya.io/2012/12/complexity-analysis-of-javascript-code</a></li><li><a class="ext" href="https://web.archive.org/web/20231210222710/https://craftsmanshipforsoftware.com/2015/05/25/complexity-for-javascript/">https://web.archive.org/web/20231210222710/https://craftsmanshipforsoftware.com/2015/05/25/complexity-for-javascript/</a></li><li><a class="ext" href="https://web.archive.org/web/20160808115119/http://jscomplexity.org/complexity">https://web.archive.org/web/20160808115119/http://jscomplexity.org/complexity</a></li><li><a class="ext" href="https://github.com/eslint/eslint/issues/4808#issuecomment-167795140">https://github.com/eslint/eslint/issues/4808#issuecomment-167795140</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#max">max</a><a class="toc-3" href="#variant">variant</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

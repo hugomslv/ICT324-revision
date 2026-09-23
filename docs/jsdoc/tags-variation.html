@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>@variation (JSDoc) · ICT-324 Révision</title>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/hljs.css">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../index.html">Accueil</a><a class="nav-link" href="../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../docs/index.html">Index des docs</a><a class="nav-link" href="../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../docs/vite/index.html">Vite</a><a class="nav-link active" href="../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="index.html">JSDoc</a> › tags-variation <span class="badge">Distinguish different objects with the same name.</span> <a class="ext small" href="https://jsdoc.app/tags-variation.html">version en ligne</a></div>
+<h1>@variation</h1><h2 id="syntax"><a class="anchor" href="#syntax">#</a>Syntax</h2>
+<p><code>@variation &lt;variationNumber&gt;</code></p>
+<h2 id="overview"><a class="anchor" href="#overview">#</a>Overview</h2>
+<p>Sometimes your code may include multiple symbols with the same longname. For example, you might have
+both a global class and a top-level namespace called <code>Widget</code>. In cases such as these, what does
+&quot;{@link Widget}&quot; or &quot;@memberof Widget&quot; mean? The global namespace, or the global class?</p>
+<p>Variations help JSDoc distinguish between different symbols with the same longname. For example, if
+&quot;@variation 2&quot; is added to the JSDoc comment for the Widget class, &quot;{@link Widget(2)}&quot; will refer to
+the class, and &quot;{@link Widget}&quot; will refer to the namespace. Alternatively, you can include the
+variation when you specify the symbol&#39;s with tags such as <a href="tags-alias.html">@alias</a> or <a href="tags-name.html">@name</a>
+(for example, &quot;@alias Widget(2)&quot;).</p>
+<p>You can provide any value with the @variation tag, as long as the combination of the value and the
+longname results in a globally unique version of the longname. As a best practice, use a predictable
+pattern for choosing the values, which will make it easier for you to document your code.</p>
+<h2 id="examples"><a class="anchor" href="#examples">#</a>Examples</h2>
+<p>The following example uses the @variation tag to distinguish between the Widget class and the Widget
+namespace.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Using the @variation tag</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * The Widget namespace.
+ * <span class="hljs-doctag">@namespace</span> <span class="hljs-variable">Widget</span>
+ */</span>
+
+<span class="hljs-comment">// you can also use &#x27;@class Widget(2)&#x27; and omit the @variation tag</span>
+<span class="hljs-comment">/**
+ * The Widget class. Defaults to the properties in {<span class="hljs-doctag">@link</span> Widget.properties}.
+ * <span class="hljs-doctag">@class</span>
+ * <span class="hljs-doctag">@variation</span> 2
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">Object</span>} <span class="hljs-variable">props</span> - Name-value pairs to add to the widget.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Widget</span>(<span class="hljs-params">props</span>) {}
+
+<span class="hljs-comment">/**
+ * Properties added by default to a new {<span class="hljs-doctag">@link</span> Widget(2)} instance.
+ */</span>
+<span class="hljs-title class_">Widget</span>.<span class="hljs-property">properties</span> = {
+    <span class="hljs-comment">/**
+     * Indicates whether the widget is shiny.
+     */</span>
+    <span class="hljs-attr">shiny</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-comment">/**
+     * Indicates whether the widget is metallic.
+     */</span>
+    <span class="hljs-attr">metallic</span>: <span class="hljs-literal">true</span>
+};</code></pre></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#syntax">Syntax</a><a class="toc-2" href="#overview">Overview</a><a class="toc-2" href="#examples">Examples</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

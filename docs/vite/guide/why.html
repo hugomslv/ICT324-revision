@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why Vite (Vite) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link active" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vite</a> › guide/why  <a class="ext small" href="https://vite.dev/guide/why">version en ligne</a></div>
+<h1 id="why-vite"><a class="anchor" href="#why-vite">#</a>Why Vite</h1>
+<p>As web applications have grown in size and complexity, the tools used to build them have struggled to keep up. Developers working on large projects have experienced painfully slow dev server startups, sluggish hot updates, and long production build times. Each generation of build tooling has improved on the last, but these problems have persisted.</p>
+<p>Vite was created to address this. Rather than incrementally improving existing approaches, it rethought how code should be served during development. Since then, Vite has evolved through multiple major versions, each time adapting to new capabilities in the ecosystem: from leveraging native ES modules in the browser, to adopting a fully Rust-powered toolchain.</p>
+<p>Today, Vite powers many frameworks and tools. Its architecture is designed to evolve with the web platform rather than lock into any single approach, making it a foundation you can build on for the long term.</p>
+<h2 id="the-origins"><a class="anchor" href="#the-origins">#</a>The Origins</h2>
+<p>When Vite was first created, browsers had just gained wide support for <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules">ES modules</a> (ESM), a way to load JavaScript files directly, without needing a tool to bundle them into a single file first. Traditional build tools (often called <em>bundlers</em>) would process your entire application upfront before anything could be shown in the browser. The larger the app, the longer you waited.</p>
+<p>Vite took a different approach. It split the work into two parts:</p>
+<ul>
+<li><strong>Dependencies</strong> (libraries that rarely change) are <a href="dep-pre-bundling.html">pre-bundled</a> once using fast native tooling, so they&#39;re ready instantly.</li>
+<li><strong>Source code</strong> (your application code that changes frequently) is served on-demand over native ESM. The browser loads only what it needs for the current page, and Vite transforms each file as it&#39;s requested.</li>
+</ul>
+<p>This meant dev server startup was nearly instant, regardless of application size. When you edited a file, Vite used <a href="features.html#hot-module-replacement">Hot Module Replacement</a> (HMR) over native ESM to update just that module in the browser, without a full page reload or waiting for a rebuild.</p>
+<svg-image :svg="bundlerSvg" /><p><em>In a bundle-based dev server, the entire application is bundled before it can be served.</em></p>
+<svg-image :svg="esmSvg" /><p><em>In an ESM-based dev server, modules are served on-demand as the browser requests them.</em></p>
+<p>Vite was not the first tool to explore this approach. <a href="https://www.snowpack.dev/">Snowpack</a> pioneered unbundled development and inspired Vite&#39;s dependency pre-bundling. <a href="https://github.com/preactjs/wmr">WMR</a> by the Preact team inspired the universal plugin API that works in both dev and build. <a href="https://modern-web.dev/docs/dev-server/overview/">@web/dev-server</a> influenced Vite 1.0&#39;s server architecture. Vite built on these ideas and carried them forward.</p>
+<p>Even though unbundled ESM works well during development, shipping it in production is still inefficient due to additional network round trips from nested imports. That&#39;s <a href="https://rolldown.rs/in-depth/why-bundlers">why bundling is still necessary</a> for optimized production builds.</p>
+<h2 id="growing-with-the-ecosystem"><a class="anchor" href="#growing-with-the-ecosystem">#</a>Growing with the Ecosystem</h2>
+<p>As Vite matured, frameworks began adopting it as their build layer. Its <a href="api-plugin.html">plugin API</a>, based on Rollup&#39;s conventions, made integration natural without requiring frameworks to work around Vite&#39;s internals. <a href="https://nuxt.com/">Nuxt</a>, <a href="https://svelte.dev/docs/kit">SvelteKit</a>, <a href="https://astro.build/">Astro</a>, <a href="https://reactrouter.com/">React Router</a>, <a href="https://analogjs.org/">Analog</a>, <a href="https://start.solidjs.com/">SolidStart</a>, and others chose Vite as their foundation. Tools like <a href="https://vitest.dev/">Vitest</a> and <a href="https://storybook.js.org/">Storybook</a> built on it too, extending Vite&#39;s reach beyond app bundling. Backend frameworks like <a href="https://laravel.com/docs/vite">Laravel</a> and <a href="https://vite-ruby.netlify.app/">Ruby on Rails</a> integrated Vite for their frontend asset pipelines.</p>
+<p>This growth was not one-directional. The ecosystem shaped Vite as much as Vite shaped the ecosystem. The Vite team runs <a href="https://github.com/vitejs/vite-ecosystem-ci">vite-ecosystem-ci</a>, which tests major ecosystem projects against every Vite change. Ecosystem health is not an afterthought. It is part of the release process.</p>
+<h2 id="a-unified-toolchain"><a class="anchor" href="#a-unified-toolchain">#</a>A Unified Toolchain</h2>
+<p>Vite originally relied on two separate tools under the hood: <a href="https://esbuild.github.io/">esbuild</a> for fast compilation during development, and <a href="https://rollupjs.org/">Rollup</a> for thorough optimization in production builds. This worked, but maintaining two pipelines introduced inconsistencies: different transformation behaviors, separate plugin systems, and growing glue code to keep them aligned.</p>
+<p><a href="https://rolldown.rs/">Rolldown</a> was built to unify both into a single bundler: written in Rust for native speed, and compatible with the same plugin API the ecosystem already relied on. It uses <a href="https://oxc.rs/">Oxc</a> for parsing, transforming, and minifying. This gives Vite an end-to-end toolchain where the build tool, bundler, and compiler are maintained together and evolve as a unit.</p>
+<p>The result is one consistent pipeline from development to <a href="build.html">production</a>. The migration was done carefully: a <a href="https://voidzero.dev/posts/announcing-rolldown-vite">technical preview</a> shipped first so early adopters could validate the change, ecosystem CI caught compatibility issues early, and a compatibility layer preserved existing configurations.</p>
+<h2 id="where-vite-is-heading"><a class="anchor" href="#where-vite-is-heading">#</a>Where Vite is Heading</h2>
+<p>Vite&#39;s architecture continues to evolve. Several efforts are shaping its future:</p>
+<ul>
+<li><p><strong>Full bundle mode</strong>: Unbundled ESM was the right tradeoff when Vite was created because no tool was both fast enough and had the HMR and plugin capabilities needed to bundle during dev. Rolldown changes that. Since exceptionally large codebases can experience slow page loads due to the high number of unbundled network requests, the team is exploring a mode where the dev server bundles code similarly to production, reducing network overhead.</p>
+</li>
+<li><p><strong>Environment API</strong>: Instead of treating &quot;client&quot; and &quot;SSR&quot; as the only two build targets, the <a href="api-environment-instances.html">Environment API</a> lets frameworks define custom environments (edge runtimes, service workers, and other deployment targets), each with their own module resolution and execution rules. As where and how code runs continues to diversify, Vite&#39;s model expands with it.</p>
+</li>
+<li><p><strong>Evolving with JavaScript</strong>: With Oxc and Rolldown closely collaborating with Vite, new language features and standards can be adopted quickly across the entire toolchain, without waiting on upstream dependencies.</p>
+</li>
+</ul>
+<p>Vite&#39;s goal is not to be the final tool, but to be one that keeps evolving with the web platform, and with the developers building on it.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#the-origins">The Origins</a><a class="toc-2" href="#growing-with-the-ecosystem">Growing with the Ecosystem</a><a class="toc-2" href="#a-unified-toolchain">A Unified Toolchain</a><a class="toc-2" href="#where-vite-is-heading">Where Vite is Heading</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

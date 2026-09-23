@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Environment API for Plugins (Vite) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link active" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vite</a> › guide/api-environment-plugins  <a class="ext small" href="https://vite.dev/guide/api-environment-plugins">version en ligne</a></div>
+<h1 id="environment-api-for-plugins"><a class="anchor" href="#environment-api-for-plugins">#</a>Environment API for Plugins</h1>
+<div class="box box-info"><div class="box-title">ℹ️ Info : Release Candidate</div><p>The Environment API is generally in the release candidate phase. We&#39;ll maintain stability in the APIs between major releases to allow the ecosystem to experiment and build upon them. However, note that <a href="https://vite.dev/changes/#considering" class="ext" title="lien en ligne (non disponible hors-ligne)">some specific APIs</a> are still considered experimental.</p>
+<p>We plan to stabilize these new APIs (with potential breaking changes) in a future major release once downstream projects have had time to experiment with the new features and validate them.</p>
+<p>Resources:</p>
+<ul>
+<li><a href="https://github.com/vitejs/vite/discussions/16358">Feedback discussion</a> where we are gathering feedback about the new APIs.</li>
+<li><a href="https://github.com/vitejs/vite/pull/16471">Environment API PR</a> where the new APIs were implemented and reviewed.</li>
+</ul>
+<p>Please share your feedback with us.</p>
+</div><h2 id="per-environment-hooks-and-global-hooks"><a class="anchor" href="#per-environment-hooks-and-global-hooks">#</a>Per-environment Hooks and Global Hooks</h2>
+<p>Plugins run on a shared pipeline, but their hooks fall into two categories depending on whether they run once for the whole server or once for each environment.</p>
+<p>Global hooks are called a single time, independent of the configured environments. They handle app-wide concerns such as resolving the config or setting up the dev and preview servers, so <code>this.environment</code> is not relevant to them. Config resolution related hooks and server related hooks are global hooks.</p>
+<p>Per-environment hooks are called once for each environment, and expose the current environment through <code>this.environment</code> in their context. All <a href="api-plugin.html#rolldown-hooks">Rolldown hooks</a> are per-environment, as are other Vite-specific hooks that handle modules. However, note that <code>buildStart</code> and <code>buildEnd</code> are only called for the client environment without <a href="#per-environment-state-in-plugins">the <code>perEnvironmentStartEndDuringDev: true</code> flag</a>.</p>
+<h2 id="accessing-the-current-environment-in-hooks"><a class="anchor" href="#accessing-the-current-environment-in-hooks">#</a>Accessing the Current Environment in Hooks</h2>
+<p>Given that there were only two Environments until Vite 6 (<code>client</code> and <code>ssr</code>), a <code>ssr</code> boolean was enough to identify the current environment in Vite APIs. Plugin Hooks received a <code>ssr</code> boolean in the last options parameter, and several APIs expected an optional last <code>ssr</code> parameter to properly associate modules to the correct environment (for example <code>server.moduleGraph.getModuleByUrl(url, { ssr })</code>).</p>
+<p>With the advent of configurable environments, we now have a uniform way to access their options and instance in plugins. Plugin hooks now expose <code>this.environment</code> in their context, and APIs that previously expected a <code>ssr</code> boolean are now scoped to the proper environment (for example <code>environment.moduleGraph.getModuleByUrl(url)</code>).</p>
+<p>The Vite server has a shared plugin pipeline, but when a module is processed it is always done in the context of a given environment. The <code>environment</code> instance is available in the plugin context.</p>
+<p>A plugin could use the <code>environment</code> instance to change how a module is processed depending on the configuration for the environment (which can be accessed using <code>environment.config</code>).</p>
+<div class="code"><pre><code class="hljs lang-ts">  <span class="hljs-title function_">transform</span>(<span class="hljs-params">code, id</span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">environment</span>.<span class="hljs-property">config</span>.<span class="hljs-property">resolve</span>.<span class="hljs-property">conditions</span>)
+  }</code></pre></div>
+<h2 id="registering-new-environments-using-hooks"><a class="anchor" href="#registering-new-environments-using-hooks">#</a>Registering New Environments Using Hooks</h2>
+<p>Plugins can add new environments in the <code>config</code> hook. For example, <a href="../plugins/index.html#vitejs-plugin-rsc">RSC support</a> uses an additional environment to have a separate module graph with the <code>react-server</code> condition:</p>
+<div class="code"><pre><code class="hljs lang-ts">  <span class="hljs-title function_">config</span>(<span class="hljs-params"><span class="hljs-attr">config</span>: <span class="hljs-title class_">UserConfig</span></span>) {
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">environments</span>: {
+        <span class="hljs-attr">rsc</span>: {
+          <span class="hljs-attr">resolve</span>: {
+            <span class="hljs-attr">conditions</span>: [<span class="hljs-string">&#x27;react-server&#x27;</span>, ...defaultServerConditions],
+          },
+        },
+      },
+    }
+  }</code></pre></div>
+<p>An empty object is enough to register the environment, using default values from the root level environment config.</p>
+<h2 id="configuring-environment-using-the-configenvironment-hook"><a class="anchor" href="#configuring-environment-using-the-configenvironment-hook">#</a>Configuring Environment Using the <code>configEnvironment</code> Hook</h2>
+<ul>
+<li><strong>Type:</strong> <code>(name: string, config: EnvironmentOptions, env: { mode: string, command: &#39;build&#39; | &#39;serve&#39;, isSsrBuild?: boolean, isPreview?: boolean, isSsrTargetWebworker?: boolean }) =&gt; EnvironmentOptions | null | void</code></li>
+<li><strong>Kind:</strong> <code>async</code>, <code>sequential</code></li>
+<li><strong>Scope:</strong> <a href="#per-environment-hooks-and-global-hooks">Per-environment</a></li>
+</ul>
+<p>While the <code>config</code> hook is running, the complete list of environments isn&#39;t yet known and the environments can be affected by both the default values from the root level environment config or explicitly through the <code>config.environments</code> record.
+Plugins should set default values using the <code>config</code> hook. To configure each environment, they can use the new <code>configEnvironment</code> hook. This hook is called for each environment with its partially resolved config including resolution of final defaults.</p>
+<div class="code"><pre><code class="hljs lang-ts">  <span class="hljs-title function_">configEnvironment</span>(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">options</span>: <span class="hljs-title class_">EnvironmentOptions</span></span>) {
+    <span class="hljs-comment">// add &quot;workerd&quot; condition to the rsc environment</span>
+    <span class="hljs-keyword">if</span> (name === <span class="hljs-string">&#x27;rsc&#x27;</span>) {
+      <span class="hljs-keyword">return</span> {
+        <span class="hljs-attr">resolve</span>: {
+          <span class="hljs-attr">conditions</span>: [<span class="hljs-string">&#x27;workerd&#x27;</span>],
+        },
+      }
+    }
+  }</code></pre></div>
+<h2 id="the-hotupdate-hook"><a class="anchor" href="#the-hotupdate-hook">#</a>The <code>hotUpdate</code> Hook</h2>
+<ul>
+<li><strong>Type:</strong> <code>(this: { environment: DevEnvironment }, options: HotUpdateOptions) =&gt; Array&lt;EnvironmentModuleNode&gt; | void | Promise&lt;Array&lt;EnvironmentModuleNode&gt; | void&gt;</code></li>
+<li><strong>Kind:</strong> <code>async</code>, <code>sequential</code></li>
+<li><strong>Scope:</strong> <a href="#per-environment-hooks-and-global-hooks">Per-environment</a></li>
+<li><strong>See also:</strong> <a href="api-hmr.html">HMR API</a></li>
+</ul>
+<p>The <code>hotUpdate</code> hook allows plugins to perform custom HMR update handling for a given environment. When a file changes, the HMR algorithm is run for each environment in series according to the order in <code>server.environments</code>, so the <code>hotUpdate</code> hook will be called multiple times. The hook receives a context object with the following signature:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">HotUpdateOptions</span> {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;create&#x27;</span> | <span class="hljs-string">&#x27;update&#x27;</span> | <span class="hljs-string">&#x27;delete&#x27;</span>
+  <span class="hljs-attr">file</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">timestamp</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-attr">modules</span>: <span class="hljs-title class_">Array</span>&lt;<span class="hljs-title class_">EnvironmentModuleNode</span>&gt;
+  <span class="hljs-attr">read</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">string</span> | <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">string</span>&gt;
+  <span class="hljs-attr">server</span>: <span class="hljs-title class_">ViteDevServer</span>
+}</code></pre></div>
+<ul>
+<li><p><code>this.environment</code> is the module execution environment where a file update is currently being processed.</p>
+</li>
+<li><p><code>modules</code> is an array of modules in this environment that are affected by the changed file. It&#39;s an array because a single file may map to multiple served modules (e.g. Vue SFCs).</p>
+</li>
+<li><p><code>read</code> is an async read function that returns the content of the file. This is provided because on some systems, the file change callback may fire too fast before the editor finishes updating the file, and direct <code>fs.readFile</code> will return empty content. The read function passed in normalizes this behavior.</p>
+</li>
+</ul>
+<p>The hook can choose to:</p>
+<ul>
+<li><p>Filter and narrow down the affected module list so that the HMR is more accurate.</p>
+</li>
+<li><p>Return an empty array and perform a full reload:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">hotUpdate</span>(<span class="hljs-params">{ modules, timestamp }</span>) {
+  <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">environment</span>.<span class="hljs-property">name</span> !== <span class="hljs-string">&#x27;client&#x27;</span>)
+    <span class="hljs-keyword">return</span>
+
+  <span class="hljs-comment">// Invalidate modules manually</span>
+  <span class="hljs-keyword">const</span> invalidatedModules = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>()
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> mod <span class="hljs-keyword">of</span> modules) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">environment</span>.<span class="hljs-property">moduleGraph</span>.<span class="hljs-title function_">invalidateModule</span>(
+      mod,
+      invalidatedModules,
+      timestamp,
+      <span class="hljs-literal">true</span>
+    )
+  }
+  <span class="hljs-variable language_">this</span>.<span class="hljs-property">environment</span>.<span class="hljs-property">hot</span>.<span class="hljs-title function_">send</span>({ <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;full-reload&#x27;</span> })
+  <span class="hljs-keyword">return</span> []
+}</code></pre></div>
+</li>
+<li><p>Return an empty array and perform complete custom HMR handling by sending custom events to the client:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">hotUpdate</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">environment</span>.<span class="hljs-property">name</span> !== <span class="hljs-string">&#x27;client&#x27;</span>)
+    <span class="hljs-keyword">return</span>
+
+  <span class="hljs-variable language_">this</span>.<span class="hljs-property">environment</span>.<span class="hljs-property">hot</span>.<span class="hljs-title function_">send</span>({
+    <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;custom&#x27;</span>,
+    <span class="hljs-attr">event</span>: <span class="hljs-string">&#x27;special-update&#x27;</span>,
+    <span class="hljs-attr">data</span>: {}
+  })
+  <span class="hljs-keyword">return</span> []
+}</code></pre></div>
+<p>Client code should register the corresponding handler using the <a href="api-hmr.html">HMR API</a> (this could be injected by the same plugin&#39;s <code>transform</code> hook):</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">if</span> (<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>) {
+  <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">hot</span>.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;special-update&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> {
+    <span class="hljs-comment">// perform custom update</span>
+  })
+}</code></pre></div>
+</li>
+</ul>
+<h2 id="per-environment-state-in-plugins"><a class="anchor" href="#per-environment-state-in-plugins">#</a>Per-environment State in Plugins</h2>
+<p>Given that the same plugin instance is used for different environments, the plugin state needs to be keyed with <code>this.environment</code>. This is the same pattern the ecosystem has already been using to keep state about modules using the <code>ssr</code> boolean as key to avoid mixing client and ssr modules state. A <code>Map&lt;Environment, State&gt;</code> can be used to keep the state for each environment separately. Note that for backward compatibility, <code>buildStart</code> and <code>buildEnd</code> are only called for the client environment without the <code>perEnvironmentStartEndDuringDev: true</code> flag. Same for <code>watchChange</code> and the <code>perEnvironmentWatchChangeDuringDev: true</code> flag.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">PerEnvironmentCountTransformedModulesPlugin</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> state = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>&lt;<span class="hljs-title class_">Environment</span>, { <span class="hljs-attr">count</span>: number }&gt;()
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;count-transformed-modules&#x27;</span>,
+    <span class="hljs-attr">perEnvironmentStartEndDuringDev</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-title function_">buildStart</span>(<span class="hljs-params"></span>) {
+      state.<span class="hljs-title function_">set</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">environment</span>, { <span class="hljs-attr">count</span>: <span class="hljs-number">0</span> })
+    },
+    <span class="hljs-title function_">transform</span>(<span class="hljs-params">id</span>) {
+      state.<span class="hljs-title function_">get</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">environment</span>).<span class="hljs-property">count</span>++
+    },
+    <span class="hljs-title function_">buildEnd</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">environment</span>.<span class="hljs-property">name</span>, state.<span class="hljs-title function_">get</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">environment</span>).<span class="hljs-property">count</span>)
+    }
+  }
+}</code></pre></div>
+<h2 id="per-environment-plugins-using-the-applytoenvironment-hook"><a class="anchor" href="#per-environment-plugins-using-the-applytoenvironment-hook">#</a>Per-environment Plugins Using the <code>applyToEnvironment</code> Hook</h2>
+<ul>
+<li><strong>Type:</strong> <code>(environment: PartialEnvironment) =&gt; boolean | PluginOption | Promise&lt;boolean&gt;</code></li>
+<li><strong>Kind:</strong> <code>async</code>, <code>sequential</code></li>
+<li><strong>Scope:</strong> <a href="#per-environment-hooks-and-global-hooks">Per-environment</a></li>
+</ul>
+<p>A plugin can define what are the environments it should apply to with the <code>applyToEnvironment</code> function.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> <span class="hljs-title function_">UnoCssPlugin</span> = (<span class="hljs-params"></span>) =&gt; {
+  <span class="hljs-comment">// shared global state</span>
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-title function_">buildStart</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-comment">// init per-environment state with WeakMap&lt;Environment,Data&gt;</span>
+      <span class="hljs-comment">// using this.environment</span>
+    },
+    <span class="hljs-title function_">configureServer</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-comment">// use global hooks normally</span>
+    },
+    <span class="hljs-title function_">applyToEnvironment</span>(<span class="hljs-params">environment</span>) {
+      <span class="hljs-comment">// return true if this plugin should be active in this environment,</span>
+      <span class="hljs-comment">// or return a new plugin to replace it.</span>
+      <span class="hljs-comment">// if the hook is not used, the plugin is active in all environments</span>
+    },
+    <span class="hljs-title function_">resolveId</span>(<span class="hljs-params">id, importer</span>) {
+      <span class="hljs-comment">// only called for environments this plugin apply to</span>
+    },
+  }
+}</code></pre></div>
+<p>If a plugin isn&#39;t environment aware and has state that isn&#39;t keyed on the current environment, the <code>applyToEnvironment</code> hook allows to easily make it per-environment.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { nonShareablePlugin } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;non-shareable-plugin&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [
+    {
+      <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;per-environment-plugin&#x27;</span>,
+      <span class="hljs-title function_">applyToEnvironment</span>(<span class="hljs-params">environment</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-title function_">nonShareablePlugin</span>({ <span class="hljs-attr">outputName</span>: environment.<span class="hljs-property">name</span> })
+      },
+    },
+  ],
+})</code></pre></div>
+<p>Vite exports a <code>perEnvironmentPlugin</code> helper to simplify these cases where no other hooks are required:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { nonShareablePlugin } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;non-shareable-plugin&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [
+    <span class="hljs-title function_">perEnvironmentPlugin</span>(<span class="hljs-string">&#x27;per-environment-plugin&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">environment</span>) =&gt;</span>
+      <span class="hljs-title function_">nonShareablePlugin</span>({ <span class="hljs-attr">outputName</span>: environment.<span class="hljs-property">name</span> }),
+    ),
+  ],
+})</code></pre></div>
+<p>Note that the plugin returned from <code>applyToEnvironment</code> or <code>perEnvironmentPlugin</code> should not use Vite-specific hooks.</p>
+<p>The <code>applyToEnvironment</code> hook is called at config time, currently after <code>configResolved</code> due to projects in the ecosystem modifying the plugins in it. Environment plugins resolution may be moved before <code>configResolved</code> in the future.</p>
+<h2 id="application-plugin-communication"><a class="anchor" href="#application-plugin-communication">#</a>Application-Plugin Communication</h2>
+<p><code>environment.hot</code> allows plugins to communicate with the code on the application side for a given environment. This is the equivalent of <a href="api-plugin.html#client-server-communication">the Client-server Communication feature</a>, but supports environments other than the client environment.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Note</div><p>Note that this feature is only available for environments that support HMR.</p>
+</div><h3 id="managing-the-application-instances"><a class="anchor" href="#managing-the-application-instances">#</a>Managing the Application Instances</h3>
+<p>Be aware that there might be multiple application instances running in the same environment. For example, if you have multiple tabs open in the browser, each tab is a separate application instance and has a separate connection to the server.</p>
+<p>When a new connection is established, a <code>vite:client:connect</code> event is emitted on the environment&#39;s <code>hot</code> instance. When the connection is closed, a <code>vite:client:disconnect</code> event is emitted.</p>
+<p>Each event handler receives the <code>NormalizedHotChannelClient</code> as the second argument. The client is an object with a <code>send</code> method that can be used to send messages to that specific application instance. The client reference is always the same for the same connection, so you can keep it to track the connection.</p>
+<h3 id="example-usage"><a class="anchor" href="#example-usage">#</a>Example Usage</h3>
+<p>The plugin side:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">configureServer</span>(<span class="hljs-params">server</span>) {
+  server.<span class="hljs-property">environments</span>.<span class="hljs-property">ssr</span>.<span class="hljs-property">hot</span>.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;my:greetings&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">data, client</span>) =&gt;</span> {
+    <span class="hljs-comment">// do something with the data,</span>
+    <span class="hljs-comment">// and optionally send a response to that application instance</span>
+    client.<span class="hljs-title function_">send</span>(<span class="hljs-string">&#x27;my:foo:reply&#x27;</span>, <span class="hljs-string">`Hello from server! You said: <span class="hljs-subst">${data}</span>`</span>)
+  })
+
+  <span class="hljs-comment">// broadcast a message to all application instances</span>
+  server.<span class="hljs-property">environments</span>.<span class="hljs-property">ssr</span>.<span class="hljs-property">hot</span>.<span class="hljs-title function_">send</span>(<span class="hljs-string">&#x27;my:foo&#x27;</span>, <span class="hljs-string">&#x27;Hello from server!&#x27;</span>)
+}</code></pre></div>
+<p>The application side is same with the Client-server Communication feature. You can use the <code>import.meta.hot</code> object to send messages to the plugin.</p>
+<h2 id="environment-in-build-hooks"><a class="anchor" href="#environment-in-build-hooks">#</a>Environment in Build Hooks</h2>
+<p>In the same way as during dev, plugin hooks also receive the environment instance during build, replacing the <code>ssr</code> boolean.
+This also works for <code>renderChunk</code>, <code>generateBundle</code>, and other build only hooks.</p>
+<h2 id="shared-plugins-during-build"><a class="anchor" href="#shared-plugins-during-build">#</a>Shared Plugins During Build</h2>
+<p>Before Vite 6, the plugins pipelines worked in a different way during dev and build:</p>
+<ul>
+<li><strong>During dev:</strong> plugins are shared</li>
+<li><strong>During Build:</strong> plugins are isolated for each environment (in different processes: <code>vite build</code> then <code>vite build --ssr</code>).</li>
+</ul>
+<p>This forced frameworks to share state between the <code>client</code> build and the <code>ssr</code> build through manifest files written to the file system. In Vite 6, we are now building all environments in a single process so the way the plugins pipeline and inter-environment communication can be aligned with dev.</p>
+<p>In a future major, we could have complete alignment:</p>
+<ul>
+<li><strong>During both dev and build:</strong> plugins are shared, with <a href="#per-environment-plugins-using-the-applytoenvironment-hook">per-environment filtering</a></li>
+</ul>
+<p>There will also be a single <code>ResolvedConfig</code> instance shared during build, allowing for caching at entire app build process level in the same way as we have been doing with <code>WeakMap&lt;ResolvedConfig, CachedData&gt;</code> during dev.</p>
+<p>For Vite 6, we need to do a smaller step to keep backward compatibility. Ecosystem plugins are currently using <code>config.build</code> instead of <code>environment.config.build</code> to access configuration, so we need to create a new <code>ResolvedConfig</code> per-environment by default. A project can opt-in into sharing the full config and plugins pipeline setting <code>builder.sharedConfigBuild</code> to <code>true</code>.</p>
+<p>This option would only work of a small subset of projects at first, so plugin authors can opt-in for a particular plugin to be shared by setting the <code>sharedDuringBuild</code> flag to <code>true</code>. This allows for easily sharing state both for regular plugins:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">myPlugin</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-comment">// Share state among all environments in dev and build</span>
+  <span class="hljs-keyword">const</span> sharedState = ...
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;shared-plugin&#x27;</span>,
+    <span class="hljs-title function_">transform</span>(<span class="hljs-params">code, id</span>) { ... },
+
+    <span class="hljs-comment">// Opt-in into a single instance for all environments</span>
+    <span class="hljs-attr">sharedDuringBuild</span>: <span class="hljs-literal">true</span>,
+  }
+}</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#per-environment-hooks-and-global-hooks">Per-environment Hooks and Global Hooks</a><a class="toc-2" href="#accessing-the-current-environment-in-hooks">Accessing the Current Environment in Hooks</a><a class="toc-2" href="#registering-new-environments-using-hooks">Registering New Environments Using Hooks</a><a class="toc-2" href="#configuring-environment-using-the-configenvironment-hook">Configuring Environment Using the configEnvironment Hook</a><a class="toc-2" href="#the-hotupdate-hook">The hotUpdate Hook</a><a class="toc-2" href="#per-environment-state-in-plugins">Per-environment State in Plugins</a><a class="toc-2" href="#per-environment-plugins-using-the-applytoenvironment-hook">Per-environment Plugins Using the applyToEnvironment Hook</a><a class="toc-2" href="#application-plugin-communication">Application-Plugin Communication</a><a class="toc-3" href="#managing-the-application-instances">Managing the Application Instances</a><a class="toc-3" href="#example-usage">Example Usage</a><a class="toc-2" href="#environment-in-build-hooks">Environment in Build Hooks</a><a class="toc-2" href="#shared-plugins-during-build">Shared Plugins During Build</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

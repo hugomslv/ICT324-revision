@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JavaScript API (Vite) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link active" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vite</a> › guide/api-javascript  <a class="ext small" href="https://vite.dev/guide/api-javascript">version en ligne</a></div>
+<h1 id="javascript-api"><a class="anchor" href="#javascript-api">#</a>JavaScript API</h1>
+<p>Vite&#39;s JavaScript APIs are fully typed, and it&#39;s recommended to use TypeScript or enable JS type checking in VS Code to leverage the IntelliSense and validation.</p>
+<h2 id="createserver"><a class="anchor" href="#createserver">#</a><code>createServer</code></h2>
+<p><strong>Type Signature:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createServer</span>(<span class="hljs-params"><span class="hljs-attr">inlineConfig</span>?: <span class="hljs-title class_">InlineConfig</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">ViteDevServer</span>&gt;</code></pre></div>
+<p><strong>Example Usage:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { createServer } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">const</span> server = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createServer</span>({
+  <span class="hljs-comment">// any valid user config options, plus `mode` and `configFile`</span>
+  <span class="hljs-attr">configFile</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-attr">root</span>: <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">dirname</span>,
+  <span class="hljs-attr">server</span>: {
+    <span class="hljs-attr">port</span>: <span class="hljs-number">1337</span>,
+  },
+})
+<span class="hljs-keyword">await</span> server.<span class="hljs-title function_">listen</span>()
+
+server.<span class="hljs-title function_">printUrls</span>()
+server.<span class="hljs-title function_">bindCLIShortcuts</span>({ <span class="hljs-attr">print</span>: <span class="hljs-literal">true</span> })</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce : NOTE</div><p>When using <code>createServer</code> and <code>build</code> in the same Node.js process, both functions rely on <code>process.env.NODE_ENV</code> to work properly, which also depends on the <code>mode</code> config option. To prevent conflicting behavior, set <code>process.env.NODE_ENV</code> or the <code>mode</code> of the two APIs to <code>development</code>. Otherwise, you can spawn a child process to run the APIs separately.</p>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce : NOTE</div><p>When using <a href="../config/server-options.html#server-middlewaremode">middleware mode</a> combined with <a href="../config/server-options.html#server-proxy">proxy config for WebSocket</a>, the parent http server should be provided in <code>middlewareMode</code> to bind the proxy correctly.</p>
+<details>
+<summary>Example</summary><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> http <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;http&#x27;</span>
+<span class="hljs-keyword">import</span> { createServer } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">const</span> parentServer = http.<span class="hljs-title function_">createServer</span>() <span class="hljs-comment">// or express, koa, etc.</span>
+
+<span class="hljs-keyword">const</span> vite = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createServer</span>({
+  <span class="hljs-attr">server</span>: {
+    <span class="hljs-comment">// Enable middleware mode</span>
+    <span class="hljs-attr">middlewareMode</span>: {
+      <span class="hljs-comment">// Provide the parent http server for proxy WebSocket</span>
+      <span class="hljs-attr">server</span>: parentServer,
+    },
+    <span class="hljs-attr">proxy</span>: {
+      <span class="hljs-string">&#x27;/ws&#x27;</span>: {
+        <span class="hljs-attr">target</span>: <span class="hljs-string">&#x27;ws://localhost:3000&#x27;</span>,
+        <span class="hljs-comment">// Proxying WebSocket</span>
+        <span class="hljs-attr">ws</span>: <span class="hljs-literal">true</span>,
+      },
+    },
+  },
+})
+
+parentServer.<span class="hljs-title function_">use</span>(vite.<span class="hljs-property">middlewares</span>)</code></pre></div>
+</details></div><h2 id="inlineconfig"><a class="anchor" href="#inlineconfig">#</a><code>InlineConfig</code></h2>
+<p>The <code>InlineConfig</code> interface extends <code>UserConfig</code> with additional properties:</p>
+<ul>
+<li><code>configFile</code>: specify config file to use. If not set, Vite will try to automatically resolve one from project root. Set to <code>false</code> to disable auto resolving.</li>
+</ul>
+<h2 id="resolvedconfig"><a class="anchor" href="#resolvedconfig">#</a><code>ResolvedConfig</code></h2>
+<p>The <code>ResolvedConfig</code> interface has all the same properties of a <code>UserConfig</code>, except most properties are resolved and non-undefined. It also contains utilities like:</p>
+<ul>
+<li><code>config.assetsInclude</code>: A function to check if an <code>id</code> is considered an asset.</li>
+<li><code>config.logger</code>: Vite&#39;s internal logger object.</li>
+</ul>
+<h2 id="vitedevserver"><a class="anchor" href="#vitedevserver">#</a><code>ViteDevServer</code></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">ViteDevServer</span> {
+  <span class="hljs-comment">/**
+   * The resolved Vite config object.
+   */</span>
+  <span class="hljs-attr">config</span>: <span class="hljs-title class_">ResolvedConfig</span>
+  <span class="hljs-comment">/**
+   * A connect app instance
+   * - Can be used to attach custom middlewares to the dev server.
+   * - Can also be used as the handler function of a custom http server
+   *   or as a middleware in any connect-style Node.js frameworks.
+   *
+   * https://github.com/senchalabs/connect#use-middleware
+   */</span>
+  <span class="hljs-attr">middlewares</span>: <span class="hljs-title class_">Connect</span>.<span class="hljs-property">Server</span>
+  <span class="hljs-comment">/**
+   * Native Node http server instance.
+   * Will be null in middleware mode.
+   */</span>
+  <span class="hljs-attr">httpServer</span>: http.<span class="hljs-property">Server</span> | <span class="hljs-literal">null</span>
+  <span class="hljs-comment">/**
+   * Chokidar watcher instance. If `config.server.watch` is set to `null`,
+   * it will not watch any files and calling `add` or `unwatch` will have no effect.
+   * https://github.com/paulmillr/chokidar/tree/3.6.0#api
+   */</span>
+  <span class="hljs-attr">watcher</span>: <span class="hljs-title class_">FSWatcher</span>
+  <span class="hljs-comment">/**
+   * WebSocket server with `send(payload)` method.
+   */</span>
+  <span class="hljs-attr">ws</span>: <span class="hljs-title class_">WebSocketServer</span>
+  <span class="hljs-comment">/**
+   * Rollup plugin container that can run plugin hooks on a given file.
+   */</span>
+  <span class="hljs-attr">pluginContainer</span>: <span class="hljs-title class_">PluginContainer</span>
+  <span class="hljs-comment">/**
+   * Module graph that tracks the import relationships, url to file mapping
+   * and hmr state.
+   */</span>
+  <span class="hljs-attr">moduleGraph</span>: <span class="hljs-title class_">ModuleGraph</span>
+  <span class="hljs-comment">/**
+   * The resolved urls Vite prints on the CLI (URL-encoded). Returns `null`
+   * in middleware mode or if the server is not listening on any port.
+   */</span>
+  <span class="hljs-attr">resolvedUrls</span>: <span class="hljs-title class_">ResolvedServerUrls</span> | <span class="hljs-literal">null</span>
+  <span class="hljs-comment">/**
+   * Programmatically resolve, load and transform a URL and get the result
+   * without going through the http request pipeline.
+   */</span>
+  <span class="hljs-title function_">transformRequest</span>(
+    <span class="hljs-attr">url</span>: <span class="hljs-built_in">string</span>,
+    <span class="hljs-attr">options</span>?: <span class="hljs-title class_">TransformOptions</span>,
+  ): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TransformResult</span> | <span class="hljs-literal">null</span>&gt;
+  <span class="hljs-comment">/**
+   * Apply Vite built-in HTML transforms and any plugin HTML transforms.
+   */</span>
+  <span class="hljs-title function_">transformIndexHtml</span>(
+    <span class="hljs-attr">url</span>: <span class="hljs-built_in">string</span>,
+    <span class="hljs-attr">html</span>: <span class="hljs-built_in">string</span>,
+    <span class="hljs-attr">originalUrl</span>?: <span class="hljs-built_in">string</span>,
+  ): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">string</span>&gt;
+  <span class="hljs-comment">/**
+   * Load a given URL as an instantiated module for SSR.
+   */</span>
+  <span class="hljs-title function_">ssrLoadModule</span>(
+    <span class="hljs-attr">url</span>: <span class="hljs-built_in">string</span>,
+    <span class="hljs-attr">options</span>?: { <span class="hljs-attr">fixStacktrace</span>?: <span class="hljs-built_in">boolean</span> },
+  ): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">any</span>&gt;&gt;
+  <span class="hljs-comment">/**
+   * Fix ssr error stacktrace.
+   */</span>
+  <span class="hljs-title function_">ssrFixStacktrace</span>(<span class="hljs-attr">e</span>: <span class="hljs-title class_">Error</span>): <span class="hljs-built_in">void</span>
+  <span class="hljs-comment">/**
+   * Triggers HMR for a module in the module graph. You can use the `server.moduleGraph`
+   * API to retrieve the module to be reloaded. If `hmr` is false, this is a no-op.
+   */</span>
+  <span class="hljs-title function_">reloadModule</span>(<span class="hljs-attr">module</span>: <span class="hljs-title class_">ModuleNode</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-comment">/**
+   * Start the server.
+   */</span>
+  <span class="hljs-title function_">listen</span>(<span class="hljs-attr">port</span>?: <span class="hljs-built_in">number</span>, <span class="hljs-attr">isRestart</span>?: <span class="hljs-built_in">boolean</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">ViteDevServer</span>&gt;
+  <span class="hljs-comment">/**
+   * Restart the server.
+   *
+   * <span class="hljs-doctag">@param</span> <span class="hljs-variable">forceOptimize</span> - force the optimizer to re-bundle, same as --force cli flag
+   */</span>
+  <span class="hljs-title function_">restart</span>(<span class="hljs-attr">forceOptimize</span>?: <span class="hljs-built_in">boolean</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-comment">/**
+   * Stop the server.
+   */</span>
+  <span class="hljs-title function_">close</span>(): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-comment">/**
+   * Bind CLI shortcuts
+   */</span>
+  <span class="hljs-title function_">bindCLIShortcuts</span>(<span class="hljs-attr">options</span>?: <span class="hljs-title class_">BindCLIShortcutsOptions</span>&lt;<span class="hljs-title class_">ViteDevServer</span>&gt;): <span class="hljs-built_in">void</span>
+  <span class="hljs-comment">/**
+   * Calling `await server.waitForRequestsIdle(id)` will wait until all static imports
+   * are processed. If called from a load or transform plugin hook, the id needs to be
+   * passed as a parameter to avoid deadlocks. Calling this function after the first
+   * static imports section of the module graph has been processed will resolve immediately.
+   * <span class="hljs-doctag">@experimental</span>
+   */</span>
+  <span class="hljs-attr">waitForRequestsIdle</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">ignoredId</span>?: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+}</code></pre></div>
+<div class="box box-info"><div class="box-title">ℹ️ Info</div><p><code>waitForRequestsIdle</code> is meant to be used as an escape hatch to improve DX for features that can&#39;t be implemented following the on-demand nature of the Vite dev server. It can be used during startup by tools like Tailwind to delay generating the app CSS classes until the app code has been seen, avoiding flashes of style changes. When this function is used in a load or transform hook, and the default HTTP1 server is used, one of the six http channels will be blocked until the server processes all static imports. Vite&#39;s dependency optimizer currently uses this function to avoid full-page reloads on missing dependencies by delaying loading of pre-bundled dependencies until all imported dependencies have been collected from static imported sources. Vite may switch to a different strategy in a future major release, setting <code>optimizeDeps.holdUntilCrawlEnd: false</code> by default to avoid the performance hit in large applications during cold start.</p>
+</div><h2 id="build"><a class="anchor" href="#build">#</a><code>build</code></h2>
+<p><strong>Type Signature:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">build</span>(<span class="hljs-params">
+  <span class="hljs-attr">inlineConfig</span>?: <span class="hljs-title class_">InlineConfig</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">RolldownOutput</span> | <span class="hljs-title class_">RolldownOutput</span>[] | <span class="hljs-title class_">RolldownWatcher</span>&gt;</code></pre></div>
+<p><strong>Example Usage:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> path <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:path&#x27;</span>
+<span class="hljs-keyword">import</span> { build } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">build</span>({
+  <span class="hljs-attr">root</span>: path.<span class="hljs-title function_">resolve</span>(<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">dirname</span>, <span class="hljs-string">&#x27;./project&#x27;</span>),
+  <span class="hljs-attr">base</span>: <span class="hljs-string">&#x27;/foo/&#x27;</span>,
+  <span class="hljs-attr">build</span>: {
+    <span class="hljs-attr">rolldownOptions</span>: {
+      <span class="hljs-comment">// ...</span>
+    },
+  },
+})</code></pre></div>
+<h2 id="preview"><a class="anchor" href="#preview">#</a><code>preview</code></h2>
+<p><strong>Type Signature:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">preview</span>(<span class="hljs-params"><span class="hljs-attr">inlineConfig</span>?: <span class="hljs-title class_">InlineConfig</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">PreviewServer</span>&gt;</code></pre></div>
+<p><strong>Example Usage:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { preview } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">const</span> previewServer = <span class="hljs-keyword">await</span> <span class="hljs-title function_">preview</span>({
+  <span class="hljs-comment">// any valid user config options, plus `mode` and `configFile`</span>
+  <span class="hljs-attr">preview</span>: {
+    <span class="hljs-attr">port</span>: <span class="hljs-number">8080</span>,
+    <span class="hljs-attr">open</span>: <span class="hljs-literal">true</span>,
+  },
+})
+
+previewServer.<span class="hljs-title function_">printUrls</span>()
+previewServer.<span class="hljs-title function_">bindCLIShortcuts</span>({ <span class="hljs-attr">print</span>: <span class="hljs-literal">true</span> })</code></pre></div>
+<h2 id="previewserver"><a class="anchor" href="#previewserver">#</a><code>PreviewServer</code></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">PreviewServer</span> {
+  <span class="hljs-comment">/**
+   * The resolved vite config object
+   */</span>
+  <span class="hljs-attr">config</span>: <span class="hljs-title class_">ResolvedConfig</span>
+  <span class="hljs-comment">/**
+   * A connect app instance.
+   * - Can be used to attach custom middlewares to the preview server.
+   * - Can also be used as the handler function of a custom http server
+   *   or as a middleware in any connect-style Node.js frameworks
+   *
+   * https://github.com/senchalabs/connect#use-middleware
+   */</span>
+  <span class="hljs-attr">middlewares</span>: <span class="hljs-title class_">Connect</span>.<span class="hljs-property">Server</span>
+  <span class="hljs-comment">/**
+   * native Node http server instance
+   */</span>
+  <span class="hljs-attr">httpServer</span>: http.<span class="hljs-property">Server</span>
+  <span class="hljs-comment">/**
+   * The resolved urls Vite prints on the CLI (URL-encoded). Returns `null`
+   * if the server is not listening on any port.
+   */</span>
+  <span class="hljs-attr">resolvedUrls</span>: <span class="hljs-title class_">ResolvedServerUrls</span> | <span class="hljs-literal">null</span>
+  <span class="hljs-comment">/**
+   * Print server urls
+   */</span>
+  <span class="hljs-title function_">printUrls</span>(): <span class="hljs-built_in">void</span>
+  <span class="hljs-comment">/**
+   * Bind CLI shortcuts
+   */</span>
+  <span class="hljs-title function_">bindCLIShortcuts</span>(<span class="hljs-attr">options</span>?: <span class="hljs-title class_">BindCLIShortcutsOptions</span>&lt;<span class="hljs-title class_">PreviewServer</span>&gt;): <span class="hljs-built_in">void</span>
+}</code></pre></div>
+<h2 id="resolveconfig"><a class="anchor" href="#resolveconfig">#</a><code>resolveConfig</code></h2>
+<p><strong>Type Signature:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">resolveConfig</span>(<span class="hljs-params">
+  <span class="hljs-attr">inlineConfig</span>: <span class="hljs-title class_">InlineConfig</span>,
+  <span class="hljs-attr">command</span>: <span class="hljs-string">&#x27;build&#x27;</span> | <span class="hljs-string">&#x27;serve&#x27;</span>,
+  defaultMode = <span class="hljs-string">&#x27;development&#x27;</span>,
+  defaultNodeEnv = <span class="hljs-string">&#x27;development&#x27;</span>,
+  isPreview = <span class="hljs-literal">false</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">ResolvedConfig</span>&gt;</code></pre></div>
+<p>The <code>command</code> value is <code>serve</code> in dev and preview, and <code>build</code> in build.</p>
+<h2 id="mergeconfig"><a class="anchor" href="#mergeconfig">#</a><code>mergeConfig</code></h2>
+<p><strong>Type Signature:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mergeConfig</span>(<span class="hljs-params">
+  <span class="hljs-attr">defaults</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">any</span>&gt;,
+  <span class="hljs-attr">overrides</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">any</span>&gt;,
+  isRoot = <span class="hljs-literal">true</span>,
+</span>): <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">any</span>&gt;</code></pre></div>
+<p>Deeply merge two Vite configs. <code>isRoot</code> represents the level within the Vite config which is being merged. For example, set <code>false</code> if you&#39;re merging two <code>build</code> options.</p>
+<p>Note that <code>null</code> and <code>undefined</code> values in <code>overrides</code> are skipped and not merged. If you need to explicitly clear a value from <code>defaults</code>, modify the result of <code>mergeConfig</code> directly.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : NOTE</div><p><code>mergeConfig</code> accepts only config in object form. If you have a config in callback form, you should call it before passing into <code>mergeConfig</code>.</p>
+<p>You can use the <code>defineConfig</code> helper to merge a config in callback form with another config:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> {
+  defineConfig,
+  mergeConfig,
+  <span class="hljs-keyword">type</span> <span class="hljs-title class_">UserConfigFnObject</span>,
+  <span class="hljs-keyword">type</span> <span class="hljs-title class_">UserConfig</span>,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+<span class="hljs-keyword">declare</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">configAsCallback</span>: <span class="hljs-title class_">UserConfigFnObject</span>
+<span class="hljs-keyword">declare</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">configAsObject</span>: <span class="hljs-title class_">UserConfig</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>(<span class="hljs-function">(<span class="hljs-params">configEnv</span>) =&gt;</span>
+  <span class="hljs-title function_">mergeConfig</span>(<span class="hljs-title function_">configAsCallback</span>(configEnv), configAsObject),
+)</code></pre></div>
+</div><h2 id="searchforworkspaceroot"><a class="anchor" href="#searchforworkspaceroot">#</a><code>searchForWorkspaceRoot</code></h2>
+<p><strong>Type Signature:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">searchForWorkspaceRoot</span>(<span class="hljs-params">
+  <span class="hljs-attr">current</span>: <span class="hljs-built_in">string</span>,
+  root = searchForPackageRoot(current),
+</span>): <span class="hljs-built_in">string</span></code></pre></div>
+<p><strong>Related:</strong> <a href="../config/server-options.html#server-fs-allow">server.fs.allow</a></p>
+<p>Search for the root of the potential workspace if it meets the following conditions, otherwise it would fallback to <code>root</code>:</p>
+<ul>
+<li>contains <code>workspaces</code> field in <code>package.json</code></li>
+<li>contains one of the following file<ul>
+<li><code>lerna.json</code></li>
+<li><code>pnpm-workspace.yaml</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="loadenv"><a class="anchor" href="#loadenv">#</a><code>loadEnv</code></h2>
+<p><strong>Type Signature:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">loadEnv</span>(<span class="hljs-params">
+  <span class="hljs-attr">mode</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">envDir</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">prefixes</span>: <span class="hljs-built_in">string</span> | <span class="hljs-built_in">string</span>[] = <span class="hljs-string">&#x27;VITE_&#x27;</span>,
+</span>): <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt;</code></pre></div>
+<p><strong>Related:</strong> <a href="env-and-mode.html#env-files"><code>.env</code> Files</a></p>
+<p>Load <code>.env</code> files within the <code>envDir</code> and merge them with the matching variables already present in <code>process.env</code>. By default, only env variables prefixed with <code>VITE_</code> are loaded, unless <code>prefixes</code> is changed.</p>
+<h2 id="normalizepath"><a class="anchor" href="#normalizepath">#</a><code>normalizePath</code></h2>
+<p><strong>Type Signature:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">normalizePath</span>(<span class="hljs-params"><span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">string</span></code></pre></div>
+<p><strong>Related:</strong> <a href="api-plugin.html#path-normalization">Path Normalization</a></p>
+<p>Normalizes a path to interoperate between Vite plugins.</p>
+<h2 id="transformwithoxc"><a class="anchor" href="#transformwithoxc">#</a><code>transformWithOxc</code></h2>
+<p><strong>Type Signature:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">transformWithOxc</span>(<span class="hljs-params">
+  <span class="hljs-attr">code</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">filename</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">OxcTransformOptions</span>,
+  <span class="hljs-attr">inMap</span>?: <span class="hljs-built_in">object</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Omit</span>&lt;<span class="hljs-title class_">OxcTransformResult</span>, <span class="hljs-string">&#x27;errors&#x27;</span>&gt; &amp; { <span class="hljs-attr">warnings</span>: <span class="hljs-built_in">string</span>[] }&gt;</code></pre></div>
+<p>Transform JavaScript or TypeScript with <a href="https://oxc.rs/docs/guide/usage/transformer">Oxc Transformer</a>. Useful for plugins that prefer matching Vite&#39;s internal Oxc Transformer transform.</p>
+<h2 id="transformwithesbuild"><a class="anchor" href="#transformwithesbuild">#</a><code>transformWithEsbuild</code></h2>
+<p><strong>Type Signature:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">transformWithEsbuild</span>(<span class="hljs-params">
+  <span class="hljs-attr">code</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">filename</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">EsbuildTransformOptions</span>,
+  <span class="hljs-attr">inMap</span>?: <span class="hljs-built_in">object</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">ESBuildTransformResult</span>&gt;</code></pre></div>
+<p><strong>Deprecated:</strong> Use <code>transformWithOxc</code> instead.</p>
+<p>Transform JavaScript or TypeScript with esbuild. Useful for plugins that prefer matching Vite&#39;s internal esbuild transform.</p>
+<h2 id="loadconfigfromfile"><a class="anchor" href="#loadconfigfromfile">#</a><code>loadConfigFromFile</code></h2>
+<p><strong>Type Signature:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">loadConfigFromFile</span>(<span class="hljs-params">
+  <span class="hljs-attr">configEnv</span>: <span class="hljs-title class_">ConfigEnv</span>,
+  <span class="hljs-attr">configFile</span>?: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">configRoot</span>: <span class="hljs-built_in">string</span> = process.cwd(),
+  <span class="hljs-attr">logLevel</span>?: <span class="hljs-title class_">LogLevel</span>,
+  <span class="hljs-attr">customLogger</span>?: <span class="hljs-title class_">Logger</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;{
+  <span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">config</span>: <span class="hljs-title class_">UserConfig</span>
+  <span class="hljs-attr">dependencies</span>: <span class="hljs-built_in">string</span>[]
+} | <span class="hljs-literal">null</span>&gt;</code></pre></div>
+<p>Load a Vite config file manually with Rolldown.</p>
+<h2 id="preprocesscss"><a class="anchor" href="#preprocesscss">#</a><code>preprocessCSS</code></h2>
+<ul>
+<li><strong>Experimental:</strong> <a href="https://github.com/vitejs/vite/discussions/13815">Give Feedback</a></li>
+</ul>
+<p><strong>Type Signature:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">preprocessCSS</span>(<span class="hljs-params">
+  <span class="hljs-attr">code</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">filename</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">config</span>: <span class="hljs-title class_">ResolvedConfig</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">PreprocessCSSResult</span>&gt;
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">PreprocessCSSResult</span> {
+  <span class="hljs-attr">code</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">map</span>?: <span class="hljs-title class_">SourceMapInput</span>
+  <span class="hljs-attr">modules</span>?: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt;
+  <span class="hljs-attr">deps</span>?: <span class="hljs-title class_">Set</span>&lt;<span class="hljs-built_in">string</span>&gt;
+}</code></pre></div>
+<p>Pre-processes <code>.css</code>, <code>.scss</code>, <code>.sass</code>, <code>.less</code>, <code>.styl</code> and <code>.stylus</code> files to plain CSS so it can be used in browsers or parsed by other tools. Similar to the <a href="features.html#css-pre-processors">built-in CSS pre-processing support</a>, the corresponding pre-processor must be installed if used.</p>
+<p>The pre-processor used is inferred from the <code>filename</code> extension. If the <code>filename</code> ends with <code>.module.{ext}</code>, it is inferred as a <a href="https://github.com/css-modules/css-modules">CSS module</a> and the returned result will include a <code>modules</code> object mapping the original class names to the transformed ones.</p>
+<p>Note that pre-processing will not resolve URLs in <code>url()</code> or <code>image-set()</code>.</p>
+<h2 id="version"><a class="anchor" href="#version">#</a><code>version</code></h2>
+<p><strong>Type:</strong> <code>string</code></p>
+<p>The current version of Vite as a string (e.g. <code>&quot;8.0.0&quot;</code>).</p>
+<h2 id="rolldownversion"><a class="anchor" href="#rolldownversion">#</a><code>rolldownVersion</code></h2>
+<p><strong>Type:</strong> <code>string</code></p>
+<p>The version of Rolldown used by Vite as a string (e.g. <code>&quot;1.0.0&quot;</code>). A re-export of <a href="https://rolldown.rs/reference/Variable.VERSION"><code>VERSION</code></a> from <code>rolldown</code>.</p>
+<h2 id="esbuildversion"><a class="anchor" href="#esbuildversion">#</a><code>esbuildVersion</code></h2>
+<p><strong>Type:</strong> <code>string</code></p>
+<p>Only kept for backward compatibility.</p>
+<h2 id="rollupversion"><a class="anchor" href="#rollupversion">#</a><code>rollupVersion</code></h2>
+<p><strong>Type:</strong> <code>string</code></p>
+<p>Only kept for backward compatibility.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#createserver">createServer</a><a class="toc-2" href="#inlineconfig">InlineConfig</a><a class="toc-2" href="#resolvedconfig">ResolvedConfig</a><a class="toc-2" href="#vitedevserver">ViteDevServer</a><a class="toc-2" href="#build">build</a><a class="toc-2" href="#preview">preview</a><a class="toc-2" href="#previewserver">PreviewServer</a><a class="toc-2" href="#resolveconfig">resolveConfig</a><a class="toc-2" href="#mergeconfig">mergeConfig</a><a class="toc-2" href="#searchforworkspaceroot">searchForWorkspaceRoot</a><a class="toc-2" href="#loadenv">loadEnv</a><a class="toc-2" href="#normalizepath">normalizePath</a><a class="toc-2" href="#transformwithoxc">transformWithOxc</a><a class="toc-2" href="#transformwithesbuild">transformWithEsbuild</a><a class="toc-2" href="#loadconfigfromfile">loadConfigFromFile</a><a class="toc-2" href="#preprocesscss">preprocessCSS</a><a class="toc-2" href="#version">version</a><a class="toc-2" href="#rolldownversion">rolldownVersion</a><a class="toc-2" href="#esbuildversion">esbuildVersion</a><a class="toc-2" href="#rollupversion">rollupVersion</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

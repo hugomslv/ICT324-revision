@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>coverage | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/coverage  <a class="ext small" href="https://vitest.dev/config/coverage">version en ligne</a></div>
+<h1 id="coverage"><a class="anchor" href="#coverage">#</a>coverage <CRoot /></h1>
+<p>You can use <a href="../guide/coverage.html#v8-provider"><code>v8</code></a>, <a href="../guide/coverage.html#istanbul-provider"><code>istanbul</code></a> or <a href="../guide/coverage.html#custom-coverage-provider">a custom coverage solution</a> for coverage collection.</p>
+<p>You can provide coverage options to CLI with dot notation:</p>
+<div class="code"><pre><code class="hljs lang-sh">npx vitest --coverage.enabled --coverage.provider=istanbul</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If you are using coverage options with dot notation, don&#39;t forget to specify <code>--coverage.enabled</code>. Do not provide a single <code>--coverage</code> option in that case.</p>
+</div><h2 id="coverage-provider"><a class="anchor" href="#coverage-provider">#</a>coverage.provider</h2>
+<ul>
+<li><strong>Type:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39; | &#39;custom&#39;</code></li>
+<li><strong>Default:</strong> <code>&#39;v8&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.provider=&lt;provider&gt;</code></li>
+</ul>
+<p>Use <code>provider</code> to select the tool for coverage collection.</p>
+<h2 id="coverage-enabled"><a class="anchor" href="#coverage-enabled">#</a>coverage.enabled</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.enabled</code>, <code>--coverage.enabled=false</code></li>
+</ul>
+<p>Enables coverage collection. Can be overridden using <code>--coverage</code> CLI option.</p>
+<h2 id="coverage-include"><a class="anchor" href="#coverage-include">#</a>coverage.include</h2>
+<ul>
+<li><strong>Type:</strong> <code>string[]</code></li>
+<li><strong>Default:</strong> Files that were imported during test run</li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.include=&lt;pattern&gt;</code>, <code>--coverage.include=&lt;pattern1&gt; --coverage.include=&lt;pattern2&gt;</code></li>
+</ul>
+<p>List of files included in coverage as glob patterns. By default only files covered by tests are included.</p>
+<p>It is recommended to pass file extensions in the pattern.</p>
+<p>Patterns are matched against each file&#39;s path relative to the project root. A pattern with no glob wildcard is treated as a directory and matches everything inside it, so <code>include: [&#39;src&#39;]</code> is equivalent to <code>include: [&#39;src/**&#39;]</code>.</p>
+<p>See <a href="../guide/coverage.html#including-and-excluding-files-from-coverage-report">Including and excluding files from coverage report</a> for examples.</p>
+<h2 id="coverage-exclude"><a class="anchor" href="#coverage-exclude">#</a>coverage.exclude</h2>
+<ul>
+<li><strong>Type:</strong> <code>string[]</code></li>
+<li><strong>Default:</strong> : <code>[]</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.exclude=&lt;path&gt;</code>, <code>--coverage.exclude=&lt;path1&gt; --coverage.exclude=&lt;path2&gt;</code></li>
+</ul>
+<p>List of files excluded from coverage as glob patterns. Patterns are matched the same way as <a href="#coverage-include"><code>coverage.include</code></a>.</p>
+<p>See <a href="../guide/coverage.html#including-and-excluding-files-from-coverage-report">Including and excluding files from coverage report</a> for examples.</p>
+<h2 id="coverage-clean"><a class="anchor" href="#coverage-clean">#</a>coverage.clean</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.clean</code>, <code>--coverage.clean=false</code></li>
+</ul>
+<p>Clean coverage results before running tests.</p>
+<h2 id="coverage-cleanonrerun"><a class="anchor" href="#coverage-cleanonrerun">#</a>coverage.cleanOnRerun</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.cleanOnRerun</code>, <code>--coverage.cleanOnRerun=false</code></li>
+</ul>
+<p>Clean coverage report on watch rerun. Set to <code>false</code> to preserve coverage results from previous run in watch mode.</p>
+<h2 id="coverage-reportsdirectory"><a class="anchor" href="#coverage-reportsdirectory">#</a>coverage.reportsDirectory</h2>
+<ul>
+<li><strong>Type:</strong> <code>string</code></li>
+<li><strong>Default:</strong> <code>&#39;./coverage&#39;</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.reportsDirectory=&lt;path&gt;</code></li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Vitest will delete this directory before running tests if <code>coverage.clean</code> is enabled (default value).</p>
+</div><p>Directory to write coverage report to.</p>
+<h2 id="coverage-reporter"><a class="anchor" href="#coverage-reporter">#</a>coverage.reporter</h2>
+<ul>
+<li><strong>Type:</strong> <code>string | string[] | [string, {}][]</code></li>
+<li><strong>Default:</strong> <code>[&#39;text&#39;, &#39;html&#39;, &#39;clover&#39;, &#39;json&#39;]</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.reporter=&lt;reporter&gt;</code>, <code>--coverage.reporter=&lt;reporter1&gt; --coverage.reporter=&lt;reporter2&gt;</code></li>
+</ul>
+<p>Coverage reporters to use. See <a href="https://istanbul.js.org/docs/advanced/alternative-reporters/">istanbul documentation</a> for detailed list of all reporters. See <a href="https://github.com/vitest-dev/istanbuljs/tree/main/packages/istanbul-lib-report/src/reports"><code>@vitest/istanbul-lib-report</code></a> for details about reporter specific options.</p>
+<p>The reporter has three different types:</p>
+<ul>
+<li>A single reporter: <code>{ reporter: &#39;html&#39; }</code></li>
+<li>Multiple reporters without options: <code>{ reporter: [&#39;html&#39;, &#39;json&#39;] }</code></li>
+<li>A single or multiple reporters with reporter options:<!-- eslint-skip -->
+<div class="code"><pre><code class="hljs lang-ts">{
+  <span class="hljs-attr">reporter</span>: [
+    [<span class="hljs-string">&#x27;lcov&#x27;</span>, { <span class="hljs-string">&#x27;projectRoot&#x27;</span>: <span class="hljs-string">&#x27;./src&#x27;</span> }],
+    [<span class="hljs-string">&#x27;json&#x27;</span>, { <span class="hljs-string">&#x27;file&#x27;</span>: <span class="hljs-string">&#x27;coverage.json&#x27;</span> }],
+    [<span class="hljs-string">&#x27;text&#x27;</span>]
+  ]
+}</code></pre></div>
+</li>
+</ul>
+<p>You can also pass custom coverage reporters. See <a href="../guide/coverage.html#custom-coverage-reporter">Guide - Custom Coverage Reporter</a> for more information.</p>
+<!-- eslint-skip -->
+<div class="code"><pre><code class="hljs lang-ts">  {
+    <span class="hljs-attr">reporter</span>: [
+      <span class="hljs-comment">// Specify reporter using name of the NPM package</span>
+      <span class="hljs-string">&#x27;@vitest/custom-coverage-reporter&#x27;</span>,
+      [<span class="hljs-string">&#x27;@vitest/custom-coverage-reporter&#x27;</span>, { <span class="hljs-attr">someOption</span>: <span class="hljs-literal">true</span> }],
+
+      <span class="hljs-comment">// Specify reporter using local path</span>
+      <span class="hljs-string">&#x27;/absolute/path/to/custom-reporter.cjs&#x27;</span>,
+      [<span class="hljs-string">&#x27;/absolute/path/to/custom-reporter.cjs&#x27;</span>, { <span class="hljs-attr">someOption</span>: <span class="hljs-literal">true</span> }],
+    ]
+  }</code></pre></div>
+<p>You can check your coverage report in Vitest UI: check <a href="../guide/coverage.html#vitest-ui">Vitest UI Coverage</a> for more details.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : AI coding agents</div><p>When Vitest detects it is running inside an AI coding agent, it automatically adds the <code>text-summary</code> reporter and sets <code>skipFull: true</code> on the <code>text</code> reporter to reduce output and minimize token usage.</p>
+</div><h2 id="coverage-reportonfailure"><a class="anchor" href="#coverage-reportonfailure">#</a>coverage.reportOnFailure</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.reportOnFailure</code>, <code>--coverage.reportOnFailure=false</code></li>
+</ul>
+<p>Generate coverage report even when tests fail.</p>
+<h2 id="coverage-allowexternal"><a class="anchor" href="#coverage-allowexternal">#</a>coverage.allowExternal</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.allowExternal</code>, <code>--coverage.allowExternal=false</code></li>
+</ul>
+<p>Collect coverage of files outside the <a href="root.html">project <code>root</code></a>.</p>
+<h2 id="coverage-excludeafterremap"><a class="anchor" href="#coverage-excludeafterremap">#</a>coverage.excludeAfterRemap</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.excludeAfterRemap</code>, <code>--coverage.excludeAfterRemap=false</code></li>
+</ul>
+<p>Apply exclusions again after coverage has been remapped to original sources.
+This is useful when your source files are transpiled and may contain source maps of non-source files.</p>
+<p>Use this option when you are seeing files that show up in report even if they match your <code>coverage.exclude</code> patterns.</p>
+<h2 id="coverage-skipfull"><a class="anchor" href="#coverage-skipfull">#</a>coverage.skipFull</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.skipFull</code>, <code>--coverage.skipFull=false</code></li>
+</ul>
+<p>Do not show files with 100% statement, branch, and function coverage.</p>
+<h2 id="coverage-thresholds"><a class="anchor" href="#coverage-thresholds">#</a>coverage.thresholds</h2>
+<p>Options for coverage thresholds.</p>
+<p>If a threshold is set to a positive number, it will be interpreted as the minimum percentage of coverage required. For example, setting the lines threshold to <code>90</code> means that 90% of lines must be covered.</p>
+<p>If a threshold is set to a negative number, it will be treated as the maximum number of uncovered items allowed. For example, setting the lines threshold to <code>-10</code> means that no more than 10 lines may be uncovered.</p>
+<!-- eslint-skip -->
+<div class="code"><pre><code class="hljs lang-ts">{
+  <span class="hljs-attr">coverage</span>: {
+    <span class="hljs-attr">thresholds</span>: {
+      <span class="hljs-comment">// Requires 90% function coverage</span>
+      <span class="hljs-attr">functions</span>: <span class="hljs-number">90</span>,
+
+      <span class="hljs-comment">// Require that no more than 10 lines are uncovered</span>
+      <span class="hljs-attr">lines</span>: -<span class="hljs-number">10</span>,
+    }
+  }
+}</code></pre></div>
+<h3 id="coverage-thresholds-lines"><a class="anchor" href="#coverage-thresholds-lines">#</a>coverage.thresholds.lines</h3>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.thresholds.lines=&lt;number&gt;</code></li>
+</ul>
+<p>Global threshold for lines.</p>
+<h3 id="coverage-thresholds-functions"><a class="anchor" href="#coverage-thresholds-functions">#</a>coverage.thresholds.functions</h3>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.thresholds.functions=&lt;number&gt;</code></li>
+</ul>
+<p>Global threshold for functions.</p>
+<h3 id="coverage-thresholds-branches"><a class="anchor" href="#coverage-thresholds-branches">#</a>coverage.thresholds.branches</h3>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.thresholds.branches=&lt;number&gt;</code></li>
+</ul>
+<p>Global threshold for branches.</p>
+<h3 id="coverage-thresholds-statements"><a class="anchor" href="#coverage-thresholds-statements">#</a>coverage.thresholds.statements</h3>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.thresholds.statements=&lt;number&gt;</code></li>
+</ul>
+<p>Global threshold for statements.</p>
+<h3 id="coverage-thresholds-perfile"><a class="anchor" href="#coverage-thresholds-perfile">#</a>coverage.thresholds.perFile</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean | { 100?: boolean, lines?: number, functions?: number, branches?: number, statements?: number }</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.thresholds.perFile</code>, <code>--coverage.thresholds.perFile=false</code></li>
+</ul>
+<p>When <code>true</code>, each file is checked against the top-level thresholds instead of the project-wide aggregate. When set to an object, both are checked: the aggregate against the top-level thresholds, and every file against these per-file minimums.</p>
+<!-- eslint-skip -->
+<div class="code"><pre><code class="hljs lang-ts">{
+  <span class="hljs-attr">coverage</span>: {
+    <span class="hljs-attr">thresholds</span>: {
+      <span class="hljs-attr">lines</span>: <span class="hljs-number">80</span>,
+      <span class="hljs-attr">functions</span>: <span class="hljs-number">80</span>,
+      <span class="hljs-attr">branches</span>: <span class="hljs-number">80</span>,
+      <span class="hljs-attr">statements</span>: <span class="hljs-number">80</span>,
+      <span class="hljs-attr">perFile</span>: {
+        <span class="hljs-attr">lines</span>: <span class="hljs-number">50</span>,
+        <span class="hljs-attr">functions</span>: <span class="hljs-number">50</span>,
+        <span class="hljs-attr">branches</span>: <span class="hljs-number">50</span>,
+        <span class="hljs-attr">statements</span>: <span class="hljs-number">50</span>,
+      },
+    }
+  }
+}</code></pre></div>
+<p><code>{ 100: true }</code> is also accepted inside the object as a shortcut for setting all four metrics to <code>100</code>:</p>
+<!-- eslint-skip -->
+<div class="code"><pre><code class="hljs lang-ts">{
+  <span class="hljs-attr">coverage</span>: {
+    <span class="hljs-attr">thresholds</span>: {
+      <span class="hljs-attr">lines</span>: <span class="hljs-number">80</span>,
+      <span class="hljs-attr">perFile</span>: {
+        <span class="hljs-number">100</span>: <span class="hljs-literal">true</span>,
+      },
+    }
+  }
+}</code></pre></div>
+<p><code>perFile</code> can also be set on an individual <a href="coverage.html#coverage-thresholds-glob-pattern">glob-pattern threshold</a>. Glob patterns do <strong>not</strong> inherit the top-level <code>perFile</code>; set it on each glob explicitly.</p>
+<!-- eslint-skip -->
+<div class="code"><pre><code class="hljs lang-ts">{
+  <span class="hljs-attr">coverage</span>: {
+    <span class="hljs-attr">thresholds</span>: {
+      <span class="hljs-attr">perFile</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">lines</span>: <span class="hljs-number">80</span>,
+
+      <span class="hljs-string">&#x27;src/utils/**&#x27;</span>: {
+        <span class="hljs-attr">lines</span>: <span class="hljs-number">90</span>,
+        <span class="hljs-attr">perFile</span>: <span class="hljs-literal">true</span>,
+      },
+    }
+  }
+}</code></pre></div>
+<h3 id="coverage-thresholds-autoupdate"><a class="anchor" href="#coverage-thresholds-autoupdate">#</a>coverage.thresholds.autoUpdate</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean | function</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.thresholds.autoUpdate=&lt;boolean&gt;</code></li>
+</ul>
+<p>Update all threshold values <code>lines</code>, <code>functions</code>, <code>branches</code> and <code>statements</code> to configuration file when current coverage is better than the configured thresholds.
+This option helps to maintain thresholds when coverage is improved.</p>
+<p>You can also pass a function for formatting the updated threshold values. The function receives the new threshold as the first argument and the previous threshold as the second:</p>
+<!-- eslint-skip -->
+<div class="code"><pre><code class="hljs lang-ts">{
+  <span class="hljs-attr">coverage</span>: {
+    <span class="hljs-attr">thresholds</span>: {
+      <span class="hljs-comment">// Log the change and update without decimals</span>
+      <span class="hljs-attr">autoUpdate</span>: <span class="hljs-function">(<span class="hljs-params">newThreshold, previousThreshold</span>) =&gt;</span> {
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`Updated threshold from <span class="hljs-subst">${previousThreshold}</span> to <span class="hljs-subst">${newThreshold}</span>`</span>)
+        <span class="hljs-keyword">return</span> <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>(newThreshold)
+      },
+
+      <span class="hljs-comment">// 95.85 -&gt; 95</span>
+      <span class="hljs-attr">functions</span>: <span class="hljs-number">95</span>,
+    }
+  }
+}</code></pre></div>
+<h3 id="coverage-thresholds-100"><a class="anchor" href="#coverage-thresholds-100">#</a>coverage.thresholds.100</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.thresholds.100</code>, <code>--coverage.thresholds.100=false</code></li>
+</ul>
+<p>Sets global thresholds to 100.
+Shortcut for <code>--coverage.thresholds.lines 100 --coverage.thresholds.functions 100 --coverage.thresholds.branches 100 --coverage.thresholds.statements 100</code>.</p>
+<h3 id="coverage-thresholds-glob-pattern"><a class="anchor" href="#coverage-thresholds-glob-pattern">#</a>coverage.thresholds[glob-pattern]</h3>
+<ul>
+<li><strong>Type:</strong> <code>{ statements?: number, functions?: number, branches?: number, lines?: number, perFile?: boolean | object }</code></li>
+<li><strong>Default:</strong> <code>undefined</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+</ul>
+<p>Sets thresholds for files matching the glob pattern.</p>
+<p>Each glob pattern can set its own <code>perFile</code> (<code>boolean | object</code>), checked exactly like the top-level <code>perFile</code> but scoped to the matched files. Glob patterns do not inherit the top-level <code>perFile</code> — set it per glob.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : NOTE</div><p>Vitest counts all files, including those covered by glob-patterns, into the global coverage thresholds.
+This is different from Jest behavior.</p>
+</div><!-- eslint-skip -->
+<div class="code"><pre><code class="hljs lang-ts">{
+  <span class="hljs-attr">coverage</span>: {
+    <span class="hljs-attr">thresholds</span>: {
+      <span class="hljs-comment">// Thresholds for all files</span>
+      <span class="hljs-attr">functions</span>: <span class="hljs-number">95</span>,
+      <span class="hljs-attr">branches</span>: <span class="hljs-number">70</span>,
+
+      <span class="hljs-comment">// Thresholds for matching glob pattern</span>
+      <span class="hljs-string">&#x27;src/utils/**.ts&#x27;</span>: {
+        <span class="hljs-attr">statements</span>: <span class="hljs-number">95</span>,
+        <span class="hljs-attr">functions</span>: <span class="hljs-number">90</span>,
+        <span class="hljs-attr">branches</span>: <span class="hljs-number">85</span>,
+        <span class="hljs-attr">lines</span>: <span class="hljs-number">80</span>,
+        <span class="hljs-comment">// each matching file must individually hit the thresholds above</span>
+        <span class="hljs-attr">perFile</span>: <span class="hljs-literal">true</span>,
+      },
+
+      <span class="hljs-comment">// Files matching this pattern will only have lines thresholds set.</span>
+      <span class="hljs-comment">// Global thresholds are not inherited.</span>
+      <span class="hljs-string">&#x27;**/math.ts&#x27;</span>: {
+        <span class="hljs-attr">lines</span>: <span class="hljs-number">100</span>,
+      }
+    }
+  }
+}</code></pre></div>
+<h3 id="coverage-thresholds-glob-pattern-100"><a class="anchor" href="#coverage-thresholds-glob-pattern-100">#</a>coverage.thresholds[glob-pattern].100</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+</ul>
+<p>Sets thresholds to 100 for files matching the glob pattern.</p>
+<!-- eslint-skip -->
+<div class="code"><pre><code class="hljs lang-ts">{
+  <span class="hljs-attr">coverage</span>: {
+    <span class="hljs-attr">thresholds</span>: {
+      <span class="hljs-comment">// Thresholds for all files</span>
+      <span class="hljs-attr">functions</span>: <span class="hljs-number">95</span>,
+      <span class="hljs-attr">branches</span>: <span class="hljs-number">70</span>,
+
+      <span class="hljs-comment">// Thresholds for matching glob pattern</span>
+      <span class="hljs-string">&#x27;src/utils/**.ts&#x27;</span>: { <span class="hljs-number">100</span>: <span class="hljs-literal">true</span> },
+      <span class="hljs-string">&#x27;**/math.ts&#x27;</span>: { <span class="hljs-number">100</span>: <span class="hljs-literal">true</span> }
+    }
+  }
+}</code></pre></div>
+<h2 id="coverage-ignoreclassmethods"><a class="anchor" href="#coverage-ignoreclassmethods">#</a>coverage.ignoreClassMethods</h2>
+<ul>
+<li><strong>Type:</strong> <code>string[]</code></li>
+<li><strong>Default:</strong> <code>[]</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.ignoreClassMethods=&lt;method&gt;</code></li>
+</ul>
+<p>Set to array of class method names to ignore for coverage.
+See <a href="https://github.com/istanbuljs/nyc#ignoring-methods">istanbul documentation</a> for more information.</p>
+<h2 id="coverage-watermarks"><a class="anchor" href="#coverage-watermarks">#</a>coverage.watermarks</h2>
+<ul>
+<li><strong>Type:</strong></li>
+</ul>
+<!-- eslint-skip -->
+<div class="code"><pre><code class="hljs lang-ts">{
+  <span class="hljs-attr">statements</span>?: [<span class="hljs-built_in">number</span>, <span class="hljs-built_in">number</span>],
+  <span class="hljs-attr">functions</span>?: [<span class="hljs-built_in">number</span>, <span class="hljs-built_in">number</span>],
+  <span class="hljs-attr">branches</span>?: [<span class="hljs-built_in">number</span>, <span class="hljs-built_in">number</span>],
+  <span class="hljs-attr">lines</span>?: [<span class="hljs-built_in">number</span>, <span class="hljs-built_in">number</span>]
+}</code></pre></div>
+<ul>
+<li><strong>Default:</strong></li>
+</ul>
+<!-- eslint-skip -->
+<div class="code"><pre><code class="hljs lang-ts">{
+  <span class="hljs-attr">statements</span>: [<span class="hljs-number">50</span>, <span class="hljs-number">80</span>],
+  <span class="hljs-attr">functions</span>: [<span class="hljs-number">50</span>, <span class="hljs-number">80</span>],
+  <span class="hljs-attr">branches</span>: [<span class="hljs-number">50</span>, <span class="hljs-number">80</span>],
+  <span class="hljs-attr">lines</span>: [<span class="hljs-number">50</span>, <span class="hljs-number">80</span>]
+}</code></pre></div>
+<ul>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.watermarks.statements=50,80</code>, <code>--coverage.watermarks.branches=50,80</code></li>
+</ul>
+<p>Watermarks for statements, lines, branches and functions. See <a href="https://github.com/istanbuljs/nyc#high-and-low-watermarks">istanbul documentation</a> for more information.</p>
+<h2 id="coverage-processingconcurrency"><a class="anchor" href="#coverage-processingconcurrency">#</a>coverage.processingConcurrency</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>Math.min(20, os.availableParallelism?.() ?? os.cpus().length)</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.processingConcurrency=&lt;number&gt;</code></li>
+</ul>
+<p>Concurrency limit used when processing the coverage results.</p>
+<h2 id="coverage-instrumenter"><a class="anchor" href="#coverage-instrumenter">#</a>coverage.instrumenter <Version type="experimental">4.1.5</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>(options: InstrumenterOptions) =&gt; CoverageInstrumenter</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;istanbul&#39;</code></li>
+</ul>
+<p>Factory for a custom instrumenter to use in place of the default <code>@vitest/istanbul-lib-instrument</code>. Vitest calls the factory once during initialization and reuses the returned instrumenter for every file. The rest of the Istanbul pipeline (collection, merging, reporting) is unchanged.</p>
+<p>The factory receives an <code>InstrumenterOptions</code> object with Vitest&#39;s runtime coverage settings, and must return an object implementing the <code>CoverageInstrumenter</code> interface. Both types are exported from <code>vitest/node</code>.</p>
+<!-- eslint-skip -->
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">InstrumenterOptions</span> {
+  <span class="hljs-attr">coverageVariable</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">coverageGlobalScope</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">coverageGlobalScopeFunc</span>: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-attr">ignoreClassMethods</span>: <span class="hljs-built_in">string</span>[]
+}
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">CoverageInstrumenter</span> {
+  <span class="hljs-attr">instrumentSync</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">code</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">filename</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">inputSourceMap</span>?: <span class="hljs-built_in">any</span></span>) =&gt;</span> <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">lastSourceMap</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">any</span>
+  <span class="hljs-attr">lastFileCoverage</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">any</span>
+}</code></pre></div>
+<!-- eslint-skip -->
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> { createInstrumenter } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/some-custom-instrumenter&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">coverage</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-string">&#x27;istanbul&#x27;</span>,
+      <span class="hljs-attr">instrumenter</span>: <span class="hljs-function"><span class="hljs-params">options</span> =&gt;</span> <span class="hljs-title function_">createInstrumenter</span>(options),
+    }
+  }
+})</code></pre></div>
+<h2 id="coverage-customprovidermodule"><a class="anchor" href="#coverage-customprovidermodule">#</a>coverage.customProviderModule</h2>
+<ul>
+<li><strong>Type:</strong> <code>string</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;custom&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.customProviderModule=&lt;path or module name&gt;</code></li>
+</ul>
+<p>Specifies the module name or path for the custom coverage provider module. See <a href="../guide/coverage.html#custom-coverage-provider">Guide - Custom Coverage Provider</a> for more information.</p>
+<h2 id="coverage-htmldir"><a class="anchor" href="#coverage-htmldir">#</a>coverage.htmlDir</h2>
+<ul>
+<li><strong>Type:</strong> <code>string</code></li>
+<li><strong>Default:</strong> Automatically inferred from <code>html</code>, <code>html-spa</code>, or <code>lcov</code> coverage reporters</li>
+<li><strong>CLI:</strong> <code>--coverage.htmlDir=&lt;path&gt;</code></li>
+</ul>
+<p>Directory of HTML coverage output to be served in <a href="../guide/ui.html">Vitest UI</a> and <a href="../guide/reporters.html#html-reporter">HTML reporter</a>.</p>
+<p>This is automatically configured when using builtin coverage reporters that produce HTML output (<code>html</code>, <code>html-spa</code>, and <code>lcov</code>). Use this option to override with a custom coverage reporting location when using custom coverage reporters.</p>
+<p>Note that setting this option does not change where coverage HTML report is generated. Configure the <code>coverage.reporter</code> option to change the directory instead.</p>
+<h2 id="coverage-changed"><a class="anchor" href="#coverage-changed">#</a>coverage.changed</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean | string</code></li>
+<li><strong>Default:</strong> <code>false</code> (inherits from <code>test.changed</code>)</li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39; | &#39;istanbul&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.changed</code>, <code>--coverage.changed=&lt;commit/branch&gt;</code></li>
+</ul>
+<p>Collect coverage only for files changed since a specified commit or branch. When set to <code>true</code>, it uses staged and unstaged changes.</p>
+<h2 id="coverage-autoattachsubprocess"><a class="anchor" href="#coverage-autoattachsubprocess">#</a>coverage.autoAttachSubprocess <Version>5.0.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Available for providers:</strong> <code>&#39;v8&#39;</code></li>
+<li><strong>CLI:</strong> <code>--coverage.autoAttachSubprocess</code></li>
+</ul>
+<p>Track coverage of the <code>node:child_process</code> and <code>node:worker_threads</code> spawned during test run.</p>
+<p>Note that this option has some performance overhead as its using <a href="https://nodejs.org/api/cli.html#node-v8-coveragedir"><code>NODE_V8_COVERAGE</code></a> internally. This triggers Node to write lots of unnecessary files on file system.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#coverage-provider">coverage.provider</a><a class="toc-2" href="#coverage-enabled">coverage.enabled</a><a class="toc-2" href="#coverage-include">coverage.include</a><a class="toc-2" href="#coverage-exclude">coverage.exclude</a><a class="toc-2" href="#coverage-clean">coverage.clean</a><a class="toc-2" href="#coverage-cleanonrerun">coverage.cleanOnRerun</a><a class="toc-2" href="#coverage-reportsdirectory">coverage.reportsDirectory</a><a class="toc-2" href="#coverage-reporter">coverage.reporter</a><a class="toc-2" href="#coverage-reportonfailure">coverage.reportOnFailure</a><a class="toc-2" href="#coverage-allowexternal">coverage.allowExternal</a><a class="toc-2" href="#coverage-excludeafterremap">coverage.excludeAfterRemap</a><a class="toc-2" href="#coverage-skipfull">coverage.skipFull</a><a class="toc-2" href="#coverage-thresholds">coverage.thresholds</a><a class="toc-3" href="#coverage-thresholds-lines">coverage.thresholds.lines</a><a class="toc-3" href="#coverage-thresholds-functions">coverage.thresholds.functions</a><a class="toc-3" href="#coverage-thresholds-branches">coverage.thresholds.branches</a><a class="toc-3" href="#coverage-thresholds-statements">coverage.thresholds.statements</a><a class="toc-3" href="#coverage-thresholds-perfile">coverage.thresholds.perFile</a><a class="toc-3" href="#coverage-thresholds-autoupdate">coverage.thresholds.autoUpdate</a><a class="toc-3" href="#coverage-thresholds-100">coverage.thresholds.100</a><a class="toc-3" href="#coverage-thresholds-glob-pattern">coverage.thresholds[glob-pattern]</a><a class="toc-3" href="#coverage-thresholds-glob-pattern-100">coverage.thresholds[glob-pattern].100</a><a class="toc-2" href="#coverage-ignoreclassmethods">coverage.ignoreClassMethods</a><a class="toc-2" href="#coverage-watermarks">coverage.watermarks</a><a class="toc-2" href="#coverage-processingconcurrency">coverage.processingConcurrency</a><a class="toc-2" href="#coverage-instrumenter">coverage.instrumenter 4.1.5</a><a class="toc-2" href="#coverage-customprovidermodule">coverage.customProviderModule</a><a class="toc-2" href="#coverage-htmldir">coverage.htmlDir</a><a class="toc-2" href="#coverage-changed">coverage.changed</a><a class="toc-2" href="#coverage-autoattachsubprocess">coverage.autoAttachSubprocess 5.0.0</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

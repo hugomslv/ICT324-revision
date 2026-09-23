@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>class-methods-use-this (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/class-methods-use-this <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/class-methods-use-this">version en ligne</a></div>
+<h1>class-methods-use-this</h1><p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes">Classes</a> are often used to encapsulate reusable logic, especially stateful logic, into an object where each instance&#39;s state is accessed via <code>this</code>. When an API is written with an instance method, it signals to consumers:</p>
+<ul>
+<li><p>The method&#39;s outcome is related to the object on which it&#39;s invoked, including possibly its state.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> array1 = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>];
+<span class="hljs-keyword">const</span> array2 = [<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>];
+
+<span class="hljs-comment">// Using the `includes()` method on different objects gives different results:</span>
+array1.<span class="hljs-title function_">includes</span>(<span class="hljs-number">1</span>); <span class="hljs-comment">// true</span>
+array2.<span class="hljs-title function_">includes</span>(<span class="hljs-number">1</span>); <span class="hljs-comment">// false</span>
+
+<span class="hljs-comment">// Modifying the state of an object may change the outcome of its instance methods:</span>
+array2.<span class="hljs-title function_">push</span>(<span class="hljs-number">1</span>);
+array2.<span class="hljs-title function_">includes</span>(<span class="hljs-number">1</span>); <span class="hljs-comment">// true</span></code></pre></div>
+</li>
+<li><p>The method doesn&#39;t make sense to be used without an associated object. (For example, it doesn&#39;t make sense to call <code>Array#includes()</code> without an array to operate on.)</p>
+</li>
+</ul>
+<p>It&#39;s possible to have a class method which doesn&#39;t use <code>this</code>, such as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span> {
+    <span class="hljs-title function_">sayHi</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;Hi!&quot;</span>);
+    }
+}
+
+<span class="hljs-keyword">const</span> person = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Person</span>();
+person.<span class="hljs-title function_">sayHi</span>(); <span class="hljs-comment">// =&gt; &quot;Hi!&quot;</span></code></pre></div>
+<p>If a class instance method does not use <code>this</code>, that normally means that it does not access any instance state and therefore doesn&#39;t need to be a method.
+Therefore, it can <em>sometimes</em> be refactored into an <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions">ordinary function</a> or a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/static">static method</a>, which may better communicate intent to users of the API.</p>
+<p>In the example above, the <code>sayHi</code> method doesn&#39;t use <code>this</code>, so we can make it an ordinary function:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// Ordinary function</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">sayHi</span>(<span class="hljs-params"></span>) {
+	<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;Hi!&quot;</span>);
+}
+
+<span class="hljs-comment">// No need for `Person` class or any instance thereof</span>
+<span class="hljs-title function_">sayHi</span>(); <span class="hljs-comment">// =&gt; &quot;Hi!&quot;</span>
+
+<span class="hljs-comment">// Alternately, a static method may be used if it offers a more natural API</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span> {
+    <span class="hljs-keyword">static</span> <span class="hljs-title function_">sayHi</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;Hi!&quot;</span>);
+    }
+}
+
+<span class="hljs-title class_">Person</span>.<span class="hljs-title function_">sayHi</span>(); <span class="hljs-comment">// =&gt; &quot;Hi!&quot;</span>
+
+<span class="hljs-comment">// Keep in mind that, either way, the following now throws an error,</span>
+<span class="hljs-comment">// since sayHi() is no longer an instance method!</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// const person = new Person();</span>
+<span class="hljs-comment">// person.sayHi();</span></code></pre></div>
+<p>It&#39;s also possible the author forgot to use some piece of instance data that they intended to include.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span> {
+	<span class="hljs-title function_">constructor</span>(<span class="hljs-params">name</span>) {
+		<span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = name;
+	}
+
+	<span class="hljs-title function_">sayHi</span>(<span class="hljs-params"></span>) {
+		<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`Hi from <span class="hljs-subst">${<span class="hljs-variable language_">this</span>.name}</span>!`</span>);
+	}
+}
+
+<span class="hljs-keyword">const</span> alice = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Person</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>);
+alice.<span class="hljs-title function_">sayHi</span>(); <span class="hljs-comment">// =&gt; &#x27;Hi from Alice!&#x27;</span>
+
+<span class="hljs-keyword">const</span> bob = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Person</span>(<span class="hljs-string">&#x27;Bob&#x27;</span>);
+bob.<span class="hljs-title function_">sayHi</span>(); <span class="hljs-comment">// =&gt; &#x27;Hi from Bob!&#x27;</span></code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule flags class instance methods that do not use <code>this</code>.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint class-methods-use-this: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;Hello World&quot;</span>); <span class="hljs-comment">/* error Expected &#x27;this&#x27; to be used by class method &#x27;foo&#x27;. */</span>
+    }
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint class-methods-use-this: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">bar</span> = <span class="hljs-string">&quot;Hello World&quot;</span>; <span class="hljs-comment">// OK, `this` is used</span>
+    }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">B</span> {
+    <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// OK. constructor is exempt</span>
+    }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+    <span class="hljs-keyword">static</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// OK. static methods aren&#x27;t expected to use this.</span>
+    }
+
+    <span class="hljs-keyword">static</span> {
+        <span class="hljs-comment">// OK. static blocks are exempt.</span>
+    }
+}</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has four options:</p>
+<ul>
+<li><code>&quot;exceptMethods&quot;</code> allows specified method names to be ignored with this rule.</li>
+<li><code>&quot;enforceForClassFields&quot;</code> enforces that arrow functions and function expressions used as instance field initializers utilize <code>this</code>. This also applies to auto-accessor fields (fields declared with the <code>accessor</code> keyword) which are part of the <a href="https://github.com/tc39/proposal-decorators">stage 3 decorators proposal</a>. (default: <code>true</code>)</li>
+<li><code>&quot;ignoreOverrideMethods&quot;</code> ignores members that are marked with the <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-3.html#override-and-the---noimplicitoverride-flag"><code>override</code> modifier</a>. (TypeScript only, default: <code>false</code>)</li>
+<li><code>&quot;ignoreClassesWithImplements&quot;</code> ignores class members that are defined within a class that <a href="https://www.typescriptlang.org/docs/handbook/2/classes.html#implements-clauses"><code>implements</code></a> an interface. (TypeScript only)</li>
+</ul>
+<h3 id="exceptmethods"><a class="anchor" href="#exceptmethods">#</a>exceptMethods</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-string">&quot;class-methods-use-this&quot;</span>: [&lt;enabled&gt;, { <span class="hljs-string">&quot;exceptMethods&quot;</span>: [&lt;...exceptions&gt;] }]</code></pre></div>
+<p>The <code>&quot;exceptMethods&quot;</code> option allows you to pass an array of method names for which you would like to ignore warnings. For example, you might have a spec from an external library that requires you to overwrite a method as a regular function (and not as a static method) and does not use <code>this</code> inside the function body. In this case, you can add that method to ignore in the warnings.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule when used without <code>&quot;exceptMethods&quot;</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint class-methods-use-this: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    }
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule when used with exceptMethods:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint class-methods-use-this: [&quot;error&quot;, { &quot;exceptMethods&quot;: [&quot;foo&quot;, &quot;#bar&quot;] }] */</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    }
+    #<span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {
+    }
+}</code></pre></div>
+</div><h3 id="enforceforclassfields"><a class="anchor" href="#enforceforclassfields">#</a>enforceForClassFields</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-string">&quot;class-methods-use-this&quot;</span>: [&lt;enabled&gt;, { <span class="hljs-string">&quot;enforceForClassFields&quot;</span>: <span class="hljs-literal">true</span> | <span class="hljs-literal">false</span> }]</code></pre></div>
+<p>The <code>enforceForClassFields</code> option enforces that arrow functions and function expressions used as instance field initializers utilize <code>this</code>. This also applies to auto-accessor fields (fields declared with the <code>accessor</code> keyword) which are part of the <a href="https://github.com/tc39/proposal-decorators">stage 3 decorators proposal</a>. (default: <code>true</code>)</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>{ &quot;enforceForClassFields&quot;: true }</code> option (default):</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint class-methods-use-this: [&quot;error&quot;, { &quot;enforceForClassFields&quot;: true }] */</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    foo = <span class="hljs-function">() =&gt;</span> {}
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;enforceForClassFields&quot;: true }</code> option (default):</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint class-methods-use-this: [&quot;error&quot;, { &quot;enforceForClassFields&quot;: true }] */</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    foo = <span class="hljs-function">() =&gt;</span> {<span class="hljs-variable language_">this</span>;}
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;enforceForClassFields&quot;: false }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint class-methods-use-this: [&quot;error&quot;, { &quot;enforceForClassFields&quot;: false }] */</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    foo = <span class="hljs-function">() =&gt;</span> {}
+}</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> TypeScript code for this rule with the <code>{ &quot;enforceForClassFields&quot;: true }</code> option (default):</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint class-methods-use-this: [&quot;error&quot;, { &quot;enforceForClassFields&quot;: true }] */</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    foo = <span class="hljs-function">() =&gt;</span> {}
+    accessor bar = <span class="hljs-function">() =&gt;</span> {}
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> TypeScript code for this rule with the <code>{ &quot;enforceForClassFields&quot;: true }</code> option (default):</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint class-methods-use-this: [&quot;error&quot;, { &quot;enforceForClassFields&quot;: true }] */</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    foo = <span class="hljs-function">() =&gt;</span> {<span class="hljs-variable language_">this</span>;}
+    accessor bar = <span class="hljs-function">() =&gt;</span> {<span class="hljs-variable language_">this</span>;}
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> TypeScript code for this rule with the <code>{ &quot;enforceForClassFields&quot;: false }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint class-methods-use-this: [&quot;error&quot;, { &quot;enforceForClassFields&quot;: false }] */</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    foo = <span class="hljs-function">() =&gt;</span> {}
+    accessor bar = <span class="hljs-function">() =&gt;</span> {}
+}</code></pre></div>
+</div><h3 id="ignoreoverridemethods"><a class="anchor" href="#ignoreoverridemethods">#</a>ignoreOverrideMethods</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-string">&quot;class-methods-use-this&quot;</span>: [&lt;enabled&gt;, { <span class="hljs-string">&quot;ignoreOverrideMethods&quot;</span>: <span class="hljs-literal">true</span> | <span class="hljs-literal">false</span> }]</code></pre></div>
+<p>The <code>ignoreOverrideMethods</code> option ignores members that are marked with the <code>override</code> modifier. (default: <code>false</code>)</p>
+<p>Examples of <strong>incorrect</strong> TypeScript code for this rule with the <code>{ &quot;ignoreOverrideMethods&quot;: false }</code> option (default):</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint class-methods-use-this: [&quot;error&quot;, { &quot;ignoreOverrideMethods&quot;: false }] */</span>
+
+<span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Base</span> {
+    <span class="hljs-keyword">abstract</span> <span class="hljs-title function_">method</span>(): <span class="hljs-built_in">void</span>;
+    <span class="hljs-keyword">abstract</span> <span class="hljs-attr">property</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">void</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Derived</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Base</span> {
+    <span class="hljs-keyword">override</span> <span class="hljs-title function_">method</span>(<span class="hljs-params"></span>) {}
+    <span class="hljs-keyword">override</span> property = <span class="hljs-function">() =&gt;</span> {};
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> TypeScript code for this rule with the <code>{ &quot;ignoreOverrideMethods&quot;: false }</code> option (default):</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint class-methods-use-this: [&quot;error&quot;, { &quot;ignoreOverrideMethods&quot;: false }] */</span>
+
+<span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Base</span> {
+    <span class="hljs-keyword">abstract</span> <span class="hljs-title function_">method</span>(): <span class="hljs-built_in">void</span>;
+    <span class="hljs-keyword">abstract</span> <span class="hljs-attr">property</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">void</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Derived</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Base</span> {
+    <span class="hljs-keyword">override</span> <span class="hljs-title function_">method</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">foo</span> = <span class="hljs-string">&quot;Hello World&quot;</span>;
+    };
+    <span class="hljs-keyword">override</span> property = <span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-variable language_">this</span>;
+    };
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> TypeScript code for this rule with the <code>{ &quot;ignoreOverrideMethods&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint class-methods-use-this: [&quot;error&quot;, { &quot;ignoreOverrideMethods&quot;: true }] */</span>
+
+<span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Base</span> {
+    <span class="hljs-keyword">abstract</span> <span class="hljs-title function_">method</span>(): <span class="hljs-built_in">void</span>;
+    <span class="hljs-keyword">abstract</span> <span class="hljs-attr">property</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">void</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Derived</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Base</span> {
+    <span class="hljs-keyword">override</span> <span class="hljs-title function_">method</span>(<span class="hljs-params"></span>) {}
+    <span class="hljs-keyword">override</span> property = <span class="hljs-function">() =&gt;</span> {};
+}</code></pre></div>
+</div><h3 id="ignoreclasseswithimplements"><a class="anchor" href="#ignoreclasseswithimplements">#</a>ignoreClassesWithImplements</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-string">&quot;class-methods-use-this&quot;</span>: [&lt;enabled&gt;, { <span class="hljs-string">&quot;ignoreClassesWithImplements&quot;</span>: <span class="hljs-string">&quot;all&quot;</span> | <span class="hljs-string">&quot;public-fields&quot;</span> }]</code></pre></div>
+<p>The <code>ignoreClassesWithImplements</code> ignores class members that are defined within a class that <code>implements</code> an interface. The option accepts two possible values:</p>
+<ul>
+<li><code>&quot;all&quot;</code> - Ignores all classes that implement interfaces</li>
+<li><code>&quot;public-fields&quot;</code> - Only ignores public fields in classes that implement interfaces</li>
+</ul>
+<p>Examples of <strong>incorrect</strong> TypeScript code for this rule with the <code>{ &quot;ignoreClassesWithImplements&quot;: &quot;all&quot; }</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint class-methods-use-this: [&quot;error&quot;, { &quot;ignoreClassesWithImplements&quot;: &quot;all&quot; }] */</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Standalone</span> {
+    <span class="hljs-title function_">method</span>(<span class="hljs-params"></span>) {}
+    property = <span class="hljs-function">() =&gt;</span> {};
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> TypeScript code for this rule with the <code>{ &quot;ignoreClassesWithImplements&quot;: &quot;all&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint class-methods-use-this: [&quot;error&quot;, { &quot;ignoreClassesWithImplements&quot;: &quot;all&quot; }] */</span>
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Base</span> {
+    <span class="hljs-title function_">method</span>(): <span class="hljs-built_in">void</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Derived</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Base</span> {
+    <span class="hljs-title function_">method</span>(<span class="hljs-params"></span>) {}
+    property = <span class="hljs-function">() =&gt;</span> {};
+}</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> TypeScript code for this rule with the <code>{ &quot;ignoreClassesWithImplements&quot;: &quot;public-fields&quot; }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint class-methods-use-this: [&quot;error&quot;, { &quot;ignoreClassesWithImplements&quot;: &quot;public-fields&quot; }] */</span>
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Base</span> {
+    <span class="hljs-title function_">method</span>(): <span class="hljs-built_in">void</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Derived</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Base</span> {
+    <span class="hljs-title function_">method</span>(<span class="hljs-params"></span>) {}
+    property = <span class="hljs-function">() =&gt;</span> {};
+
+    <span class="hljs-keyword">private</span> <span class="hljs-title function_">privateMethod</span>(<span class="hljs-params"></span>) {}
+    <span class="hljs-keyword">private</span> privateProperty = <span class="hljs-function">() =&gt;</span> {};
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-title function_">protectedMethod</span>(<span class="hljs-params"></span>) {}
+    <span class="hljs-keyword">protected</span> protectedProperty = <span class="hljs-function">() =&gt;</span> {};
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> TypeScript code for this rule with the <code>{ &quot;ignoreClassesWithImplements&quot;: &quot;public-fields&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint class-methods-use-this: [&quot;error&quot;, { &quot;ignoreClassesWithImplements&quot;: &quot;public-fields&quot; }] */</span>
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Base</span> {
+    <span class="hljs-title function_">method</span>(): <span class="hljs-built_in">void</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Derived</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Base</span> {
+    <span class="hljs-title function_">method</span>(<span class="hljs-params"></span>) {}
+    property = <span class="hljs-function">() =&gt;</span> {};
+}</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>Fixing violations of this rule almost always is a breaking change, since it requires a change at every usage of the affected method.
+Therefore, if your project has downstream consumers you cannot break, or you do not wish to make invasive changes to every call site of a method, it likely does not make sense to address violations of this rule.</p>
+<h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes</a></li><li><a class="ext" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/static">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/static</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#exceptmethods">exceptMethods</a><a class="toc-3" href="#enforceforclassfields">enforceForClassFields</a><a class="toc-3" href="#ignoreoverridemethods">ignoreOverrideMethods</a><a class="toc-3" href="#ignoreclasseswithimplements">ignoreClassesWithImplements</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

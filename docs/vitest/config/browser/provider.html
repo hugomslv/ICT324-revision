@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>browser.provider | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › config/browser/provider  <a class="ext small" href="https://vitest.dev/config/browser/provider">version en ligne</a></div>
+<h1 id="browser-provider"><a class="anchor" href="#browser-provider">#</a>browser.provider</h1>
+<ul>
+<li><strong>Type:</strong> <code>BrowserProviderOption</code></li>
+</ul>
+<p>The return value of the provider factory. You can import the factory from <code>@vitest/browser-&lt;provider-name&gt;</code> or make your own provider:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+<span class="hljs-keyword">import</span> { webdriverio } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-webdriverio&#x27;</span>
+<span class="hljs-keyword">import</span> { preview } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-preview&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>(),
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">webdriverio</span>(),
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">preview</span>(),
+    },
+  },
+})</code></pre></div>
+<p>To configure how provider initializes the browser, you can pass down options to the factory function:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-comment">// shared provider options between all instances</span>
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>({
+        <span class="hljs-attr">launchOptions</span>: {
+          <span class="hljs-attr">slowMo</span>: <span class="hljs-number">50</span>,
+          <span class="hljs-attr">channel</span>: <span class="hljs-string">&#x27;chrome-beta&#x27;</span>,
+        },
+        <span class="hljs-attr">actionTimeout</span>: <span class="hljs-number">5_000</span>,
+      }),
+      <span class="hljs-attr">instances</span>: [
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> },
+        {
+          <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;firefox&#x27;</span>,
+          <span class="hljs-comment">// overriding options only for a single instance</span>
+          <span class="hljs-comment">// this will NOT merge options with the parent one</span>
+          <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>({
+            <span class="hljs-attr">launchOptions</span>: {
+              <span class="hljs-attr">firefoxUserPrefs</span>: {
+                <span class="hljs-string">&#x27;browser.startup.homepage&#x27;</span>: <span class="hljs-string">&#x27;https://example.com&#x27;</span>,
+              },
+            },
+          })
+        }
+      ],
+    },
+  },
+})</code></pre></div>
+<h2 id="custom-provider"><a class="anchor" href="#custom-provider">#</a>Custom Provider <Badge type="danger">advanced</Badge></h2>
+<div class="box box-danger"><div class="box-title">🛑 Danger : ADVANCED API</div><p>The custom provider API is highly experimental and can change between patches. If you just need to run tests in a browser, use the <a href="instances.html"><code>browser.instances</code></a> option instead.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">BrowserProvider</span> {
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">mocker</span>?: <span class="hljs-title class_">BrowserModuleMocker</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">initScripts</span>?: <span class="hljs-built_in">string</span>[]
+  <span class="hljs-comment">/**
+   * <span class="hljs-doctag">@experimental</span> <span class="hljs-variable">opt</span>-in into file parallelisation
+   */</span>
+  <span class="hljs-attr">supportsParallelism</span>: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-attr">getCommandsContext</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">sessionId</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt;
+  <span class="hljs-attr">openPage</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">sessionId</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">url</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-attr">getCDPSession</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">sessionId</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">CDPSession</span>&gt;
+  <span class="hljs-attr">close</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">Awaitable</span>&lt;<span class="hljs-built_in">void</span>&gt;
+}</code></pre></div>
+
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuring Vitest (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/index  <a class="ext small" href="https://vitest.dev/config/">version en ligne</a></div>
+<h1 id="configuring-vitest"><a class="anchor" href="#configuring-vitest">#</a>Configuring Vitest</h1>
+<p>If you are using Vite and have a <code>vite.config</code> file, Vitest will read it to match with the plugins and setup as your Vite app. If you want to have a different configuration for testing or your main app doesn&#39;t rely on Vite specifically, you could either:</p>
+<ul>
+<li>Create <code>vitest.config.ts</code>, which will have the higher priority and will <strong>override</strong> the configuration from <code>vite.config.ts</code> (Vitest supports all conventional JS and TS extensions, but doesn&#39;t support <code>json</code>) - it means all options in your <code>vite.config</code> will be <strong>ignored</strong></li>
+<li>Pass <code>--config</code> option to CLI, e.g. <code>vitest --config ./path/to/vitest.config.ts</code></li>
+<li>Use <code>process.env.VITEST</code> or <code>mode</code> property on <code>defineConfig</code> (will be set to <code>test</code> if not overridden with <code>--mode</code>) to conditionally apply different configuration in <code>vite.config.ts</code>. Note that like any other environment variable, <code>VITEST</code> is also exposed on <code>import.meta.env</code> in your tests</li>
+</ul>
+<p>When an explicit <code>--config</code> option is not provided, Vitest looks for <code>vitest.config.{ts,mts,cts,js,mjs,cjs}</code> first and <code>vite.config.{ts,mts,cts,js,mjs,cjs}</code> second in the project <a href="root.html"><code>root</code></a>. If no config file is found, Vitest will run without one.</p>
+<p>To configure <code>vitest</code> itself, add <code>test</code> property in your Vite config. You&#39;ll also need to add a reference to Vitest types using a <a href="https://www.typescriptlang.org/docs/handbook/triple-slash-directives.html#-reference-types-">triple slash command</a> at the top of your config file, if you are importing <code>defineConfig</code> from <code>vite</code> itself.</p>
+<p>If you are not using <code>vite</code>, add <code>defineConfig</code> imported from <code>vitest/config</code> to your config file:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-comment">// ... Specify options here.</span>
+  },
+})</code></pre></div>
+<p>If you have a <code>vite</code> config already, you can add <code>/// &lt;reference types=&quot;vitest/config&quot; /&gt;</code> to include the <code>test</code> types:</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-comment">/// &lt;reference types=&quot;vitest/config&quot; /&gt;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-comment">// ... Specify options here.</span>
+  },
+})</code></pre></div>
+<p>You can retrieve Vitest&#39;s default options to expand them if needed:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { configDefaults, defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">exclude</span>: [...configDefaults.<span class="hljs-property">exclude</span>, <span class="hljs-string">&#x27;packages/template/*&#x27;</span>],
+  },
+})</code></pre></div>
+<p>When using a separate <code>vitest.config.js</code>, you can also extend Vite&#39;s options from another config file if needed:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig, mergeConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> viteConfig <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./vite.config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">mergeConfig</span>(viteConfig, <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">exclude</span>: [<span class="hljs-string">&#x27;packages/template/*&#x27;</span>],
+  },
+}))</code></pre></div>
+<p>If your Vite config is defined as a function, you can define the config like this:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig, mergeConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> viteConfig <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./vite.config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>(<span class="hljs-function"><span class="hljs-params">configEnv</span> =&gt;</span> <span class="hljs-title function_">mergeConfig</span>(
+  <span class="hljs-title function_">viteConfig</span>(configEnv),
+  <span class="hljs-title function_">defineConfig</span>({
+    <span class="hljs-attr">test</span>: {
+      <span class="hljs-attr">exclude</span>: [<span class="hljs-string">&#x27;packages/template/*&#x27;</span>],
+    },
+  })
+))</code></pre></div>
+<p>Since Vitest uses Vite config, you can also use any configuration option from <a href="https://vitejs.dev/config/">Vite</a>. For example, <code>define</code> to define global variables, or <code>resolve.alias</code> to define aliases - these options should be defined on the top level, <em>not</em> within a <code>test</code> property.</p>
+<h2 id="automatic-dependency-installation"><a class="anchor" href="#automatic-dependency-installation">#</a>Automatic Dependency Installation</h2>
+<p>Vitest will prompt you to install certain dependencies if they are not already installed. You can disable this behavior by setting the <code>VITEST_SKIP_INSTALL_CHECKS=1</code> environment variable.</p>
+<h2 id="config-options"><a class="anchor" href="#config-options">#</a>Config Options</h2>
+<p>Configuration options that are not supported inside a <a href="../guide/projects.html">project</a> config have <CRoot /> icon next to them. This means they can only be set in the root Vitest config.</p>
+
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

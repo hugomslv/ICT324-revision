@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › api/test  <a class="ext small" href="https://vitest.dev/api/test">version en ligne</a></div>
+<h1 id="test"><a class="anchor" href="#test">#</a>Test</h1>
+<ul>
+<li><strong>Alias:</strong> <code>it</code></li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">test</span>(<span class="hljs-params">
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">Function</span>,
+  <span class="hljs-attr">body</span>?: () =&gt; <span class="hljs-built_in">unknown</span>,
+  <span class="hljs-attr">timeout</span>?: <span class="hljs-built_in">number</span>
+</span>): <span class="hljs-built_in">void</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">test</span>(<span class="hljs-params">
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">Function</span>,
+  <span class="hljs-attr">options</span>: <span class="hljs-title class_">TestOptions</span>,
+  <span class="hljs-attr">body</span>?: () =&gt; <span class="hljs-built_in">unknown</span>,
+</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p><code>test</code> or <code>it</code> defines a set of related expectations. It receives the test name and a function that holds the expectations to test.</p>
+<p>Optionally, you can provide a timeout (in milliseconds) for specifying how long to wait before terminating, or a set of <a href="#test-options">additional options</a>. The default timeout is 5 seconds, and can be configured globally with <a href="../config/testtimeout.html"><code>testTimeout</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;should work as expected&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">2</span>)
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If the first argument is a function, its <code>name</code> property will be used as the name of the test. The function itself will not be called.</p>
+<p>If test body is not provided, the test is marked as <code>todo</code>.</p>
+</div><p>When a test function returns a promise, the runner will wait until it is resolved to collect async expectations. If the promise is rejected, the test will fail.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>In Jest, <code>TestFunction</code> can also be of type <code>(done: DoneCallback) =&gt; void</code>. If this form is used, the test will not be concluded until <code>done</code> is called. You can achieve the same using an <code>async</code> function, see the <a href="../guide/migration/jest.html#done-callback">Migration guide Done Callback section</a>.</p>
+</div><h2 id="test-options"><a class="anchor" href="#test-options">#</a>Test Options</h2>
+<p>You can define boolean options by chaining properties on a function:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+test.<span class="hljs-title function_">skip</span>(<span class="hljs-string">&#x27;skipped test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// some logic that fails right now</span>
+})
+
+test.<span class="hljs-property">concurrent</span>.<span class="hljs-title function_">skip</span>(<span class="hljs-string">&#x27;skipped concurrent test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// some logic that fails right now</span>
+})</code></pre></div>
+<p>But you can also provide an object as a second argument instead:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;skipped test&#x27;</span>, { <span class="hljs-attr">skip</span>: <span class="hljs-literal">true</span> }, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// some logic that fails right now</span>
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;skipped concurrent test&#x27;</span>, { <span class="hljs-attr">skip</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">concurrent</span>: <span class="hljs-literal">true</span> }, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// some logic that fails right now</span>
+})</code></pre></div>
+<p>They both work in exactly the same way. To use either one is purely a stylistic choice.</p>
+<h3 id="timeout"><a class="anchor" href="#timeout">#</a>timeout</h3>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Default:</strong> <code>5_000</code> (configured by <a href="../config/testtimeout.html"><code>testTimeout</code></a>)</li>
+</ul>
+<p>Test timeout in milliseconds.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that if you are providing timeout as the last argument, you cannot use options anymore:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// ✅ this works</span>
+test.<span class="hljs-title function_">skip</span>(<span class="hljs-string">&#x27;heavy test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// ...</span>
+}, <span class="hljs-number">10_000</span>)
+
+<span class="hljs-comment">// ❌ this doesn&#x27;t work</span>
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;heavy test&#x27;</span>, { <span class="hljs-attr">skip</span>: <span class="hljs-literal">true</span> }, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// ...</span>
+}, <span class="hljs-number">10_000</span>)</code></pre></div>
+<p>However, you can provide a timeout inside the object:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// ✅ this works</span>
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;heavy test&#x27;</span>, { <span class="hljs-attr">skip</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">timeout</span>: <span class="hljs-number">10_000</span> }, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// ...</span>
+})</code></pre></div>
+</div><h3 id="retry"><a class="anchor" href="#retry">#</a>retry</h3>
+<ul>
+<li><strong>Default:</strong> <code>0</code> (configured by <a href="../config/retry.html"><code>retry</code></a>)</li>
+<li><strong>Type:</strong></li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">type</span> <span class="hljs-title class_">Retry</span> = <span class="hljs-built_in">number</span> | {
+  <span class="hljs-comment">/**
+   * The number of times to retry the test if it fails.
+   * <span class="hljs-doctag">@default</span> 0
+   */</span>
+  <span class="hljs-attr">count</span>?: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * Delay in milliseconds between retry attempts.
+   * <span class="hljs-doctag">@default</span> 0
+   */</span>
+  <span class="hljs-attr">delay</span>?: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * Condition to determine if a test should be retried based on the error.
+   * - If a RegExp, it is tested against the error message
+   * - If a function, called with the TestError object; return true to retry
+   *
+   * <span class="hljs-doctag">NOTE:</span> Functions can only be used in test files, not in vitest.config.ts,
+   * because the configuration is serialized when passed to worker threads.
+   *
+   * <span class="hljs-doctag">@default</span> undefined (retry on all errors)
+   */</span>
+  <span class="hljs-attr">condition</span>?: <span class="hljs-title class_">RegExp</span> | (<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">error</span>: <span class="hljs-title class_">TestError</span></span>) =&gt;</span> <span class="hljs-built_in">boolean</span>)
+}</code></pre></div>
+<p>Retry configuration for the test. If a number, specifies how many times to retry. If an object, allows fine-grained retry control.</p>
+<p>Note that the object configuration is available only since Vitest 4.1.</p>
+<h3 id="repeats"><a class="anchor" href="#repeats">#</a>repeats</h3>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Default:</strong> <code>0</code></li>
+</ul>
+<p>How many times the test will run again. If set to <code>0</code> (the default), the test will run only one time.</p>
+<p>This can be useful for debugging flaky tests.</p>
+<h3 id="tags"><a class="anchor" href="#tags">#</a>tags <Version>4.1.0</Version></h3>
+<ul>
+<li><strong>Type:</strong> <code>string[]</code></li>
+<li><strong>Default:</strong> <code>[]</code></li>
+</ul>
+<p>Custom user <a href="../guide/test-tags.html">tags</a>. If the tag is not specified in the <a href="../config/tags.html">configuration</a>, the test will fail before it starts, unless <a href="../config/stricttags.html"><code>strictTags</code></a> is disabled manually.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;user returns data from db&#x27;</span>, { <span class="hljs-attr">tags</span>: [<span class="hljs-string">&#x27;db&#x27;</span>, <span class="hljs-string">&#x27;flaky&#x27;</span>] }, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// ...</span>
+})</code></pre></div>
+<h3 id="meta"><a class="anchor" href="#meta">#</a>meta <Version>4.1.0</Version></h3>
+<ul>
+<li><strong>Type:</strong> <code>TaskMeta</code></li>
+</ul>
+<p>Attaches custom <a href="advanced/metadata.html">metadata</a> available in reporters.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Vitest merges top-level properties inherited from suites or tags. However, it does not perform a deep merge of nested objects.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">describe</span>(
+  <span class="hljs-string">&#x27;nested meta&#x27;</span>,
+  {
+    <span class="hljs-attr">meta</span>: {
+      <span class="hljs-attr">nested</span>: { <span class="hljs-attr">object</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">array</span>: <span class="hljs-literal">false</span> },
+    },
+  },
+  <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">test</span>(
+      <span class="hljs-string">&#x27;overrides part of meta&#x27;</span>,
+      {
+        <span class="hljs-attr">meta</span>: {
+          <span class="hljs-attr">nested</span>: { <span class="hljs-attr">object</span>: <span class="hljs-literal">false</span> }
+        },
+      },
+      <span class="hljs-function">(<span class="hljs-params">{ task }</span>) =&gt;</span> {
+        <span class="hljs-comment">// task.meta === { nested: { object: false } }</span>
+        <span class="hljs-comment">// notice array got lost because &quot;nested&quot; object was overridden</span>
+      }
+    )
+  }
+)</code></pre></div>
+<p>Prefer using non-nested meta, if possible.</p>
+</div><h3 id="concurrent"><a class="anchor" href="#concurrent">#</a>concurrent</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code> (configured by <a href="../config/sequence.html#sequence-concurrent"><code>sequence.concurrent</code></a>)</li>
+<li><strong>Alias:</strong> <a href="#test-concurrent"><code>test.concurrent</code></a></li>
+</ul>
+<p>Whether this test run concurrently with other concurrent tests in the suite.</p>
+<p>Set <code>concurrent</code> to <code>false</code> to opt out of concurrency inherited from <a href="describe.html#describe-concurrent"><code>describe.concurrent</code></a> or <a href="../config/sequence.html#sequence-concurrent"><code>sequence.concurrent</code></a>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;runs sequentially&#x27;</span>, { <span class="hljs-attr">concurrent</span>: <span class="hljs-literal">false</span> }, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// ...</span>
+})</code></pre></div>
+<h3 id="skip"><a class="anchor" href="#skip">#</a>skip</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Alias:</strong> <a href="#test-skip"><code>test.skip</code></a></li>
+</ul>
+<p>Whether the test should be skipped.</p>
+<h3 id="only"><a class="anchor" href="#only">#</a>only</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Alias:</strong> <a href="#test-only"><code>test.only</code></a></li>
+</ul>
+<p>Should this test be the only one running in a suite.</p>
+<h3 id="todo"><a class="anchor" href="#todo">#</a>todo</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Alias:</strong> <a href="#test-todo"><code>test.todo</code></a></li>
+</ul>
+<p>Whether the test should be skipped and marked as a todo.</p>
+<h3 id="fails"><a class="anchor" href="#fails">#</a>fails</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Alias:</strong> <a href="#test-fails"><code>test.fails</code></a></li>
+</ul>
+<p>Whether the test is expected to fail. If it does, the test will pass, otherwise it will fail.</p>
+<h2 id="test-extend"><a class="anchor" href="#test-extend">#</a>test.extend</h2>
+<ul>
+<li><strong>Alias:</strong> <code>it.extend</code></li>
+</ul>
+<p>Use <code>test.extend</code> to extend the test context with custom fixtures. This will return a new <code>test</code> and it&#39;s also extendable, so you can compose more fixtures or override existing ones by extending it as you need. See <a href="../guide/test-context.html#extend-test-context">Extend Test Context</a> for more information.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test <span class="hljs-keyword">as</span> baseTest, expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> test = baseTest
+  <span class="hljs-comment">// Simple value - type is inferred as { port: number; host: string }</span>
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;config&#x27;</span>, { <span class="hljs-attr">port</span>: <span class="hljs-number">3000</span>, <span class="hljs-attr">host</span>: <span class="hljs-string">&#x27;localhost&#x27;</span> })
+  <span class="hljs-comment">// Function fixture - type is inferred from return value</span>
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;server&#x27;</span>, <span class="hljs-title function_">async</span> ({ config }) =&gt; {
+    <span class="hljs-comment">// TypeScript knows config is { port: number; host: string }</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`http://<span class="hljs-subst">${config.host}</span>:<span class="hljs-subst">${config.port}</span>`</span>
+  })
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;server uses correct port&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ config, server }</span>) =&gt;</span> {
+  <span class="hljs-comment">// TypeScript knows the types:</span>
+  <span class="hljs-comment">// - config is { port: number; host: string }</span>
+  <span class="hljs-comment">// - server is string</span>
+  <span class="hljs-title function_">expect</span>(server).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;http://localhost:3000&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(config.<span class="hljs-property">port</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">3000</span>)
+})</code></pre></div>
+<h2 id="test-override"><a class="anchor" href="#test-override">#</a>test.override <Version>4.1.0</Version></h2>
+<p>Use <code>test.override</code> to override fixture values for all tests within the current suite and its nested suites. This must be called at the top level of a <code>describe</code> block. See <a href="../guide/test-context.html#overriding-fixture-values">Overriding Fixture Values</a> for more information.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test <span class="hljs-keyword">as</span> baseTest, describe, expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;dependency&#x27;</span>, <span class="hljs-string">&#x27;default&#x27;</span>)
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;dependant&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ dependency }</span>) =&gt;</span> dependency)
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;use scoped values&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  test.<span class="hljs-title function_">override</span>({ <span class="hljs-attr">dependency</span>: <span class="hljs-string">&#x27;new&#x27;</span> })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;uses scoped value&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ dependant }</span>) =&gt;</span> {
+    <span class="hljs-comment">// `dependant` uses the new overridden value that is scoped</span>
+    <span class="hljs-comment">// to all tests in this suite</span>
+    <span class="hljs-title function_">expect</span>(dependant).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">dependency</span>: <span class="hljs-string">&#x27;new&#x27;</span> })
+  })
+})</code></pre></div>
+<h2 id="test-scoped"><a class="anchor" href="#test-scoped">#</a>test.scoped <Version>3.1.0</Version> <Deprecated /></h2>
+<ul>
+<li><strong>Alias:</strong> <code>it.scoped</code></li>
+</ul>
+<div class="box box-danger"><div class="box-title">🛑 Danger : DEPRECATED</div><p><code>test.scoped</code> is deprecated in favor of <a href="#test-override"><code>test.override</code></a> and will be removed in a future major version.</p>
+</div><p>Alias of <a href="#test-override"><code>test.override</code></a></p>
+<h2 id="test-skip"><a class="anchor" href="#test-skip">#</a>test.skip</h2>
+<ul>
+<li><strong>Alias:</strong> <code>it.skip</code></li>
+</ul>
+<p>If you want to skip running certain tests, but you don&#39;t want to delete the code due to any reason, you can use <code>test.skip</code> to avoid running them.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+test.<span class="hljs-title function_">skip</span>(<span class="hljs-string">&#x27;skipped test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// Test skipped, no error</span>
+  assert.<span class="hljs-title function_">equal</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>), <span class="hljs-number">3</span>)
+})</code></pre></div>
+<p>You can also skip test by calling <code>skip</code> on its <a href="../guide/test-context.html">context</a> dynamically:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;skipped test&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">context</span>) =&gt;</span> {
+  context.<span class="hljs-title function_">skip</span>()
+  <span class="hljs-comment">// Test skipped, no error</span>
+  assert.<span class="hljs-title function_">equal</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>), <span class="hljs-number">3</span>)
+})</code></pre></div>
+<p>If the condition is unknown, you can provide it to the <code>skip</code> method as the first arguments:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;skipped test&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">context</span>) =&gt;</span> {
+  context.<span class="hljs-title function_">skip</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() &lt; <span class="hljs-number">0.5</span>, <span class="hljs-string">&#x27;optional message&#x27;</span>)
+  <span class="hljs-comment">// Test skipped, no error</span>
+  assert.<span class="hljs-title function_">equal</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>), <span class="hljs-number">3</span>)
+})</code></pre></div>
+<h2 id="test-skipif"><a class="anchor" href="#test-skipif">#</a>test.skipIf</h2>
+<ul>
+<li><strong>Alias:</strong> <code>it.skipIf</code></li>
+</ul>
+<p>In some cases you might run tests multiple times with different environments, and some of the tests might be environment-specific. Instead of wrapping the test code with <code>if</code>, you can use <code>test.skipIf</code> to skip the test whenever the condition is truthy.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> isDev = process.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-string">&#x27;development&#x27;</span>
+
+test.<span class="hljs-title function_">skipIf</span>(isDev)(<span class="hljs-string">&#x27;prod only test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// this test only runs in production</span>
+})</code></pre></div>
+<h2 id="test-runif"><a class="anchor" href="#test-runif">#</a>test.runIf</h2>
+<ul>
+<li><strong>Alias:</strong> <code>it.runIf</code></li>
+</ul>
+<p>Opposite of <a href="#test-skipif">test.skipIf</a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> isDev = process.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-string">&#x27;development&#x27;</span>
+
+test.<span class="hljs-title function_">runIf</span>(isDev)(<span class="hljs-string">&#x27;dev only test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// this test only runs in development</span>
+})</code></pre></div>
+<h2 id="test-only"><a class="anchor" href="#test-only">#</a>test.only</h2>
+<ul>
+<li><strong>Alias:</strong> <code>it.only</code></li>
+</ul>
+<p>Use <code>test.only</code> to only run certain tests in a given suite. This is useful when debugging.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+test.<span class="hljs-title function_">only</span>(<span class="hljs-string">&#x27;test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// Only this test (and others marked with only) are run</span>
+  assert.<span class="hljs-title function_">equal</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>), <span class="hljs-number">2</span>)
+})</code></pre></div>
+<p>Sometimes it is very useful to run <code>only</code> tests in a certain file, ignoring all other tests from the whole test suite, which pollute the output.</p>
+<p>In order to do that, run <code>vitest</code> with specific file containing the tests in question:</p>
+<div class="code"><pre><code class="hljs lang-shell">vitest interesting.test.ts</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Vitest detects when tests are running in CI and will throw an error if any test has <code>only</code> flag. You can configure this behaviour via <a href="../config/allowonly.html"><code>allowOnly</code></a> option.</p>
+</div><h2 id="test-concurrent"><a class="anchor" href="#test-concurrent">#</a>test.concurrent</h2>
+<ul>
+<li><strong>Alias:</strong> <code>it.concurrent</code></li>
+</ul>
+<p><code>test.concurrent</code> marks consecutive tests to be run in parallel. It receives the test name, an async function with the tests to collect, and an optional timeout (in milliseconds).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// The two tests marked with concurrent will be run in parallel</span>
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;serial test&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+  test.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;concurrent test 1&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+  test.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;concurrent test 2&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+})</code></pre></div>
+<p><code>test.skip</code>, <code>test.only</code>, and <code>test.todo</code> works with concurrent tests. All the following combinations are valid:</p>
+<div class="code"><pre><code class="hljs lang-ts">test.<span class="hljs-title function_">concurrent</span>(<span class="hljs-comment">/* ... */</span>)
+test.<span class="hljs-property">skip</span>.<span class="hljs-title function_">concurrent</span>(<span class="hljs-comment">/* ... */</span>) <span class="hljs-comment">// or test.concurrent.skip(/* ... */)</span>
+test.<span class="hljs-property">only</span>.<span class="hljs-title function_">concurrent</span>(<span class="hljs-comment">/* ... */</span>) <span class="hljs-comment">// or test.concurrent.only(/* ... */)</span>
+test.<span class="hljs-property">todo</span>.<span class="hljs-title function_">concurrent</span>(<span class="hljs-comment">/* ... */</span>) <span class="hljs-comment">// or test.concurrent.todo(/* ... */)</span></code></pre></div>
+<p>When running concurrent tests, Snapshots and Assertions must use <code>expect</code> from the local <a href="../guide/test-context.html">Test Context</a> to ensure the right test is detected.</p>
+<div class="code"><pre><code class="hljs lang-ts">test.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;test 1&#x27;</span>, <span class="hljs-title function_">async</span> ({ expect }) =&gt; {
+  <span class="hljs-title function_">expect</span>(foo).<span class="hljs-title function_">toMatchSnapshot</span>()
+})
+test.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;test 2&#x27;</span>, <span class="hljs-title function_">async</span> ({ expect }) =&gt; {
+  <span class="hljs-title function_">expect</span>(foo).<span class="hljs-title function_">toMatchSnapshot</span>()
+})</code></pre></div>
+<p>Note that if tests are synchronous, Vitest will still run them sequentially.</p>
+<h2 id="test-todo"><a class="anchor" href="#test-todo">#</a>test.todo</h2>
+<ul>
+<li><strong>Alias:</strong> <code>it.todo</code></li>
+</ul>
+<p>Use <code>test.todo</code> to stub tests to be implemented later. An entry will be shown in the report for the tests so you know how many tests you still need to implement.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// An entry will be shown in the report for this test</span>
+test.<span class="hljs-title function_">todo</span>(<span class="hljs-string">&#x27;unimplemented test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// failing implementation...</span>
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Vitest will automatically mark test as <code>todo</code> if test has no body.</p>
+</div><h2 id="test-fails"><a class="anchor" href="#test-fails">#</a>test.fails</h2>
+<ul>
+<li><strong>Alias:</strong> <code>it.fails</code></li>
+</ul>
+<p>Use <code>test.fails</code> to indicate that an assertion will fail explicitly.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+test.<span class="hljs-title function_">fails</span>(<span class="hljs-string">&#x27;repro #1234&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">4</span>)
+})</code></pre></div>
+<p>This flag is useful to track difference in behaviour of your library over time. For example, you can define a failing test without fixing the issue yet due to time constraints. Tests marked with <code>fails</code> are tracked in the test summary since Vitest 4.1.</p>
+<h2 id="test-each"><a class="anchor" href="#test-each">#</a>test.each</h2>
+<ul>
+<li><strong>Alias:</strong> <code>it.each</code></li>
+</ul>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>While <code>test.each</code> is provided for Jest compatibility,
+Vitest also has <a href="#test-for"><code>test.for</code></a> with an additional feature to integrate <a href="../guide/test-context.html"><code>TestContext</code></a>.</p>
+</div><p>Use <code>test.each</code> when you need to run the same test with different variables.
+You can inject parameters with <a href="https://nodejs.org/api/util.html#util_util_format_format_args">printf formatting</a> in the test name in the order of the test function parameters.</p>
+<ul>
+<li><code>%s</code>: string</li>
+<li><code>%d</code>: number</li>
+<li><code>%i</code>: integer</li>
+<li><code>%f</code>: floating point value</li>
+<li><code>%j</code>: json</li>
+<li><code>%o</code>: object</li>
+<li><code>%#</code>: 0-based index of the test case</li>
+<li><code>%$</code>: 1-based index of the test case</li>
+<li><code>%%</code>: single percent sign (&#39;%&#39;)</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+test.<span class="hljs-title function_">each</span>([
+  [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>],
+  [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
+  [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>],
+])(<span class="hljs-string">&#x27;add(%i, %i) -&gt; %i&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">a, b, expected</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(a + b).<span class="hljs-title function_">toBe</span>(expected)
+})
+
+<span class="hljs-comment">// this will return</span>
+<span class="hljs-comment">// ✓ add(1, 1) -&gt; 2</span>
+<span class="hljs-comment">// ✓ add(1, 2) -&gt; 3</span>
+<span class="hljs-comment">// ✓ add(2, 1) -&gt; 3</span></code></pre></div>
+<p>You can also access object properties and array elements with <code>$</code> prefix:</p>
+<div class="code"><pre><code class="hljs lang-ts">test.<span class="hljs-title function_">each</span>([
+  { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">expected</span>: <span class="hljs-number">2</span> },
+  { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">expected</span>: <span class="hljs-number">3</span> },
+  { <span class="hljs-attr">a</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">expected</span>: <span class="hljs-number">3</span> },
+])(<span class="hljs-string">&#x27;add($a, $b) -&gt; $expected&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ a, b, expected }</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(a + b).<span class="hljs-title function_">toBe</span>(expected)
+})
+
+<span class="hljs-comment">// this will return</span>
+<span class="hljs-comment">// ✓ add(1, 1) -&gt; 2</span>
+<span class="hljs-comment">// ✓ add(1, 2) -&gt; 3</span>
+<span class="hljs-comment">// ✓ add(2, 1) -&gt; 3</span>
+
+test.<span class="hljs-title function_">each</span>([
+  [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>],
+  [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
+  [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>],
+])(<span class="hljs-string">&#x27;add($0, $1) -&gt; $2&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">a, b, expected</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(a + b).<span class="hljs-title function_">toBe</span>(expected)
+})
+
+<span class="hljs-comment">// this will return</span>
+<span class="hljs-comment">// ✓ add(1, 1) -&gt; 2</span>
+<span class="hljs-comment">// ✓ add(1, 2) -&gt; 3</span>
+<span class="hljs-comment">// ✓ add(2, 1) -&gt; 3</span></code></pre></div>
+<p>You can also access Object attributes with <code>.</code>, if you are using objects as arguments:</p>
+<div class="code"><pre><code class="hljs lang-ts">test.<span class="hljs-property">each</span><span class="hljs-string">`
+a               | b      | expected
+<span class="hljs-subst">${{ val: <span class="hljs-number">1</span> }}</span>   | <span class="hljs-subst">${<span class="hljs-string">&#x27;b&#x27;</span>}</span> | <span class="hljs-subst">${<span class="hljs-string">&#x27;1b&#x27;</span>}</span>
+<span class="hljs-subst">${{ val: <span class="hljs-number">2</span> }}</span>   | <span class="hljs-subst">${<span class="hljs-string">&#x27;b&#x27;</span>}</span> | <span class="hljs-subst">${<span class="hljs-string">&#x27;2b&#x27;</span>}</span>
+<span class="hljs-subst">${{ val: <span class="hljs-number">3</span> }}</span>   | <span class="hljs-subst">${<span class="hljs-string">&#x27;b&#x27;</span>}</span> | <span class="hljs-subst">${<span class="hljs-string">&#x27;3b&#x27;</span>}</span>
+`</span>(<span class="hljs-string">&#x27;add($a.val, $b) -&gt; $expected&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ a, b, expected }</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(a.<span class="hljs-property">val</span> + b).<span class="hljs-title function_">toBe</span>(expected)
+})
+
+<span class="hljs-comment">// this will return</span>
+<span class="hljs-comment">// ✓ add(1, b) -&gt; 1b</span>
+<span class="hljs-comment">// ✓ add(2, b) -&gt; 2b</span>
+<span class="hljs-comment">// ✓ add(3, b) -&gt; 3b</span></code></pre></div>
+<ul>
+<li>First row should be column names, separated by <code>|</code>;</li>
+<li>One or more subsequent rows of data supplied as template literal expressions using <code>${value}</code> syntax.</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+test.<span class="hljs-property">each</span><span class="hljs-string">`
+  a               | b      | expected
+  <span class="hljs-subst">${<span class="hljs-number">1</span>}</span>            | <span class="hljs-subst">${<span class="hljs-number">1</span>}</span>   | <span class="hljs-subst">${<span class="hljs-number">2</span>}</span>
+  <span class="hljs-subst">${<span class="hljs-string">&#x27;a&#x27;</span>}</span>          | <span class="hljs-subst">${<span class="hljs-string">&#x27;b&#x27;</span>}</span> | <span class="hljs-subst">${<span class="hljs-string">&#x27;ab&#x27;</span>}</span>
+  <span class="hljs-subst">${[]}</span>           | <span class="hljs-subst">${<span class="hljs-string">&#x27;b&#x27;</span>}</span> | <span class="hljs-subst">${<span class="hljs-string">&#x27;b&#x27;</span>}</span>
+  <span class="hljs-subst">${{}}</span>           | <span class="hljs-subst">${<span class="hljs-string">&#x27;b&#x27;</span>}</span> | <span class="hljs-subst">${<span class="hljs-string">&#x27;[object Object]b&#x27;</span>}</span>
+  <span class="hljs-subst">${{ asd: <span class="hljs-number">1</span> }}</span>   | <span class="hljs-subst">${<span class="hljs-string">&#x27;b&#x27;</span>}</span> | <span class="hljs-subst">${<span class="hljs-string">&#x27;[object Object]b&#x27;</span>}</span>
+`</span>(<span class="hljs-string">&#x27;returns $expected when $a is added $b&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ a, b, expected }</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(a + b).<span class="hljs-title function_">toBe</span>(expected)
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Vitest formats interpolated title values with its display formatter. If the value is too truncated, you can increase <a href="../config/tasktitlevalueformattruncate.html">taskTitleValueFormatTruncate</a> in your config file.</p>
+</div><h2 id="test-for"><a class="anchor" href="#test-for">#</a>test.for</h2>
+<ul>
+<li><strong>Alias:</strong> <code>it.for</code></li>
+</ul>
+<p>Alternative to <code>test.each</code> to provide <a href="../guide/test-context.html"><code>TestContext</code></a>.</p>
+<p>The difference from <code>test.each</code> lies in how arrays are provided in the arguments.
+Non-array arguments to <code>test.for</code> (including template string usage) work exactly the same as for <code>test.each</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// `each` spreads arrays</span>
+test.<span class="hljs-title function_">each</span>([
+  [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>],
+  [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
+  [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>],
+])(<span class="hljs-string">&#x27;add(%i, %i) -&gt; %i&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">a, b, expected</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(a + b).<span class="hljs-title function_">toBe</span>(expected)
+})
+
+<span class="hljs-comment">// `for` doesn&#x27;t spread arrays (notice the square brackets around the arguments)</span>
+test.<span class="hljs-title function_">for</span>([
+  [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>],
+  [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
+  [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>],
+])(<span class="hljs-string">&#x27;add(%i, %i) -&gt; %i&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">[a, b, expected]</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(a + b).<span class="hljs-title function_">toBe</span>(expected)
+})</code></pre></div>
+<p>The 2nd argument is <a href="../guide/test-context.html"><code>TestContext</code></a> and can be used for concurrent snapshots, for example:</p>
+<div class="code"><pre><code class="hljs lang-ts">test.<span class="hljs-property">concurrent</span>.<span class="hljs-title function_">for</span>([
+  [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>],
+  [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>],
+  [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>],
+])(<span class="hljs-string">&#x27;add(%i, %i)&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">[a, b], { expect }</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(a + b).<span class="hljs-title function_">toMatchSnapshot</span>()
+})</code></pre></div>
+<h2 id="test-describe"><a class="anchor" href="#test-describe">#</a>test.describe <Version>4.1.0</Version></h2>
+<p>Scoped <code>describe</code>. See <a href="describe.html">describe</a> for more information.</p>
+<h2 id="test-suite"><a class="anchor" href="#test-suite">#</a>test.suite <Version>4.1.0</Version></h2>
+<p>Alias for <code>suite</code>. See <a href="describe.html">describe</a> for more information.</p>
+<h2 id="test-beforeeach"><a class="anchor" href="#test-beforeeach">#</a>test.beforeEach</h2>
+<p>Scoped <code>beforeEach</code> hook that inherits types from <a href="#test-extend"><code>test.extend</code></a>. See <a href="hooks.html#beforeeach">beforeEach</a> for more information.</p>
+<h2 id="test-aftereach"><a class="anchor" href="#test-aftereach">#</a>test.afterEach</h2>
+<p>Scoped <code>afterEach</code> hook that inherits types from <a href="#test-extend"><code>test.extend</code></a>. See <a href="hooks.html#aftereach">afterEach</a> for more information.</p>
+<h2 id="test-beforeall"><a class="anchor" href="#test-beforeall">#</a>test.beforeAll</h2>
+<p>Scoped <code>beforeAll</code> hook that inherits types from <a href="#test-extend"><code>test.extend</code></a>. See <a href="hooks.html#beforeall">beforeAll</a> for more information.</p>
+<h2 id="test-afterall"><a class="anchor" href="#test-afterall">#</a>test.afterAll</h2>
+<p>Scoped <code>afterAll</code> hook that inherits types from <a href="#test-extend"><code>test.extend</code></a>. See <a href="hooks.html#afterall">afterAll</a> for more information.</p>
+<h2 id="test-aroundeach"><a class="anchor" href="#test-aroundeach">#</a>test.aroundEach <Version>4.1.0</Version></h2>
+<p>Scoped <code>aroundEach</code> hook that inherits types from <a href="#test-extend"><code>test.extend</code></a>. See <a href="hooks.html#aroundeach">aroundEach</a> for more information.</p>
+<h2 id="test-aroundall"><a class="anchor" href="#test-aroundall">#</a>test.aroundAll <Version>4.1.0</Version></h2>
+<p>Scoped <code>aroundAll</code> hook that inherits types from <a href="#test-extend"><code>test.extend</code></a>. See <a href="hooks.html#aroundall">aroundAll</a> for more information.</p>
+<h2 id="bench"><a class="anchor" href="#bench">#</a>bench <Experimental /></h2>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Updated in Vitest 5</div><p>The benchmarking API has been rewritten. <code>bench</code> is no longer a top-level import from <code>vitest</code>, and the <code>bench.skip</code> / <code>bench.only</code> / <code>bench.todo</code> helpers have been removed. <code>bench</code> is now a <a href="../guide/test-context.html#bench">test-context fixture</a> accessed from inside a <code>test()</code>.</p>
+<p>See the <a href="../guide/benchmarking.html">Benchmarking guide</a> for the new API.</p>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#test-options">Test Options</a><a class="toc-3" href="#timeout">timeout</a><a class="toc-3" href="#retry">retry</a><a class="toc-3" href="#repeats">repeats</a><a class="toc-3" href="#tags">tags 4.1.0</a><a class="toc-3" href="#meta">meta 4.1.0</a><a class="toc-3" href="#concurrent">concurrent</a><a class="toc-3" href="#skip">skip</a><a class="toc-3" href="#only">only</a><a class="toc-3" href="#todo">todo</a><a class="toc-3" href="#fails">fails</a><a class="toc-2" href="#test-extend">test.extend</a><a class="toc-2" href="#test-override">test.override 4.1.0</a><a class="toc-2" href="#test-scoped">test.scoped 3.1.0</a><a class="toc-2" href="#test-skip">test.skip</a><a class="toc-2" href="#test-skipif">test.skipIf</a><a class="toc-2" href="#test-runif">test.runIf</a><a class="toc-2" href="#test-only">test.only</a><a class="toc-2" href="#test-concurrent">test.concurrent</a><a class="toc-2" href="#test-todo">test.todo</a><a class="toc-2" href="#test-fails">test.fails</a><a class="toc-2" href="#test-each">test.each</a><a class="toc-2" href="#test-for">test.for</a><a class="toc-2" href="#test-describe">test.describe 4.1.0</a><a class="toc-2" href="#test-suite">test.suite 4.1.0</a><a class="toc-2" href="#test-beforeeach">test.beforeEach</a><a class="toc-2" href="#test-aftereach">test.afterEach</a><a class="toc-2" href="#test-beforeall">test.beforeAll</a><a class="toc-2" href="#test-afterall">test.afterAll</a><a class="toc-2" href="#test-aroundeach">test.aroundEach 4.1.0</a><a class="toc-2" href="#test-aroundall">test.aroundAll 4.1.0</a><a class="toc-2" href="#bench">bench</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

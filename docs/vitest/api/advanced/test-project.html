@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TestProject (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/advanced/test-project  <a class="ext small" href="https://vitest.dev/api/advanced/test-project">version en ligne</a></div>
+<h1 id="testproject"><a class="anchor" href="#testproject">#</a>TestProject <Version>3.0.0</Version></h1>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This guide describes the advanced Node.js API. If you just want to define projects, follow the <a href="../../guide/projects.html">&quot;Test Projects&quot;</a> guide.</p>
+</div><h2 id="name"><a class="anchor" href="#name">#</a>name</h2>
+<p>The name is a unique string assigned by the user or interpreted by Vitest. If user did not provide a name, Vitest tries to load a <code>package.json</code> in the root of the project and takes the <code>name</code> property from there. If there is no <code>package.json</code>, Vitest uses the name of the folder by default. Inline projects use numbers as the name (converted to string).</p>
+<div class="code-group"><div class="code"><div class="code-title">node.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { createVitest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> vitest = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createVitest</span>(<span class="hljs-string">&#x27;test&#x27;</span>)
+vitest.<span class="hljs-property">projects</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> p.<span class="hljs-property">name</span>) === [
+  <span class="hljs-string">&#x27;@pkg/server&#x27;</span>,
+  <span class="hljs-string">&#x27;utils&#x27;</span>,
+  <span class="hljs-string">&#x27;2&#x27;</span>,
+  <span class="hljs-string">&#x27;custom&#x27;</span>
+]</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [
+      <span class="hljs-string">&#x27;./packages/server&#x27;</span>, <span class="hljs-comment">// has package.json with &quot;@pkg/server&quot;</span>
+      <span class="hljs-string">&#x27;./utils&#x27;</span>, <span class="hljs-comment">// doesn&#x27;t have a package.json file</span>
+      {
+        <span class="hljs-comment">// doesn&#x27;t customize the name</span>
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">pool</span>: <span class="hljs-string">&#x27;threads&#x27;</span>,
+        },
+      },
+      {
+        <span class="hljs-comment">// customized the name</span>
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;custom&#x27;</span>,
+        },
+      },
+    ],
+  },
+})</code></pre></div>
+</div><div class="box box-info"><div class="box-title">ℹ️ Info</div><p>If the <a href="vitest.html#getrootproject">root project</a> is not part of user projects, its <code>name</code> will not be resolved.</p>
+</div><h2 id="vitest"><a class="anchor" href="#vitest">#</a>vitest</h2>
+<p><code>vitest</code> references the global <a href="vitest.html"><code>Vitest</code></a> process.</p>
+<h2 id="serializedconfig"><a class="anchor" href="#serializedconfig">#</a>serializedConfig</h2>
+<p>This is the config that test processes receive. Vitest <a href="https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/config/serializeConfig.ts">serializes config</a> manually by removing all functions and properties that are not possible to serialize. Since this value is available in both tests and node, its type is exported from the main entry point.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">SerializedConfig</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">config</span>: <span class="hljs-title class_">SerializedConfig</span> = vitest.<span class="hljs-property">projects</span>[<span class="hljs-number">0</span>].<span class="hljs-property">serializedConfig</span></code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>The <code>serializedConfig</code> property is a getter. Every time it&#39;s accessed Vitest serializes the config again in case it was changed. This also means that it always returns a different reference:</p>
+<div class="code"><pre><code class="hljs lang-ts">project.<span class="hljs-property">serializedConfig</span> === project.<span class="hljs-property">serializedConfig</span> <span class="hljs-comment">// ❌</span></code></pre></div>
+</div><h2 id="globalconfig"><a class="anchor" href="#globalconfig">#</a>globalConfig</h2>
+<p>The test config that <a href="vitest.html"><code>Vitest</code></a> was initialized with. If this is the <a href="vitest.html#getrootproject">root project</a>, <code>globalConfig</code> and <code>config</code> will reference the same object. This config is useful for values that cannot be set on the project level, like <code>coverage</code> or <code>reporters</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">ResolvedConfig</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+vitest.<span class="hljs-property">config</span> === vitest.<span class="hljs-property">projects</span>[<span class="hljs-number">0</span>].<span class="hljs-property">globalConfig</span></code></pre></div>
+<h2 id="config"><a class="anchor" href="#config">#</a>config</h2>
+<p>This is the project&#39;s resolved test config.</p>
+<h2 id="hash"><a class="anchor" href="#hash">#</a>hash <Version>3.2.0</Version></h2>
+<p>The unique hash of this project. This value is consistent between the reruns.</p>
+<p>It is based on the root of the project and its name. Note that the root path is not consistent between different OS, so the hash will also be different.</p>
+<h2 id="vite"><a class="anchor" href="#vite">#</a>vite</h2>
+<p>This is project&#39;s <a href="https://vite.dev/guide/api-javascript#vitedevserver"><code>ViteDevServer</code></a>. Note that the server is not necessarily exclusive to this project: other projects can reuse it when the <a href="../../config/sharedviteserver.html"><code>sharedViteServer</code></a> option applies, and browser instances of the same cluster share a single browser server.</p>
+<h2 id="sharedviteserver"><a class="anchor" href="#sharedviteserver">#</a>sharedViteServer</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> <span class="hljs-attr">sharedViteServer</span>: <span class="hljs-built_in">boolean</span></code></pre></div>
+<p><code>true</code> when the project reuses the Vite server of the config that declared it instead of resolving its own (see the <a href="../../config/sharedviteserver.html"><code>sharedViteServer</code></a> option). The project that owns the server reports <code>false</code> even when other projects reuse it. To detect any two projects sharing a server (including browser instances), compare their <a href="#vite"><code>vite</code></a> references.</p>
+<h2 id="browser"><a class="anchor" href="#browser">#</a>browser</h2>
+<p>This value will be set only if tests are running in the browser. If <code>browser</code> is enabled, but tests didn&#39;t run yet, this will be <code>undefined</code>. If you need to check if the project supports browser tests, use <code>project.isBrowserEnabled()</code> method.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>The browser API is even more experimental and doesn&#39;t follow SemVer. The browser API will be standardized separately from the rest of the APIs.</p>
+</div><h2 id="provide"><a class="anchor" href="#provide">#</a>provide</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> provide&lt;T <span class="hljs-keyword">extends</span> keyof <span class="hljs-title class_">ProvidedContext</span> &amp; <span class="hljs-built_in">string</span>&gt;(
+  <span class="hljs-attr">key</span>: T,
+  <span class="hljs-attr">value</span>: <span class="hljs-title class_">ProvidedContext</span>[T],
+): <span class="hljs-built_in">void</span></code></pre></div>
+<p>A way to provide custom values to tests in addition to <a href="../../config/provide.html"><code>config.provide</code></a> field. All values are validated with <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/structuredClone"><code>structuredClone</code></a> before they are stored, but the values on <code>providedContext</code> themselves are not cloned.</p>
+<div class="code-group"><div class="code"><div class="code-title">node.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { createVitest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> vitest = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createVitest</span>(<span class="hljs-string">&#x27;test&#x27;</span>)
+<span class="hljs-keyword">const</span> project = vitest.<span class="hljs-property">projects</span>.<span class="hljs-title function_">find</span>(<span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> p.<span class="hljs-property">name</span> === <span class="hljs-string">&#x27;custom&#x27;</span>)
+project.<span class="hljs-title function_">provide</span>(<span class="hljs-string">&#x27;key&#x27;</span>, <span class="hljs-string">&#x27;value&#x27;</span>)
+<span class="hljs-keyword">await</span> vitest.<span class="hljs-title function_">start</span>()</code></pre></div>
+<div class="code"><div class="code-title">test.spec.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { inject } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">const</span> value = <span class="hljs-title function_">inject</span>(<span class="hljs-string">&#x27;key&#x27;</span>)</code></pre></div>
+</div><p>The values can be provided dynamically. Provided value in tests will be updated on their next run.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This method is also available to <a href="../../config/globalsetup.html">global setup files</a> for cases where you cannot use the public API:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">setup</span>(<span class="hljs-params">{ provide }</span>) {
+  <span class="hljs-title function_">provide</span>(<span class="hljs-string">&#x27;wsPort&#x27;</span>, <span class="hljs-number">3000</span>)
+}</code></pre></div>
+</div><h2 id="getprovidedcontext"><a class="anchor" href="#getprovidedcontext">#</a>getProvidedContext</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getProvidedContext</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">ProvidedContext</span></code></pre></div>
+<p>This returns the context object. Every project also inherits the global context set by <code>vitest.provide</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { createVitest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> vitest = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createVitest</span>(<span class="hljs-string">&#x27;test&#x27;</span>)
+vitest.<span class="hljs-title function_">provide</span>(<span class="hljs-string">&#x27;global&#x27;</span>, <span class="hljs-literal">true</span>)
+<span class="hljs-keyword">const</span> project = vitest.<span class="hljs-property">projects</span>.<span class="hljs-title function_">find</span>(<span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> p.<span class="hljs-property">name</span> === <span class="hljs-string">&#x27;custom&#x27;</span>)
+project.<span class="hljs-title function_">provide</span>(<span class="hljs-string">&#x27;key&#x27;</span>, <span class="hljs-string">&#x27;value&#x27;</span>)
+
+<span class="hljs-comment">// { global: true, key: &#x27;value&#x27; }</span>
+<span class="hljs-keyword">const</span> context = project.<span class="hljs-title function_">getProvidedContext</span>()</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Project context values will always override root project&#39;s context.</p>
+</div><h2 id="createspecification"><a class="anchor" href="#createspecification">#</a>createSpecification</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createSpecification</span>(<span class="hljs-params">
+  <span class="hljs-attr">moduleId</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">locations</span>?: <span class="hljs-built_in">number</span>[],
+</span>): <span class="hljs-title class_">TestSpecification</span></code></pre></div>
+<p>Create a <a href="test-specification.html">test specification</a> that can be used in <a href="vitest.html#runtestspecifications"><code>vitest.runTestSpecifications</code></a>. Specification scopes the test file to a specific <code>project</code> and test <code>locations</code> (optional). Test <a href="test-case.html#location">locations</a> are code lines where the test is defined in the source code. If locations are provided, Vitest will only run tests defined on those lines. Note that if <a href="../../config/testnamepattern.html"><code>testNamePattern</code></a> is defined, then it will also be applied.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { createVitest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+<span class="hljs-keyword">import</span> { resolve } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:path/posix&#x27;</span>
+
+<span class="hljs-keyword">const</span> vitest = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createVitest</span>(<span class="hljs-string">&#x27;test&#x27;</span>)
+<span class="hljs-keyword">const</span> project = vitest.<span class="hljs-property">projects</span>[<span class="hljs-number">0</span>]
+<span class="hljs-keyword">const</span> specification = project.<span class="hljs-title function_">createSpecification</span>(
+  <span class="hljs-title function_">resolve</span>(<span class="hljs-string">&#x27;./example.test.ts&#x27;</span>),
+  [<span class="hljs-number">20</span>, <span class="hljs-number">40</span>], <span class="hljs-comment">// optional test lines</span>
+)
+<span class="hljs-keyword">await</span> vitest.<span class="hljs-title function_">runTestSpecifications</span>([specification])</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p><code>createSpecification</code> expects resolved <a href="test-specification.html#moduleid">module ID</a>. It doesn&#39;t auto-resolve the file or check that it exists on the file system.</p>
+<p>Also note that <code>project.createSpecification</code> always returns a new instance.</p>
+</div><h2 id="isrootproject"><a class="anchor" href="#isrootproject">#</a>isRootProject</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">isRootProject</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">boolean</span></code></pre></div>
+<p>Checks if the current project is the root project. You can also get the root project by calling <a href="vitest.html#getrootproject"><code>vitest.getRootProject()</code></a>.</p>
+<h2 id="globtestfiles"><a class="anchor" href="#globtestfiles">#</a>globTestFiles</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">globTestFiles</span>(<span class="hljs-params"><span class="hljs-attr">filters</span>?: <span class="hljs-built_in">string</span>[]</span>): {
+  <span class="hljs-comment">/**
+   * Test files that match the filters.
+   */</span>
+  <span class="hljs-attr">testFiles</span>: <span class="hljs-built_in">string</span>[]
+  <span class="hljs-comment">/**
+   * Typecheck test files that match the filters. This will be empty unless `typecheck.enabled` is `true`.
+   */</span>
+  <span class="hljs-attr">typecheckTestFiles</span>: <span class="hljs-built_in">string</span>[]
+}</code></pre></div>
+<p>Globs all test files. This function returns an object with regular tests and typecheck tests.</p>
+<p>This method accepts <code>filters</code>. Filters can only a part of the file path, unlike in other methods on the <a href="vitest.html"><code>Vitest</code></a> instance:</p>
+<div class="code"><pre><code class="hljs lang-js">project.<span class="hljs-title function_">globTestFiles</span>([<span class="hljs-string">&#x27;foo&#x27;</span>]) <span class="hljs-comment">// ✅</span>
+project.<span class="hljs-title function_">globTestFiles</span>([<span class="hljs-string">&#x27;basic/foo.js:10&#x27;</span>]) <span class="hljs-comment">// ❌</span></code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Vitest uses <a href="https://npmx.dev/package/fast-glob">fast-glob</a> to find test files. <code>test.dir</code>, <code>test.root</code>, <code>root</code> or <code>process.cwd()</code> define the <code>cwd</code> option.</p>
+<p>This method looks at several config options:</p>
+<ul>
+<li><code>test.include</code>, <code>test.exclude</code> to find regular test files</li>
+<li><code>test.includeSource</code>, <code>test.exclude</code> to find in-source tests</li>
+<li><code>test.typecheck.include</code>, <code>test.typecheck.exclude</code> to find typecheck tests</li>
+</ul>
+</div><h2 id="matchestestglob"><a class="anchor" href="#matchestestglob">#</a>matchesTestGlob</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">matchesTestGlob</span>(<span class="hljs-params">
+  <span class="hljs-attr">moduleId</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">source</span>?: () =&gt; <span class="hljs-built_in">string</span>
+</span>): <span class="hljs-built_in">boolean</span></code></pre></div>
+<p>This method checks if the file is a regular test file. It uses the same config properties that <code>globTestFiles</code> uses for validation.</p>
+<p>This method also accepts a second parameter, which is the source code. This is used to validate if the file is an in-source test. If you are calling this method several times for several projects it is recommended to read the file once and pass it down directly. If the file is not a test file, but matches the <code>includeSource</code> glob, Vitest will synchronously read the file unless the <code>source</code> is provided.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { createVitest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+<span class="hljs-keyword">import</span> { resolve } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:path/posix&#x27;</span>
+
+<span class="hljs-keyword">const</span> vitest = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createVitest</span>(<span class="hljs-string">&#x27;test&#x27;</span>)
+<span class="hljs-keyword">const</span> project = vitest.<span class="hljs-property">projects</span>[<span class="hljs-number">0</span>]
+
+project.<span class="hljs-title function_">matchesTestGlob</span>(<span class="hljs-title function_">resolve</span>(<span class="hljs-string">&#x27;./basic.test.ts&#x27;</span>)) <span class="hljs-comment">// true</span>
+project.<span class="hljs-title function_">matchesTestGlob</span>(<span class="hljs-title function_">resolve</span>(<span class="hljs-string">&#x27;./basic.ts&#x27;</span>)) <span class="hljs-comment">// false</span>
+project.<span class="hljs-title function_">matchesTestGlob</span>(<span class="hljs-title function_">resolve</span>(<span class="hljs-string">&#x27;./basic.ts&#x27;</span>), <span class="hljs-function">() =&gt;</span> <span class="hljs-string">`
+if (import.meta.vitest) {
+  // ...
+}
+`</span>) <span class="hljs-comment">// true if `includeSource` is set</span></code></pre></div>
+<h2 id="import"><a class="anchor" href="#import">#</a>import</h2>
+<!--@include: ./import-example.md--><p>Import a file using Vite module runner. The file will be transformed by Vite with provided project&#39;s config and executed in a separate context. Note that <code>moduleId</code> will be relative to the <code>config.root</code>.</p>
+<div class="box box-danger"><div class="box-title">🛑 Danger</div><p><code>project.import</code> reuses Vite&#39;s module graph, so importing the same module using a regular import will return a different module:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> staticExample <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.js&#x27;</span>
+<span class="hljs-keyword">const</span> dynamicExample = <span class="hljs-keyword">await</span> project.<span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./example.js&#x27;</span>)
+
+dynamicExample !== staticExample <span class="hljs-comment">// ✅</span></code></pre></div>
+</div><div class="box box-info"><div class="box-title">ℹ️ Info</div><p>Internally, Vitest uses this method to import global setups, custom coverage providers and custom reporters, meaning all of them share the same module graph as long as they belong to the same Vite server.</p>
+</div><h2 id="ontestsrerun"><a class="anchor" href="#ontestsrerun">#</a>onTestsRerun</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">onTestsRerun</span>(<span class="hljs-params"><span class="hljs-attr">cb</span>: <span class="hljs-title class_">OnTestsRerunHandler</span></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>This is a shorthand for <a href="vitest.html#ontestsrerun"><code>project.vitest.onTestsRerun</code></a>. It accepts a callback that will be awaited when the tests have been scheduled to rerun (usually, due to a file change).</p>
+<div class="code"><pre><code class="hljs lang-ts">project.<span class="hljs-title function_">onTestsRerun</span>(<span class="hljs-function">(<span class="hljs-params">specs</span>) =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(specs)
+})</code></pre></div>
+<h2 id="isbrowserenabled"><a class="anchor" href="#isbrowserenabled">#</a>isBrowserEnabled</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">isBrowserEnabled</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">boolean</span></code></pre></div>
+<p>Returns <code>true</code> if this project runs tests in the browser.</p>
+<h2 id="close"><a class="anchor" href="#close">#</a>close</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">close</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Closes the project and all associated resources. This can only be called once; the closing promise is cached until the server restarts. If the resources are needed again, create a new project.</p>
+<p>In detail, this method closes the Vite server, stops the typechecker service, closes the browser if it&#39;s running, deletes the temporary directory that holds the source code, and resets the provided context.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#name">name</a><a class="toc-2" href="#vitest">vitest</a><a class="toc-2" href="#serializedconfig">serializedConfig</a><a class="toc-2" href="#globalconfig">globalConfig</a><a class="toc-2" href="#config">config</a><a class="toc-2" href="#hash">hash 3.2.0</a><a class="toc-2" href="#vite">vite</a><a class="toc-2" href="#sharedviteserver">sharedViteServer</a><a class="toc-2" href="#browser">browser</a><a class="toc-2" href="#provide">provide</a><a class="toc-2" href="#getprovidedcontext">getProvidedContext</a><a class="toc-2" href="#createspecification">createSpecification</a><a class="toc-2" href="#isrootproject">isRootProject</a><a class="toc-2" href="#globtestfiles">globTestFiles</a><a class="toc-2" href="#matchestestglob">matchesTestGlob</a><a class="toc-2" href="#import">import</a><a class="toc-2" href="#ontestsrerun">onTestsRerun</a><a class="toc-2" href="#isbrowserenabled">isBrowserEnabled</a><a class="toc-2" href="#close">close</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

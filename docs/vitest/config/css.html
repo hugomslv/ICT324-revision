@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>css | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/css  <a class="ext small" href="https://vitest.dev/config/css">version en ligne</a></div>
+<h1 id="css"><a class="anchor" href="#css">#</a>css</h1>
+<ul>
+<li><strong>Type:</strong> <code>boolean | { include?, exclude?, modules? }</code></li>
+</ul>
+<p>Configure if CSS should be processed. When excluded, CSS files will be replaced with empty strings to bypass the subsequent processing. CSS Modules will return a proxy to not affect runtime.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This option is not applied to <a href="../guide/browser/index.html">browser tests</a>.</p>
+</div><h2 id="css-include"><a class="anchor" href="#css-include">#</a>css.include</h2>
+<ul>
+<li><strong>Type:</strong> <code>RegExp | RegExp[]</code></li>
+<li><strong>Default:</strong> <code>[]</code></li>
+</ul>
+<p>RegExp pattern for files that should return actual CSS and will be processed by Vite pipeline.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>To process all CSS files, use <code>/.+/</code>.</p>
+</div><h2 id="css-exclude"><a class="anchor" href="#css-exclude">#</a>css.exclude</h2>
+<ul>
+<li><strong>Type:</strong> <code>RegExp | RegExp[]</code></li>
+<li><strong>Default:</strong> <code>[]</code></li>
+</ul>
+<p>RegExp pattern for files that will return an empty CSS file.</p>
+<h2 id="css-modules"><a class="anchor" href="#css-modules">#</a>css.modules</h2>
+<ul>
+<li><strong>Type:</strong> <code>{ classNameStrategy? }</code></li>
+<li><strong>Default:</strong> <code>{}</code></li>
+</ul>
+<h3 id="css-modules-classnamestrategy"><a class="anchor" href="#css-modules-classnamestrategy">#</a>css.modules.classNameStrategy</h3>
+<ul>
+<li><strong>Type:</strong> <code>&#39;stable&#39; | &#39;scoped&#39; | &#39;non-scoped&#39;</code></li>
+<li><strong>Default:</strong> <code>&#39;stable&#39;</code></li>
+</ul>
+<p>If you decide to process CSS files, you can configure if class names inside CSS modules should be scoped. You can choose one of the options:</p>
+<ul>
+<li><code>stable</code>: class names will be generated as <code>_${name}_${hashedFilename}</code>, which means that generated class will stay the same, if CSS content is changed, but will change, if the name of the file is modified, or file is moved to another folder. This setting is useful, if you use snapshot feature.</li>
+<li><code>scoped</code>: class names will be generated as usual, respecting <code>css.modules.generateScopedName</code> method, if you have one and CSS processing is enabled. By default, filename will be generated as <code>_${name}_${hash}</code>, where hash includes filename and content of the file.</li>
+<li><code>non-scoped</code>: class names will not be hashed.</li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>By default, Vitest exports a proxy, bypassing CSS Modules processing. If you rely on CSS properties on your classes, you have to enable CSS processing using <code>include</code> option.</p>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#css-include">css.include</a><a class="toc-2" href="#css-exclude">css.exclude</a><a class="toc-2" href="#css-modules">css.modules</a><a class="toc-3" href="#css-modules-classnamestrategy">css.modules.classNameStrategy</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

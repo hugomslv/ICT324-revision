@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Custom Benchmark Provider 5.0.0 advanced (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/advanced/benchmark-provider  <a class="ext small" href="https://vitest.dev/guide/advanced/benchmark-provider">version en ligne</a></div>
+<h1 id="custom-benchmark-provider"><a class="anchor" href="#custom-benchmark-provider">#</a>Custom Benchmark Provider <Version type="experimental">5.0.0</Version> <Badge type="danger">advanced</Badge></h1>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This is an advanced, experimental API. If you only need to run benchmarks with Vitest&#39;s built-in provider, read the <a href="../benchmarking.html">Benchmarking</a> guide instead.</p>
+</div><p>Vitest uses a benchmark provider to execute the functions registered with <code>bench</code> and convert their measurements into results that Vitest can report. The built-in provider uses <a href="https://github.com/tinylibs/tinybench">Tinybench</a>, but you can replace it to use another benchmarking engine or execution strategy.</p>
+<h2 id="setup"><a class="anchor" href="#setup">#</a>Setup</h2>
+<p>Set <a href="../../config/benchmark.html#benchmark-provider"><code>benchmark.provider</code></a> to the path of your provider module. Relative paths are resolved from the project root.</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">benchmark</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-string">&#x27;./benchmark-provider.ts&#x27;</span>,
+    },
+  },
+})</code></pre></div>
+<p>The module must has a default export with an object that implements <code>BenchmarkProvider</code>. This example wraps Tinybench to demonstrate how registrations and results flow through a provider. If you use Tinybench in your provider, add it as a direct dependency of your project.</p>
+<div class="code"><div class="code-title">benchmark-provider.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">BenchmarkProvider</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">Bench</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;tinybench&#x27;</span>
+
+<span class="hljs-keyword">const</span> provider = {
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">run</span>(<span class="hljs-params">{ test, config, registrations, options }</span>) {
+    <span class="hljs-keyword">const</span> bench = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Bench</span>({
+      <span class="hljs-attr">signal</span>: test.<span class="hljs-property">context</span>.<span class="hljs-property">signal</span>,
+      <span class="hljs-attr">retainSamples</span>: config.<span class="hljs-property">retainSamples</span>,
+      ...options,
+    })
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> { name, fn, fnOpts } <span class="hljs-keyword">of</span> registrations) {
+      bench.<span class="hljs-title function_">add</span>(name, fn, fnOpts)
+    }
+
+    <span class="hljs-keyword">await</span> bench.<span class="hljs-title function_">run</span>()
+
+    <span class="hljs-keyword">return</span> bench.<span class="hljs-property">tasks</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">task</span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> result = task.<span class="hljs-property">result</span>
+
+      <span class="hljs-keyword">if</span> (result.<span class="hljs-property">state</span> === <span class="hljs-string">&#x27;errored&#x27;</span>) {
+        <span class="hljs-keyword">throw</span> result.<span class="hljs-property">error</span>
+      }
+      <span class="hljs-keyword">if</span> (result.<span class="hljs-property">state</span> !== <span class="hljs-string">&#x27;completed&#x27;</span>) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`Benchmark &quot;<span class="hljs-subst">${task.name}</span>&quot; ended in the &quot;<span class="hljs-subst">${result.state}</span>&quot; state`</span>)
+      }
+
+      <span class="hljs-keyword">return</span> {
+        ...result,
+        <span class="hljs-attr">name</span>: task.<span class="hljs-property">name</span>,
+      }
+    })
+  },
+} <span class="hljs-keyword">satisfies</span> <span class="hljs-title class_">BenchmarkProvider</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> provider</code></pre></div>
+<h2 id="provider-api"><a class="anchor" href="#provider-api">#</a>Provider API</h2>
+<p>Vitest calls <code>provider.run(group)</code> when a registration&#39;s <code>.run()</code> method is called, or once for all runnable registrations passed to <code>bench.compare()</code>. The <code>group</code> contains:</p>
+<ul>
+<li><code>test</code>: the test that registered the benchmarks. <code>test.context.signal</code> is aborted when the run is cancelled.</li>
+<li><code>config</code>: the resolved benchmark configuration for the current project.</li>
+<li><code>registrations</code>: runnable benchmarks in registration order. Every registration contains <code>name</code>, <code>fn</code>, and optional <code>fnOpts</code> for lifecycle hooks, cancellation, async behavior, and sample retention.</li>
+<li><code>options</code>: benchmark run options passed to <code>.run()</code> or <code>bench.compare()</code>, if any.</li>
+</ul>
+<p>The provider is responsible for honoring the run and registration options and for running every benchmark function and its <code>beforeAll</code>, <code>beforeEach</code>, <code>afterEach</code>, and <code>afterAll</code> hooks according to the benchmarking engine&#39;s lifecycle. If execution fails, throw the error to fail the test.</p>
+<p><code>run</code> must resolve to one <code>BenchResult</code> for every runnable registration. Results are matched to registrations by <code>name</code> and are the source for <code>.run()</code> return values, comparison tables, reporters, and saved benchmark results. A custom engine must convert its measurements into the Tinybench-compatible <code>BenchResult</code> shape exported by <code>vitest</code>.</p>
+<p>Registrations created by <code>bench.from()</code> are loaded by Vitest and are not passed to the provider.</p>
+<h2 id="provider-lifetime"><a class="anchor" href="#provider-lifetime">#</a>Provider Lifetime</h2>
+<p>Vitest imports the provider module on first use and caches its default export for the lifetime of the worker. The API does not have separate setup or teardown hooks; keep worker-scoped state on the provider object when needed.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#setup">Setup</a><a class="toc-2" href="#provider-api">Provider API</a><a class="toc-2" href="#provider-lifetime">Provider Lifetime</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

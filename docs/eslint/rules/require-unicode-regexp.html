@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>require-unicode-regexp (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/require-unicode-regexp <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/require-unicode-regexp">version en ligne</a></div>
+<h1>require-unicode-regexp</h1><p>RegExp <code>u</code> flag has two effects:</p>
+<ol>
+<li><p><strong>Make the regular expression handling UTF-16 surrogate pairs correctly.</strong></p>
+<p> Especially, character range syntax gets the correct behavior.</p>
+<div class="code"><pre><code class="hljs lang-js">/^[👍]$/.<span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;👍&quot;</span>) <span class="hljs-comment">//→ false</span>
+/^[👍]$/u.<span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;👍&quot;</span>) <span class="hljs-comment">//→ true</span></code></pre></div>
+</li>
+<li><p><strong>Make the regular expression throwing syntax errors early as disabling <a href="https://www.ecma-international.org/ecma-262/6.0/#sec-regular-expressions-patterns">Annex B extensions</a>.</strong></p>
+<p> Because of historical reason, JavaScript regular expressions are tolerant of syntax errors. For example, <code>/\w{1, 2/</code> is a syntax error, but JavaScript doesn&#39;t throw the error. It matches strings such as <code>&quot;a{1, 2&quot;</code> instead. Such a recovering logic is defined in Annex B.</p>
+<p> The <code>u</code> flag disables the recovering logic Annex B defined. As a result, you can find errors early. This is similar to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode">the strict mode</a>.</p>
+</li>
+</ol>
+<p>The RegExp <code>v</code> flag, introduced in ECMAScript 2024, is a superset of the <code>u</code> flag, and offers two more features:</p>
+<ol>
+<li><p><strong>Unicode properties of strings</strong></p>
+<p> With the Unicode property escape, you can use properties of strings.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> re = <span class="hljs-regexp">/^\p{RGI_Emoji}$/</span>v;
+
+<span class="hljs-comment">// Match an emoji that consists of just 1 code point:</span>
+re.<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;⚽&#x27;</span>); <span class="hljs-comment">// &#x27;\u26BD&#x27;</span>
+<span class="hljs-comment">// → true ✅</span>
+
+<span class="hljs-comment">// Match an emoji that consists of multiple code points:</span>
+re.<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;👨🏾‍⚕️&#x27;</span>); <span class="hljs-comment">// &#x27;\u{1F468}\u{1F3FE}\u200D\u2695\uFE0F&#x27;</span>
+<span class="hljs-comment">// → true ✅</span></code></pre></div>
+</li>
+<li><p><strong>Set notation</strong></p>
+<p> It allows for set operations between character classes.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> re = <span class="hljs-regexp">/[\p{White_Space}&amp;&amp;\p{ASCII}]/</span>v;
+re.<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;\n&#x27;</span>); <span class="hljs-comment">// → true</span>
+re.<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;\u2028&#x27;</span>); <span class="hljs-comment">// → false</span></code></pre></div>
+</li>
+</ol>
+<p>Therefore, the <code>u</code> and <code>v</code> flags let us work better with regular expressions.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule aims to enforce the use of <code>u</code> or <code>v</code> flag on regular expressions.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint require-unicode-regexp: error */</span>
+
+<span class="hljs-keyword">const</span> a = <span class="hljs-regexp">/aaa/</span>
+<span class="hljs-keyword">const</span> b = <span class="hljs-regexp">/bbb/gi</span>
+<span class="hljs-keyword">const</span> c = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&quot;ccc&quot;</span>)
+<span class="hljs-keyword">const</span> d = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&quot;ddd&quot;</span>, <span class="hljs-string">&quot;gi&quot;</span>)</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint require-unicode-regexp: error */</span>
+
+<span class="hljs-keyword">const</span> a = <span class="hljs-regexp">/aaa/u</span>
+<span class="hljs-keyword">const</span> b = <span class="hljs-regexp">/bbb/giu</span>
+<span class="hljs-keyword">const</span> c = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&quot;ccc&quot;</span>, <span class="hljs-string">&quot;u&quot;</span>)
+<span class="hljs-keyword">const</span> d = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&quot;ddd&quot;</span>, <span class="hljs-string">&quot;giu&quot;</span>)
+
+<span class="hljs-keyword">const</span> e = <span class="hljs-regexp">/aaa/</span>v
+<span class="hljs-keyword">const</span> f = <span class="hljs-regexp">/bbb/gi</span>v
+<span class="hljs-keyword">const</span> g = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&quot;ccc&quot;</span>, <span class="hljs-string">&quot;v&quot;</span>)
+<span class="hljs-keyword">const</span> h = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&quot;ddd&quot;</span>, <span class="hljs-string">&quot;giv&quot;</span>)
+
+<span class="hljs-comment">// This rule ignores RegExp calls if the flags could not be evaluated to a static value.</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">i</span>(<span class="hljs-params">flags</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&quot;eee&quot;</span>, flags)
+}</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has one object option:</p>
+<ul>
+<li><code>&quot;requireFlag&quot;: &quot;u&quot;|&quot;v&quot;</code> requires a particular Unicode regex flag</li>
+</ul>
+<h3 id="requireflag-u"><a class="anchor" href="#requireflag-u">#</a>requireFlag: &quot;u&quot;</h3>
+<p>The <code>u</code> flag may be preferred in environments that do not support the <code>v</code> flag.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>{ &quot;requireFlag&quot;: &quot;u&quot; }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint require-unicode-regexp: [&quot;error&quot;, { &quot;requireFlag&quot;: &quot;u&quot; }] */</span>
+
+<span class="hljs-keyword">const</span> fooEmpty = <span class="hljs-regexp">/foo/</span>;
+
+<span class="hljs-keyword">const</span> fooEmptyRegexp = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&#x27;foo&#x27;</span>);
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-regexp">/foo/</span>v;
+
+<span class="hljs-keyword">const</span> fooRegexp = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&#x27;foo&#x27;</span>, <span class="hljs-string">&#x27;v&#x27;</span>);</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;requireFlag&quot;: &quot;u&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint require-unicode-regexp: [&quot;error&quot;, { &quot;requireFlag&quot;: &quot;u&quot; }] */</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-regexp">/foo/u</span>;
+
+<span class="hljs-keyword">const</span> fooRegexp = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&#x27;foo&#x27;</span>, <span class="hljs-string">&#x27;u&#x27;</span>);</code></pre></div>
+</div><h3 id="requireflag-v"><a class="anchor" href="#requireflag-v">#</a>requireFlag: &quot;v&quot;</h3>
+<p>The <code>v</code> flag may be a better choice when it is supported because it has more
+features than the <code>u</code> flag (e.g., the ability to test Unicode properties of strings). It
+does have a stricter syntax, however (e.g., the need to escape certain
+characters within character classes).</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>{ &quot;requireFlag&quot;: &quot;v&quot; }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint require-unicode-regexp: [&quot;error&quot;, { &quot;requireFlag&quot;: &quot;v&quot; }] */</span>
+
+<span class="hljs-keyword">const</span> fooEmpty = <span class="hljs-regexp">/foo/</span>;
+
+<span class="hljs-keyword">const</span> fooEmptyRegexp = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&#x27;foo&#x27;</span>);
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-regexp">/foo/u</span>;
+
+<span class="hljs-keyword">const</span> fooRegexp = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&#x27;foo&#x27;</span>, <span class="hljs-string">&#x27;u&#x27;</span>);</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;requireFlag&quot;: &quot;v&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint require-unicode-regexp: [&quot;error&quot;, { &quot;requireFlag&quot;: &quot;v&quot; }] */</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-regexp">/foo/</span>v;
+
+<span class="hljs-keyword">const</span> fooRegexp = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-string">&#x27;foo&#x27;</span>, <span class="hljs-string">&#x27;v&#x27;</span>);</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you don&#39;t want to warn on regular expressions without either a <code>u</code> or a <code>v</code> flag, then it&#39;s safe to disable this rule.</p>
+<h3 id="note-on-i-flag-and-w"><a class="anchor" href="#note-on-i-flag-and-w">#</a>Note on <code>i</code> flag and <code>\w</code></h3>
+<p>In some cases, adding the <code>u</code> flag to a regular expression using both the <code>i</code> flag and the <code>\w</code> character class can change its behavior due to Unicode case folding.</p>
+<p>For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> regexWithoutU = <span class="hljs-regexp">/^\w+$/i</span>;
+<span class="hljs-keyword">const</span> regexWithU = <span class="hljs-regexp">/^\w+$/iu</span>;
+
+<span class="hljs-keyword">const</span> str = <span class="hljs-string">&quot;\u017f\u212a&quot;</span>; <span class="hljs-comment">// Example Unicode characters</span>
+
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(regexWithoutU.<span class="hljs-title function_">test</span>(str)); <span class="hljs-comment">// false</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(regexWithU.<span class="hljs-title function_">test</span>(str)); <span class="hljs-comment">// true</span></code></pre></div>
+<p>If you prefer to use a non-Unicode-aware regex in this specific case, you can disable this rule using an <code>eslint-disable</code> comment:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint-disable require-unicode-regexp */</span>
+<span class="hljs-keyword">const</span> regex = <span class="hljs-regexp">/^\w+$/i</span>;
+<span class="hljs-comment">/* eslint-enable require-unicode-regexp */</span></code></pre></div>
+<h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://github.com/tc39/proposal-regexp-v-flag">https://github.com/tc39/proposal-regexp-v-flag</a></li><li><a class="ext" href="https://v8.dev/features/regexp-v-flag">https://v8.dev/features/regexp-v-flag</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#requireflag-u">requireFlag: &quot;u&quot;</a><a class="toc-3" href="#requireflag-v">requireFlag: &quot;v&quot;</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a><a class="toc-3" href="#note-on-i-flag-and-w">Note on i flag and \w</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

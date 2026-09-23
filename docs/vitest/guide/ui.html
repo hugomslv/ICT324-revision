@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vitest UI | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/ui  <a class="ext small" href="https://vitest.dev/guide/ui">version en ligne</a></div>
+<h1 id="vitest-ui"><a class="anchor" href="#vitest-ui">#</a>Vitest UI</h1>
+<p>Vitest UI is a visual interface for exploring your test results. You can use it interactively while tests run or as a static HTML report for reviewing completed runs.</p>
+<p>Vitest UI is optional, so you&#39;ll need to install it with:</p>
+<div class="code"><pre><code class="hljs lang-bash">npm i -D @vitest/ui</code></pre></div>
+<span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span><h2 id="live-ui"><a class="anchor" href="#live-ui">#</a>Live UI</h2>
+<p>The Live UI runs alongside Vitest&#39;s development server and requires <a href="../config/watch.html">watch mode</a>, which is enabled by default. It stays connected to the running Vitest process, so results update as tests rerun. You can also rerun selected tests, update failed snapshots, and edit test files directly from the UI.</p>
+<p>Start it by passing the <code>--ui</code> flag:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest --ui</code></pre></div>
+<p>Then you can visit the Vitest UI at <a href="http://localhost:51204/__vitest__/"><code>http://localhost:51204/__vitest__/</code></a></p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Vitest UI access is protected. If the direct URL shows an error, open the URL with a token printed by Vitest in the terminal, for example <code>http://localhost:51204/__vitest__/?token=...</code>.</p>
+</div><h2 id="html-reporter"><a class="anchor" href="#html-reporter">#</a>HTML Reporter</h2>
+<p>The HTML reporter writes test results to a static version of Vitest UI. The result views remain navigable, but the report is read-only and cannot rerun tests, update snapshots, or edit test files. It is useful for run mode, CI, and automated workflows where results are reviewed later.</p>
+<p>Use the <code>html</code> reporter from the command line or in your Vitest configuration:</p>
+<div class="code-group"><div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;html&#x27;</span>],
+  },
+})</code></pre></div>
+<div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">vitest run --reporter=html</code></pre></div>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce : Keep terminal output</div><p>Configuring the HTML reporter replaces the default terminal reporter. To keep terminal output, <a href="reporters.html#default-configuration">include Vitest&#39;s default reporters</a>.</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { configDefaults, defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;html&#x27;</span>, ...configDefaults.<span class="hljs-property">reporters</span>],
+  },
+})</code></pre></div>
+</div><h3 id="preview-locally"><a class="anchor" href="#preview-locally">#</a>Preview Locally</h3>
+<p>By default, the report entry is written to <code>.vitest/index.html</code>. You can configure the artifact directory with the HTML reporter&#39;s <code>outputDir</code> option.</p>
+<p>To preview the default output, use the <a href="https://vitejs.dev/guide/cli.html#vite-preview">vite preview</a> command:</p>
+<div class="code"><pre><code class="hljs lang-sh">npx vite preview --outDir .vitest</code></pre></div>
+<p>Open the URL printed by Vite in your browser. Alternatively, <a href="https://code.visualstudio.com/docs/debugtest/integrated-browser">VS Code&#39;s Integrated Browser</a> can open <code>.vitest/index.html</code> directly without a preview server.</p>
+<h3 id="share-as-a-single-file"><a class="anchor" href="#share-as-a-single-file">#</a>Share as a Single File</h3>
+<p>Set <code>singleFile</code> to generate a self-contained HTML report:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [
+      [<span class="hljs-string">&#x27;html&#x27;</span>, { <span class="hljs-attr">singleFile</span>: <span class="hljs-literal">true</span> }],
+    ],
+  },
+})</code></pre></div>
+<p>When <code>singleFile</code> is enabled, Vitest inlines the UI assets, metadata, and test attachments into a single self-contained <code>index.html</code>. This makes the report easy to share, upload, or download as one artifact instead of preserving the whole output directory.</p>
+<p>Because everything is inlined, you can open <code>&lt;outputDir&gt;/index.html</code> directly in a browser with a <code>file://</code> URL. No preview server is required.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p><code>singleFile</code> has two caveats:</p>
+<ul>
+<li>The file can grow very large because everything is embedded inline. It can be slow to open, memory-hungry, or exceed the size limits of artifact viewers and static hosts.</li>
+<li>Coverage HTML reports are not inlined yet and remain as separate files.</li>
+</ul>
+<p>Prefer the default multi-file report when the suite has many or large attachments, or when you need coverage included in the bundle.</p>
+</div><h3 id="view-reports-from-ci"><a class="anchor" href="#view-reports-from-ci">#</a>View Reports from CI</h3>
+<p>To view the HTML report from CI, for example in GitHub Actions, upload the output directory as an artifact:</p>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/upload-artifact@v7</span>
+  <span class="hljs-attr">id:</span> <span class="hljs-string">upload-report</span>
+  <span class="hljs-attr">with:</span>
+    <span class="hljs-attr">name:</span> <span class="hljs-string">vitest-report</span>
+    <span class="hljs-attr">path:</span> <span class="hljs-string">.vitest/</span>
+
+<span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Link</span> <span class="hljs-string">HTML</span> <span class="hljs-string">report</span>
+  <span class="hljs-attr">run:</span> <span class="hljs-string">echo</span> <span class="hljs-string">&quot;::notice title=Vitest HTML report::$REPORT_URL&quot;</span>
+  <span class="hljs-attr">env:</span>
+    <span class="hljs-attr">REPORT_URL:</span> <span class="hljs-string">https://viewer.vitest.dev/?url=${{</span> <span class="hljs-string">steps.upload-report.outputs.artifact-url</span> <span class="hljs-string">}}</span></code></pre></div>
+<p>This adds the report link as a notice annotation on the workflow run. Click it to open the report in <a href="https://viewer.vitest.dev/">Vitest Viewer</a> directly in the browser. You can also download the artifact manually and extract it, then run <code>vite preview</code> locally as above.</p>
+<p>When you use <code>singleFile: true</code>, you can upload the report as a single file and view it directly from GitHub artifacts with the <a href="https://github.com/actions/upload-artifact#upload-an-individual-file-unzipped"><code>archive: false</code> option</a>:</p>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/upload-artifact@v7</span>
+  <span class="hljs-attr">id:</span> <span class="hljs-string">upload-report</span>
+  <span class="hljs-attr">with:</span>
+    <span class="hljs-attr">path:</span> <span class="hljs-string">.vitest/index.html</span>
+    <span class="hljs-attr">archive:</span> <span class="hljs-literal">false</span>
+
+<span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Link</span> <span class="hljs-string">HTML</span> <span class="hljs-string">report</span>
+  <span class="hljs-attr">run:</span> <span class="hljs-string">echo</span> <span class="hljs-string">&quot;::notice title=Vitest HTML report::$REPORT_URL&quot;</span>
+  <span class="hljs-attr">env:</span>
+    <span class="hljs-attr">REPORT_URL:</span> <span class="hljs-string">${{</span> <span class="hljs-string">steps.upload-report.outputs.artifact-url</span> <span class="hljs-string">}}</span></code></pre></div>
+<h2 id="coverage"><a class="anchor" href="#coverage">#</a>Coverage</h2>
+<p>Vitest UI displays coverage results in both the Live UI and HTML reports. See <a href="coverage.html#vitest-ui">Vitest UI Coverage</a> for setup and usage.</p>
+<h2 id="trace-view"><a class="anchor" href="#trace-view">#</a>Trace View</h2>
+<p>Vitest UI replays recorded browser interactions when <a href="browser/trace-view.html"><code>browser.traceView</code></a> is enabled. The Live UI streams trace entries as tests run, while HTML reports preserve recorded traces for later review.</p>
+<h2 id="module-graph"><a class="anchor" href="#module-graph">#</a>Module Graph</h2>
+<p>Module Graph&#39;s tab displays the module graph of the selected test file.</p>
+<div class="box box-info"><div class="box-title">ℹ️ Info</div><p>All of the provided images use <a href="https://github.com/zammad/zammad">Zammad</a> repository as an example.</p>
+</div><span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span><p>If there are more than 50 modules, the module graph displays only the first two levels of the graph to reduce the visual clutter. You can always click on &quot;Show Full Graph&quot; icon to preview the full graph.</p>
+<center>
+  <span class="img-missing">[image]</span>
+  <span class="img-missing">[image]</span>
+</center><div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that if your graph is too big, it may take some time before the node positions are stabilized.</p>
+</div><p>You can always restore the entry module graph by clicking on &quot;Reset&quot;. To expand the module graph, right-click or hold <kbd>Shift</kbd> while clicking the node that interests you. It will display all nodes related to the selected one.</p>
+<p>By default, Vitest doesn&#39;t show the modules from <code>node_modules</code>. Usually, these modules are externalized. You can enable them by deselecting &quot;Hide node_modules&quot;.</p>
+<h3 id="module-info"><a class="anchor" href="#module-info">#</a>Module Info</h3>
+<p>By left-clicking on the module node, you open the Module Info view.</p>
+<span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span><p>This view is separated into two parts. The top part shows the full module ID and some diagnostics about the module. If <a href="../config/fsmodulecache.html"><code>fsModuleCache</code></a> is enabled, there will be a &quot;cached&quot; or &quot;not cached&quot; badge. On the right you can see time diagnostics:</p>
+<ul>
+<li>Self Time: the time it took to import the module, excluding static imports.</li>
+<li>Total Time: the time it took to import the module, including static imports. Note that this does not include <code>transform</code> time of the current module.</li>
+<li>Transform: the time it took to transform the module.</li>
+</ul>
+<p>If you opened this view by clicking on an import, you will also see a &quot;Back&quot; button at the start that will take you to the previous module.</p>
+<p>The bottom part depends on the module type. If the module is external, you will only see the source code of that file. You will not be able to traverse the module graph any further, and you won&#39;t see how long it took to import static imports.</p>
+<span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span><p>If the module was inlined, you will see three more windows:</p>
+<ul>
+<li>Source: unchanged source code of the module</li>
+<li>Transformed: the transformed code that Vitest executes using Vite&#39;s <a href="https://vite.dev/guide/api-environment-runtimes#modulerunner">module runner</a></li>
+<li>Source Map (v3): source map mappings</li>
+</ul>
+<p>All static imports in the &quot;Source&quot; window show a total time it took to evaluate them by the current module. If the import was already evaluated in the module graph, it will show <code>0ms</code> because it is cached by that point.</p>
+<p>If the module took longer than the <a href="../config/experimental.html#experimental-importdurations-thresholds"><code>danger</code> threshold</a> (default: 500ms) to load, the time will be displayed in red. If the module took longer than the <a href="../config/experimental.html#experimental-importdurations-thresholds"><code>warn</code> threshold</a> (default: 100ms), the time will be displayed in orange.</p>
+<p>You can click on an import source to jump into that module and traverse the graph further (note <code>./support/assertions/index.ts</code> below).</p>
+<span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span><div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that type-only imports are not executed at runtime and do not display a total duration. They also cannot be opened.</p>
+</div><p>If another plugin injects a module import during transformation, those imports will be displayed at the start of the module in gray colour (for example, modules injected by <code>import.meta.glob</code>). They also show the total time and can be traversed further.</p>
+<span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If you are developing a custom integration on top of Vitest, you can use <a href="../api/advanced/vitest.html#getsourcemodulediagnostic"><code>vitest.experimental_getSourceModuleDiagnostic</code></a> to retrieve this information.</p>
+</div><h3 id="import-breakdown"><a class="anchor" href="#import-breakdown">#</a>Import Breakdown</h3>
+<div class="box box-tip"><div class="box-title">💡 Astuce : FEEDBACK</div><p>Please, leave feedback regarding this feature in a <a href="https://github.com/vitest-dev/vitest/discussions/9224">GitHub Discussion</a>.</p>
+</div><p>The Module Graph tab also provides an Import Breakdown with a list of modules that take the longest time to load (top 10 by default), sorted by Total Time.</p>
+<span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span><p>You can click on the module to see the Module Info. If the module is external, it will have the yellow color (the same color in the module graph).</p>
+<p>The breakdown shows a list of modules with self time, total time, and a percentage relative to the time it took to load the whole test file.</p>
+<p>The &quot;Show Import Breakdown&quot; icon will have a red color if there is at least one file that took longer than the <a href="../config/experimental.html#experimental-importdurations-thresholds"><code>danger</code> threshold</a> (default: 500ms) to load, and it will be orange if there is at least one file that took longer than the <a href="../config/experimental.html#experimental-importdurations-thresholds"><code>warn</code> threshold</a> (default: 100ms).</p>
+<p>You can use <a href="../config/experimental.html#experimental-importdurationslimit"><code>experimental.importDurations.limit</code></a> to control the number of imports displayed.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#live-ui">Live UI</a><a class="toc-2" href="#html-reporter">HTML Reporter</a><a class="toc-3" href="#preview-locally">Preview Locally</a><a class="toc-3" href="#share-as-a-single-file">Share as a Single File</a><a class="toc-3" href="#view-reports-from-ci">View Reports from CI</a><a class="toc-2" href="#coverage">Coverage</a><a class="toc-2" href="#trace-view">Trace View</a><a class="toc-2" href="#module-graph">Module Graph</a><a class="toc-3" href="#module-info">Module Info</a><a class="toc-3" href="#import-breakdown">Import Breakdown</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

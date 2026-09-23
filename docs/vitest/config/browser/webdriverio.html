@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuring WebdriverIO (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › config/browser/webdriverio  <a class="ext small" href="https://vitest.dev/config/browser/webdriverio">version en ligne</a></div>
+<h1 id="configuring-webdriverio"><a class="anchor" href="#configuring-webdriverio">#</a>Configuring WebdriverIO</h1>
+<div class="box box-info"><div class="box-title">ℹ️ Info : Community maintained</div><p>The WebdriverIO provider (<a href="https://github.com/vitest-community/vitest-webdriverio"><code>@vitest/browser-webdriverio</code></a>) is maintained by the Vitest community in the <a href="https://github.com/vitest-community"><code>vitest-community</code></a> organization, separately from the core Vitest packages. Please report provider-specific issues to its repository.</p>
+</div><p>To run tests using WebdriverIO, you need to install the <a href="https://npmx.dev/package/@vitest/browser-webdriverio"><code>@vitest/browser-webdriverio</code></a> npm package and specify its <code>webdriverio</code> export in the <code>test.browser.provider</code> property of your config:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { webdriverio } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-webdriverio&#x27;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">webdriverio</span>(),
+      <span class="hljs-attr">instances</span>: [{ <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chrome&#x27;</span> }]
+    },
+  },
+})</code></pre></div>
+<p>You can configure all the parameters that <a href="https://webdriver.io/docs/api/modules/#remoteoptions-modifier"><code>remote</code></a> function accepts:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { webdriverio } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-webdriverio&#x27;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-comment">// shared provider options between all instances</span>
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">webdriverio</span>({
+        <span class="hljs-attr">capabilities</span>: {
+          <span class="hljs-attr">browserVersion</span>: <span class="hljs-string">&#x27;82&#x27;</span>,
+        },
+      }),
+      <span class="hljs-attr">instances</span>: [
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chrome&#x27;</span> },
+        {
+          <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;firefox&#x27;</span>,
+          <span class="hljs-comment">// overriding options only for a single instance</span>
+          <span class="hljs-comment">// this will NOT merge options with the parent one</span>
+          <span class="hljs-attr">provider</span>: <span class="hljs-title function_">webdriverio</span>({
+            <span class="hljs-attr">capabilities</span>: {
+              <span class="hljs-string">&#x27;moz:firefoxOptions&#x27;</span>: {
+                <span class="hljs-attr">args</span>: [<span class="hljs-string">&#x27;--disable-gpu&#x27;</span>],
+              },
+            },
+          })
+        },
+      ],
+    },
+  },
+})</code></pre></div>
+<p>You can find most available options in the <a href="https://webdriver.io/docs/configuration/">WebdriverIO documentation</a>. Note that Vitest will ignore all test runner options because we only use <code>webdriverio</code>&#39;s browser capabilities.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Most useful options are located on <code>capabilities</code> object. WebdriverIO allows nested capabilities, but Vitest will ignore those options because we rely on a different mechanism to spawn several browsers.</p>
+<p>Note that Vitest will ignore <code>capabilities.browserName</code>; use <a href="instances.html#browser"><code>test.browser.instances.browser</code></a> instead.</p>
+</div><h2 id="headful-chrome-in-ci"><a class="anchor" href="#headful-chrome-in-ci">#</a>Headful Chrome in CI</h2>
+<p>Vitest enables <a href="headless.html"><code>browser.headless</code></a> automatically in CI.
+If you explicitly set <code>headless: false</code> for Chrome on a Linux CI runner, Chrome
+still needs a display server. Without one, WebDriverIO or ChromeDriver can fail
+with a misleading error such as <code>session not created: probably user data directory is already in use</code>.</p>
+<p>Run the test command through <code>xvfb-run</code> when you need headful Chrome in GitHub
+Actions or another Linux CI environment:</p>
+<div class="code"><pre><code class="hljs lang-bash">xvfb-run npm <span class="hljs-built_in">test</span></code></pre></div>
+<p>Alternatively, keep <code>browser.headless</code> enabled in CI and use headful mode only
+for local debugging.</p>
+
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

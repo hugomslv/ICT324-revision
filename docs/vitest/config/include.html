@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>include | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/include  <a class="ext small" href="https://vitest.dev/config/include">version en ligne</a></div>
+<h1 id="include"><a class="anchor" href="#include">#</a>include</h1>
+<ul>
+<li><strong>Type:</strong> <code>string[]</code></li>
+<li><strong>Default:</strong> <code>[&#39;**/*.{test,spec}.?(c|m)[jt]s?(x)&#39;]</code></li>
+<li><strong>CLI:</strong> <code>vitest [...include]</code>, <code>vitest **/*.test.js</code></li>
+</ul>
+<p>A list of <a href="https://superchupu.dev/tinyglobby/comparison">glob patterns</a> that match your test files. These patterns are resolved relative to the <a href="root.html"><code>root</code></a> (<a href="https://nodejs.org/api/process.html#processcwd"><code>process.cwd()</code></a> by default).</p>
+<p>Vitest uses the <a href="https://npmx.dev/package/tinyglobby"><code>tinyglobby</code></a> package to resolve the globs.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : NOTE</div><p>When using coverage, Vitest automatically adds test files <code>include</code> patterns to coverage&#39;s default <code>exclude</code> patterns. See <a href="coverage.html#exclude"><code>coverage.exclude</code></a>.</p>
+</div><h2 id="example"><a class="anchor" href="#example">#</a>Example</h2>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">include</span>: [
+      <span class="hljs-string">&#x27;./test&#x27;</span>,
+      <span class="hljs-string">&#x27;./**/*.{test,spec}.ts(x)?&#x27;</span>,
+    ],
+  },
+})</code></pre></div>
+<p>Vitest provides reasonable defaults, so normally you wouldn&#39;t override them. A good example of defining <code>include</code> is for <a href="../guide/projects.html">test projects</a>:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;unit&#x27;</span>,
+          <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;./test/unit/*.test.js&#x27;</span>],
+        },
+      },
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;e2e&#x27;</span>,
+          <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;./test/e2e/*.test.js&#x27;</span>],
+        },
+      },
+    ],
+  },
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This option will override Vitest defaults. If you just want to extend them, use <code>configDefaults</code> from <code>vitest/config</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { configDefaults, defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">include</span>: [
+      ...configDefaults.<span class="hljs-property">include</span>,
+      <span class="hljs-string">&#x27;./test&#x27;</span>,
+      <span class="hljs-string">&#x27;./**/*.{test,spec}.ts(x)?&#x27;</span>,
+    ],
+  },
+})</code></pre></div>
+</div>
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

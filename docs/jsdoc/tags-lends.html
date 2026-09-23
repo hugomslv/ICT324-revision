@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>@lends (JSDoc) · ICT-324 Révision</title>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/hljs.css">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../index.html">Accueil</a><a class="nav-link" href="../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../docs/index.html">Index des docs</a><a class="nav-link" href="../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../docs/vite/index.html">Vite</a><a class="nav-link active" href="../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="index.html">JSDoc</a> › tags-lends <span class="badge">Document properties on an object literal as if they belonged to a symbol with a given name.</span> <a class="ext small" href="https://jsdoc.app/tags-lends.html">version en ligne</a></div>
+<h1>@lends</h1><h2 id="syntax"><a class="anchor" href="#syntax">#</a>Syntax</h2>
+<p><code>@lends &lt;namepath&gt;</code></p>
+<h2 id="overview"><a class="anchor" href="#overview">#</a>Overview</h2>
+<p>The <code>@lends</code> tag allows you to document all the members of an object literal as if they were members
+of a symbol with the given name. You might want to do this if you are passing an object literal into
+a function that creates a named class from its members.</p>
+<h2 id="examples"><a class="anchor" href="#examples">#</a>Examples</h2>
+<p>In this example, we want to use a helper function to make a class named <code>Person</code>, along with
+instance methods named <code>initialize</code> and <code>say</code>. This is similar to how some popular frameworks
+handle class creation.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Example class</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// We want to document this as being a class</span>
+<span class="hljs-keyword">var</span> <span class="hljs-title class_">Person</span> = <span class="hljs-title function_">makeClass</span>(
+    <span class="hljs-comment">// We want to document these as being methods</span>
+    {
+        <span class="hljs-attr">initialize</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>) {
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = name;
+        },
+        <span class="hljs-attr">say</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">message</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> + <span class="hljs-string">&quot; says: &quot;</span> + message;
+        }
+    }
+);</code></pre></div>
+</div><p>Without any comments, JSDoc won&#39;t recognize that this code creates a <code>Person</code> class with two
+methods. To document the methods, we must use a <code>@lends</code> tag in a doc comment immediately before the
+object literal. The <code>@lends</code> tag tells JSDoc that all the member names of that object literal are
+being &quot;loaned&quot; to a variable named <code>Person</code>. We must also add comments to each of the methods.</p>
+<p>The following example gets us closer to what we want:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Documented as static methods</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/** <span class="hljs-doctag">@class</span> */</span>
+<span class="hljs-keyword">var</span> <span class="hljs-title class_">Person</span> = <span class="hljs-title function_">makeClass</span>(
+    <span class="hljs-comment">/** <span class="hljs-doctag">@lends</span> Person */</span>
+    {
+        <span class="hljs-comment">/**
+         * Create a `Person` instance.
+         * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">name</span> - The person&#x27;s name.
+         */</span>
+        <span class="hljs-attr">initialize</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>) {
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = name;
+        },
+        <span class="hljs-comment">/**
+         * Say something.
+         * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">message</span> - The message to say.
+         * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">string</span>} The complete message.
+         */</span>
+        <span class="hljs-attr">say</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">message</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> + <span class="hljs-string">&quot; says: &quot;</span> + message;
+        }
+    }
+);</code></pre></div>
+</div><p>Now the functions named <code>initialize</code> and <code>say</code> will be documented, but they appear as static methods
+of the <code>Person</code> class. That is possibly what you meant, but in this case we want <code>initialize</code> and
+<code>say</code> to belong to the instances of the <code>Person</code> class. So we change things slightly by lending the
+methods to the class&#39;s prototype:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Documented as instance methods</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/** <span class="hljs-doctag">@class</span> */</span>
+<span class="hljs-keyword">var</span> <span class="hljs-title class_">Person</span> = <span class="hljs-title function_">makeClass</span>(
+    <span class="hljs-comment">/** <span class="hljs-doctag">@lends</span> Person.prototype */</span>
+    {
+        <span class="hljs-comment">/**
+         * Create a `Person` instance.
+         * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">name</span> - The person&#x27;s name.
+         */</span>
+        <span class="hljs-attr">initialize</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>) {
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = name;
+        },
+        <span class="hljs-comment">/**
+         * Say something.
+         * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">message</span> - The message to say.
+         * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">string</span>} The complete message.
+         */</span>
+        <span class="hljs-attr">say</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">message</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> + <span class="hljs-string">&quot; says: &quot;</span> + message;
+        }
+    }
+);</code></pre></div>
+</div><p>One final step: Our class framework uses the loaned <code>initialize</code> function to construct <code>Person</code>
+instances, but a <code>Person</code> instance does not have its own <code>initialize</code> method. The solution is to add
+the <code>@constructs</code> tag to the loaned function. Remember to remove the <code>@class</code> tag as well, or else
+two classes will be documented.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Documented with a constructor</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">var</span> <span class="hljs-title class_">Person</span> = <span class="hljs-title function_">makeClass</span>(
+    <span class="hljs-comment">/** <span class="hljs-doctag">@lends</span> Person.prototype */</span>
+    {
+        <span class="hljs-comment">/**
+         * Create a `Person` instance.
+         * <span class="hljs-doctag">@constructs</span>
+         * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">name</span> - The person&#x27;s name.
+         */</span>
+        <span class="hljs-attr">initialize</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">name</span>) {
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = name;
+        },
+        <span class="hljs-comment">/**
+         * Say something.
+         * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">message</span> - The message to say.
+         * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">string</span>} The complete message.
+         */</span>
+        <span class="hljs-attr">say</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">message</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> + <span class="hljs-string">&quot; says: &quot;</span> + message;
+        }
+    }
+);</code></pre></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#syntax">Syntax</a><a class="toc-2" href="#overview">Overview</a><a class="toc-2" href="#examples">Examples</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

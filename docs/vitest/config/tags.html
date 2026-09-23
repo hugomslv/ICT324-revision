@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tags | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/tags  <a class="ext small" href="https://vitest.dev/config/tags">version en ligne</a></div>
+<h1 id="tags"><a class="anchor" href="#tags">#</a>tags <Version>4.1.0</Version></h1>
+<ul>
+<li><strong>Type:</strong> <code>TestTagDefinition[]</code></li>
+<li><strong>Default:</strong> <code>[]</code></li>
+</ul>
+<p>Defines all <a href="../guide/test-tags.html">available tags</a> in your test project. By default, if test defines a name not listed here, Vitest will throw an error, but this can be configured via a <a href="stricttags.html"><code>strictTags</code></a> option.</p>
+<p>If you are using <a href="projects.html"><code>projects</code></a>, they will inherit all global tags definitions automatically.</p>
+<p>Use <a href="../guide/test-tags.html#syntax"><code>--tags-filter</code></a> to filter tests by their tags. Use <a href="../guide/cli.html#listtags"><code>--list-tags</code></a> to print every tag in your Vitest workspace.</p>
+<h2 id="name"><a class="anchor" href="#name">#</a>name</h2>
+<ul>
+<li><strong>Type:</strong> <code>string</code></li>
+<li><strong>Required:</strong> <code>true</code></li>
+</ul>
+<p>The name of the tag. This is what you use in the <code>tags</code> option in tests.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">tags</span>: [
+      { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;unit&#x27;</span> },
+      { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;e2e&#x27;</span> },
+    ],
+  },
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If you are using TypeScript, you can enforce what tags are available by augmenting the <code>TestTags</code> type with a property that contains a union of strings (make sure this file is included by your <code>tsconfig</code>):</p>
+<div class="code"><div class="code-title">vitest.shims.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">TestTags</span> {
+    <span class="hljs-attr">tags</span>:
+      | <span class="hljs-string">&#x27;frontend&#x27;</span>
+      | <span class="hljs-string">&#x27;backend&#x27;</span>
+      | <span class="hljs-string">&#x27;db&#x27;</span>
+      | <span class="hljs-string">&#x27;flaky&#x27;</span>
+  }
+}</code></pre></div>
+</div><h2 id="description"><a class="anchor" href="#description">#</a>description</h2>
+<ul>
+<li><strong>Type:</strong> <code>string</code></li>
+</ul>
+<p>A human-readable description for the tag. This will be shown in UI and inside error messages when a tag is not found.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">tags</span>: [
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;slow&#x27;</span>,
+        <span class="hljs-attr">description</span>: <span class="hljs-string">&#x27;Tests that take a long time to run.&#x27;</span>,
+      },
+    ],
+  },
+})</code></pre></div>
+<h2 id="priority"><a class="anchor" href="#priority">#</a>priority</h2>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Default:</strong> <code>Infinity</code></li>
+</ul>
+<p>Priority for merging options when multiple tags with the same options are applied to a test. Lower number means higher priority (e.g., priority <code>1</code> takes precedence over priority <code>3</code>).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">tags</span>: [
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;flaky&#x27;</span>,
+        <span class="hljs-attr">timeout</span>: <span class="hljs-number">30_000</span>,
+        <span class="hljs-attr">priority</span>: <span class="hljs-number">1</span>, <span class="hljs-comment">// higher priority</span>
+      },
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;db&#x27;</span>,
+        <span class="hljs-attr">timeout</span>: <span class="hljs-number">60_000</span>,
+        <span class="hljs-attr">priority</span>: <span class="hljs-number">2</span>, <span class="hljs-comment">// lower priority</span>
+      },
+    ],
+  },
+})</code></pre></div>
+<p>When a test has both tags, the <code>timeout</code> will be <code>30_000</code> because <code>flaky</code> has a higher priority.</p>
+<h2 id="test-options"><a class="anchor" href="#test-options">#</a>Test Options</h2>
+<p>Tags can define <a href="../api/test.html#test-options">test options</a> that will be applied to every test marked with the tag. These options are merged with the test&#39;s own options, with the test&#39;s options taking precedence.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>The <a href="../api/test.html#retry"><code>retry.condition</code></a> can only be a regexp because the config values need to be serialised.</p>
+<p>Tags also cannot apply other <a href="../api/test.html#tags">tags</a> via these options.</p>
+</div><h2 id="example"><a class="anchor" href="#example">#</a>Example</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">tags</span>: [
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;unit&#x27;</span>,
+        <span class="hljs-attr">description</span>: <span class="hljs-string">&#x27;Unit tests.&#x27;</span>,
+      },
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;e2e&#x27;</span>,
+        <span class="hljs-attr">description</span>: <span class="hljs-string">&#x27;End-to-end tests.&#x27;</span>,
+        <span class="hljs-attr">timeout</span>: <span class="hljs-number">60_000</span>,
+      },
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;flaky&#x27;</span>,
+        <span class="hljs-attr">description</span>: <span class="hljs-string">&#x27;Flaky tests that need retries.&#x27;</span>,
+        <span class="hljs-attr">retry</span>: process.<span class="hljs-property">env</span>.<span class="hljs-property">CI</span> ? <span class="hljs-number">3</span> : <span class="hljs-number">0</span>,
+        <span class="hljs-attr">priority</span>: <span class="hljs-number">1</span>,
+      },
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;slow&#x27;</span>,
+        <span class="hljs-attr">description</span>: <span class="hljs-string">&#x27;Slow tests.&#x27;</span>,
+        <span class="hljs-attr">timeout</span>: <span class="hljs-number">120_000</span>,
+      },
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;skip-ci&#x27;</span>,
+        <span class="hljs-attr">description</span>: <span class="hljs-string">&#x27;Tests to skip in CI.&#x27;</span>,
+        <span class="hljs-attr">skip</span>: !!process.<span class="hljs-property">env</span>.<span class="hljs-property">CI</span>,
+      },
+    ],
+  },
+})</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#name">name</a><a class="toc-2" href="#description">description</a><a class="toc-2" href="#priority">priority</a><a class="toc-2" href="#test-options">Test Options</a><a class="toc-2" href="#example">Example</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

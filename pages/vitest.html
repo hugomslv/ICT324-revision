@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3. Vitest : tests unitaires · ICT-324 Révision</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/hljs.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../index.html">Accueil</a><a class="nav-link" href="../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../pages/vite.html">1. Vite</a><a class="nav-link" href="../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link active" href="../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../pages/projets.html">Projets du cours</a><a class="nav-link" href="../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../docs/index.html">Index des docs</a><a class="nav-link" href="../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../docs/vite/index.html">Vite</a><a class="nav-link" href="../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+
+<h1>3. Vitest : tests unitaires</h1><p class="lead">Vitest exécute des fonctions de test qui vérifient que ton code renvoie ce qui est attendu. Il utilise la config de Vite, et son API est la même que Jest.</p><p>Versions : Vitest <strong>2.1</strong> (projet <code>vitest</code>), <strong>3.2</strong> (<code>currency-converter</code>), <strong>4.1</strong> (<code>vite_lint_test_doc</code>), <strong>5.0</strong> (actuelle, utilisée ici). L&#39;API de base est identique. Doc hors-ligne : <a href="../docs/vitest/index.html">Vitest</a>, <a href="../docs/vitest/api/expect.html">expect</a>, <a href="../docs/vitest/api/vi.html">vi</a>.</p>
+<h2 id="installer-et-lancer"><a class="anchor" href="#installer-et-lancer">#</a>Installer et lancer</h2>
+<div class="code"><pre><code class="hljs lang-bash">npm install -D vitest @vitest/coverage-v8</code></pre></div>
+<div class="code"><div class="code-title">package.json</div><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;test&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;test:run&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest run&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;coverage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest run --coverage&quot;</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Commande</th>
+<th>Effet</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>npx vitest</code></td>
+<td>mode <strong>watch</strong> : relance à chaque sauvegarde (<code>q</code> pour quitter)</td>
+</tr>
+<tr>
+<td><code>npx vitest run</code></td>
+<td>une seule exécution puis sortie (code 1 si échec)</td>
+</tr>
+<tr>
+<td><code>npx vitest run math</code></td>
+<td>seulement les fichiers dont le nom contient <code>math</code></td>
+</tr>
+<tr>
+<td><code>npx vitest run -t &quot;add&quot;</code></td>
+<td>seulement les tests dont le <strong>nom</strong> contient <code>add</code></td>
+</tr>
+<tr>
+<td><code>npx vitest run --coverage</code></td>
+<td>+ rapport de couverture</td>
+</tr>
+<tr>
+<td><code>npx vitest run --reporter=verbose</code></td>
+<td>affiche chaque test</td>
+</tr>
+<tr>
+<td><code>npx vitest run --reporter=json --outputFile=test-results.json</code></td>
+<td>résultats dans un fichier (comme <code>test-results.json</code> du prof)</td>
+</tr>
+<tr>
+<td><code>npx vitest --ui</code></td>
+<td>interface web (paquet <code>@vitest/ui</code>)</td>
+</tr>
+</tbody></table></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Noms de fichiers</div><p>Vitest trouve seul les fichiers <code>*.test.js</code> et <code>*.spec.js</code> (aussi <code>.mjs</code>, <code>.ts</code>…). Un fichier <code>math_test.js</code> ou <code>tests.js</code> est <strong>ignoré</strong> → <em>No test files found</em>.</p>
+</div><h2 id="premier-test"><a class="anchor" href="#premier-test">#</a>Premier test</h2>
+<div class="code"><div class="code-title">src/math.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">a, b</span>) {
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> a !== <span class="hljs-string">&quot;number&quot;</span> || <span class="hljs-keyword">typeof</span> b !== <span class="hljs-string">&quot;number&quot;</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;error&quot;</span>
+  }
+  <span class="hljs-keyword">return</span> a + b
+}</code></pre></div>
+<div class="code"><div class="code-title">src/math.test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { test, expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>
+<span class="hljs-keyword">import</span> { add } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./math.js&quot;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;1 + 2 = 3&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">3</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;paramètre invalide → &#x27;error&#x27;&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>, <span class="hljs-string">&quot;a&quot;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;error&quot;</span>)
+})</code></pre></div>
+<p>Sortie :</p>
+<div class="code"><pre><code class="hljs lang-text"> ✓ src/math.test.js (2 tests) 1ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Structure d'un test : AAA</div><p><strong>Arrange</strong> (préparer les données) → <strong>Act</strong> (appeler la fonction) → <strong>Assert</strong> (<code>expect</code>). Un test = un comportement. Le nom décrit le comportement attendu.</p>
+</div><h2 id="organiser-describe-it-each-skip-only"><a class="anchor" href="#organiser-describe-it-each-skip-only">#</a>Organiser : describe, it, each, skip, only</h2>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { describe, test, it, expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>
+<span class="hljs-keyword">import</span> { add, sub } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./math.js&quot;</span>
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;add&quot;</span>, <span class="hljs-function">() =&gt;</span> {                 <span class="hljs-comment">// groupe</span>
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;nombres positifs&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">3</span>)
+  })
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;nombres négatifs&quot;</span>, <span class="hljs-function">() =&gt;</span> {        <span class="hljs-comment">// it = alias de test</span>
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>(-<span class="hljs-number">1</span>, -<span class="hljs-number">2</span>)).<span class="hljs-title function_">toBe</span>(-<span class="hljs-number">3</span>)
+  })
+})
+
+<span class="hljs-comment">// même test avec plusieurs jeux de données</span>
+test.<span class="hljs-title function_">each</span>([
+  [ <span class="hljs-number">5</span>, <span class="hljs-number">3</span>, <span class="hljs-number">2</span> ],
+  [ <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span> ],
+  [ -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span> ],
+])(<span class="hljs-string">&quot;sub(%i, %i) = %i&quot;</span>, <span class="hljs-function">(<span class="hljs-params">a, b, expected</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">sub</span>(a, b)).<span class="hljs-title function_">toBe</span>(expected)
+})
+
+test.<span class="hljs-title function_">skip</span>(<span class="hljs-string">&quot;pas encore prêt&quot;</span>, <span class="hljs-function">() =&gt;</span> {})  <span class="hljs-comment">// ignoré</span>
+test.<span class="hljs-title function_">todo</span>(<span class="hljs-string">&quot;tester la division&quot;</span>)         <span class="hljs-comment">// à faire</span>
+<span class="hljs-comment">// test.only(...)  → n&#x27;exécute QUE ce test dans le fichier</span></code></pre></div>
+<h2 id="les-matchers-expect"><a class="anchor" href="#les-matchers-expect">#</a>Les matchers (expect)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Matcher</th>
+<th>Vérifie</th>
+<th>Exemple</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>toBe(v)</code></td>
+<td>égalité stricte <code>===</code> (nombres, chaînes, booléens)</td>
+<td><code>expect(add(1, 2)).toBe(3)</code></td>
+</tr>
+<tr>
+<td><code>toEqual(v)</code></td>
+<td>même <strong>contenu</strong> (tableaux, objets)</td>
+<td><code>expect(rotate([ 1, 2 ])).toEqual([ 2, 1 ])</code></td>
+</tr>
+<tr>
+<td><code>toStrictEqual(v)</code></td>
+<td>comme <code>toEqual</code> + types et <code>undefined</code> stricts</td>
+<td></td>
+</tr>
+<tr>
+<td><code>toBeCloseTo(n, d)</code></td>
+<td>flottants (<code>0.1 + 0.2</code>)</td>
+<td><code>expect(0.1 + 0.2).toBeCloseTo(0.3)</code></td>
+</tr>
+<tr>
+<td><code>toBeTruthy()</code> / <code>toBeFalsy()</code></td>
+<td>valeur vraie / fausse</td>
+<td></td>
+</tr>
+<tr>
+<td><code>toBeNull()</code> / <code>toBeUndefined()</code> / <code>toBeDefined()</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>toBeNaN()</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>toBeGreaterThan(n)</code> / <code>toBeLessThanOrEqual(n)</code> …</td>
+<td>comparaisons</td>
+<td><code>expect(x).toBeGreaterThan(5)</code></td>
+</tr>
+<tr>
+<td><code>toBeTypeOf(&quot;number&quot;)</code></td>
+<td><code>typeof</code></td>
+<td><code>expect(rates).toBeTypeOf(&quot;object&quot;)</code></td>
+</tr>
+<tr>
+<td><code>toBeInstanceOf(Classe)</code></td>
+<td><code>instanceof</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>toContain(x)</code></td>
+<td>élément dans un tableau / sous-chaîne</td>
+<td><code>expect([ 1, 2 ]).toContain(2)</code></td>
+</tr>
+<tr>
+<td><code>toHaveLength(n)</code></td>
+<td><code>.length</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>toHaveProperty(&quot;a.b&quot;, v?)</code></td>
+<td>propriété (chemin avec des points)</td>
+<td><code>expect(rates).toHaveProperty(&quot;eur&quot;)</code></td>
+</tr>
+<tr>
+<td><code>toMatch(/regex/)</code></td>
+<td>chaîne correspond</td>
+<td></td>
+</tr>
+<tr>
+<td><code>toThrow(&quot;msg&quot;)</code></td>
+<td>lève une erreur</td>
+<td>voir plus bas</td>
+</tr>
+<tr>
+<td><code>.not.xxx</code></td>
+<td>négation</td>
+<td><code>expect(x).not.toBe(0)</code></td>
+</tr>
+<tr>
+<td><code>.resolves</code> / <code>.rejects</code></td>
+<td>promesses</td>
+<td><code>await expect(p).resolves.toBe(1)</code></td>
+</tr>
+<tr>
+<td><code>toHaveBeenCalled()</code> / <code>toHaveBeenCalledOnce()</code></td>
+<td>un mock a été appelé</td>
+<td></td>
+</tr>
+<tr>
+<td><code>toHaveBeenCalledTimes(n)</code> / <code>toHaveBeenCalledWith(...)</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table></div>
+<div class="box box-danger"><div class="box-title">🛑 Danger : toBe vs toEqual</div><p><code>expect([ 1, 2 ]).toBe([ 1, 2 ])</code> <strong>échoue</strong> : deux tableaux différents en mémoire. Pour tableaux et objets → <code>toEqual</code>.</p>
+</div><h3 id="tester-une-erreur-tothrow"><a class="anchor" href="#tester-une-erreur-tothrow">#</a>Tester une erreur (toThrow)</h3>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">divide</span>(<span class="hljs-params">a, b</span>) {
+  <span class="hljs-keyword">if</span> (b === <span class="hljs-number">0</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Division par zéro&quot;</span>)
+  <span class="hljs-keyword">return</span> a / b
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;division par zéro&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// ⚠️ il faut passer une FONCTION, pas le résultat</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">divide</span>(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&quot;Division par zéro&quot;</span>)
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">divide</span>(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>)).<span class="hljs-title function_">toThrowError</span>(<span class="hljs-regexp">/zéro/</span>)
+})</code></pre></div>
+<h3 id="tester-du-code-asynchrone"><a class="anchor" href="#tester-du-code-asynchrone">#</a>Tester du code asynchrone</h3>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;async&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> rates = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getLatestRates</span>(<span class="hljs-string">&quot;eur&quot;</span>)
+  <span class="hljs-title function_">expect</span>(rates).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&quot;eur&quot;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;promesse rejetée&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">fonctionQuiEchoue</span>()).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&quot;HTTP 404&quot;</span>)
+})</code></pre></div>
+<h2 id="hooks-avant-apres"><a class="anchor" href="#hooks-avant-apres">#</a>Hooks : avant / après</h2>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { beforeAll, beforeEach, afterEach, afterAll } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>
+
+<span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* une fois avant tous les tests du fichier */</span> })
+<span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* avant CHAQUE test */</span> })
+<span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* après chaque test : nettoyer les mocks */</span> })
+<span class="hljs-title function_">afterAll</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* une fois à la fin */</span> })</code></pre></div>
+<h2 id="mocks-simuler-fetch-console"><a class="anchor" href="#mocks-simuler-fetch-console">#</a>Mocks : simuler fetch, console…</h2>
+<p>Indispensable <strong>hors-ligne</strong> : un test qui appelle vraiment une API échoue sans réseau. Exemple testé :</p>
+<div class="code"><div class="code-title">exemples/vitest-avance/src/api.test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { describe, test, expect, vi, afterEach, beforeEach } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>
+<span class="hljs-keyword">import</span> { get_rate, divide } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./api.js&quot;</span>
+
+<span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> {
+  vi.<span class="hljs-title function_">unstubAllGlobals</span>()
+  vi.<span class="hljs-title function_">restoreAllMocks</span>()
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;get_rate&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;renvoie le taux (fetch simulé)&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> fake_fetch = vi.<span class="hljs-title function_">fn</span>().<span class="hljs-title function_">mockResolvedValue</span>({
+      <span class="hljs-attr">ok</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">json</span>: <span class="hljs-title function_">async</span> () =&gt; ({ <span class="hljs-attr">eur</span>: { <span class="hljs-attr">chf</span>: <span class="hljs-number">0.94</span> } }),
+    })
+    vi.<span class="hljs-title function_">stubGlobal</span>(<span class="hljs-string">&quot;fetch&quot;</span>, fake_fetch)
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">get_rate</span>(<span class="hljs-string">&quot;eur&quot;</span>, <span class="hljs-string">&quot;chf&quot;</span>)).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toBe</span>(<span class="hljs-number">0.94</span>)
+    <span class="hljs-title function_">expect</span>(fake_fetch).<span class="hljs-title function_">toHaveBeenCalledOnce</span>()
+    <span class="hljs-title function_">expect</span>(fake_fetch).<span class="hljs-title function_">toHaveBeenCalledWith</span>(<span class="hljs-string">&quot;https://api.test/eur.json&quot;</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;lève une erreur si HTTP KO&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> fake_fetch = vi.<span class="hljs-title function_">fn</span>().<span class="hljs-title function_">mockResolvedValue</span>({ <span class="hljs-attr">ok</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">status</span>: <span class="hljs-number">404</span> })
+    vi.<span class="hljs-title function_">stubGlobal</span>(<span class="hljs-string">&quot;fetch&quot;</span>, fake_fetch)
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">get_rate</span>(<span class="hljs-string">&quot;eur&quot;</span>, <span class="hljs-string">&quot;chf&quot;</span>)).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&quot;HTTP 404&quot;</span>)
+  })
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;divide&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;toThrow a besoin d&#x27;une fonction&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">divide</span>(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&quot;Division par zéro&quot;</span>)
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">divide</span>(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>)).<span class="hljs-title function_">toThrowError</span>(<span class="hljs-regexp">/zéro/</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;matchers divers&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">divide</span>(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>)).<span class="hljs-title function_">toBeCloseTo</span>(<span class="hljs-number">0.333</span>, <span class="hljs-number">3</span>)
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">divide</span>(<span class="hljs-number">4</span>, <span class="hljs-number">2</span>)).<span class="hljs-title function_">toBeTypeOf</span>(<span class="hljs-string">&quot;number&quot;</span>)
+    <span class="hljs-title function_">expect</span>([ <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span> ]).<span class="hljs-title function_">toContain</span>(<span class="hljs-number">2</span>)
+    <span class="hljs-title function_">expect</span>([ <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span> ]).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">3</span>)
+    <span class="hljs-title function_">expect</span>({ <span class="hljs-attr">a</span>: { <span class="hljs-attr">b</span>: <span class="hljs-number">1</span> } }).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&quot;a.b&quot;</span>, <span class="hljs-number">1</span>)
+    <span class="hljs-title function_">expect</span>(<span class="hljs-string">&quot;bonjour&quot;</span>).<span class="hljs-title function_">toMatch</span>(<span class="hljs-regexp">/jour/</span>)
+    <span class="hljs-title function_">expect</span>({ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-literal">undefined</span> }).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> })
+    <span class="hljs-title function_">expect</span>({ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-literal">undefined</span> }).<span class="hljs-property">not</span>.<span class="hljs-title function_">toStrictEqual</span>({ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> })
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">NaN</span>).<span class="hljs-title function_">toBeNaN</span>()
+    <span class="hljs-title function_">expect</span>(<span class="hljs-literal">null</span>).<span class="hljs-title function_">toBeNull</span>()
+    <span class="hljs-title function_">expect</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_">toBeFalsy</span>()
+  })
+  <span class="hljs-keyword">const</span> spy_target = { <span class="hljs-attr">log</span>: <span class="hljs-function">(<span class="hljs-params">m</span>) =&gt;</span> m }
+  <span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> {
+    vi.<span class="hljs-title function_">spyOn</span>(spy_target, <span class="hljs-string">&quot;log&quot;</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;spyOn&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    spy_target.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;x&quot;</span>)
+    <span class="hljs-title function_">expect</span>(spy_target.<span class="hljs-property">log</span>).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(<span class="hljs-number">1</span>)
+  })
+})</code></pre></div>
+<p class="file-link"><a href="../projets/exemples/vitest-avance/src/api.test.js">📄 ouvrir le fichier api.test.js</a></p><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Outil</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>vi.fn()</code></td>
+<td>fausse fonction qui enregistre ses appels</td>
+</tr>
+<tr>
+<td><code>.mockReturnValue(v)</code></td>
+<td>elle renvoie <code>v</code></td>
+</tr>
+<tr>
+<td><code>.mockResolvedValue(v)</code></td>
+<td>elle renvoie une promesse résolue avec <code>v</code> (parfait pour <code>fetch</code>)</td>
+</tr>
+<tr>
+<td><code>.mockRejectedValue(err)</code></td>
+<td>promesse rejetée</td>
+</tr>
+<tr>
+<td><code>.mockImplementation(fn)</code></td>
+<td>code personnalisé</td>
+</tr>
+<tr>
+<td><code>vi.spyOn(obj, &quot;methode&quot;)</code></td>
+<td>espionne une vraie méthode (ex : <code>console.error</code>)</td>
+</tr>
+<tr>
+<td><code>vi.stubGlobal(&quot;fetch&quot;, mock)</code></td>
+<td>remplace une globale</td>
+</tr>
+<tr>
+<td><code>vi.unstubAllGlobals()</code></td>
+<td>remet les globales d&#39;origine</td>
+</tr>
+<tr>
+<td><code>vi.restoreAllMocks()</code></td>
+<td>restaure les méthodes espionnées</td>
+</tr>
+</tbody></table></div>
+<p>Le prof, dans <code>currency-converter</code> :</p>
+<div class="code"><pre><code class="hljs lang-js">vi.<span class="hljs-title function_">stubGlobal</span>(<span class="hljs-string">&quot;fetch&quot;</span>, vi.<span class="hljs-title function_">fn</span>().<span class="hljs-title function_">mockResolvedValue</span>({ <span class="hljs-attr">ok</span>: <span class="hljs-literal">false</span> }))
+vi.<span class="hljs-title function_">spyOn</span>(<span class="hljs-variable language_">console</span>, <span class="hljs-string">&quot;error&quot;</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> {}) <span class="hljs-comment">// silence la console</span>
+<span class="hljs-keyword">const</span> rates = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getLatestRates</span>(<span class="hljs-string">&quot;eur&quot;</span>)
+<span class="hljs-title function_">expect</span>(rates).<span class="hljs-title function_">toBeNull</span>()
+<span class="hljs-title function_">expect</span>(<span class="hljs-variable language_">console</span>.<span class="hljs-property">error</span>).<span class="hljs-title function_">toHaveBeenCalledOnce</span>()</code></pre></div>
+<h2 id="tester-le-dom-jsdom"><a class="anchor" href="#tester-le-dom-jsdom">#</a>Tester le DOM (jsdom)</h2>
+<p>Par défaut les tests tournent dans Node (pas de <code>document</code>). Pour du code qui manipule la page :</p>
+<div class="code"><pre><code class="hljs lang-bash">npm install -D jsdom     <span class="hljs-comment"># avec réseau !</span></code></pre></div>
+<div class="code"><div class="code-title">exemples/vitest-avance/src/dom.test.js</div><pre><code class="hljs lang-js"><span class="hljs-comment">// @vitest-environment jsdom</span>
+<span class="hljs-keyword">import</span> { test, expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>
+<span class="hljs-keyword">import</span> { render_title } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./api.js&quot;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;affiche un titre dans le DOM&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-property">innerHTML</span> = <span class="hljs-string">&quot;&lt;div id=\&quot;app\&quot;&gt;&lt;/div&gt;&quot;</span>
+  <span class="hljs-keyword">const</span> app = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&quot;#app&quot;</span>)
+  <span class="hljs-title function_">render_title</span>(app, <span class="hljs-string">&quot;Salut&quot;</span>)
+  <span class="hljs-title function_">expect</span>(app.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&quot;h1&quot;</span>).<span class="hljs-property">textContent</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;Salut&quot;</span>)
+  <span class="hljs-title function_">expect</span>(app.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&quot;h1&quot;</span>).<span class="hljs-property">classList</span>.<span class="hljs-title function_">contains</span>(<span class="hljs-string">&quot;title&quot;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">true</span>)
+})</code></pre></div>
+<p class="file-link"><a href="../projets/exemples/vitest-avance/src/dom.test.js">📄 ouvrir le fichier dom.test.js</a></p><p>Ou pour tous les tests : <code>test: { environment: &quot;jsdom&quot; }</code> dans la config.</p>
+<h2 id="configuration"><a class="anchor" href="#configuration">#</a>Configuration</h2>
+<p>Dans <code>vitest.config.js</code> <strong>ou</strong> dans le bloc <code>test</code> de <code>vite.config.js</code> :</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig, coverageConfigDefaults } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest/config&quot;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">globals</span>: <span class="hljs-literal">true</span>,           <span class="hljs-comment">// describe/test/expect sans import</span>
+    <span class="hljs-attr">environment</span>: <span class="hljs-string">&quot;node&quot;</span>,     <span class="hljs-comment">// ou &quot;jsdom&quot;</span>
+    <span class="hljs-attr">include</span>: [ <span class="hljs-string">&quot;src/**/*.test.js&quot;</span> ],
+    <span class="hljs-attr">coverage</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-string">&quot;v8&quot;</span>,
+      <span class="hljs-attr">include</span>: [ <span class="hljs-string">&quot;src/**/*.js&quot;</span> ],
+      <span class="hljs-attr">exclude</span>: [ <span class="hljs-string">&quot;src/main.js&quot;</span>, ...coverageConfigDefaults.<span class="hljs-property">exclude</span> ],
+      <span class="hljs-attr">reporter</span>: [ <span class="hljs-string">&quot;text&quot;</span>, <span class="hljs-string">&quot;html&quot;</span>, <span class="hljs-string">&quot;json&quot;</span> ],
+      <span class="hljs-attr">reportsDirectory</span>: <span class="hljs-string">&quot;./coverage&quot;</span>,
+      <span class="hljs-attr">thresholds</span>: { <span class="hljs-attr">lines</span>: <span class="hljs-number">80</span>, <span class="hljs-attr">functions</span>: <span class="hljs-number">80</span>, <span class="hljs-attr">branches</span>: <span class="hljs-number">80</span>, <span class="hljs-attr">statements</span>: <span class="hljs-number">80</span> },
+    },
+  },
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : globals: true et ESLint</div><p>Si tu utilises <code>globals: true</code> sans importer <code>test</code>/<code>expect</code>, ESLint dira <code>&#39;test&#39; is not defined</code>. Ajoute dans <code>eslint.config.js</code> : <code>{ files: [ &quot;**/*.test.js&quot; ], languageOptions: { globals: globals.vitest } }</code>. Le plus simple reste d&#39;importer depuis <code>&quot;vitest&quot;</code>.</p>
+</div><h2 id="couverture-de-code-coverage"><a class="anchor" href="#couverture-de-code-coverage">#</a>Couverture de code (coverage)</h2>
+<div class="code"><pre><code class="hljs lang-bash">npx vitest run --coverage</code></pre></div>
+<div class="code"><pre><code class="hljs lang-text">File      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+----------|---------|----------|---------|---------|-------------------
+math.js   |   91.66 |     92.3 |     100 |    90.9 | 33</code></pre></div>
+<ul>
+<li><strong>Stmts</strong> : instructions exécutées · <strong>Branch</strong> : chaque <code>if</code>/<code>else</code> pris dans les deux sens · <strong>Funcs</strong> : fonctions appelées · <strong>Lines</strong> : lignes exécutées.</li>
+<li><em>Uncovered Line #s</em> : les lignes jamais exécutées → écris un test qui y passe.</li>
+<li>Le rapport HTML est dans <code>coverage/index.html</code> (exemples réels : <a href="../projets/modele/coverage/index.html">projet modèle</a>, <a href="../projets/cours/2-vitest/coverage/index.html">projet vitest du cours</a>).</li>
+<li><code>coverage.include</code> compte aussi les fichiers qu&#39;aucun test n&#39;importe (à 0 %).</li>
+<li>Ajoute <code>coverage/</code> au <code>.gitignore</code> et aux <code>globalIgnores</code> d&#39;ESLint.</li>
+</ul>
+<div class="box box-danger"><div class="box-title">🛑 Danger : Hors-ligne</div><p>Si <code>@vitest/coverage-v8</code> n&#39;est pas installé, Vitest propose de l&#39;installer : impossible sans réseau. Installe-le pendant la phase connectée, <strong>même version</strong> que <code>vitest</code>.</p>
+</div><h2 id="que-tester-idees-pour-l-examen"><a class="anchor" href="#que-tester-idees-pour-l-examen">#</a>Que tester ? (idées pour l&#39;examen)</h2>
+<ul>
+<li>Le cas normal (<code>add(1, 2)</code>)</li>
+<li>Les zéros et négatifs (<code>add(-1, -0)</code>, <code>add(-1.0, 1.0)</code>)</li>
+<li>Les flottants (<code>toBeCloseTo</code>)</li>
+<li>Les mauvais types (<code>add(1, &quot;a&quot;)</code>, <code>add(&quot;a&quot;, [ 1 ])</code>) → <code>&quot;error&quot;</code></li>
+<li>Tableau vide, un seul élément, tableau imbriqué (<code>rotate([])</code>, <code>rotate([ 1 ])</code>, <code>rotate([[ 1 ], 2 ])</code>)</li>
+<li>Les chaînes : majuscules / minuscules, espaces, caractères spéciaux (<code>&quot;user.name@domain.tld&quot;</code>)</li>
+<li>Les erreurs levées (<code>toThrow</code>)</li>
+<li>Les appels réseau → mocker <code>fetch</code></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#installer-et-lancer">Installer et lancer</a><a class="toc-2" href="#premier-test">Premier test</a><a class="toc-2" href="#organiser-describe-it-each-skip-only">Organiser : describe, it, each, skip, only</a><a class="toc-2" href="#les-matchers-expect">Les matchers (expect)</a><a class="toc-3" href="#tester-une-erreur-tothrow">Tester une erreur (toThrow)</a><a class="toc-3" href="#tester-du-code-asynchrone">Tester du code asynchrone</a><a class="toc-2" href="#hooks-avant-apres">Hooks : avant / après</a><a class="toc-2" href="#mocks-simuler-fetch-console">Mocks : simuler fetch, console…</a><a class="toc-2" href="#tester-le-dom-jsdom">Tester le DOM (jsdom)</a><a class="toc-2" href="#configuration">Configuration</a><a class="toc-2" href="#couverture-de-code-coverage">Couverture de code (coverage)</a><a class="toc-2" href="#que-tester-idees-pour-l-examen">Que tester ? (idées pour l'examen)</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../assets/app.js"></script>
+</body>
+</html>

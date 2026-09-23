@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configure Rules (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">ESLint</a> › use/configure/rules  <a class="ext small" href="https://eslint.org/docs/latest/use/configure/rules">version en ligne</a></div>
+<h1>Configure Rules</h1><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This page explains how to configure rules using the flat config format.</p>
+</div><p>Rules are the core building block of ESLint. A rule validates if your code meets a certain expectation, and what to do if it does not meet that expectation. Rules can also contain additional configuration options specific to that rule.</p>
+<p>ESLint comes with a large number of <a href="../../rules/index.html">built-in rules</a> and you can add more rules through plugins. You can modify which rules your project uses with either configuration comments or configuration files.</p>
+<h2 id="rule-severities"><a class="anchor" href="#rule-severities">#</a>Rule Severities</h2>
+<p>To change a rule&#39;s severity, set the rule ID equal to one of these values:</p>
+<ul>
+<li><code>&quot;off&quot;</code> or <code>0</code> - turn the rule off.</li>
+<li><code>&quot;warn&quot;</code> or <code>1</code> - turn the rule on as a warning (doesn&#39;t affect exit code).</li>
+<li><code>&quot;error&quot;</code> or <code>2</code> - turn the rule on as an error (exit code is 1 when triggered).</li>
+</ul>
+<p>Rules are typically set to <code>&quot;error&quot;</code> to enforce compliance with the rule during continuous integration testing, pre-commit checks, and pull request merging because doing so causes ESLint to exit with a non-zero exit code.</p>
+<p>If you don&#39;t want to enforce compliance with a rule but would still like ESLint to report the rule&#39;s violations, set the severity to <code>&quot;warn&quot;</code>. This is typically used when introducing a new rule that will eventually be set to <code>&quot;error&quot;</code>, when a rule is flagging something other than a potential buildtime or runtime error (such as an unused variable), or when a rule cannot determine with certainty that a problem has been found (when a rule might have false positives and need manual review).</p>
+<h3 id="use-configuration-comments"><a class="anchor" href="#use-configuration-comments">#</a>Use configuration comments</h3>
+<p>To configure rules inside of a file using configuration comments, use a comment in the following format:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint eqeqeq: &quot;off&quot;, curly: &quot;error&quot; */</span></code></pre></div>
+<p>In this example, <a href="../../rules/eqeqeq.html"><code>eqeqeq</code></a> is turned off and <a href="../../rules/curly.html"><code>curly</code></a> is turned on as an error. You can also use the numeric equivalent for the rule severity:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint eqeqeq: 0, curly: 2 */</span></code></pre></div>
+<p>This example is the same as the last example, only it uses the numeric codes instead of the string values. The <a href="../../rules/eqeqeq.html"><code>eqeqeq</code></a> rule is off and the <a href="../../rules/curly.html"><code>curly</code></a> rule is set to be an error.</p>
+<p>If a rule has additional options, you can specify them using array literal syntax, such as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint quotes: [&quot;error&quot;, &quot;double&quot;], curly: 2 */</span></code></pre></div>
+<p>This comment specifies the <code>&quot;double&quot;</code> option for the <a href="../../rules/quotes.html"><code>quotes</code></a> rule. The first item in the array is always the rule severity (number or string).</p>
+<h4 id="configuration-comment-descriptions"><a class="anchor" href="#configuration-comment-descriptions">#</a>Configuration Comment Descriptions</h4>
+<p>Configuration comments can include descriptions to explain why the comment is necessary. The description must occur after the configuration and is separated from the configuration by two or more consecutive <code>-</code> characters. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint eqeqeq: &quot;off&quot;, curly: &quot;error&quot; -- Here&#x27;s a description about why this configuration is necessary. */</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint eqeqeq: &quot;off&quot;, curly: &quot;error&quot;
+    --------
+    Here&#x27;s a description about why this configuration is necessary. */</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint eqeqeq: &quot;off&quot;, curly: &quot;error&quot;
+ * --------
+ * This will not work due to the line above starting with a &#x27;*&#x27; character.
+ */</span></code></pre></div>
+<h4 id="report-unused-eslint-inline-config-comments"><a class="anchor" href="#report-unused-eslint-inline-config-comments">#</a>Report unused <code>eslint</code> inline config comments</h4>
+<p>To report unused <code>eslint</code> inline config comments (those that don&#39;t change anything from what was already configured), use the <code>reportUnusedInlineConfigs</code> setting. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">linterOptions</span>: {
+			<span class="hljs-attr">reportUnusedInlineConfigs</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>This setting defaults to <code>&quot;off&quot;</code>.</p>
+<p>This setting is similar to the <a href="../command-line-interface.html#--report-unused-inline-configs"><code>--report-unused-inline-configs</code></a> CLI option.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>To enforce best practices around configuration comments, take a look at <a href="https://github.com/eslint-community/eslint-plugin-eslint-comments"><code>eslint-plugin-eslint-comments</code></a> (<a href="https://eslint-community.github.io/eslint-plugin-eslint-comments/">Docs</a>).</p>
+</div><h3 id="use-configuration-files"><a class="anchor" href="#use-configuration-files">#</a>Use Configuration Files</h3>
+<p>To configure rules inside of a <a href="configuration-files.html#configuration-file">configuration file</a>, use the <code>rules</code> key along with an error level and any options you want to use. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">eqeqeq</span>: <span class="hljs-string">&quot;off&quot;</span>,
+			<span class="hljs-string">&quot;no-unused-vars&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+			<span class="hljs-string">&quot;prefer-const&quot;</span>: [<span class="hljs-string">&quot;error&quot;</span>, { <span class="hljs-attr">ignoreReadBeforeAssign</span>: <span class="hljs-literal">true</span> }],
+		},
+	},
+]);</code></pre></div>
+<p>When more than one configuration object specifies the same rule, the rule configuration is merged with the later object taking precedence over any previous objects. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">semi</span>: [<span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;never&quot;</span>],
+		},
+	},
+	{
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">semi</span>: [<span class="hljs-string">&quot;warn&quot;</span>, <span class="hljs-string">&quot;always&quot;</span>],
+		},
+	},
+]);</code></pre></div>
+<p>Using this configuration, the final rule configuration for <code>semi</code> is <code>[&quot;warn&quot;, &quot;always&quot;]</code> because it appears last in the array. The array indicates that the configuration is for the severity and any options. You can change just the severity by defining only a string or number, as in this example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">semi</span>: [<span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;never&quot;</span>],
+		},
+	},
+	{
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">semi</span>: <span class="hljs-string">&quot;warn&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>Here, the second configuration object only overrides the severity, so the final configuration for <code>semi</code> is <code>[&quot;warn&quot;, &quot;never&quot;]</code>.</p>
+<div class="box box-important"><div class="box-title">❗ Important</div><p>Rules configured via configuration comments have the highest priority and are applied after all configuration files settings.</p>
+</div><h2 id="rules-from-plugins"><a class="anchor" href="#rules-from-plugins">#</a>Rules from Plugins</h2>
+<p>To configure a rule that is defined within a plugin, prefix the rule ID with the plugin namespace and <code>/</code>.</p>
+<p>In a <a href="configuration-files.html#configuration-file">configuration file</a>, for example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> example <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint-plugin-example&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">plugins</span>: {
+			example,
+		},
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;example/rule1&quot;</span>: <span class="hljs-string">&quot;warn&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>In this configuration file, the rule <code>example/rule1</code> comes from the plugin named <code>eslint-plugin-example</code>.</p>
+<p>You can also use this format with configuration comments, such as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint &quot;example/rule1&quot;: &quot;error&quot; */</span></code></pre></div>
+<div class="box box-important"><div class="box-title">❗ Important</div><p>In order to use plugin rules in configuration comments, your configuration file must load the plugin and specify it in the <code>plugins</code> object of your config. Configuration comments can not load plugins on their own.</p>
+</div><h2 id="disable-rules"><a class="anchor" href="#disable-rules">#</a>Disable Rules</h2>
+<h3 id="use-configuration-comments-2"><a class="anchor" href="#use-configuration-comments-2">#</a>Use configuration comments</h3>
+<ul>
+<li><strong>Use with Caution.</strong> Disabling ESLint rules inline should be restricted and used only in situations with a clear and
+valid reason for doing so. Disabling rules inline should not be the default solution to resolve linting errors.</li>
+<li><strong>Document the Reason.</strong> Provide a comment explaining the reason for disabling a particular rule after the <code>--</code> section of the comment. This
+documentation should clarify why the rule is being disabled and why it is necessary in that specific situation.</li>
+<li><strong>Temporary Solutions.</strong> If a disable comment is added as a temporary measure to address a pressing issue, create a follow-up task to address the underlying problem adequately. This ensures that the
+disable comment is revisited and resolved at a later stage.</li>
+<li><strong>Code Reviews and Pair Programming.</strong> Encourage team members to review each other&#39;s code regularly. Code reviews can help
+identify the reasons behind disable comments and ensure that they are used appropriately.</li>
+<li><strong>Configurations.</strong> Whenever possible, prefer using ESLint configuration files over disable comments. Configuration
+files allow for consistent and project-wide rule handling.</li>
+</ul>
+<p>To disable rule warnings in a part of a file, use block comments in the following format:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint-disable */</span>
+
+<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>);
+
+<span class="hljs-comment">/* eslint-enable */</span></code></pre></div>
+<p>You can also disable or enable warnings for specific rules:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint-disable no-alert, no-console */</span>
+
+<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>);
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;bar&quot;</span>);
+
+<span class="hljs-comment">/* eslint-enable no-alert, no-console */</span></code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p><code>/* eslint-enable */</code> without any specific rules listed causes all disabled rules to be re-enabled.</p>
+</div><p>To disable rule warnings in an entire file, put a <code>/* eslint-disable */</code> block comment at the top of the file:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint-disable */</span>
+
+<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>);</code></pre></div>
+<p>You can also disable or enable specific rules for an entire file:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint-disable no-alert */</span>
+
+<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>);</code></pre></div>
+<p>To ensure that a rule is never applied (regardless of any future enable/disable lines):</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-alert: &quot;off&quot; */</span>
+
+<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>);</code></pre></div>
+<p>To disable all rules on a specific line, use a line or block comment in one of the following formats:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>); <span class="hljs-comment">// eslint-disable-line</span>
+
+<span class="hljs-comment">// eslint-disable-next-line</span>
+<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>);
+
+<span class="hljs-comment">/* eslint-disable-next-line */</span>
+<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>);
+
+<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>); <span class="hljs-comment">/* eslint-disable-line */</span></code></pre></div>
+<p>To disable a specific rule on a specific line:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>); <span class="hljs-comment">// eslint-disable-line no-alert</span>
+
+<span class="hljs-comment">// eslint-disable-next-line no-alert</span>
+<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>);
+
+<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>); <span class="hljs-comment">/* eslint-disable-line no-alert */</span>
+
+<span class="hljs-comment">/* eslint-disable-next-line no-alert */</span>
+<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>);</code></pre></div>
+<p>To disable multiple rules on a specific line:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>); <span class="hljs-comment">// eslint-disable-line no-alert, quotes, semi</span>
+
+<span class="hljs-comment">// eslint-disable-next-line no-alert, quotes, semi</span>
+<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>);
+
+<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>); <span class="hljs-comment">/* eslint-disable-line no-alert, quotes, semi */</span>
+
+<span class="hljs-comment">/* eslint-disable-next-line no-alert, quotes, semi */</span>
+<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>);
+
+<span class="hljs-comment">/* eslint-disable-next-line
+  no-alert,
+  quotes,
+  semi
+*/</span>
+<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;foo&quot;</span>);</code></pre></div>
+<p>All of the above methods also work for plugin rules. For example, to disable <code>eslint-plugin-example</code>&#39;s <code>rule-name</code> rule, combine the plugin&#39;s name (<code>example</code>) and the rule&#39;s name (<code>rule-name</code>) into <code>example/rule-name</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">foo</span>(); <span class="hljs-comment">// eslint-disable-line example/rule-name</span>
+<span class="hljs-title function_">foo</span>(); <span class="hljs-comment">/* eslint-disable-line example/rule-name */</span></code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Comments that disable warnings for a portion of a file tell ESLint not to report rule violations for the disabled code. ESLint still parses the entire file, however, so disabled code still needs to be syntactically valid JavaScript.</p>
+</div><h4 id="comment-descriptions"><a class="anchor" href="#comment-descriptions">#</a>Comment descriptions</h4>
+<p>Configuration comments can include descriptions to explain why disabling or re-enabling the rule is necessary. The description must come after the configuration and needs to be separated from the configuration by two or more consecutive <code>-</code> characters. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint-disable-next-line no-console -- Here&#x27;s a description about why this configuration is necessary.</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;hello&quot;</span>);
+
+<span class="hljs-comment">/* eslint-disable-next-line no-console --
+ * Here&#x27;s a very long description about why this configuration is necessary
+ * along with some additional information
+ **/</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;hello&quot;</span>);</code></pre></div>
+<h3 id="use-configuration-files-2"><a class="anchor" href="#use-configuration-files-2">#</a>Use configuration files</h3>
+<p>To disable rules inside of a <a href="configuration-files.html#configuration-file">configuration file</a> for a group of files, use a subsequent config object with a <code>files</code> key. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;no-unused-expressions&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;*-test.js&quot;</span>, <span class="hljs-string">&quot;*.spec.js&quot;</span>],
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;no-unused-expressions&quot;</span>: <span class="hljs-string">&quot;off&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<h3 id="disable-inline-comments"><a class="anchor" href="#disable-inline-comments">#</a>Disable Inline Comments</h3>
+<p>To disable all inline config comments, use the <code>noInlineConfig</code> setting in your configuration file. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">linterOptions</span>: {
+			<span class="hljs-attr">noInlineConfig</span>: <span class="hljs-literal">true</span>,
+		},
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;no-unused-expressions&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>You can also use the <a href="../command-line-interface.html#--no-inline-config"><code>--no-inline-config</code></a> CLI option to disable rule comments, in addition to other in-line configuration.</p>
+<h4 id="report-unused-eslint-disable-comments"><a class="anchor" href="#report-unused-eslint-disable-comments">#</a>Report unused <code>eslint-disable</code> comments</h4>
+<p>To report unused <code>eslint-disable</code> comments (those that disable rules which would not report on the disabled line), use the <code>reportUnusedDisableDirectives</code> setting. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">linterOptions</span>: {
+			<span class="hljs-attr">reportUnusedDisableDirectives</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>This setting defaults to <code>&quot;warn&quot;</code>.</p>
+<p>This setting is similar to <a href="../command-line-interface.html#--report-unused-disable-directives"><code>--report-unused-disable-directives</code></a> and <a href="../command-line-interface.html#--report-unused-disable-directives-severity"><code>--report-unused-disable-directives-severity</code></a> CLI options.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-severities">Rule Severities</a><a class="toc-3" href="#use-configuration-comments">Use configuration comments</a><a class="toc-3" href="#use-configuration-files">Use Configuration Files</a><a class="toc-2" href="#rules-from-plugins">Rules from Plugins</a><a class="toc-2" href="#disable-rules">Disable Rules</a><a class="toc-3" href="#use-configuration-comments-2">Use configuration comments</a><a class="toc-3" href="#use-configuration-files-2">Use configuration files</a><a class="toc-3" href="#disable-inline-comments">Disable Inline Comments</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

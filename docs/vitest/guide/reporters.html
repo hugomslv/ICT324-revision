@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reporters | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/reporters  <a class="ext small" href="https://vitest.dev/guide/reporters">version en ligne</a></div>
+<h1 id="reporters"><a class="anchor" href="#reporters">#</a>Reporters</h1>
+<p>Vitest provides several built-in reporters to display test output in different formats, as well as the ability to use custom reporters. You can select different reporters either by using the <code>--reporter</code> command line option, or by including a <code>reporters</code> property in your <a href="../config/reporters.html">configuration file</a>. If no reporter is specified, Vitest <a href="#default-configuration">auto-selects reporters</a> based on the environment.</p>
+<p>Using reporters via command line:</p>
+<div class="code"><pre><code class="hljs lang-bash">npx vitest --reporter=verbose</code></pre></div>
+<p>Using reporters via <a href="../config/index.html"><code>vitest.config.ts</code></a>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;verbose&#x27;</span>]
+  },
+})</code></pre></div>
+<p>Some reporters can be customized by passing additional options to them. Reporter specific options are described in sections below.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [
+      <span class="hljs-string">&#x27;default&#x27;</span>,
+      [<span class="hljs-string">&#x27;junit&#x27;</span>, { <span class="hljs-attr">suiteName</span>: <span class="hljs-string">&#x27;UI tests&#x27;</span> }]
+    ],
+  },
+})</code></pre></div>
+<h2 id="default-configuration"><a class="anchor" href="#default-configuration">#</a>Default Configuration</h2>
+<p>When <code>reporters</code> is not configured, Vitest uses the following reporters:</p>
+<ul>
+<li><a href="#default-reporter"><code>default</code></a> in normal terminal runs</li>
+<li><a href="#minimal-reporter"><code>minimal</code></a> when Vitest detects an AI coding agent</li>
+<li><a href="#github-actions-reporter"><code>github-actions</code></a> is added when <code>process.env.GITHUB_ACTIONS === &#39;true&#39;</code></li>
+</ul>
+<p>If you configure your own reporters, the configured list replaces the default list. To add a reporter while keeping Vitest&#39;s defaults, extend <code>configDefaults.reporters</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { configDefaults, defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;json&#x27;</span>, ...configDefaults.<span class="hljs-property">reporters</span>],
+  },
+})</code></pre></div>
+<h2 id="reporter-output"><a class="anchor" href="#reporter-output">#</a>Reporter Output</h2>
+<p>By default, Vitest&#39;s reporters print their output to the terminal. The <code>json</code>, <code>junit</code> and <code>html</code> reporters instead write to a scoped location under <code>.vitest/</code>:</p>
+<ul>
+<li><code>json</code> writes <code>.vitest/json/output.json</code></li>
+<li><code>junit</code> writes <code>.vitest/junit/output.xml</code></li>
+<li><code>html</code> writes <code>.vitest/index.html</code></li>
+</ul>
+<p>The <code>json</code> and <code>junit</code> locations can be overridden with the <code>outputFile</code> <a href="../config/outputfile.html">configuration option</a> in your Vitest configuration file or via CLI. The <code>html</code> reporter uses its <a href="#html-reporter"><code>outputDir</code></a> option instead.</p>
+<div class="code-group"><div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">npx vitest --reporter=json --outputFile=./test-output.json</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;json&#x27;</span>],
+    <span class="hljs-attr">outputFile</span>: <span class="hljs-string">&#x27;./test-output.json&#x27;</span>
+  },
+})</code></pre></div>
+</div><p>The <code>json</code> and <code>junit</code> reporters also accept <code>outputFile</code> as a reporter option, which takes precedence over the top-level <code>outputFile</code>:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [[<span class="hljs-string">&#x27;json&#x27;</span>, { <span class="hljs-attr">outputFile</span>: <span class="hljs-string">&#x27;./test-output.json&#x27;</span> }]],
+  },
+})</code></pre></div>
+<p>To print the report to the terminal instead of writing it to a file, set the <code>stdout</code> option on the <code>json</code> or <code>junit</code> reporter. This is ignored when <code>outputFile</code> is set:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [[<span class="hljs-string">&#x27;json&#x27;</span>, { <span class="hljs-attr">stdout</span>: <span class="hljs-literal">true</span> }]],
+  },
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>When <code>stdout</code> is enabled, the report can be interleaved with other output written directly to the terminal — for example <code>process.stdout.write</code> in a test file, or logs from the main process such as a global setup file — which can make the JSON or XML unparsable. Prefer the default file output when you need to consume the report programmatically.</p>
+</div><h2 id="combining-reporters"><a class="anchor" href="#combining-reporters">#</a>Combining Reporters</h2>
+<p>You can use multiple reporters simultaneously to print your test results in different formats. For example:</p>
+<div class="code"><pre><code class="hljs lang-bash">npx vitest --reporter=json --reporter=default</code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { configDefaults, defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;json&#x27;</span>, ...configDefaults.<span class="hljs-property">reporters</span>],
+    <span class="hljs-attr">outputFile</span>: <span class="hljs-string">&#x27;./test-output.json&#x27;</span>
+  },
+})</code></pre></div>
+<p>The above example will both print the test results to the terminal in the default style and write them as JSON to the designated output file.</p>
+<p>When using multiple reporters, it&#39;s also possible to designate multiple output files, as follows:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;junit&#x27;</span>, <span class="hljs-string">&#x27;json&#x27;</span>, <span class="hljs-string">&#x27;verbose&#x27;</span>],
+    <span class="hljs-attr">outputFile</span>: {
+      <span class="hljs-attr">junit</span>: <span class="hljs-string">&#x27;./junit-report.xml&#x27;</span>,
+      <span class="hljs-attr">json</span>: <span class="hljs-string">&#x27;./json-report.json&#x27;</span>,
+    },
+  },
+})</code></pre></div>
+<p>This example will write separate JSON and XML reports as well as printing a verbose report to the terminal.</p>
+<h2 id="built-in-reporters"><a class="anchor" href="#built-in-reporters">#</a>Built-in Reporters</h2>
+<h3 id="default-reporter"><a class="anchor" href="#default-reporter">#</a>Default Reporter</h3>
+<p>The <code>default</code> reporter displays summary of running tests and their status at the bottom. Once a suite passes, its status will be reported on top of the summary.</p>
+<p>You can disable the summary by configuring the reporter:</p>
+<div class="code-group"><div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [
+      [<span class="hljs-string">&#x27;default&#x27;</span>, { <span class="hljs-attr">summary</span>: <span class="hljs-literal">false</span> }]
+    ]
+  },
+})</code></pre></div>
+</div><p>Example output for tests in progress:</p>
+<div class="code"><pre><code class="hljs lang-bash"> ✓ <span class="hljs-built_in">test</span>/example-1.test.ts (5 tests | 1 skipped) 306ms
+ ✓ <span class="hljs-built_in">test</span>/example-2.test.ts (5 tests | 1 skipped) 307ms
+
+ ❯ <span class="hljs-built_in">test</span>/example-3.test.ts 3/5
+ ❯ <span class="hljs-built_in">test</span>/example-4.test.ts 1/5
+
+ Test Files 2 passed (4)
+      Tests 10 passed | 3 skipped (65)
+   Start at 11:01:36
+   Duration 2.00s</code></pre></div>
+<p>Final output after tests have finished:</p>
+<div class="code"><pre><code class="hljs lang-bash"> ✓ <span class="hljs-built_in">test</span>/example-1.test.ts (5 tests | 1 skipped) 306ms
+ ✓ <span class="hljs-built_in">test</span>/example-2.test.ts (5 tests | 1 skipped) 307ms
+ ✓ <span class="hljs-built_in">test</span>/example-3.test.ts (5 tests | 1 skipped) 307ms
+ ✓ <span class="hljs-built_in">test</span>/example-4.test.ts (5 tests | 1 skipped) 307ms
+
+ Test Files  4 passed (4)
+      Tests  16 passed | 4 skipped (20)
+   Start at  12:34:32
+   Duration  1.26s (transform 35ms, setup 1ms, collect 90ms, tests 1.47s, environment 0ms, prepare 267ms)</code></pre></div>
+<p>If there is only one test file running, Vitest will output the full test tree of that file, similar to the <a href="#tree-reporter"><code>tree</code></a> reporter. The default reporter will also print the test tree if there is at least one failed test in the file.</p>
+<div class="code"><pre><code class="hljs lang-bash">✓ __tests__/file1.test.ts (2) 725ms
+   ✓ first <span class="hljs-built_in">test</span> file (2) 725ms
+     ✓ 2 + 2 should equal 4
+     ✓ 4 - 2 should equal 2
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  12:34:32
+   Duration  1.26s (transform 35ms, setup 1ms, collect 90ms, tests 1.47s, environment 0ms, prepare 267ms)</code></pre></div>
+<h3 id="verbose-reporter"><a class="anchor" href="#verbose-reporter">#</a>Verbose Reporter</h3>
+<p>The verbose reporter prints every test case once it is finished. It does not report suites or files separately. If <code>--includeTaskLocation</code> is enabled, it will also include the location of each test in the output. Similar to <code>default</code> reporter, you can disable the summary by configuring the reporter.</p>
+<p>In addition to this, the <code>verbose</code> reporter prints test error messages right away. The full test error is reported when the test run is finished.</p>
+<p>This is the only terminal reporter that reports <a href="test-annotations.html">annotations</a> when the test doesn&#39;t fail.</p>
+<div class="code-group"><div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">npx vitest --reporter=verbose</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [
+      [<span class="hljs-string">&#x27;verbose&#x27;</span>, { <span class="hljs-attr">summary</span>: <span class="hljs-literal">false</span> }]
+    ]
+  },
+})</code></pre></div>
+</div><p>Example output:</p>
+<div class="code"><pre><code class="hljs lang-bash">✓ __tests__/file1.test.ts &gt; first <span class="hljs-built_in">test</span> file &gt; 2 + 2 should equal 4 1ms
+✓ __tests__/file1.test.ts &gt; first <span class="hljs-built_in">test</span> file &gt; 4 - 2 should equal 2 1ms
+✓ __tests__/file2.test.ts &gt; second <span class="hljs-built_in">test</span> file &gt; 1 + 1 should equal 2 1ms
+✓ __tests__/file2.test.ts &gt; second <span class="hljs-built_in">test</span> file &gt; 2 - 1 should equal 1 1ms
+
+ Test Files  2 passed (2)
+      Tests  4 passed (4)
+   Start at  12:34:32
+   Duration  1.26s (transform 35ms, setup 1ms, collect 90ms, tests 1.47s, environment 0ms, prepare 267ms)</code></pre></div>
+<p>An example with <code>--includeTaskLocation</code>:</p>
+<div class="code"><pre><code class="hljs lang-bash">✓ __tests__/file1.test.ts:2 &gt; first <span class="hljs-built_in">test</span> file &gt; 2 + 2 should equal 4 1ms
+✓ __tests__/file1.test.ts:3 &gt; first <span class="hljs-built_in">test</span> file &gt; 4 - 2 should equal 2 1ms
+✓ __tests__/file2.test.ts:2 &gt; second <span class="hljs-built_in">test</span> file &gt; 1 + 1 should equal 2 1ms
+✓ __tests__/file2.test.ts:3 &gt; second <span class="hljs-built_in">test</span> file &gt; 2 - 1 should equal 1 1ms
+
+ Test Files  2 passed (2)
+      Tests  4 passed (4)
+   Start at  12:34:32
+   Duration  1.26s (transform 35ms, setup 1ms, collect 90ms, tests 1.47s, environment 0ms, prepare 267ms)</code></pre></div>
+<h3 id="tree-reporter"><a class="anchor" href="#tree-reporter">#</a>Tree Reporter</h3>
+<p>The tree reporter is same as <code>default</code> reporter, but it also displays each individual test after the suite has finished. Similar to <code>default</code> reporter, you can disable the summary by configuring the reporter.</p>
+<div class="code-group"><div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">npx vitest --reporter=tree</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [
+      [<span class="hljs-string">&#x27;tree&#x27;</span>, { <span class="hljs-attr">summary</span>: <span class="hljs-literal">false</span> }]
+    ]
+  },
+})</code></pre></div>
+</div><p>Example output for tests in progress with default <code>slowTestThreshold: 300</code>:</p>
+<div class="code"><pre><code class="hljs lang-bash"> ✓ __tests__/example-1.test.ts (2) 725ms
+   ✓ first <span class="hljs-built_in">test</span> file (2) 725ms
+     ✓ 2 + 2 should equal 4
+     ✓ 4 - 2 should equal 2
+
+ ❯ <span class="hljs-built_in">test</span>/example-2.test.ts 3/5
+   ↳ should run longer than three seconds 1.57s
+ ❯ <span class="hljs-built_in">test</span>/example-3.test.ts 1/5
+
+ Test Files 2 passed (4)
+      Tests 10 passed | 3 skipped (65)
+   Start at 11:01:36
+   Duration 2.00s</code></pre></div>
+<p>Example of final terminal output for a passing test suite:</p>
+<div class="code"><pre><code class="hljs lang-bash">✓ __tests__/file1.test.ts (2) 725ms
+   ✓ first <span class="hljs-built_in">test</span> file (2) 725ms
+     ✓ 2 + 2 should equal 4
+     ✓ 4 - 2 should equal 2
+✓ __tests__/file2.test.ts (2) 746ms
+  ✓ second <span class="hljs-built_in">test</span> file (2) 746ms
+    ✓ 1 + 1 should equal 2
+    ✓ 2 - 1 should equal 1
+
+ Test Files  2 passed (2)
+      Tests  4 passed (4)
+   Start at  12:34:32
+   Duration  1.26s (transform 35ms, setup 1ms, collect 90ms, tests 1.47s, environment 0ms, prepare 267ms)</code></pre></div>
+<h3 id="dot-reporter"><a class="anchor" href="#dot-reporter">#</a>Dot Reporter</h3>
+<p>Prints a single dot for each completed test to provide minimal output while still showing all tests that have run. Details are only provided for failed tests, along with the summary for the suite.</p>
+<div class="code-group"><div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">npx vitest --reporter=dot</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;dot&#x27;</span>]
+  },
+})</code></pre></div>
+</div><p>Example terminal output for a passing test suite:</p>
+<div class="code"><pre><code class="hljs lang-bash">....
+
+ Test Files  2 passed (2)
+      Tests  4 passed (4)
+   Start at  12:34:32
+   Duration  1.26s (transform 35ms, setup 1ms, collect 90ms, tests 1.47s, environment 0ms, prepare 267ms)</code></pre></div>
+<h3 id="junit-reporter"><a class="anchor" href="#junit-reporter">#</a>JUnit Reporter</h3>
+<p>Outputs a report of the test results in JUnit XML format. By default it is written to <code>.vitest/junit/output.xml</code>. To write it elsewhere, use the <a href="../config/outputfile.html"><code>outputFile</code></a> configuration option or the reporter&#39;s own <code>outputFile</code> option. To print it to the terminal instead, set the reporter&#39;s <a href="#reporter-output"><code>stdout</code></a> option.</p>
+<div class="code-group"><div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">npx vitest --reporter=junit</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;junit&#x27;</span>]
+  },
+})</code></pre></div>
+</div><p>Example of a JUnit XML report:</p>
+<div class="code"><pre><code class="hljs lang-xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">&quot;1.0&quot;</span> encoding=<span class="hljs-string">&quot;UTF-8&quot;</span> ?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">testsuites</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;vitest tests&quot;</span> <span class="hljs-attr">tests</span>=<span class="hljs-string">&quot;2&quot;</span> <span class="hljs-attr">failures</span>=<span class="hljs-string">&quot;1&quot;</span> <span class="hljs-attr">errors</span>=<span class="hljs-string">&quot;0&quot;</span> <span class="hljs-attr">time</span>=<span class="hljs-string">&quot;0.503&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">testsuite</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;__tests__/test-file-1.test.ts&quot;</span> <span class="hljs-attr">timestamp</span>=<span class="hljs-string">&quot;2023-10-19T17:41:58.580Z&quot;</span> <span class="hljs-attr">hostname</span>=<span class="hljs-string">&quot;My-Computer.local&quot;</span> <span class="hljs-attr">tests</span>=<span class="hljs-string">&quot;2&quot;</span> <span class="hljs-attr">failures</span>=<span class="hljs-string">&quot;1&quot;</span> <span class="hljs-attr">errors</span>=<span class="hljs-string">&quot;0&quot;</span> <span class="hljs-attr">skipped</span>=<span class="hljs-string">&quot;0&quot;</span> <span class="hljs-attr">time</span>=<span class="hljs-string">&quot;0.013&quot;</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">testcase</span> <span class="hljs-attr">classname</span>=<span class="hljs-string">&quot;__tests__/test-file-1.test.ts&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;first test file <span class="hljs-symbol">&amp;gt;</span> 2 + 2 should equal 4&quot;</span> <span class="hljs-attr">time</span>=<span class="hljs-string">&quot;0.01&quot;</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">failure</span> <span class="hljs-attr">message</span>=<span class="hljs-string">&quot;expected 5 to be 4 // Object.is equality&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;AssertionError&quot;</span>&gt;</span>
+AssertionError: expected 5 to be 4 // Object.is equality
+ ❯ __tests__/test-file-1.test.ts:20:28
+            <span class="hljs-tag">&lt;/<span class="hljs-name">failure</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">testcase</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">testcase</span> <span class="hljs-attr">classname</span>=<span class="hljs-string">&quot;__tests__/test-file-1.test.ts&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;first test file <span class="hljs-symbol">&amp;gt;</span> 4 - 2 should equal 2&quot;</span> <span class="hljs-attr">time</span>=<span class="hljs-string">&quot;0&quot;</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">testcase</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">testsuite</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">testsuites</span>&gt;</span></code></pre></div>
+<p>The output XML contains nested <code>testsuites</code> → <code>testsuite</code> → <code>testcase</code> tags. You can customize the reporter&#39;s behaviour with the following options:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>suiteName</code></td>
+<td><code>name</code> attribute of <code>&lt;testsuites&gt;</code></td>
+<td><code>&quot;vitest tests&quot;</code></td>
+</tr>
+<tr>
+<td><code>suiteNameTemplate</code></td>
+<td>Template for the <code>name</code> attribute of <code>&lt;testsuite&gt;</code>. Accepts a string with placeholders or a function.</td>
+<td>Relative file path</td>
+</tr>
+<tr>
+<td><code>classnameTemplate</code></td>
+<td>Template for the <code>classname</code> attribute of <code>&lt;testcase&gt;</code>. Accepts a string with placeholders or a function.</td>
+<td>Relative file path</td>
+</tr>
+<tr>
+<td><code>titleTemplate</code></td>
+<td>Template for the <code>name</code> attribute of <code>&lt;testcase&gt;</code>. Accepts a string with placeholders or a function.</td>
+<td>Full test title with ancestor hierarchy</td>
+</tr>
+<tr>
+<td><code>ancestorSeparator</code></td>
+<td>Separator used when joining ancestor describe block names in the <code>{classname}</code> placeholder and in the default test title.</td>
+<td><code>&quot; &gt; &quot;</code></td>
+</tr>
+<tr>
+<td><code>addFileAttribute</code></td>
+<td>Add a <code>file</code> attribute to each <code>&lt;testcase&gt;</code>.</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>includeConsoleOutput</code></td>
+<td>Include <code>&lt;system-out&gt;</code> / <code>&lt;system-err&gt;</code> console output.</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>stackTrace</code></td>
+<td>Include stack traces in <code>&lt;failure&gt;</code> elements.</td>
+<td><code>true</code></td>
+</tr>
+</tbody></table></div>
+<p>The following placeholders are available for <code>suiteNameTemplate</code>:</p>
+<ul>
+<li><code>{title}</code> – name of the first top-level <code>describe</code> block; falls back to the file basename when there is no top-level <code>describe</code></li>
+<li><code>{filename}</code> – relative file path from the root (e.g. <code>src/foo.test.ts</code>)</li>
+<li><code>{filepath}</code> – absolute file path</li>
+<li><code>{basename}</code> – file name without directory (e.g. <code>foo.test.ts</code>)</li>
+<li><code>{displayName}</code> – Vitest project name</li>
+</ul>
+<p>The following placeholders are available for <code>classnameTemplate</code> and <code>titleTemplate</code>:</p>
+<ul>
+<li><code>{classname}</code> – ancestor <code>describe</code> block names joined by <code>ancestorSeparator</code> (e.g. <code>outer &gt; inner</code>)</li>
+<li><code>{title}</code> – leaf test title (the string passed to <code>it</code>/<code>test</code>)</li>
+<li><code>{suitename}</code> – top-level <code>describe</code> block name, empty string when the test has no enclosing <code>describe</code></li>
+<li><code>{filename}</code> – relative file path from the root</li>
+<li><code>{filepath}</code> – absolute file path</li>
+<li><code>{basename}</code> – file name without directory</li>
+<li><code>{displayName}</code> – Vitest project name</li>
+</ul>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p><code>{filename}</code> follows Vitest&#39;s convention and resolves to the <strong>relative path</strong> from the project root (e.g. <code>src/foo.test.ts</code>). This differs from jest-junit where <code>{filename}</code> is the bare file name. Use <code>{basename}</code> to get only the file name.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [
+      [<span class="hljs-string">&#x27;junit&#x27;</span>, {
+        <span class="hljs-attr">suiteName</span>: <span class="hljs-string">&#x27;My Test Suite&#x27;</span>,
+        <span class="hljs-comment">// Use the first top-level describe block name as the testsuite name</span>
+        <span class="hljs-attr">suiteNameTemplate</span>: <span class="hljs-string">&#x27;{title}&#x27;</span>,
+        <span class="hljs-comment">// classname = ancestor describe chain</span>
+        <span class="hljs-attr">classnameTemplate</span>: <span class="hljs-string">&#x27;{classname}&#x27;</span>,
+        <span class="hljs-comment">// name = leaf test title only (jest-junit-compatible)</span>
+        <span class="hljs-attr">titleTemplate</span>: <span class="hljs-string">&#x27;{title}&#x27;</span>,
+        <span class="hljs-attr">ancestorSeparator</span>: <span class="hljs-string">&#x27; &gt; &#x27;</span>,
+      }]
+    ]
+  },
+})</code></pre></div>
+<p>Function-based templates receive all available variables and can return any string:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [
+      [<span class="hljs-string">&#x27;junit&#x27;</span>, {
+        <span class="hljs-attr">classnameTemplate</span>: <span class="hljs-function">(<span class="hljs-params">{ classname, filename }</span>) =&gt;</span>
+          classname ? <span class="hljs-string">`<span class="hljs-subst">${filename}</span>::<span class="hljs-subst">${classname}</span>`</span> : filename,
+        <span class="hljs-attr">titleTemplate</span>: <span class="hljs-function">(<span class="hljs-params">{ suitename, title }</span>) =&gt;</span>
+          suitename ? <span class="hljs-string">`[<span class="hljs-subst">${suitename}</span>] <span class="hljs-subst">${title}</span>`</span> : title,
+      }]
+    ]
+  },
+})</code></pre></div>
+<h3 id="json-reporter"><a class="anchor" href="#json-reporter">#</a>JSON Reporter</h3>
+<p>Generates a report of the test results in a JSON format compatible with Jest&#39;s <code>--json</code> option. By default it is written to <code>.vitest/json/output.json</code>. To write it elsewhere, use the <a href="../config/outputfile.html"><code>outputFile</code></a> configuration option or the reporter&#39;s own <code>outputFile</code> option. To print it to the terminal instead, set the reporter&#39;s <a href="#reporter-output"><code>stdout</code></a> option.</p>
+<div class="code-group"><div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">npx vitest --reporter=json</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;json&#x27;</span>]
+  },
+})</code></pre></div>
+</div><p>Example of a JSON report:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;numTotalTestSuites&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">4</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;numPassedTestSuites&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;numFailedTestSuites&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;numPendingTestSuites&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;numTotalTests&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">4</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;numPassedTests&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;numFailedTests&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;numPendingTests&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;numTodoTests&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;startTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1697737019307</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;success&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;testResults&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;assertionResults&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">&quot;ancestorTitles&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+            <span class="hljs-string">&quot;&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-string">&quot;first test file&quot;</span>
+          <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;fullName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot; first test file 2 + 2 should equal 4&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;failed&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;title&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2 + 2 should equal 4&quot;</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;duration&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">9</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;failureMessages&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+            <span class="hljs-string">&quot;expected 5 to be 4 // Object.is equality&quot;</span>
+          <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;location&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">20</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">28</span>
+          <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+          <span class="hljs-attr">&quot;meta&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span>
+        <span class="hljs-punctuation">}</span>
+      <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;startTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1697737019787</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;endTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1697737019797</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;failed&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;/root-directory/__tests__/test-file-1.test.ts&quot;</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;coverageMap&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<div class="box box-info"><div class="box-title">ℹ️ Info</div><p>Since Vitest 3, the JSON reporter includes coverage information in <code>coverageMap</code> if coverage is enabled.</p>
+</div><p>The <code>meta</code> field in each assertion result can be filtered via the <code>filterMeta</code> reporter option. It receives the key and value of each field and should return a falsy value to exclude the field from the report:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [
+      [<span class="hljs-string">&#x27;json&#x27;</span>, {
+        <span class="hljs-attr">filterMeta</span>: <span class="hljs-function">(<span class="hljs-params">key, value</span>) =&gt;</span> key !== <span class="hljs-string">&#x27;internalField&#x27;</span>,
+      }]
+    ]
+  },
+})</code></pre></div>
+<h3 id="html-reporter"><a class="anchor" href="#html-reporter">#</a>HTML Reporter</h3>
+<p>Generates a static version of <a href="ui.html">Vitest UI</a> for reviewing completed test runs. See the <a href="ui.html#html-reporter">HTML Reporter guide</a> for local preview, CI artifacts, and sharing workflows.</p>
+<p>The report artifact root can be specified using the reporter&#39;s <code>outputDir</code> option and the report entry is written to <code>&lt;outputDir&gt;/index.html</code>. By default <code>outputDir</code> is the shared Vitest artifact directory <code>.vitest</code>.</p>
+<p>Use <code>singleFile</code> to produce one portable HTML file. See <a href="ui.html#share-as-a-single-file">Share as a Single File</a> for configuration and limitations.</p>
+<div class="code-group"><div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">npx vitest --reporter=html</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;html&#x27;</span>]
+  },
+})</code></pre></div>
+</div><h3 id="tap-reporter"><a class="anchor" href="#tap-reporter">#</a>TAP Reporter</h3>
+<p>Outputs a report following <a href="https://testanything.org/">Test Anything Protocol</a> (TAP).</p>
+<div class="code-group"><div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">npx vitest --reporter=tap</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;tap&#x27;</span>]
+  },
+})</code></pre></div>
+</div><p>Example of a TAP report:</p>
+<div class="code"><pre><code class="hljs lang-bash">TAP version 13
+1..1
+not ok 1 - __tests__/test-file-1.test.ts <span class="hljs-comment"># time=14.00ms {</span>
+    1..1
+    not ok 1 - first <span class="hljs-built_in">test</span> file <span class="hljs-comment"># time=13.00ms {</span>
+        1..2
+        not ok 1 - 2 + 2 should equal 4 <span class="hljs-comment"># time=11.00ms</span>
+            ---
+            error:
+                name: <span class="hljs-string">&quot;AssertionError&quot;</span>
+                message: <span class="hljs-string">&quot;expected 5 to be 4 // Object.is equality&quot;</span>
+            at: <span class="hljs-string">&quot;/root-directory/__tests__/test-file-1.test.ts:20:28&quot;</span>
+            actual: <span class="hljs-string">&quot;5&quot;</span>
+            expected: <span class="hljs-string">&quot;4&quot;</span>
+            ...
+        ok 2 - 4 - 2 should equal 2 <span class="hljs-comment"># time=1.00ms</span>
+    }
+}</code></pre></div>
+<h3 id="tap-flat-reporter"><a class="anchor" href="#tap-flat-reporter">#</a>TAP Flat Reporter</h3>
+<p>Outputs a TAP flat report. Like the <code>tap</code> reporter, test results are formatted to follow TAP standards, but test suites are formatted as a flat list rather than a nested hierarchy.</p>
+<div class="code-group"><div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">npx vitest --reporter=tap-flat</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;tap-flat&#x27;</span>]
+  },
+})</code></pre></div>
+</div><p>Example of a TAP flat report:</p>
+<div class="code"><pre><code class="hljs lang-bash">TAP version 13
+1..2
+not ok 1 - __tests__/test-file-1.test.ts &gt; first <span class="hljs-built_in">test</span> file &gt; 2 + 2 should equal 4 <span class="hljs-comment"># time=11.00ms</span>
+    ---
+    error:
+        name: <span class="hljs-string">&quot;AssertionError&quot;</span>
+        message: <span class="hljs-string">&quot;expected 5 to be 4 // Object.is equality&quot;</span>
+    at: <span class="hljs-string">&quot;/root-directory/__tests__/test-file-1.test.ts:20:28&quot;</span>
+    actual: <span class="hljs-string">&quot;5&quot;</span>
+    expected: <span class="hljs-string">&quot;4&quot;</span>
+    ...
+ok 2 - __tests__/test-file-1.test.ts &gt; first <span class="hljs-built_in">test</span> file &gt; 4 - 2 should equal 2 <span class="hljs-comment"># time=0.00ms</span></code></pre></div>
+<h3 id="hanging-process-reporter"><a class="anchor" href="#hanging-process-reporter">#</a>Hanging Process Reporter</h3>
+<p>Displays a list of hanging processes, if any are preventing Vitest from exiting safely. The <code>hanging-process</code> reporter does not itself display test results, but can be used in conjunction with another reporter to monitor processes while tests run. Using this reporter can be resource-intensive, so should generally be reserved for debugging purposes in situations where Vitest consistently cannot exit the process.</p>
+<div class="code-group"><div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">npx vitest --reporter=hanging-process</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;hanging-process&#x27;</span>]
+  },
+})</code></pre></div>
+</div><h3 id="github-actions-reporter"><a class="anchor" href="#github-actions-reporter">#</a>GitHub Actions Reporter</h3>
+<p>Output <a href="https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message">workflow commands</a>
+to provide annotations for test failures. This reporter is <a href="#default-configuration">enabled automatically</a> when <code>process.env.GITHUB_ACTIONS === &#39;true&#39;</code> (on GitHub Actions environment).</p>
+<img alt="GitHub Actions" img-dark src="https://github.com/vitest-dev/vitest/assets/4232207/336cddc2-df6b-4b8a-8e72-4d00010e37f5">
+<img alt="GitHub Actions" img-light src="https://github.com/vitest-dev/vitest/assets/4232207/ce8447c1-0eab-4fe1-abef-d0d322290dca"><p>You can customize the file paths that are printed in <a href="https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions">GitHub&#39;s annotation command format</a> by using the <code>onWritePath</code> option. This is useful when running Vitest in a containerized environment, such as Docker, where the file paths may not match the paths in the GitHub Actions environment.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: process.<span class="hljs-property">env</span>.<span class="hljs-property">GITHUB_ACTIONS</span> === <span class="hljs-string">&#x27;true&#x27;</span>
+      ? [
+          <span class="hljs-string">&#x27;default&#x27;</span>,
+          [<span class="hljs-string">&#x27;github-actions&#x27;</span>, { <span class="hljs-title function_">onWritePath</span>(<span class="hljs-params">path</span>) {
+            <span class="hljs-keyword">return</span> path.<span class="hljs-title function_">replace</span>(<span class="hljs-regexp">/^\/app\//</span>, <span class="hljs-string">`<span class="hljs-subst">${process.env.GITHUB_WORKSPACE}</span>/`</span>)
+          } }],
+        ]
+      : [<span class="hljs-string">&#x27;default&#x27;</span>],
+  },
+})</code></pre></div>
+<p>If you are using <a href="test-annotations.html">Annotations API</a>, the reporter will automatically inline them in the GitHub UI. You can disable this by setting <code>displayAnnotations</code> option to <code>false</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [
+      [<span class="hljs-string">&#x27;github-actions&#x27;</span>, { <span class="hljs-attr">displayAnnotations</span>: <span class="hljs-literal">false</span> }],
+    ],
+  },
+})</code></pre></div>
+<p>The GitHub Actions reporter automatically generates a <a href="https://github.blog/news-insights/product-news/supercharging-github-actions-with-job-summaries/">Job Summary</a> with an overview of your test results. The summary includes test file and test case statistics, and highlights flaky tests that required retries.</p>
+<span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span><p>The job summary is enabled by default and writes to the path specified by <code>$GITHUB_STEP_SUMMARY</code>. You can override it by using the <code>jobSummary.outputPath</code> option:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [
+      [<span class="hljs-string">&#x27;github-actions&#x27;</span>, {
+        <span class="hljs-attr">jobSummary</span>: {
+          <span class="hljs-attr">outputPath</span>: <span class="hljs-string">&#x27;/home/runner/jobs/summary/step&#x27;</span>,
+        },
+      }],
+    ],
+  },
+})</code></pre></div>
+<p>To disable the job summary:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [
+      [<span class="hljs-string">&#x27;github-actions&#x27;</span>, { <span class="hljs-attr">jobSummary</span>: { <span class="hljs-attr">enabled</span>: <span class="hljs-literal">false</span> } }],
+    ],
+  },
+})</code></pre></div>
+<p>The job summary title defaults to <code>Vitest Test Report</code> or <code>(${test.name}) Vitest Test Report</code> when <a href="../config/name.html"><code>test.name</code> is set</a>.</p>
+<p>You can customize the title by setting <code>jobSummary.title</code> to distinguish multiple Vitest invocations that append to the same job summary. Please note that <code>test.name</code> will not be displayed when using a custom title.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [
+      [<span class="hljs-string">&#x27;github-actions&#x27;</span>, {
+        <span class="hljs-attr">jobSummary</span>: {
+          <span class="hljs-attr">title</span>: <span class="hljs-string">&#x27;My Test Report&#x27;</span>,
+        },
+      }],
+    ],
+  },
+})</code></pre></div>
+<p>The flaky tests section of the summary includes permalink URLs that link test names directly to the relevant source lines on GitHub. These links are generated automatically using environment variables that GitHub Actions provides (<code>$GITHUB_REPOSITORY</code>, <code>$GITHUB_SHA</code>, and <code>$GITHUB_WORKSPACE</code>), so no configuration is needed in most cases.</p>
+<p>If you need to override these values — for example, when running in a container or a custom environment — you can customize them via the <code>fileLinks</code> option:</p>
+<ul>
+<li><code>repository</code>: the GitHub repository in <code>owner/repo</code> format. Defaults to <code>process.env.GITHUB_REPOSITORY</code>.</li>
+<li><code>commitHash</code>: the commit SHA to use in permalink URLs. Defaults to <code>process.env.GITHUB_SHA</code>.</li>
+<li><code>workspacePath</code>: the absolute path to the root of the repository on disk. Used to compute relative file paths for the permalink URLs. Defaults to <code>process.env.GITHUB_WORKSPACE</code>.</li>
+</ul>
+<p>All three values must be available for the links to be generated.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [
+      [<span class="hljs-string">&#x27;github-actions&#x27;</span>, {
+        <span class="hljs-attr">jobSummary</span>: {
+          <span class="hljs-attr">fileLinks</span>: {
+            <span class="hljs-attr">repository</span>: <span class="hljs-string">&#x27;owner/repo&#x27;</span>,
+            <span class="hljs-attr">commitHash</span>: <span class="hljs-string">&#x27;abcdefg&#x27;</span>,
+            <span class="hljs-attr">workspacePath</span>: <span class="hljs-string">&#x27;/home/runner/work/repo/&#x27;</span>,
+          },
+        },
+      }],
+    ],
+  },
+})</code></pre></div>
+<h3 id="minimal-reporter"><a class="anchor" href="#minimal-reporter">#</a>Minimal Reporter</h3>
+<ul>
+<li><strong>Alias:</strong> <code>agent</code></li>
+</ul>
+<p>Outputs a minimal report containing only failed tests and their error messages. Console logs from passing tests and the summary section are also suppressed.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Agent Reporter</div><p>This reporter is well optimized for AI coding assistants and LLM-based workflows to reduce token usage. It is <a href="#default-configuration">enabled automatically</a> when Vitest detects it is running inside an AI coding agent.</p>
+<div class="code-group"><div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">npx vitest --reporter=minimal</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;minimal&#x27;</span>]
+  },
+})</code></pre></div>
+</div><h3 id="blob-reporter"><a class="anchor" href="#blob-reporter">#</a>Blob Reporter</h3>
+<p>Stores test results on the machine so they can be later merged using <a href="cli.html#merge-reports"><code>--merge-reports</code></a> command.
+By default, stores all results in <code>.vitest/blob/</code> folder, but can be overridden with <code>--outputFile</code> or <code>--outputFile.blob</code> flags.</p>
+<div class="code"><pre><code class="hljs lang-bash">npx vitest --reporter=blob --outputFile=reports/blob-1.json</code></pre></div>
+<p>We recommend using this reporter if you are running Vitest on different machines with the <a href="cli.html#shard"><code>--shard</code></a> flag or across multiple environments (e.g., linux/macos/windows). All blob reports can be merged into any report by using <code>--merge-reports</code> command at the end of your CI pipeline:</p>
+<div class="code"><pre><code class="hljs lang-bash">npx vitest --merge-reports=reports --reporter=json --reporter=default</code></pre></div>
+<p>When running the same tests across multiple environments, use the <code>VITEST_BLOB_LABEL</code> environment variable to distinguish each environment&#39;s blob. Vitest reads labels at merge time and displays results separately:</p>
+<div class="code"><pre><code class="hljs lang-bash">VITEST_BLOB_LABEL=linux vitest run --reporter=blob</code></pre></div>
+<p>You can also provide the label via the blob reporter option. This has higher priority than <code>VITEST_BLOB_LABEL</code>.</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [
+      [<span class="hljs-string">&#x27;blob&#x27;</span>, { <span class="hljs-attr">label</span>: <span class="hljs-string">&#x27;linux&#x27;</span> }],
+    ],
+  },
+})</code></pre></div>
+<p>Blob reporter output doesn&#39;t include file-based <a href="../api/advanced/artifacts.html#testattachment">attachments</a>.
+Make sure to merge <a href="../config/attachmentsdir.html"><code>attachmentsDir</code></a> separately alongside blob reports on CI when using this feature.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Both <code>--reporter=blob</code> and <code>--merge-reports</code> do not work in watch mode.</p>
+</div><h2 id="custom-reporters"><a class="anchor" href="#custom-reporters">#</a>Custom Reporters</h2>
+<p>You can use third-party custom reporters installed from NPM by specifying their package name in the reporters&#39; option:</p>
+<div class="code-group"><div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">npx vitest --reporter=some-published-vitest-reporter</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;some-published-vitest-reporter&#x27;</span>]
+  },
+})</code></pre></div>
+</div><p>Additionally, you can define your own <a href="advanced/reporters.html">custom reporters</a> and use them by specifying their file path:</p>
+<div class="code"><pre><code class="hljs lang-bash">npx vitest --reporter=./path/to/reporter.ts</code></pre></div>
+<p>Custom reporters should implement the <a href="https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/types/reporter.ts">Reporter interface</a>.</p>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#default-configuration">Default Configuration</a><a class="toc-2" href="#reporter-output">Reporter Output</a><a class="toc-2" href="#combining-reporters">Combining Reporters</a><a class="toc-2" href="#built-in-reporters">Built-in Reporters</a><a class="toc-3" href="#default-reporter">Default Reporter</a><a class="toc-3" href="#verbose-reporter">Verbose Reporter</a><a class="toc-3" href="#tree-reporter">Tree Reporter</a><a class="toc-3" href="#dot-reporter">Dot Reporter</a><a class="toc-3" href="#junit-reporter">JUnit Reporter</a><a class="toc-3" href="#json-reporter">JSON Reporter</a><a class="toc-3" href="#html-reporter">HTML Reporter</a><a class="toc-3" href="#tap-reporter">TAP Reporter</a><a class="toc-3" href="#tap-flat-reporter">TAP Flat Reporter</a><a class="toc-3" href="#hanging-process-reporter">Hanging Process Reporter</a><a class="toc-3" href="#github-actions-reporter">GitHub Actions Reporter</a><a class="toc-3" href="#minimal-reporter">Minimal Reporter</a><a class="toc-3" href="#blob-reporter">Blob Reporter</a><a class="toc-2" href="#custom-reporters">Custom Reporters</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP Server Setup (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › use/mcp  <a class="ext small" href="https://eslint.org/docs/latest/use/mcp">version en ligne</a></div>
+<h1>MCP Server Setup</h1><p><a href="https://modelcontextprotocol.io">Model Context Protocol</a> (MCP) is an open standard that enables AI models to interact with external tools and services through a unified interface. The ESLint CLI contains an MCP server that you can register with your code editor to allow LLMs to use ESLint directly.</p>
+<h2 id="set-up-eslint-mcp-server-in-vs-code"><a class="anchor" href="#set-up-eslint-mcp-server-in-vs-code">#</a>Set Up ESLint MCP Server in VS Code</h2>
+<p>To use MCP servers in VS Code, you must have the <a href="https://code.visualstudio.com/docs/copilot/copilot-chat">Copilot Chat</a> extension installed. After that, follow these steps so add the ESLint MCP server:</p>
+<h3 id="1-create-mcp-configuration-file"><a class="anchor" href="#1-create-mcp-configuration-file">#</a>1. Create MCP Configuration File</h3>
+<p>Create a <code>.vscode/mcp.json</code> file in your project with the following configuration:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;servers&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;ESLint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+			<span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;stdio&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;command&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;npx&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;args&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;@eslint/mcp@latest&quot;</span><span class="hljs-punctuation">]</span>
+		<span class="hljs-punctuation">}</span>
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Alternatively, you can use the Command Palette:</p>
+<ol>
+<li>Press <code>Ctrl+Shift+P</code> (Windows/Linux) or <code>Cmd+Shift+P</code> (macOS)</li>
+<li>Type and select <code>MCP: Add Server</code></li>
+<li>Select <code>Command (stdio)</code> from the dropdown</li>
+<li>Enter <code>npx @eslint/mcp@latest</code> as the command</li>
+<li>Type <code>ESLint</code> as the server ID</li>
+<li>Choose <code>Workspace Settings</code> to create the configuration in <code>.vscode/mcp.json</code></li>
+</ol>
+<h3 id="2-enable-mcp-server-in-user-settings-optional"><a class="anchor" href="#2-enable-mcp-server-in-user-settings-optional">#</a>2. Enable MCP Server in User Settings (Optional)</h3>
+<p>If you want to use the ESLint MCP server across all workspaces, you can follow the previous steps and choose <code>User Settings</code> instead of <code>Workspace Settings</code> to add the MCP server to your <code>settings.json</code> file.</p>
+<h3 id="use-the-eslint-mcp-server-with-github-copilot"><a class="anchor" href="#use-the-eslint-mcp-server-with-github-copilot">#</a>Use the ESLint MCP Server with GitHub Copilot</h3>
+<p>Once your MCP server is configured, you can use it with <a href="https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode">GitHub Copilot&#39;s agent mode</a>:</p>
+<ol>
+<li>Open the Copilot Chat view in VS Code</li>
+<li>Ensure agent mode is enabled (look for the agent icon in the chat input)</li>
+<li>Toggle on the ESLint MCP server tools using the &quot;Tools&quot; button in the chat view</li>
+<li>Ask Copilot to perform ESLint tasks, such as:<ul>
+<li>&quot;Check this file for linting errors&quot;</li>
+<li>&quot;Fix all ESLint issues in the current file&quot;</li>
+<li>&quot;Show me what ESLint rules are being violated&quot;</li>
+</ul>
+</li>
+</ol>
+<h2 id="troubleshooting"><a class="anchor" href="#troubleshooting">#</a>Troubleshooting</h2>
+<p>If you encounter issues with the ESLint MCP server:</p>
+<ol>
+<li>Check the MCP server status by running <code>MCP: List Servers</code> from the Command Palette</li>
+<li>Select the ESLint server and choose <code>Show Output</code> to view server logs</li>
+<li>Ensure that ESLint is installed in your project or globally</li>
+<li>Verify that your MCP configuration is correct</li>
+</ol>
+<h2 id="set-up-eslint-mcp-server-in-cursor"><a class="anchor" href="#set-up-eslint-mcp-server-in-cursor">#</a>Set Up ESLint MCP Server in Cursor</h2>
+<p>To configure the ESLint MCP server in <a href="https://cursor.com">Cursor</a>, follow these steps:</p>
+<h3 id="1-create-mcp-configuration-file-2"><a class="anchor" href="#1-create-mcp-configuration-file-2">#</a>1. Create MCP Configuration File</h3>
+<p>Create a <code>.cursor/mcp.json</code> file in your project directory with the following configuration:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;mcpServers&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;eslint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+			<span class="hljs-attr">&quot;command&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;npx&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;args&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;@eslint/mcp@latest&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;env&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span>
+		<span class="hljs-punctuation">}</span>
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<h3 id="2-global-configuration-optional"><a class="anchor" href="#2-global-configuration-optional">#</a>2. Global Configuration (Optional)</h3>
+<p>If you want to use the ESLint MCP server across all your Cursor workspaces, create a <code>~/.cursor/mcp.json</code> file in your home directory with the same configuration.</p>
+<h3 id="3-verify-tool-availability"><a class="anchor" href="#3-verify-tool-availability">#</a>3. Verify Tool Availability</h3>
+<p>Once configured, the ESLint MCP server should appear in the &quot;Available Tools&quot; section on the MCP settings page in Cursor.</p>
+<h2 id="set-up-eslint-mcp-server-in-windsurf"><a class="anchor" href="#set-up-eslint-mcp-server-in-windsurf">#</a>Set Up ESLint MCP Server in Windsurf</h2>
+<p>To configure the ESLint MCP server in <a href="https://docs.windsurf.com/">Windsurf</a>, follow these steps:</p>
+<h3 id="1-access-windsurf-settings"><a class="anchor" href="#1-access-windsurf-settings">#</a>1. Access Windsurf Settings</h3>
+<p>Navigate to Windsurf - Settings &gt; Advanced Settings, or open the Command Palette and select &quot;Open Windsurf Settings Page&quot;.</p>
+<h3 id="2-add-eslint-mcp-server"><a class="anchor" href="#2-add-eslint-mcp-server">#</a>2. Add ESLint MCP Server</h3>
+<p>Scroll down to the Cascade section and click the &quot;Add Server&quot; button. Then select &quot;Add custom server +&quot;.</p>
+<h3 id="3-configure-mcp-server"><a class="anchor" href="#3-configure-mcp-server">#</a>3. Configure MCP Server</h3>
+<p>Add the following configuration to your <code>~/.codeium/windsurf/mcp_config.json</code> file:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;mcpServers&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;eslint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+			<span class="hljs-attr">&quot;command&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;npx&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;args&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;@eslint/mcp@latest&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;env&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span>
+		<span class="hljs-punctuation">}</span>
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<h3 id="4-refresh-server-list"><a class="anchor" href="#4-refresh-server-list">#</a>4. Refresh Server List</h3>
+<p>After adding the configuration, press the refresh button to update the list of available MCP servers.</p>
+<h3 id="5-use-eslint-with-cascade"><a class="anchor" href="#5-use-eslint-with-cascade">#</a>5. Use ESLint with Cascade</h3>
+<p>Once configured, you can use ESLint tools with Cascade by asking it to:</p>
+<ul>
+<li>Check files for linting errors</li>
+<li>Explain ESLint rule violations</li>
+</ul>
+<p>Note: MCP tool calls in Windsurf will consume credits regardless of success or failure.</p>
+<h2 id="use-typescript-configuration-files"><a class="anchor" href="#use-typescript-configuration-files">#</a>Use TypeScript Configuration Files</h2>
+<p>If your project uses a TypeScript configuration file (<code>eslint.config.ts</code>, <code>eslint.config.mts</code>, or <code>eslint.config.cts</code>), additional setup is required for the MCP server to load it. There are two approaches depending on your environment. For more details, see <a href="configure/configuration-files.html#typescript-configuration-files">TypeScript Configuration Files</a>.</p>
+<h3 id="option-a-local-installation-with-jiti-nodejs"><a class="anchor" href="#option-a-local-installation-with-jiti-nodejs">#</a>Option A: Local Installation with jiti (Node.js)</h3>
+<p>When you run the MCP server with <code>npx @eslint/mcp@latest</code>, ESLint is installed into a temporary directory and cannot resolve <code>jiti</code> from your project&#39;s <code>node_modules</code>. To use <code>jiti</code> for TypeScript config loading, install both <code>@eslint/mcp</code> and <code>jiti</code> locally:</p>
+<div class="code"><pre><code class="hljs lang-bash">npm install --save-dev @eslint/mcp jiti</code></pre></div>
+<p>Then update your MCP configuration to use the locally installed server (without <code>@latest</code>, so <code>npx</code> resolves the local binary):</p>
+<p><strong>VS Code</strong> (<code>.vscode/mcp.json</code>):</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;servers&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;ESLint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+			<span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;stdio&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;command&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;npx&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;args&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;@eslint/mcp&quot;</span><span class="hljs-punctuation">]</span>
+		<span class="hljs-punctuation">}</span>
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p><strong>Cursor / Windsurf</strong> (<code>.cursor/mcp.json</code> or <code>~/.codeium/windsurf/mcp_config.json</code>):</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;mcpServers&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;eslint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+			<span class="hljs-attr">&quot;command&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;npx&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;args&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;@eslint/mcp&quot;</span><span class="hljs-punctuation">]</span>
+		<span class="hljs-punctuation">}</span>
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>When <code>@eslint/mcp</code> is installed locally, its bundled ESLint resolves <code>jiti</code> from the shared <code>node_modules</code> directory via standard Node.js module resolution.</p>
+<h4 id="yarn-plugnplay-pnp"><a class="anchor" href="#yarn-plugnplay-pnp">#</a>Yarn Plug&#39;n&#39;Play (PnP)</h4>
+<p>Yarn 2+ uses Plug&#39;n&#39;Play by default and does not create a <code>node_modules</code> directory. To run <code>npx @eslint/mcp</code> in a Yarn project, set <code>nodeLinker</code> to <code>node-modules</code> in your <code>.yarnrc.yml</code> and run <code>yarn install</code> again:</p>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-attr">nodeLinker:</span> <span class="hljs-string">node-modules</span></code></pre></div>
+<p>With a <code>node_modules</code> directory present, the <code>npx</code> configuration shown above works as expected. The <code>nodeLinker: pnpm</code> setting also works. Only the default Plug&#39;n&#39;Play (<code>nodeLinker: pnp</code>) mode is not supported with <code>npx @eslint/mcp</code>.</p>
+<h3 id="option-b-native-nodejs-typescript-support"><a class="anchor" href="#option-b-native-nodejs-typescript-support">#</a>Option B: Native Node.js TypeScript Support</h3>
+<p>If you&#39;re using <strong>Node.js &gt;= 22.13.0</strong>, you can load TypeScript configuration files without <code>jiti</code> by enabling Node.js type stripping and the ESLint <code>unstable_native_nodejs_ts_config</code> flag. Set these as environment variables in your MCP configuration.</p>
+<p><strong>VS Code</strong> (<code>.vscode/mcp.json</code>):</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;servers&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;ESLint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+			<span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;stdio&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;command&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;npx&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;args&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;@eslint/mcp@latest&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;env&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+				<span class="hljs-attr">&quot;ESLINT_FLAGS&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;unstable_native_nodejs_ts_config&quot;</span><span class="hljs-punctuation">,</span>
+				<span class="hljs-attr">&quot;NODE_OPTIONS&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;--experimental-transform-types&quot;</span>
+			<span class="hljs-punctuation">}</span>
+		<span class="hljs-punctuation">}</span>
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p><strong>Cursor / Windsurf</strong> (<code>.cursor/mcp.json</code> or <code>~/.codeium/windsurf/mcp_config.json</code>):</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;mcpServers&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;eslint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+			<span class="hljs-attr">&quot;command&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;npx&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;args&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;@eslint/mcp@latest&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;env&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+				<span class="hljs-attr">&quot;ESLINT_FLAGS&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;unstable_native_nodejs_ts_config&quot;</span><span class="hljs-punctuation">,</span>
+				<span class="hljs-attr">&quot;NODE_OPTIONS&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;--experimental-transform-types&quot;</span>
+			<span class="hljs-punctuation">}</span>
+		<span class="hljs-punctuation">}</span>
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<h2 id="example-prompts"><a class="anchor" href="#example-prompts">#</a>Example Prompts</h2>
+<p>Here are some example prompts to an LLM for running ESLint and addressing its findings:</p>
+<div class="code"><pre><code class="hljs lang-text">Lint the current file and explain any issues found
+
+Lint and fix #file:index.js</code></pre></div>
+<h2 id="additional-resources"><a class="anchor" href="#additional-resources">#</a>Additional Resources</h2>
+<ul>
+<li><a href="https://modelcontextprotocol.io/introduction">Model Context Protocol Documentation</a></li>
+<li><a href="https://code.visualstudio.com/docs/copilot/chat/mcp-servers">VS Code MCP Servers Documentation</a></li>
+<li><a href="https://code.visualstudio.com/docs/copilot/copilot-chat">GitHub Copilot in VS Code Documentation</a></li>
+<li><a href="https://docs.cursor.com/context/model-context-protocol">Model Context Protocol in Cursor documentation</a></li>
+<li><a href="https://docs.windsurf.com/">Model Context Protocol in Windsurf documentation</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#set-up-eslint-mcp-server-in-vs-code">Set Up ESLint MCP Server in VS Code</a><a class="toc-3" href="#1-create-mcp-configuration-file">1. Create MCP Configuration File</a><a class="toc-3" href="#2-enable-mcp-server-in-user-settings-optional">2. Enable MCP Server in User Settings (Optional)</a><a class="toc-3" href="#use-the-eslint-mcp-server-with-github-copilot">Use the ESLint MCP Server with GitHub Copilot</a><a class="toc-2" href="#troubleshooting">Troubleshooting</a><a class="toc-2" href="#set-up-eslint-mcp-server-in-cursor">Set Up ESLint MCP Server in Cursor</a><a class="toc-3" href="#1-create-mcp-configuration-file-2">1. Create MCP Configuration File</a><a class="toc-3" href="#2-global-configuration-optional">2. Global Configuration (Optional)</a><a class="toc-3" href="#3-verify-tool-availability">3. Verify Tool Availability</a><a class="toc-2" href="#set-up-eslint-mcp-server-in-windsurf">Set Up ESLint MCP Server in Windsurf</a><a class="toc-3" href="#1-access-windsurf-settings">1. Access Windsurf Settings</a><a class="toc-3" href="#2-add-eslint-mcp-server">2. Add ESLint MCP Server</a><a class="toc-3" href="#3-configure-mcp-server">3. Configure MCP Server</a><a class="toc-3" href="#4-refresh-server-list">4. Refresh Server List</a><a class="toc-3" href="#5-use-eslint-with-cascade">5. Use ESLint with Cascade</a><a class="toc-2" href="#use-typescript-configuration-files">Use TypeScript Configuration Files</a><a class="toc-3" href="#option-a-local-installation-with-jiti-nodejs">Option A: Local Installation with jiti (Node.js)</a><a class="toc-3" href="#option-b-native-nodejs-typescript-support">Option B: Native Node.js TypeScript Support</a><a class="toc-2" href="#example-prompts">Example Prompts</a><a class="toc-2" href="#additional-resources">Additional Resources</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

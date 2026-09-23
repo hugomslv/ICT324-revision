@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-mixed-operators (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-mixed-operators <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-mixed-operators">version en ligne</a></div>
+<h1>no-mixed-operators</h1><p>Enclosing complex expressions by parentheses clarifies the developer&#39;s intention, which makes the code more readable.
+This rule warns when different operators are used consecutively without parentheses in an expression.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">var</span> foo = a &amp;&amp; b || c || d;    <span class="hljs-comment">/*BAD: Unexpected mix of &#x27;&amp;&amp;&#x27; and &#x27;||&#x27;.*/</span>
+<span class="hljs-keyword">var</span> foo = (a &amp;&amp; b) || c || d;  <span class="hljs-comment">/*GOOD*/</span>
+<span class="hljs-keyword">var</span> foo = a &amp;&amp; (b || c || d);  <span class="hljs-comment">/*GOOD*/</span></code></pre></div>
+<p><strong>Note:</strong>
+It is expected for this rule to emit one error for each mixed operator in a pair. As a result, for each two consecutive mixed operators used, a distinct error will be displayed, pointing to where the specific operator that breaks the rule is used:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">var</span> foo = a &amp;&amp; b || c || d;</code></pre></div>
+<p>will generate</p>
+<div class="code"><pre><code class="hljs lang-shell">1:13  Unexpected mix of <span class="hljs-string">&#x27;&amp;&amp;&#x27;</span> and <span class="hljs-string">&#x27;||&#x27;</span>. (no-mixed-operators)
+1:18  Unexpected mix of <span class="hljs-string">&#x27;&amp;&amp;&#x27;</span> and <span class="hljs-string">&#x27;||&#x27;</span>. (no-mixed-operators)</code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule checks <code>BinaryExpression</code>, <code>LogicalExpression</code> and <code>ConditionalExpression</code>.</p>
+<p>This rule may conflict with <a href="no-extra-parens.html">no-extra-parens</a> rule.
+If you use both this and <a href="no-extra-parens.html">no-extra-parens</a> rule together, you need to use the <code>nestedBinaryExpressions</code> option of <a href="no-extra-parens.html">no-extra-parens</a> rule.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-mixed-operators: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">var</span> foo = a &amp;&amp; b &lt; <span class="hljs-number">0</span> || c &gt; <span class="hljs-number">0</span> || d + <span class="hljs-number">1</span> === <span class="hljs-number">0</span>;
+<span class="hljs-keyword">var</span> foo = a + b * c;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-mixed-operators: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">var</span> foo = a || b || c;
+<span class="hljs-keyword">var</span> foo = a &amp;&amp; b &amp;&amp; c;
+<span class="hljs-keyword">var</span> foo = (a &amp;&amp; b &lt; <span class="hljs-number">0</span>) || c &gt; <span class="hljs-number">0</span> || d + <span class="hljs-number">1</span> === <span class="hljs-number">0</span>;
+<span class="hljs-keyword">var</span> foo = a &amp;&amp; (b &lt; <span class="hljs-number">0</span> || c &gt; <span class="hljs-number">0</span> || d + <span class="hljs-number">1</span> === <span class="hljs-number">0</span>);
+<span class="hljs-keyword">var</span> foo = a + (b * c);
+<span class="hljs-keyword">var</span> foo = (a + b) * c;</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;no-mixed-operators&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;groups&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;+&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;-&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;*&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;/&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;%&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;**&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;&amp;&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;|&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;^&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;~&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;&lt;&lt;&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;&gt;&gt;&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;&gt;&gt;&gt;&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;==&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;!=&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;===&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;!==&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;&gt;&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;&gt;=&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;&lt;&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;&lt;=&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;&amp;&amp;&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;||&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;in&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;instanceof&quot;</span><span class="hljs-punctuation">]</span>
+            <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;allowSamePrecedence&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>This rule has 2 options.</p>
+<ul>
+<li><p><code>groups</code> (<code>string[][]</code>) - specifies operator groups to be checked. The <code>groups</code> option is a list of groups, and a group is a list of binary operators. Default operator groups are defined as arithmetic, bitwise, comparison, logical, and relational operators. Note: Ternary operator(?:) can be part of any group and by default is allowed to be mixed with other operators.</p>
+</li>
+<li><p><code>allowSamePrecedence</code> (<code>boolean</code>) - specifies whether to allow mixed operators if they are of equal precedence. Default is <code>true</code>.</p>
+</li>
+</ul>
+<h3 id="groups"><a class="anchor" href="#groups">#</a>groups</h3>
+<p>The following operators can be used in <code>groups</code> option:</p>
+<ul>
+<li>Arithmetic Operators: <code>&quot;+&quot;</code>, <code>&quot;-&quot;</code>, <code>&quot;*&quot;</code>, <code>&quot;/&quot;</code>, <code>&quot;%&quot;</code>, <code>&quot;**&quot;</code></li>
+<li>Bitwise Operators: <code>&quot;&amp;&quot;</code>, <code>&quot;|&quot;</code>, <code>&quot;^&quot;</code>, <code>&quot;~&quot;</code>, <code>&quot;&lt;&lt;&quot;</code>, <code>&quot;&gt;&gt;&quot;</code>, <code>&quot;&gt;&gt;&gt;&quot;</code></li>
+<li>Comparison Operators: <code>&quot;==&quot;</code>, <code>&quot;!=&quot;</code>, <code>&quot;===&quot;</code>, <code>&quot;!==&quot;</code>, <code>&quot;&gt;&quot;</code>, <code>&quot;&gt;=&quot;</code>, <code>&quot;&lt;&quot;</code>, <code>&quot;&lt;=&quot;</code></li>
+<li>Logical Operators: <code>&quot;&amp;&amp;&quot;</code>, <code>&quot;||&quot;</code></li>
+<li>Coalesce Operator: <code>&quot;??&quot;</code></li>
+<li>Relational Operators: <code>&quot;in&quot;</code>, <code>&quot;instanceof&quot;</code></li>
+<li>Ternary Operator: <code>?:</code></li>
+</ul>
+<p>Now, consider the following group configuration: <code>{&quot;groups&quot;: [[&quot;&amp;&quot;, &quot;|&quot;, &quot;^&quot;, &quot;~&quot;, &quot;&lt;&lt;&quot;, &quot;&gt;&gt;&quot;, &quot;&gt;&gt;&gt;&quot;], [&quot;&amp;&amp;&quot;, &quot;||&quot;]]}</code>.
+There are 2 groups specified in this configuration: bitwise operators and logical operators.
+This rule checks if the operators belong to the same group only.
+In this case, this rule checks if bitwise operators and logical operators are mixed, but ignores all other operators.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with <code>{&quot;groups&quot;: [[&quot;&amp;&quot;, &quot;|&quot;, &quot;^&quot;, &quot;~&quot;, &quot;&lt;&lt;&quot;, &quot;&gt;&gt;&quot;, &quot;&gt;&gt;&gt;&quot;], [&quot;&amp;&amp;&quot;, &quot;||&quot;]]}</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-mixed-operators: [&quot;error&quot;, {&quot;groups&quot;: [[&quot;&amp;&quot;, &quot;|&quot;, &quot;^&quot;, &quot;~&quot;, &quot;&lt;&lt;&quot;, &quot;&gt;&gt;&quot;, &quot;&gt;&gt;&gt;&quot;], [&quot;&amp;&amp;&quot;, &quot;||&quot;]]}]*/</span>
+
+<span class="hljs-keyword">var</span> foo = a &amp;&amp; b &lt; <span class="hljs-number">0</span> || c &gt; <span class="hljs-number">0</span> || d + <span class="hljs-number">1</span> === <span class="hljs-number">0</span>;
+<span class="hljs-keyword">var</span> foo = a &amp; b | c;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-mixed-operators: [&quot;error&quot;, {&quot;groups&quot;: [[&quot;&amp;&amp;&quot;, &quot;||&quot;, &quot;?:&quot;]]}]*/</span>
+
+<span class="hljs-keyword">var</span> foo = a || b ? c : d;
+
+<span class="hljs-keyword">var</span> bar = a ? b || c : d;
+
+<span class="hljs-keyword">var</span> baz = a ? b : c || d;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with <code>{&quot;groups&quot;: [[&quot;&amp;&quot;, &quot;|&quot;, &quot;^&quot;, &quot;~&quot;, &quot;&lt;&lt;&quot;, &quot;&gt;&gt;&quot;, &quot;&gt;&gt;&gt;&quot;], [&quot;&amp;&amp;&quot;, &quot;||&quot;]]}</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-mixed-operators: [&quot;error&quot;, {&quot;groups&quot;: [[&quot;&amp;&quot;, &quot;|&quot;, &quot;^&quot;, &quot;~&quot;, &quot;&lt;&lt;&quot;, &quot;&gt;&gt;&quot;, &quot;&gt;&gt;&gt;&quot;], [&quot;&amp;&amp;&quot;, &quot;||&quot;]]}]*/</span>
+
+<span class="hljs-keyword">var</span> foo = a || b &gt; <span class="hljs-number">0</span> || c + <span class="hljs-number">1</span> === <span class="hljs-number">0</span>;
+<span class="hljs-keyword">var</span> foo = a &amp;&amp; b &gt; <span class="hljs-number">0</span> &amp;&amp; c + <span class="hljs-number">1</span> === <span class="hljs-number">0</span>;
+<span class="hljs-keyword">var</span> foo = (a &amp;&amp; b &lt; <span class="hljs-number">0</span>) || c &gt; <span class="hljs-number">0</span> || d + <span class="hljs-number">1</span> === <span class="hljs-number">0</span>;
+<span class="hljs-keyword">var</span> foo = a &amp;&amp; (b &lt; <span class="hljs-number">0</span> ||  c &gt; <span class="hljs-number">0</span> || d + <span class="hljs-number">1</span> === <span class="hljs-number">0</span>);
+<span class="hljs-keyword">var</span> foo = (a &amp; b) | c;
+<span class="hljs-keyword">var</span> foo = a &amp; (b | c);
+<span class="hljs-keyword">var</span> foo = a + b * c;
+<span class="hljs-keyword">var</span> foo = a + (b * c);
+<span class="hljs-keyword">var</span> foo = (a + b) * c;</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-mixed-operators: [&quot;error&quot;, {&quot;groups&quot;: [[&quot;&amp;&amp;&quot;, &quot;||&quot;, &quot;?:&quot;]]}]*/</span>
+
+<span class="hljs-keyword">var</span> foo = (a || b) ? c : d;
+<span class="hljs-keyword">var</span> foo = a || (b ? c : d);
+
+<span class="hljs-keyword">var</span> bar = a ? (b || c) : d;
+
+<span class="hljs-keyword">var</span> baz = a ? b : (c || d);
+<span class="hljs-keyword">var</span> baz = (a ? b : c) || d;</code></pre></div>
+</div><h3 id="allowsameprecedence"><a class="anchor" href="#allowsameprecedence">#</a>allowSamePrecedence</h3>
+<p>Examples of <strong>correct</strong> code for this rule with <code>{&quot;allowSamePrecedence&quot;: true}</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-mixed-operators: [&quot;error&quot;, {&quot;allowSamePrecedence&quot;: true}]*/</span>
+
+<span class="hljs-comment">// + and - have the same precedence.</span>
+<span class="hljs-keyword">var</span> foo = a + b - c;</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for this rule with <code>{&quot;allowSamePrecedence&quot;: false}</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-mixed-operators: [&quot;error&quot;, {&quot;allowSamePrecedence&quot;: false}]*/</span>
+
+<span class="hljs-comment">// + and - have the same precedence.</span>
+<span class="hljs-keyword">var</span> foo = a + b - c;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with <code>{&quot;allowSamePrecedence&quot;: false}</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-mixed-operators: [&quot;error&quot;, {&quot;allowSamePrecedence&quot;: false}]*/</span>
+
+<span class="hljs-comment">// + and - have the same precedence.</span>
+<span class="hljs-keyword">var</span> foo = (a + b) - c;</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you don&#39;t want to be notified about mixed operators, then it&#39;s safe to disable this rule.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="no-extra-parens.html"><code>no-extra-parens</code></a></p></div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#groups">groups</a><a class="toc-3" href="#allowsameprecedence">allowSamePrecedence</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vitest API (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/advanced/vitest  <a class="ext small" href="https://vitest.dev/api/advanced/vitest">version en ligne</a></div>
+<h1 id="vitest"><a class="anchor" href="#vitest">#</a>Vitest</h1>
+<h2 id="mode"><a class="anchor" href="#mode">#</a>mode <Deprecated /></h2>
+<p>Since Vitest 5, this property is always <code>&#39;test&#39;</code>.</p>
+<h2 id="config"><a class="anchor" href="#config">#</a>config</h2>
+<p>The root (or global) config. If projects are defined, they will reference this as <code>globalConfig</code>.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This is Vitest config, it doesn&#39;t extend <em>Vite</em> config. It only has resolved values from the <code>test</code> property.</p>
+</div><h2 id="vite"><a class="anchor" href="#vite">#</a>vite</h2>
+<p>This is a global <a href="https://vite.dev/guide/api-javascript#vitedevserver"><code>ViteDevServer</code></a>.</p>
+<h2 id="state"><a class="anchor" href="#state">#</a>state <Experimental /></h2>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Public <code>state</code> is an experimental API (except <code>vitest.state.getReportedEntity</code>). Breaking changes might not follow SemVer, please pin Vitest&#39;s version when using it.</p>
+</div><p>Global state stores information about the current tests. It uses internal serializable Task API by default, but we recommend using the <a href="reporters.html#reported-tasks">Reported Tasks API</a> instead by calling <code>state.getReportedEntity()</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> task = vitest.<span class="hljs-property">state</span>.<span class="hljs-property">idMap</span>.<span class="hljs-title function_">get</span>(taskId) <span class="hljs-comment">// old API</span>
+<span class="hljs-keyword">const</span> testCase = vitest.<span class="hljs-property">state</span>.<span class="hljs-title function_">getReportedEntity</span>(task) <span class="hljs-comment">// new API</span></code></pre></div>
+<p>In the future, the old API won&#39;t be exposed anymore.</p>
+<h2 id="snapshot"><a class="anchor" href="#snapshot">#</a>snapshot</h2>
+<p>The global snapshot manager. Vitest keeps track of all snapshots using the <code>snapshot.add</code> method.</p>
+<p>You can get the latest summary of snapshots via the <code>vitest.snapshot.summary</code> property.</p>
+<h2 id="cache"><a class="anchor" href="#cache">#</a>cache</h2>
+<p>Cache manager that stores information about latest test results and test file stats. In Vitest itself this is only used by the default sequencer to sort tests.</p>
+<h2 id="watcher"><a class="anchor" href="#watcher">#</a>watcher <Version>4.0.0</Version></h2>
+<p>The instance of a Vitest watcher with useful methods to track file changes and rerun tests. You can use <code>onFileChange</code>, <code>onFileDelete</code> or <code>onFileCreate</code> with your own watcher, if the built-in watcher is disabled.</p>
+<h2 id="projects"><a class="anchor" href="#projects">#</a>projects</h2>
+<p>An array of <a href="test-project.html">test projects</a> that belong to user&#39;s projects. If the user did not specify a them, this array will only contain a <a href="#getrootproject">root project</a>.</p>
+<p>Vitest will ensure that there is always at least one project in this array. If the user specifies a non-existent <code>--project</code> name, Vitest will throw an error before this array is defined.</p>
+<h2 id="getrootproject"><a class="anchor" href="#getrootproject">#</a>getRootProject</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getRootProject</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">TestProject</span></code></pre></div>
+<p>This returns the root test project. The root project generally doesn&#39;t run any tests and is not included in <code>vitest.projects</code> unless the user explicitly includes the root config in their configuration, or projects are not defined at all.</p>
+<p>The primary goal of the root project is to setup the global config. In fact, <code>rootProject.config</code> references <code>rootProject.globalConfig</code> and <code>vitest.config</code> directly:</p>
+<div class="code"><pre><code class="hljs lang-ts">rootProject.<span class="hljs-property">config</span> === rootProject.<span class="hljs-property">globalConfig</span> === rootProject.<span class="hljs-property">vitest</span>.<span class="hljs-property">config</span></code></pre></div>
+<h2 id="provide"><a class="anchor" href="#provide">#</a>provide</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> provide&lt;T <span class="hljs-keyword">extends</span> keyof <span class="hljs-title class_">ProvidedContext</span> &amp; <span class="hljs-built_in">string</span>&gt;(
+  <span class="hljs-attr">key</span>: T,
+  <span class="hljs-attr">value</span>: <span class="hljs-title class_">ProvidedContext</span>[T],
+): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Vitest exposes <code>provide</code> method which is a shorthand for <code>vitest.getRootProject().provide</code>. With this method you can pass down values from the main thread to tests. All values are checked with <code>structuredClone</code> before they are stored, but the values themselves are not cloned.</p>
+<p>To receive the values in the test, you need to import <code>inject</code> method from <code>vitest</code> entrypoint:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { inject } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">const</span> port = <span class="hljs-title function_">inject</span>(<span class="hljs-string">&#x27;wsPort&#x27;</span>) <span class="hljs-comment">// 3000</span></code></pre></div>
+<p>For better type safety, we encourage you to augment the type of <code>ProvidedContext</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { createVitest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> vitest = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createVitest</span>(<span class="hljs-string">&#x27;test&#x27;</span>, {
+  <span class="hljs-attr">watch</span>: <span class="hljs-literal">false</span>,
+})
+vitest.<span class="hljs-title function_">provide</span>(<span class="hljs-string">&#x27;wsPort&#x27;</span>, <span class="hljs-number">3000</span>)
+
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest&#x27;</span> {
+  <span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ProvidedContext</span> {
+    <span class="hljs-attr">wsPort</span>: <span class="hljs-built_in">number</span>
+  }
+}</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Technically, <code>provide</code> is a method of <a href="test-project.html"><code>TestProject</code></a>, so it is limited to the specific project. However, all projects inherit the values from the root project which makes <code>vitest.provide</code> universal way of passing down values to tests.</p>
+</div><h2 id="getprovidedcontext"><a class="anchor" href="#getprovidedcontext">#</a>getProvidedContext</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getProvidedContext</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">ProvidedContext</span></code></pre></div>
+<p>This returns the root context object. This is a shorthand for <code>vitest.getRootProject().getProvidedContext</code>.</p>
+<h2 id="getprojectbyname"><a class="anchor" href="#getprojectbyname">#</a>getProjectByName</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getProjectByName</span>(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-title class_">TestProject</span></code></pre></div>
+<p>This method returns the project by its name. Similar to calling <code>vitest.projects.find</code>.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>In case the project doesn&#39;t exist, this method will return the root project - make sure to check the names again if the project you are looking for is the one returned.</p>
+<p>If user didn&#39;t customize a name, the Vitest will assign an empty string as a name.</p>
+</div><h2 id="globtestspecifications"><a class="anchor" href="#globtestspecifications">#</a>globTestSpecifications</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">globTestSpecifications</span>(<span class="hljs-params">
+  <span class="hljs-attr">filters</span>?: <span class="hljs-built_in">string</span>[],
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TestSpecification</span>[]&gt;</code></pre></div>
+<p>This method constructs new <a href="test-specification.html">test specifications</a> by collecting every test in all projects with <a href="test-project.html#globtestfiles"><code>project.globTestFiles</code></a>. It accepts string filters to match the test files - these are the same filters that <a href="../../guide/filtering.html#cli">CLI supports</a>.</p>
+<p>This method automatically caches all test specifications. When you call <a href="#getmodulespecifications"><code>getModuleSpecifications</code></a> next time, it will return the same specifications unless <a href="#clearspecificationscache"><code>clearSpecificationsCache</code></a> was called before that.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>As of Vitest 3, it&#39;s possible to have multiple test specifications with the same module ID (file path) if <code>poolMatchGlob</code> has several pools or if <code>typecheck</code> is enabled. This possibility will be removed in Vitest 4.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> specifications = <span class="hljs-keyword">await</span> vitest.<span class="hljs-title function_">globTestSpecifications</span>([<span class="hljs-string">&#x27;my-filter&#x27;</span>])
+<span class="hljs-comment">// [TestSpecification{ moduleId: &#x27;/tests/my-filter.test.ts&#x27; }]</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(specifications)</code></pre></div>
+<h2 id="getrelevanttestspecifications"><a class="anchor" href="#getrelevanttestspecifications">#</a>getRelevantTestSpecifications</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getRelevantTestSpecifications</span>(<span class="hljs-params">
+  <span class="hljs-attr">filters</span>?: <span class="hljs-built_in">string</span>[]
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TestSpecification</span>[]&gt;</code></pre></div>
+<p>This method resolves every test specification by calling <a href="test-project.html#globtestfiles"><code>project.globTestFiles</code></a>. It accepts string filters to match the test files - these are the same filters that <a href="../../guide/filtering.html#cli">CLI supports</a>. If <code>--changed</code> flag was specified, the list will be filtered to include only files that changed. <code>getRelevantTestSpecifications</code> doesn&#39;t run any test files.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This method can be slow because it needs to filter <code>--changed</code> flags. Do not use it if you just need a list of test files.</p>
+<ul>
+<li>If you need to get the list of specifications for known test files, use <a href="#getmodulespecifications"><code>getModuleSpecifications</code></a> instead.</li>
+<li>If you need to get the list of all possible test files, use <a href="#globtestspecifications"><code>globTestSpecifications</code></a>.</li>
+</ul>
+</div><h2 id="mergereports"><a class="anchor" href="#mergereports">#</a>mergeReports</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mergeReports</span>(<span class="hljs-params"><span class="hljs-attr">directory</span>?: <span class="hljs-built_in">string</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TestRunResult</span>&gt;</code></pre></div>
+<p>Merge reports from multiple runs located in the specified directory (value from <code>--merge-reports</code> if not specified). This value can also be set on <code>config.mergeReports</code> (by default, it will read <code>.vitest/blob/</code> folder).</p>
+<p>Note that the <code>directory</code> will always be resolved relative to the working directory.</p>
+<p>This method is called automatically by <a href="../../guide/advanced/tests.html"><code>startVitest</code></a> if <code>config.mergeReports</code> is set.</p>
+<h2 id="collect"><a class="anchor" href="#collect">#</a>collect</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">collect</span>(<span class="hljs-params">
+  <span class="hljs-attr">filters</span>?: <span class="hljs-built_in">string</span>[],
+  <span class="hljs-attr">options</span>?: {
+    staticParse?: <span class="hljs-built_in">boolean</span>
+    staticParseConcurrency?: <span class="hljs-built_in">number</span>
+  }
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TestRunResult</span>&gt;</code></pre></div>
+<p>Based on <code>staticParse</code>, this will either statically analyse test files to collect them (the default) or run the code without executing test callbacks. <code>collect</code> returns unhandled errors and an array of <a href="test-module.html">test modules</a>. It accepts string filters to match the test files - these are the same filters that <a href="../../guide/filtering.html#cli">CLI supports</a>.</p>
+<p>This method resolves tests specifications based on the config <code>include</code>, <code>exclude</code>, and <code>includeSource</code> values. Read more at <a href="test-project.html#globtestfiles"><code>project.globTestFiles</code></a>. If <code>--changed</code> flag was specified, the list will be filtered to include only files that changed.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that since Vitest 5, the tests are collected by static analysis by default. If disabled via the second option, Vitest will run every test file in isolation, just like it runs regular tests. This would make this method very slow, unless you disable isolation manually before collecting tests.</p>
+</div><h2 id="start"><a class="anchor" href="#start">#</a>start</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">start</span>(<span class="hljs-params"><span class="hljs-attr">filters</span>?: <span class="hljs-built_in">string</span>[]</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TestRunResult</span>&gt;</code></pre></div>
+<p>Initialize reporters, the coverage provider, and run tests. This method accepts string filters to match the test files - these are the same filters that <a href="../../guide/filtering.html#cli">CLI supports</a>.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This method should not be called if <a href="#standalone"><code>vitest.standalone()</code></a> is also invoked. Use <a href="#runtestspecifications"><code>runTestSpecifications</code></a> or <a href="#reruntestspecifications"><code>rerunTestSpecifications</code></a> instead if you need to run tests after Vitest was initialised.</p>
+</div><p>This method is called automatically by <a href="../../guide/advanced/tests.html"><code>startVitest</code></a> if <code>config.mergeReports</code> and <code>config.standalone</code> are not set.</p>
+<h2 id="standalone"><a class="anchor" href="#standalone">#</a>standalone <Version type="experimental">4.1.1</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">standalone</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<ul>
+<li><strong>Alias:</strong> <code>init</code> <Deprecated /></li>
+</ul>
+<p>Initialize reporters and the coverage provider. This method doesn&#39;t run any tests. If the <code>--watch</code> flag is provided, Vitest will still run changed tests even if this method was not called.</p>
+<p>Internally, this method is called only if <a href="../../guide/cli.html#standalone"><code>--standalone</code></a> flag is enabled.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This method should not be called if <a href="#start"><code>vitest.start()</code></a> is also invoked.</p>
+</div><p>This method is called automatically by <a href="../../guide/advanced/tests.html"><code>startVitest</code></a> if <code>config.standalone</code> is set.</p>
+<h2 id="getmodulespecifications"><a class="anchor" href="#getmodulespecifications">#</a>getModuleSpecifications</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getModuleSpecifications</span>(<span class="hljs-params"><span class="hljs-attr">moduleId</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-title class_">TestSpecification</span>[]</code></pre></div>
+<p>Returns a list of test specifications related to the module ID. The ID should already be resolved to an absolute file path. If ID doesn&#39;t match <code>include</code> or <code>includeSource</code> patterns, the returned array will be empty.</p>
+<p>This method can return already cached specifications based on the <code>moduleId</code> and <code>pool</code>. But note that <a href="test-project.html#createspecification"><code>project.createSpecification</code></a> always returns a new instance and it&#39;s not cached automatically. However, specifications are automatically cached when <a href="#runtestspecifications"><code>runTestSpecifications</code></a> is called.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>As of Vitest 3, this method uses a cache to check if the file is a test. To make sure that the cache is not empty, call <a href="#globtestspecifications"><code>globTestSpecifications</code></a> at least once.</p>
+</div><h2 id="clearspecificationscache"><a class="anchor" href="#clearspecificationscache">#</a>clearSpecificationsCache</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">clearSpecificationsCache</span>(<span class="hljs-params"><span class="hljs-attr">moduleId</span>?: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Vitest automatically caches test specifications for each file when <a href="#globtestspecifications"><code>globTestSpecifications</code></a> or <a href="#runtestspecifications"><code>runTestSpecifications</code></a> is called. This method clears the cache for the given file or the whole cache altogether depending on the first argument.</p>
+<h2 id="runtestspecifications"><a class="anchor" href="#runtestspecifications">#</a>runTestSpecifications</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">runTestSpecifications</span>(<span class="hljs-params">
+  <span class="hljs-attr">specifications</span>: <span class="hljs-title class_">TestSpecification</span>[],
+  allTestsRun = <span class="hljs-literal">false</span>
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TestRunResult</span>&gt;</code></pre></div>
+<p>This method runs every test based on the received <a href="test-specification.html">specifications</a>. The second argument, <code>allTestsRun</code>, is used by the coverage provider to determine if it needs to include uncovered files in report.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This method doesn&#39;t trigger <code>onWatcherRerun</code>, <code>onWatcherStart</code> and <code>onTestsRerun</code> callbacks. If you are rerunning tests based on the file change, consider using <a href="#reruntestspecifications"><code>rerunTestSpecifications</code></a> instead.</p>
+</div><h2 id="reruntestspecifications"><a class="anchor" href="#reruntestspecifications">#</a>rerunTestSpecifications</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">rerunTestSpecifications</span>(<span class="hljs-params">
+  <span class="hljs-attr">specifications</span>: <span class="hljs-title class_">TestSpecification</span>[],
+  allTestsRun = <span class="hljs-literal">false</span>
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TestRunResult</span>&gt;</code></pre></div>
+<p>This method emits <code>reporter.onWatcherRerun</code> and <code>onTestsRerun</code> events, then it runs tests with <a href="#runtestspecifications"><code>runTestSpecifications</code></a>. If there were no errors in the main process, it will emit <code>reporter.onWatcherStart</code> event.</p>
+<h2 id="runtestfiles"><a class="anchor" href="#runtestfiles">#</a>runTestFiles <Version>4.1.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">runTestFiles</span>(<span class="hljs-params">
+  <span class="hljs-attr">filepaths</span>: <span class="hljs-built_in">string</span>[],
+  allTestsRun = <span class="hljs-literal">false</span>
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TestRunResult</span>&gt;</code></pre></div>
+<p>This automatically creates specifications to run based on filepaths filters.</p>
+<p>This is different from <a href="#start"><code>start</code></a> because it does not create a coverage provider, trigger <code>onInit</code> and <code>onWatcherStart</code> events, or throw an error if there are no files to run (in this case, the function will return empty arrays without triggering a test run).</p>
+<p>This function accepts the same filters as <a href="#start"><code>start</code></a> and the CLI.</p>
+<h2 id="updatesnapshot"><a class="anchor" href="#updatesnapshot">#</a>updateSnapshot</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">updateSnapshot</span>(<span class="hljs-params"><span class="hljs-attr">files</span>?: <span class="hljs-built_in">string</span>[]</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TestRunResult</span>&gt;</code></pre></div>
+<p>Update snapshots in specified files. If no files are provided, it will update files with failed tests and obsolete snapshots.</p>
+<h2 id="collecttests"><a class="anchor" href="#collecttests">#</a>collectTests</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">collectTests</span>(<span class="hljs-params">
+  <span class="hljs-attr">specifications</span>: <span class="hljs-title class_">TestSpecification</span>[]
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TestRunResult</span>&gt;</code></pre></div>
+<p>Execute test files without running test callbacks. <code>collectTests</code> returns unhandled errors and an array of <a href="test-module.html">test modules</a>.</p>
+<p>This method works exactly the same as <a href="#collect"><code>collect</code></a>, but you need to provide test specifications yourself.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that Vitest doesn&#39;t use static analysis to collect tests. Vitest will run every test file in isolation, just like it runs regular tests.</p>
+<p>This makes this method very slow, unless you disable isolation before collecting tests.</p>
+</div><h2 id="cancelcurrentrun"><a class="anchor" href="#cancelcurrentrun">#</a>cancelCurrentRun</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">cancelCurrentRun</span>(<span class="hljs-params"><span class="hljs-attr">reason</span>: <span class="hljs-title class_">CancelReason</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This method will gracefully cancel all ongoing tests. It will stop the on-going tests and will not run tests that were scheduled to run but haven&#39;t started yet.</p>
+<h2 id="setglobaltestnamepattern"><a class="anchor" href="#setglobaltestnamepattern">#</a>setGlobalTestNamePattern</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">setGlobalTestNamePattern</span>(<span class="hljs-params"><span class="hljs-attr">pattern</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>This methods overrides the global <a href="../../config/testnamepattern.html">test name pattern</a>.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This method doesn&#39;t start running any tests. To run tests with updated pattern, call <a href="#runtestspecifications"><code>runTestSpecifications</code></a>.</p>
+</div><h2 id="getglobaltestnamepattern"><a class="anchor" href="#getglobaltestnamepattern">#</a>getGlobalTestNamePattern <Version>4.0.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getGlobalTestNamePattern</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">RegExp</span> | <span class="hljs-literal">undefined</span></code></pre></div>
+<p>Returns the regexp used for the global test name pattern.</p>
+<h2 id="resetglobaltestnamepattern"><a class="anchor" href="#resetglobaltestnamepattern">#</a>resetGlobalTestNamePattern</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">resetGlobalTestNamePattern</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>This methods resets the <a href="../../config/testnamepattern.html">test name pattern</a>. It means Vitest won&#39;t skip any tests now.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This method doesn&#39;t start running any tests. To run tests without a pattern, call <a href="#runtestspecifications"><code>runTestSpecifications</code></a>.</p>
+</div><h2 id="enablesnapshotupdate"><a class="anchor" href="#enablesnapshotupdate">#</a>enableSnapshotUpdate</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">enableSnapshotUpdate</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Enable the mode that allows updating snapshots when running tests. Every test that runs after this method is called will update snapshots. To disable the mode, call <a href="#resetsnapshotupdate"><code>resetSnapshotUpdate</code></a>.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This method doesn&#39;t start running any tests. To update snapshots, run tests with <a href="#runtestspecifications"><code>runTestSpecifications</code></a>.</p>
+</div><h2 id="resetsnapshotupdate"><a class="anchor" href="#resetsnapshotupdate">#</a>resetSnapshotUpdate</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">resetSnapshotUpdate</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Disable the mode that allows updating snapshots when running tests. This method doesn&#39;t start running any tests.</p>
+<h2 id="invalidatefile"><a class="anchor" href="#invalidatefile">#</a>invalidateFile</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">invalidateFile</span>(<span class="hljs-params"><span class="hljs-attr">filepath</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>This method invalidates the file in the cache of every project. It is mostly useful if you rely on your own watcher because Vite&#39;s cache persist in memory.</p>
+<div class="box box-danger"><div class="box-title">🛑 Danger</div><p>If you disable Vitest&#39;s watcher but keep Vitest running, it is important to manually clear the cache with this method because there is no way to disable the cache. This method will also invalidate file&#39;s importers.</p>
+</div><h2 id="import"><a class="anchor" href="#import">#</a>import</h2>
+<!--@include: ./import-example.md--><p>Import a file using Vite module runner. The file will be transformed by Vite with the global config and executed in a separate context. Note that <code>moduleId</code> will be relative to the <code>config.root</code>.</p>
+<div class="box box-danger"><div class="box-title">🛑 Danger</div><p><code>project.import</code> reuses Vite&#39;s module graph, so importing the same module using a regular import will return a different module:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> staticExample <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.js&#x27;</span>
+<span class="hljs-keyword">const</span> dynamicExample = <span class="hljs-keyword">await</span> vitest.<span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./example.js&#x27;</span>)
+
+dynamicExample !== staticExample <span class="hljs-comment">// ✅</span></code></pre></div>
+</div><div class="box box-info"><div class="box-title">ℹ️ Info</div><p>Internally, Vitest uses this method to import global setups, custom coverage providers, and custom reporters, meaning all of them share the same module graph as long as they belong to the same Vite server.</p>
+</div><h2 id="close"><a class="anchor" href="#close">#</a>close</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">close</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Closes all projects and their associated resources. This can only be called once; the closing promise is cached until the server restarts.</p>
+<h2 id="exit"><a class="anchor" href="#exit">#</a>exit</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">exit</span>(<span class="hljs-params">force = <span class="hljs-literal">false</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Closes all projects and exit the process. If <code>force</code> is set to <code>true</code>, the process will exit immediately after closing the projects.</p>
+<p>This method will also forcefully call <code>process.exit()</code> if the process is still active after <a href="../../config/teardowntimeout.html"><code>config.teardownTimeout</code></a> milliseconds.</p>
+<h2 id="shouldkeepserver"><a class="anchor" href="#shouldkeepserver">#</a>shouldKeepServer</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">shouldKeepServer</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">boolean</span></code></pre></div>
+<p>This method will return <code>true</code> if the server should be kept running after the tests are done. This usually means that the <code>watch</code> mode was enabled.</p>
+<h2 id="onserverrestart"><a class="anchor" href="#onserverrestart">#</a>onServerRestart</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">onServerRestart</span>(<span class="hljs-params"><span class="hljs-attr">fn</span>: <span class="hljs-title class_">OnServerRestartHandler</span></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Register a handler that will be called when the server is restarted due to a config change.</p>
+<h2 id="oncancel"><a class="anchor" href="#oncancel">#</a>onCancel</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">onCancel</span>(<span class="hljs-params"><span class="hljs-attr">fn</span>: (reason: CancelReason) =&gt; <span class="hljs-title class_">Awaitable</span>&lt;<span class="hljs-built_in">void</span>&gt;</span>): <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">void</span></code></pre></div>
+<p>Register a handler that will be called when the test run is cancelled with <a href="#cancelcurrentrun"><code>vitest.cancelCurrentRun</code></a>.</p>
+<p>Since 4.0.10, <code>onCancel</code> experimentally returns a teardown function that will remove the listener. Since 4.1.0 this behaviour is considered stable.</p>
+<h2 id="onclose"><a class="anchor" href="#onclose">#</a>onClose</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">onClose</span>(<span class="hljs-params"><span class="hljs-attr">fn</span>: () =&gt; <span class="hljs-title class_">Awaitable</span>&lt;<span class="hljs-built_in">void</span>&gt;</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Register a handler that will be called when the server is closed.</p>
+<h2 id="ontestsrerun"><a class="anchor" href="#ontestsrerun">#</a>onTestsRerun</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">onTestsRerun</span>(<span class="hljs-params"><span class="hljs-attr">fn</span>: <span class="hljs-title class_">OnTestsRerunHandler</span></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Register a handler that will be called when the tests are rerunning. The tests can rerun when <a href="#reruntestspecifications"><code>rerunTestSpecifications</code></a> is called manually or when a file is changed and the built-in watcher schedules a rerun.</p>
+<h2 id="onfilterwatchedspecification"><a class="anchor" href="#onfilterwatchedspecification">#</a>onFilterWatchedSpecification</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">onFilterWatchedSpecification</span>(<span class="hljs-params">
+  <span class="hljs-attr">fn</span>: (specification: TestSpecification) =&gt; <span class="hljs-built_in">boolean</span>
+</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Register a handler that will be called when a file is changed. This callback should return <code>true</code> or <code>false</code>, indicating whether the test file needs to be rerun.</p>
+<p>With this method, you can hook into the default watcher logic to delay or discard tests that the user doesn&#39;t want to keep track of at the moment:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> <span class="hljs-attr">continuesTests</span>: <span class="hljs-built_in">string</span>[] = []
+
+myCustomWrapper.<span class="hljs-title function_">onContinuesRunEnabled</span>(<span class="hljs-function"><span class="hljs-params">testItem</span> =&gt;</span>
+  continuesTests.<span class="hljs-title function_">push</span>(item.<span class="hljs-property">fsPath</span>)
+)
+
+vitest.<span class="hljs-title function_">onFilterWatchedSpecification</span>(<span class="hljs-function"><span class="hljs-params">specification</span> =&gt;</span>
+  continuesTests.<span class="hljs-title function_">includes</span>(specification.<span class="hljs-property">moduleId</span>)
+)</code></pre></div>
+<p>Vitest can create different specifications for the same file depending on the <code>pool</code> or <code>locations</code> options, so do not rely on the reference. Vitest can also return cached specification from <a href="#getmodulespecifications"><code>vitest.getModuleSpecifications</code></a> - the cache is based on the <code>moduleId</code> and <code>pool</code>. Note that <a href="test-project.html#createspecification"><code>project.createSpecification</code></a> always returns a new instance.</p>
+<h2 id="matchesprojectfilter"><a class="anchor" href="#matchesprojectfilter">#</a>matchesProjectFilter <Version>3.1.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">matchesProjectFilter</span>(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">boolean</span></code></pre></div>
+<p>Check if the name matches the current <a href="../../guide/cli.html#project">project filter</a>. If there is no project filter, this will always return <code>true</code>.</p>
+<p>It is not possible to programmatically change the <code>--project</code> CLI option.</p>
+<h2 id="waitfortestrunend"><a class="anchor" href="#waitfortestrunend">#</a>waitForTestRunEnd <Version>4.0.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">waitForTestRunEnd</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>If there is a test run happening, returns a promise that will resolve when the test run is finished.</p>
+<h2 id="createcoverageprovider"><a class="anchor" href="#createcoverageprovider">#</a>createCoverageProvider <Version>4.0.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createCoverageProvider</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">CoverageProvider</span> | <span class="hljs-literal">null</span>&gt;</code></pre></div>
+<p>Creates a coverage provider if <code>coverage</code> is enabled in the config. This is done automatically if you are running tests with <a href="#start"><code>start</code></a> or <a href="#standalone"><code>standalone</code></a> methods.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This method will also clean all previous reports if <a href="../../config/coverage.html#coverage-clean"><code>coverage.clean</code></a> is not set to <code>false</code>.</p>
+</div><h2 id="enablecoverage"><a class="anchor" href="#enablecoverage">#</a>enableCoverage <Version>4.0.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">enableCoverage</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This method enables coverage for tests that run after this call. <code>enableCoverage</code> doesn&#39;t run any tests; it only sets up Vitest to collect coverage.</p>
+<p>It creates a new coverage provider if one doesn&#39;t already exist.</p>
+<h2 id="disablecoverage"><a class="anchor" href="#disablecoverage">#</a>disableCoverage <Version>4.0.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">disableCoverage</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>This method disables coverage collection for tests that run afterwards.</p>
+<h2 id="getseed"><a class="anchor" href="#getseed">#</a>getSeed <Version>4.0.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getSeed</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">number</span> | <span class="hljs-literal">null</span></code></pre></div>
+<p>Returns the seed, if tests are running in a random order.</p>
+<h2 id="parsespecification"><a class="anchor" href="#parsespecification">#</a>experimental_parseSpecification <Version type="experimental">4.0.0</Version> <Experimental /></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">experimental_parseSpecification</span>(<span class="hljs-params">
+  <span class="hljs-attr">specification</span>: <span class="hljs-title class_">TestSpecification</span>
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TestModule</span>&gt;</code></pre></div>
+<p>This function will collect all tests inside the file without running it. It uses rollup&#39;s <code>parseAst</code> function on top of Vite&#39;s <code>ssrTransform</code> to statically analyse the file and collect all tests that it can.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If Vitest could not analyse the name of the test, it will inject a <code>dynamic: true</code> property to the test or a suite. The <code>id</code> will also have a postfix with <code>-dynamic</code> to not break tests that were collected properly.</p>
+<p>Vitest always injects this property in tests with <code>for</code> or <code>each</code> modifier or tests with a dynamic name (like, <code>hello ${property}</code> or <code>&#39;hello&#39; + ${property}</code>). Vitest will still assign a name to the test, but it cannot be used to filter tests.</p>
+<p>There is nothing Vitest can do to make it possible to filter dynamic tests, but you can turn a test with <code>for</code> or <code>each</code> modifier into a name pattern with <code>escapeTestName</code> function:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { escapeTestName } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-comment">// turns into /hello, .+?/</span>
+<span class="hljs-keyword">const</span> escapedPattern = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(<span class="hljs-title function_">escapeTestName</span>(<span class="hljs-string">&#x27;hello, %s&#x27;</span>, <span class="hljs-literal">true</span>))</code></pre></div>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Vitest will only collect tests defined in the file. It will never follow imports to other files.</p>
+<p>Vitest collects all <code>it</code>, <code>test</code>, <code>suite</code> and <code>describe</code> definitions even if they were not imported from the <code>vitest</code> entry point.</p>
+</div><h2 id="parsespecifications"><a class="anchor" href="#parsespecifications">#</a>parseSpecifications <Version>5.0.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">parseSpecifications</span>(<span class="hljs-params">
+  <span class="hljs-attr">specifications</span>: <span class="hljs-title class_">TestSpecification</span>[],
+  <span class="hljs-attr">options</span>?: {
+    concurrency?: <span class="hljs-built_in">number</span>
+  }
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TestModule</span>[]&gt;</code></pre></div>
+<p>This method will <a href="#parsespecification">collect tests</a> from an array of specifications. By default, Vitest will run only <code>os.availableParallelism()</code> number of specifications at a time to reduce the potential performance degradation. You can specify a different number in a second argument.</p>
+<h2 id="clearcache"><a class="anchor" href="#clearcache">#</a>clearCache <Version>5.0.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">clearCache</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Deletes all Vitest caches, including <a href="../../config/fsmodulecache.html"><code>fsModuleCache</code></a>.</p>
+<p>This was available since Vitest 4.0.11 as experimental <code>experimental_clearCache</code> method.</p>
+<h2 id="getsourcemodulediagnostic"><a class="anchor" href="#getsourcemodulediagnostic">#</a>experimental_getSourceModuleDiagnostic <Version type="experimental">4.0.15</Version> <Experimental /></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">experimental_getSourceModuleDiagnostic</span>(<span class="hljs-params">
+  <span class="hljs-attr">moduleId</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">testModule</span>?: <span class="hljs-title class_">TestModule</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">SourceModuleDiagnostic</span>&gt;</code></pre></div>
+<details class="box"><summary>Types</summary><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ModuleDefinitionLocation</span> {
+  <span class="hljs-attr">line</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-attr">column</span>: <span class="hljs-built_in">number</span>
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">SourceModuleLocations</span> {
+  <span class="hljs-attr">modules</span>: <span class="hljs-title class_">ModuleDefinitionDiagnostic</span>[]
+  <span class="hljs-attr">untracked</span>: <span class="hljs-title class_">ModuleDefinitionDiagnostic</span>[]
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ModuleDefinitionDiagnostic</span> {
+  <span class="hljs-attr">start</span>: <span class="hljs-title class_">ModuleDefinitionLocation</span>
+  <span class="hljs-attr">end</span>: <span class="hljs-title class_">ModuleDefinitionLocation</span>
+  <span class="hljs-attr">startIndex</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-attr">endIndex</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-attr">url</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">resolvedId</span>: <span class="hljs-built_in">string</span>
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ModuleDefinitionDurationsDiagnostic</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">ModuleDefinitionDiagnostic</span> {
+  <span class="hljs-attr">selfTime</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-attr">totalTime</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-attr">external</span>?: <span class="hljs-built_in">boolean</span>
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">UntrackedModuleDefinitionDiagnostic</span> {
+  <span class="hljs-attr">url</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">resolvedId</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">selfTime</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-attr">totalTime</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-attr">external</span>?: <span class="hljs-built_in">boolean</span>
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">SourceModuleDiagnostic</span> {
+  <span class="hljs-attr">modules</span>: <span class="hljs-title class_">ModuleDefinitionDurationsDiagnostic</span>[]
+  <span class="hljs-attr">untrackedModules</span>: <span class="hljs-title class_">UntrackedModuleDefinitionDiagnostic</span>[]
+}</code></pre></div>
+</details><p>Returns module&#39;s diagnostic. If <a href="test-module.html"><code>testModule</code></a> is not provided, <code>selfTime</code> and <code>totalTime</code> will be aggregated across all tests that were running the last time. If the module was not transformed or executed, the diagnostic will be empty.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>At the moment, the <a href="../../guide/browser/index.html">browser</a> modules are not supported.</p>
+</div><h2 id="createreport"><a class="anchor" href="#createreport">#</a>createReport <Version>5.0.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createReport</span>(<span class="hljs-params"><span class="hljs-attr">scope</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-title class_">Report</span></code></pre></div>
+<p>Creates a report that is limited to the given scope. <code>Report</code> follows Vitest&#39;s rules around <a href="../../guide/advanced/reporters.html#storing-artifacts-on-file-system">Storing artifacts on file system</a>.</p>
+<p><code>Report</code> provides collection of utilities for writing test results, temporary files and other artifacts on the file system. It&#39;s especially intended for third party integrations like custom reporters.</p>
+<p>All operations of <code>Report</code> are limited to given <code>scope</code>. A single report cannot interfere with other reports. Internally Vitest creates <code>.vitest</code> directory where each <code>scope</code> creates their own directory. This convention of <code>.vitest</code> directory reduces the amount of entries end-users need to specify in their <code>.gitignore</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">Report</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> scope = <span class="hljs-string">&#x27;example-yaml-reporter&#x27;</span>
+
+<span class="hljs-comment">// Automatically creates `&lt;project-root&gt;/.vitest/example-yaml-reporter/`</span>
+<span class="hljs-comment">// directory if it does not exist already</span>
+<span class="hljs-keyword">const</span> <span class="hljs-attr">report</span>: <span class="hljs-title class_">Report</span> = vitest.<span class="hljs-title function_">createReport</span>(scope)</code></pre></div>
+<h3 id="report-root"><a class="anchor" href="#report-root">#</a>Report.root</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> <span class="hljs-attr">root</span>: <span class="hljs-built_in">string</span></code></pre></div>
+<p>The root directory for this scope.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> report = vitest.<span class="hljs-title function_">createReport</span>(<span class="hljs-string">&#x27;my-json-reporter&#x27;</span>)
+
+<span class="hljs-comment">// Is &lt;project-root&gt;/.vitest/my-json-reporter</span>
+<span class="hljs-keyword">const</span> root = report.<span class="hljs-property">root</span></code></pre></div>
+<h3 id="report-clean"><a class="anchor" href="#report-clean">#</a>Report.clean</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">clean</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Clean up the report directory for this scope.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> report = vitest.<span class="hljs-title function_">createReport</span>(<span class="hljs-string">&#x27;my-json-reporter&#x27;</span>)
+
+<span class="hljs-comment">// Removes everything inside &lt;project-root&gt;/.vitest/my-json-reporter/</span>
+<span class="hljs-keyword">await</span> report.<span class="hljs-title function_">clean</span>()</code></pre></div>
+<h3 id="report-writefile"><a class="anchor" href="#report-writefile">#</a>Report.writeFile</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">writeFile</span>(<span class="hljs-params">
+  <span class="hljs-attr">filename</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">content</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">Uint8Array</span>,
+  <span class="hljs-attr">encoding</span>?: <span class="hljs-title class_">BufferEncoding</span>
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Write a file to the report directory for this scope. By default the file will be written with UTF-8 encoding. The filename is relative to the scope directory.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> report = vitest.<span class="hljs-title function_">createReport</span>(<span class="hljs-string">&#x27;my-json-reporter&#x27;</span>)
+
+<span class="hljs-comment">// Writes file to .vitest/my-json-reporter/test-report.json</span>
+<span class="hljs-keyword">await</span> report.<span class="hljs-title function_">writeFile</span>(<span class="hljs-string">&#x27;test-report.json&#x27;</span>, <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(results))</code></pre></div>
+<h3 id="report-readfile"><a class="anchor" href="#report-readfile">#</a>Report.readFile</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">readFile</span>(<span class="hljs-params"><span class="hljs-attr">filename</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">encoding</span>?: <span class="hljs-title class_">BufferEncoding</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">string</span>&gt;</code></pre></div>
+<p>Read a file from the report directory for this scope.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> report = vitest.<span class="hljs-title function_">createReport</span>(<span class="hljs-string">&#x27;my-json-reporter&#x27;</span>)
+
+<span class="hljs-comment">// Reads file from .vitest/my-json-reporter/test-report.json</span>
+<span class="hljs-keyword">const</span> <span class="hljs-attr">content</span>: <span class="hljs-built_in">string</span> = <span class="hljs-keyword">await</span> report.<span class="hljs-title function_">readFile</span>(<span class="hljs-string">&#x27;test-report.json&#x27;</span>)</code></pre></div>
+<h3 id="report-readdir"><a class="anchor" href="#report-readdir">#</a>Report.readdir</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">readdir</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">string</span>[]&gt;</code></pre></div>
+<p>Read contents of the report directory for this scope.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> report = vitest.<span class="hljs-title function_">createReport</span>(<span class="hljs-string">&#x27;my-json-reporter&#x27;</span>)
+
+<span class="hljs-comment">// Reads contents from .vitest/my-json-reporter</span>
+<span class="hljs-keyword">const</span> <span class="hljs-attr">filenames</span>: <span class="hljs-built_in">string</span>[] = <span class="hljs-keyword">await</span> report.<span class="hljs-title function_">readdir</span>()</code></pre></div>
+<h3 id="report-delete"><a class="anchor" href="#report-delete">#</a>Report.delete</h3>
+<!-- eslint-skip -->
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">delete</span>(<span class="hljs-params"><span class="hljs-attr">filename</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Delete a file from the report directory for this scope.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> report = vitest.<span class="hljs-title function_">createReport</span>(<span class="hljs-string">&#x27;my-json-reporter&#x27;</span>)
+
+<span class="hljs-comment">// Deletes file from .vitest/my-json-reporter/test-report.json</span>
+<span class="hljs-keyword">await</span> report.<span class="hljs-title function_">delete</span>(<span class="hljs-string">&#x27;test-report.json&#x27;</span>)</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#mode">mode</a><a class="toc-2" href="#config">config</a><a class="toc-2" href="#vite">vite</a><a class="toc-2" href="#state">state</a><a class="toc-2" href="#snapshot">snapshot</a><a class="toc-2" href="#cache">cache</a><a class="toc-2" href="#watcher">watcher 4.0.0</a><a class="toc-2" href="#projects">projects</a><a class="toc-2" href="#getrootproject">getRootProject</a><a class="toc-2" href="#provide">provide</a><a class="toc-2" href="#getprovidedcontext">getProvidedContext</a><a class="toc-2" href="#getprojectbyname">getProjectByName</a><a class="toc-2" href="#globtestspecifications">globTestSpecifications</a><a class="toc-2" href="#getrelevanttestspecifications">getRelevantTestSpecifications</a><a class="toc-2" href="#mergereports">mergeReports</a><a class="toc-2" href="#collect">collect</a><a class="toc-2" href="#start">start</a><a class="toc-2" href="#standalone">standalone 4.1.1</a><a class="toc-2" href="#getmodulespecifications">getModuleSpecifications</a><a class="toc-2" href="#clearspecificationscache">clearSpecificationsCache</a><a class="toc-2" href="#runtestspecifications">runTestSpecifications</a><a class="toc-2" href="#reruntestspecifications">rerunTestSpecifications</a><a class="toc-2" href="#runtestfiles">runTestFiles 4.1.0</a><a class="toc-2" href="#updatesnapshot">updateSnapshot</a><a class="toc-2" href="#collecttests">collectTests</a><a class="toc-2" href="#cancelcurrentrun">cancelCurrentRun</a><a class="toc-2" href="#setglobaltestnamepattern">setGlobalTestNamePattern</a><a class="toc-2" href="#getglobaltestnamepattern">getGlobalTestNamePattern 4.0.0</a><a class="toc-2" href="#resetglobaltestnamepattern">resetGlobalTestNamePattern</a><a class="toc-2" href="#enablesnapshotupdate">enableSnapshotUpdate</a><a class="toc-2" href="#resetsnapshotupdate">resetSnapshotUpdate</a><a class="toc-2" href="#invalidatefile">invalidateFile</a><a class="toc-2" href="#import">import</a><a class="toc-2" href="#close">close</a><a class="toc-2" href="#exit">exit</a><a class="toc-2" href="#shouldkeepserver">shouldKeepServer</a><a class="toc-2" href="#onserverrestart">onServerRestart</a><a class="toc-2" href="#oncancel">onCancel</a><a class="toc-2" href="#onclose">onClose</a><a class="toc-2" href="#ontestsrerun">onTestsRerun</a><a class="toc-2" href="#onfilterwatchedspecification">onFilterWatchedSpecification</a><a class="toc-2" href="#matchesprojectfilter">matchesProjectFilter 3.1.0</a><a class="toc-2" href="#waitfortestrunend">waitForTestRunEnd 4.0.0</a><a class="toc-2" href="#createcoverageprovider">createCoverageProvider 4.0.0</a><a class="toc-2" href="#enablecoverage">enableCoverage 4.0.0</a><a class="toc-2" href="#disablecoverage">disableCoverage 4.0.0</a><a class="toc-2" href="#getseed">getSeed 4.0.0</a><a class="toc-2" href="#parsespecification">experimental_parseSpecification 4.0.0</a><a class="toc-2" href="#parsespecifications">parseSpecifications 5.0.0</a><a class="toc-2" href="#clearcache">clearCache 5.0.0</a><a class="toc-2" href="#getsourcemodulediagnostic">experimental_getSourceModuleDiagnostic 4.0.15</a><a class="toc-2" href="#createreport">createReport 5.0.0</a><a class="toc-3" href="#report-root">Report.root</a><a class="toc-3" href="#report-clean">Report.clean</a><a class="toc-3" href="#report-writefile">Report.writeFile</a><a class="toc-3" href="#report-readfile">Report.readFile</a><a class="toc-3" href="#report-readdir">Report.readdir</a><a class="toc-3" href="#report-delete">Report.delete</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

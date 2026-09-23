@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test Tags | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/test-tags  <a class="ext small" href="https://vitest.dev/guide/test-tags">version en ligne</a></div>
+<h1 id="test-tags"><a class="anchor" href="#test-tags">#</a>Test Tags <Version>4.1.0</Version></h1>
+<p><a href="../config/tags.html"><code>Tags</code></a> let you label tests so you can filter what runs and override their options when needed.</p>
+<h2 id="why-tags"><a class="anchor" href="#why-tags">#</a>Why tags</h2>
+<p>Tags become useful once a suite has groups of tests that share runner options, like a longer timeout for database queries or retries for integration tests on CI. Repeating those options on every relevant test by hand is brittle, and the categories often don&#39;t line up with file paths anyway, so splitting them out by file isn&#39;t an option. Flaky tests in particular tend to accumulate wherever the bugs landed, not in a <code>flaky/</code> folder.</p>
+<p>A tag captures that kind of category: the definition holds the shared options, and any test marked with the tag inherits them. Those tag names can also be combined into expressions: <code>--tags-filter=&#39;db &amp;&amp; !flaky&#39;</code> runs database tests that aren&#39;t marked flaky. <a href="#checking-tags-filter-at-runtime"><code>TestRunner.matchesTags</code></a> exposes the same expression at runtime, useful when <code>globalSetup</code> does expensive work that should be skipped if no tagged tests are scheduled.</p>
+<h2 id="when-to-reach-for-tags"><a class="anchor" href="#when-to-reach-for-tags">#</a>When to reach for tags</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>If you want to…</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Apply timeout/retry to a <em>category</em> of tests</td>
+<td><strong>Tags</strong></td>
+</tr>
+<tr>
+<td>Mark cross-cutting categories (<code>flaky</code>, <code>slow</code>, <code>frontend</code>) scattered across many files</td>
+<td><strong>Tags</strong></td>
+</tr>
+<tr>
+<td>Conditionally run expensive setup based on what&#39;s filtered</td>
+<td><strong>Tags</strong> + <a href="#checking-tags-filter-at-runtime"><code>matchesTags</code></a></td>
+</tr>
+<tr>
+<td>Run a subset by test name match</td>
+<td><a href="../config/testnamepattern.html"><code>-t</code> / <code>testNamePattern</code></a></td>
+</tr>
+<tr>
+<td>Run a subset by file path</td>
+<td><code>--include</code> / <code>--exclude</code></td>
+</tr>
+<tr>
+<td>Run different files with different <em>runner settings</em> (isolation, pool, environment)</td>
+<td><a href="projects.html">Test Projects</a></td>
+</tr>
+</tbody></table></div>
+<p>You can combine projects and tags. A test that sits in a <code>Sequential</code> project can also carry a <code>flaky</code> tag, and Vitest applies both.</p>
+<h2 id="defining-tags"><a class="anchor" href="#defining-tags">#</a>Defining Tags</h2>
+<p>Tags must be defined in your configuration file. By default, Vitest does not provide any built-in tags. If a test uses a tag that isn&#39;t defined in the config, the test runner will throw an error. This prevents unexpected behavior from mistyped tag names. You can disable this check with the <a href="../config/stricttags.html"><code>strictTags</code></a> option.</p>
+<p>You must define a <code>name</code> of the tag, and you may define additional options that will be applied to every test marked with the tag, e.g., a <code>timeout</code>, or <code>retry</code>. For the full list of available options, see <a href="../config/tags.html"><code>tags</code></a>.</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">tags</span>: [
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;frontend&#x27;</span>,
+        <span class="hljs-attr">description</span>: <span class="hljs-string">&#x27;Tests written for frontend.&#x27;</span>,
+      },
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;backend&#x27;</span>,
+        <span class="hljs-attr">description</span>: <span class="hljs-string">&#x27;Tests written for backend.&#x27;</span>,
+      },
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;db&#x27;</span>,
+        <span class="hljs-attr">description</span>: <span class="hljs-string">&#x27;Tests for database queries.&#x27;</span>,
+        <span class="hljs-attr">timeout</span>: <span class="hljs-number">60_000</span>,
+      },
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;flaky&#x27;</span>,
+        <span class="hljs-attr">description</span>: <span class="hljs-string">&#x27;Flaky CI tests.&#x27;</span>,
+        <span class="hljs-attr">retry</span>: process.<span class="hljs-property">env</span>.<span class="hljs-property">CI</span> ? <span class="hljs-number">3</span> : <span class="hljs-number">0</span>,
+        <span class="hljs-attr">timeout</span>: <span class="hljs-number">30_000</span>,
+        <span class="hljs-attr">priority</span>: <span class="hljs-number">1</span>,
+      },
+    ],
+  },
+})</code></pre></div>
+<p>If you are using TypeScript, you can enforce what tags are available by augmenting the <code>TestTags</code> type with a property that contains a union of strings (make sure this file is included by your <code>tsconfig</code>):</p>
+<div class="code"><div class="code-title">vitest.shims.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">TestTags</span> {
+    <span class="hljs-attr">tags</span>:
+      | <span class="hljs-string">&#x27;frontend&#x27;</span>
+      | <span class="hljs-string">&#x27;backend&#x27;</span>
+      | <span class="hljs-string">&#x27;db&#x27;</span>
+      | <span class="hljs-string">&#x27;flaky&#x27;</span>
+  }
+}</code></pre></div>
+<p>To see all your tags, you can use <a href="cli.html#listtags"><code>--list-tags</code></a> command:</p>
+<div class="code"><pre><code class="hljs lang-shell">vitest --list-tags
+
+frontend: Tests written <span class="hljs-keyword">for</span> frontend.
+backend: Tests written <span class="hljs-keyword">for</span> backend.
+db: Tests <span class="hljs-keyword">for</span> database queries.
+flaky: Flaky CI tests.</code></pre></div>
+<p>To print it in JSON, pass down <code>--list-tags=json</code>:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;tags&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;frontend&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Tests written for frontend.&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;backend&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Tests written for backend.&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;db&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Tests for database queries.&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;timeout&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">60000</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;flaky&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Flaky CI tests.&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;retry&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;timeout&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">30000</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;priority&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;projects&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<h3 id="resolving-option-conflicts"><a class="anchor" href="#resolving-option-conflicts">#</a>Resolving option conflicts</h3>
+<p>If several tags define the same option and are applied to the same test, they are resolved by <code>priority</code> first (lower number wins), then by the order they appear in the test&#39;s <code>tags</code> array. Tags without a <code>priority</code> are merged first and overridden by higher-priority ones:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;flaky database test&#x27;</span>, { <span class="hljs-attr">tags</span>: [<span class="hljs-string">&#x27;flaky&#x27;</span>, <span class="hljs-string">&#x27;db&#x27;</span>] })
+<span class="hljs-comment">// { timeout: 30_000, retry: 3 }</span></code></pre></div>
+<p>The <code>timeout</code> is 30 seconds (not 60) because <code>flaky</code> has priority <code>1</code> while <code>db</code> has no priority.</p>
+<p>Options defined on the test itself always win:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;flaky database test&#x27;</span>, { <span class="hljs-attr">tags</span>: [<span class="hljs-string">&#x27;flaky&#x27;</span>, <span class="hljs-string">&#x27;db&#x27;</span>], <span class="hljs-attr">timeout</span>: <span class="hljs-number">120_000</span> })
+<span class="hljs-comment">// { timeout: 120_000, retry: 3 }</span></code></pre></div>
+<h2 id="using-tags-in-tests"><a class="anchor" href="#using-tags-in-tests">#</a>Using Tags in Tests</h2>
+<p>You can apply tags to individual tests or entire suites using the <code>tags</code> option:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;renders homepage&#x27;</span>, { <span class="hljs-attr">tags</span>: [<span class="hljs-string">&#x27;frontend&#x27;</span>] }, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// ...</span>
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;API endpoints&#x27;</span>, { <span class="hljs-attr">tags</span>: [<span class="hljs-string">&#x27;backend&#x27;</span>] }, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;returns user data&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// This test inherits the &quot;backend&quot; tag from the parent suite</span>
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;validates input&#x27;</span>, { <span class="hljs-attr">tags</span>: [<span class="hljs-string">&#x27;validation&#x27;</span>] }, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// This test has both &quot;backend&quot; (inherited) and &quot;validation&quot; tags</span>
+  })
+})</code></pre></div>
+<p>Tags are inherited from parent suites, so all tests inside a tagged <code>describe</code> block will automatically have that tag.</p>
+<p>It&#39;s also possible to define <code>tags</code> for every test in the file by using JSDoc&#39;s <code>@module-tag</code> at the top of the file:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/**
+ * Auth tests
+ * <span class="hljs-doctag">@module</span>-tag admin/pages/dashboard
+ * <span class="hljs-doctag">@module</span>-tag acceptance
+ */</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;dashboard renders items&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// ...</span>
+})</code></pre></div>
+<div class="box box-danger"><div class="box-title">🛑 Danger</div><p>A <code>@module-tag</code> in a JSDoc comment applies to all tests in that file, not just the test it precedes.</p>
+<p>Consider this example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;forms&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">/**
+   * <span class="hljs-doctag">@module</span>-tag frontend
+   */</span>
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;renders a form&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// ...</span>
+  })
+
+  <span class="hljs-comment">/**
+   * <span class="hljs-doctag">@module</span>-tag db
+   */</span>
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;db returns users&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// ...</span>
+  })
+})</code></pre></div>
+<p>In this example, every test in the file will have both the <code>frontend</code> and <code>db</code> tags. To tag individual tests, use the options argument instead:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;forms&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;renders a form&#x27;</span>, { <span class="hljs-attr">tags</span>: <span class="hljs-string">&#x27;frontend&#x27;</span> }, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// ...</span>
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;db returns users&#x27;</span>, { <span class="hljs-attr">tags</span>: <span class="hljs-string">&#x27;db&#x27;</span> }, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// ...</span>
+  })
+})</code></pre></div>
+</div><h2 id="filtering-tests-by-tag"><a class="anchor" href="#filtering-tests-by-tag">#</a>Filtering Tests by Tag</h2>
+<p>To run only tests with specific tags, use the <a href="cli.html#tagsfilter"><code>--tags-filter</code></a> CLI option:</p>
+<div class="code"><pre><code class="hljs lang-shell">vitest --tags-filter=frontend
+vitest --tags-filter=<span class="hljs-string">&quot;frontend and backend&quot;</span></code></pre></div>
+<p>If you are running Vitest UI, you can start a filter with a <code>tag:</code> prefix to filter out tests by tags using the same tags expression syntax:</p>
+<span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span><p>If you are using a programmatic API, you can pass down a <code>tagsFilter</code> option to <a href="advanced/index.html#startvitest"><code>startVitest</code></a> or <a href="advanced/index.html#createvitest"><code>createVitest</code></a>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { startVitest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">startVitest</span>([], {
+  <span class="hljs-attr">tagsFilter</span>: [<span class="hljs-string">&#x27;frontend and backend&#x27;</span>],
+})</code></pre></div>
+<p>Or you can create a <a href="../api/advanced/test-specification.html">test specification</a> with your custom filters:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> specification = vitest.<span class="hljs-title function_">getRootProject</span>().<span class="hljs-title function_">createSpecification</span>(
+  <span class="hljs-string">&#x27;/path-to-file.js&#x27;</span>,
+  {
+    <span class="hljs-attr">testTagsFilter</span>: [<span class="hljs-string">&#x27;frontend and backend&#x27;</span>],
+  },
+)</code></pre></div>
+<h3 id="syntax"><a class="anchor" href="#syntax">#</a>Syntax</h3>
+<p>You can combine tags in different ways. Vitest supports these keywords:</p>
+<ul>
+<li><code>and</code> or <code>&amp;&amp;</code> to include both expressions</li>
+<li><code>or</code> or <code>||</code> to include at least one expression</li>
+<li><code>not</code> or <code>!</code> to exclude the expression</li>
+<li><code>*</code> to match any number of characters (0 or more)</li>
+<li><code>()</code> to group expressions and override precedence</li>
+</ul>
+<p>The parser follows standard <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_precedence">operator precedence</a>: <code>not</code>/<code>!</code> has the highest priority, then <code>and</code>/<code>&amp;&amp;</code>, then <code>or</code>/<code>||</code>. Use parentheses to override default precedence.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Reserved Names</div><p>Tag names cannot be <code>and</code>, <code>or</code>, or <code>not</code> (case-insensitive) as these are reserved keywords. Tag names also cannot contain special characters (<code>(</code>, <code>)</code>, <code>&amp;</code>, <code>|</code>, <code>!</code>, <code>*</code>, spaces) as these are used by the expression parser.</p>
+</div><h3 id="wildcards"><a class="anchor" href="#wildcards">#</a>Wildcards</h3>
+<p>You can use a wildcard (<code>*</code>) to match any number of characters:</p>
+<div class="code"><pre><code class="hljs lang-shell">vitest --tags-filter=<span class="hljs-string">&quot;unit/*&quot;</span></code></pre></div>
+<p>This will match tags like <code>unit/components</code>, <code>unit/utils</code>, etc.</p>
+<h3 id="excluding-tags"><a class="anchor" href="#excluding-tags">#</a>Excluding Tags</h3>
+<p>To exclude tests with a specific tag, add an exclamation mark (<code>!</code>) at the start or a &quot;not&quot; keyword:</p>
+<div class="code"><pre><code class="hljs lang-shell">vitest --tags-filter=<span class="hljs-string">&quot;!slow and not flaky&quot;</span></code></pre></div>
+<h3 id="examples"><a class="anchor" href="#examples">#</a>Examples</h3>
+<p>Here are some common filtering patterns:</p>
+<div class="code"><pre><code class="hljs lang-shell"><span class="hljs-comment"># Run only unit tests</span>
+vitest --tags-filter=<span class="hljs-string">&quot;unit&quot;</span>
+
+<span class="hljs-comment"># Run tests that are both frontend AND fast</span>
+vitest --tags-filter=<span class="hljs-string">&quot;frontend and fast&quot;</span>
+
+<span class="hljs-comment"># Run tests that are either unit OR e2e</span>
+vitest --tags-filter=<span class="hljs-string">&quot;unit or e2e&quot;</span>
+
+<span class="hljs-comment"># Run all tests except slow ones</span>
+vitest --tags-filter=<span class="hljs-string">&quot;!slow&quot;</span>
+
+<span class="hljs-comment"># Run frontend tests that are not flaky</span>
+vitest --tags-filter=<span class="hljs-string">&quot;frontend &amp;&amp; !flaky&quot;</span>
+
+<span class="hljs-comment"># Run tests matching a wildcard pattern</span>
+vitest --tags-filter=<span class="hljs-string">&quot;api/*&quot;</span>
+
+<span class="hljs-comment"># Complex expression with parentheses</span>
+vitest --tags-filter=<span class="hljs-string">&quot;(unit || e2e) &amp;&amp; !slow&quot;</span>
+
+<span class="hljs-comment"># Run database tests that are either postgres or mysql, but not slow</span>
+vitest --tags-filter=<span class="hljs-string">&quot;db &amp;&amp; (postgres || mysql) &amp;&amp; !slow&quot;</span></code></pre></div>
+<p>You can also pass multiple <code>--tags-filter</code> flags. They are combined with AND logic:</p>
+<div class="code"><pre><code class="hljs lang-shell"><span class="hljs-comment"># Run tests that match (unit OR e2e) AND are NOT slow</span>
+vitest --tags-filter=<span class="hljs-string">&quot;unit || e2e&quot;</span> --tags-filter=<span class="hljs-string">&quot;!slow&quot;</span></code></pre></div>
+<h3 id="checking-tags-filter-at-runtime"><a class="anchor" href="#checking-tags-filter-at-runtime">#</a>Checking Tags Filter at Runtime</h3>
+<p>You can use <code>TestRunner.matchesTags</code> to check whether the current tags filter matches a set of tags. This is useful for conditionally running expensive setup logic only when relevant tests are included:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { beforeAll, <span class="hljs-title class_">TestRunner</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">beforeAll</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// Seed database when &quot;vitest --tags-filter db&quot; is used</span>
+  <span class="hljs-keyword">if</span> (<span class="hljs-title class_">TestRunner</span>.<span class="hljs-title function_">matchesTags</span>([<span class="hljs-string">&#x27;db&#x27;</span>])) {
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">seedDatabase</span>()
+  }
+})</code></pre></div>
+<p>The method accepts an array of tags and returns <code>true</code> if the current <code>--tags-filter</code> would include a test with those tags. If no tags filter is active, it always returns <code>true</code>.</p>
+<h2 id="see-also"><a class="anchor" href="#see-also">#</a>See also</h2>
+<ul>
+<li><a href="recipes/disable-isolation.html">Per-File Isolation Settings</a> and <a href="recipes/parallel-sequential.html">Parallel and Sequential Test Files</a> use projects to partition tests by file. Reach for projects when categories need different runner settings rather than different timeouts or retries.</li>
+<li><a href="filtering.html">Test Filtering</a> covers <code>-t</code>, <code>--include</code>, and the rest of the CLI filters.</li>
+<li><a href="../config/tags.html"><code>tags</code></a> and <a href="../config/stricttags.html"><code>strictTags</code></a> configuration reference.</li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#why-tags">Why tags</a><a class="toc-2" href="#when-to-reach-for-tags">When to reach for tags</a><a class="toc-2" href="#defining-tags">Defining Tags</a><a class="toc-3" href="#resolving-option-conflicts">Resolving option conflicts</a><a class="toc-2" href="#using-tags-in-tests">Using Tags in Tests</a><a class="toc-2" href="#filtering-tests-by-tag">Filtering Tests by Tag</a><a class="toc-3" href="#syntax">Syntax</a><a class="toc-3" href="#wildcards">Wildcards</a><a class="toc-3" href="#excluding-tags">Excluding Tags</a><a class="toc-3" href="#examples">Examples</a><a class="toc-3" href="#checking-tags-filter-at-runtime">Checking Tags Filter at Runtime</a><a class="toc-2" href="#see-also">See also</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

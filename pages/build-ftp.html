@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6. Build et publication FTP · ICT-324 Révision</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/hljs.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../index.html">Accueil</a><a class="nav-link" href="../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../pages/vite.html">1. Vite</a><a class="nav-link" href="../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../pages/readme.html">5. README & Markdown</a><a class="nav-link active" href="../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../pages/projets.html">Projets du cours</a><a class="nav-link" href="../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../docs/index.html">Index des docs</a><a class="nav-link" href="../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../docs/vite/index.html">Vite</a><a class="nav-link" href="../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+
+<h1>6. Build et publication FTP</h1><p class="lead">But : que le site fonctionne sans aucune 404 (favicon, images, CSS, JS) une fois copié dans un dossier précis du serveur, par exemple https://serveur.ch/mon_dossier/. Tout ce qui est ici a été testé : build, envoi FTP réel vers un serveur local, puis vérification HTTP.</p><h2 id="le-probleme"><a class="anchor" href="#le-probleme">#</a>Le problème</h2>
+<p>Par défaut Vite suppose que le site est à la <strong>racine</strong> du domaine (<code>base: &quot;/&quot;</code>). Le build contient alors <code>&lt;script src=&quot;/assets/index.js&quot;&gt;</code>. Si le site est dans <code>/mon_dossier/</code>, le navigateur cherche <code>https://serveur.ch/assets/index.js</code> → <strong>404</strong>, page blanche.</p>
+<h2 id="la-solution-base"><a class="anchor" href="#la-solution-base">#</a>La solution : <code>base</code></h2>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vite&quot;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">base</span>: <span class="hljs-string">&quot;/mon_dossier/&quot;</span>,   <span class="hljs-comment">// commence ET finit par &quot;/&quot;</span>
+})</code></pre></div>
+<p>Dans le corrigé <code>currency-converter</code> : <code>base: &#39;/ferrarip/&#39;</code> (le dossier du prof sur le serveur). Mets <strong>le nom de dossier donné dans la consigne</strong>.</p>
+<p>Build :</p>
+<div class="code"><pre><code class="hljs lang-bash">npm run build</code></pre></div>
+<p><code>dist/index.html</code> devient (testé) :</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;icon&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;image/svg+xml&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/mon_dossier/favicon.svg&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span> <span class="hljs-attr">crossorigin</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/mon_dossier/assets/index-_2MRZmio.js&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;stylesheet&quot;</span> <span class="hljs-attr">crossorigin</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/mon_dossier/assets/index-Dj4gvqNB.css&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/mon_dossier/images/logo.png&quot;</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;Logo&quot;</span> <span class="hljs-attr">width</span>=<span class="hljs-string">&quot;80&quot;</span> /&gt;</span></code></pre></div>
+<h3 id="alternative-base"><a class="anchor" href="#alternative-base">#</a>Alternative : <code>base: &quot;./&quot;</code></h3>
+<p>Tous les chemins deviennent <strong>relatifs</strong> (<code>./assets/...</code>) : le site marche dans n&#39;importe quel dossier sans connaître son nom. Testé : HTML → <code>./assets/index.js</code>, CSS → <code>url(../images/logo.png)</code>, <code>import.meta.env.BASE_URL</code> → <code>&quot;./&quot;</code>. Limite : sous-pages dans des sous-dossiers ou routeur JS. Si la consigne donne un dossier précis, préfère <code>base: &quot;/nom_du_dossier/&quot;</code>.</p>
+<h2 id="qu-est-ce-qui-est-reecrit-teste-avec-base-mon-dossier"><a class="anchor" href="#qu-est-ce-qui-est-reecrit-teste-avec-base-mon-dossier">#</a>Qu&#39;est-ce qui est réécrit ? (testé avec <code>base: &quot;/mon_dossier/&quot;</code>)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Où</th>
+<th>Ce que tu écris</th>
+<th>Dans <code>dist/</code></th>
+<th>Résultat</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTML</td>
+<td><code>&lt;link rel=&quot;icon&quot; href=&quot;/favicon.svg&quot;&gt;</code> (fichier dans <code>public/</code>)</td>
+<td><code>/mon_dossier/favicon.svg</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>HTML</td>
+<td><code>&lt;img src=&quot;/images/logo.png&quot;&gt;</code> (dans <code>public/images/</code>)</td>
+<td><code>/mon_dossier/images/logo.png</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>HTML</td>
+<td><code>&lt;script type=&quot;module&quot; src=&quot;/src/main.js&quot;&gt;</code></td>
+<td><code>/mon_dossier/assets/index-xxx.js</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>HTML</td>
+<td><code>href=&quot;favicon.svg&quot;</code> (relatif, comme dans currency-converter)</td>
+<td>laissé tel quel</td>
+<td>⚠️ marche pour <code>index.html</code> à la racine du dossier, fragile</td>
+</tr>
+<tr>
+<td>CSS</td>
+<td><code>url(&quot;/images/logo.png&quot;)</code></td>
+<td><code>url(/mon_dossier/images/logo.png)</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>JS</td>
+<td><code>import logo from &quot;./assets/vite.svg&quot;</code> puis <code>img.src = logo</code></td>
+<td><code>/mon_dossier/assets/vite-BF8QNONU.svg</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>JS</td>
+<td><code>img.src = `${import.meta.env.BASE_URL}images/logo.png`</code></td>
+<td><code>/mon_dossier/images/logo.png</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>JS</td>
+<td><code>img.src = &quot;/images/logo.png&quot;</code></td>
+<td><code>/images/logo.png</code> (<strong>pas réécrit</strong>)</td>
+<td>❌ 404</td>
+</tr>
+<tr>
+<td>HTML</td>
+<td><code>&lt;a href=&quot;/contact.html&quot;&gt;</code> (lien entre pages)</td>
+<td><code>/contact.html</code> (<strong>pas réécrit</strong>)</td>
+<td>❌ 404 → écris <code>href=&quot;contact.html&quot;</code> (relatif)</td>
+</tr>
+</tbody></table></div>
+<div class="box box-danger"><div class="box-title">🛑 Danger : À retenir</div><p><strong>HTML et CSS</strong> : Vite corrige les chemins absolus. <strong>Chaînes JavaScript</strong> : jamais. Dans le JS, utilise un <code>import</code> ou <code>import.meta.env.BASE_URL</code>.</p>
+</div><h2 id="favicon"><a class="anchor" href="#favicon">#</a>Favicon</h2>
+<ol>
+<li>Mettre le fichier dans <strong><code>public/</code></strong> : <code>public/favicon.png</code> (ou <code>.svg</code>, <code>.ico</code>).</li>
+<li>Dans <code>index.html</code> : <code>&lt;link rel=&quot;icon&quot; type=&quot;image/png&quot; href=&quot;/favicon.png&quot; /&gt;</code> (chemin absolu → Vite ajoute <code>base</code>).</li>
+<li>Après le build : <code>dist/favicon.png</code> existe et le lien est <code>/mon_dossier/favicon.png</code>.</li>
+</ol>
+<div class="box box-info"><div class="box-title">ℹ️ Info : Pourquoi il faut la balise</div><p>Sans <code>&lt;link rel=&quot;icon&quot;&gt;</code>, le navigateur demande <code>/favicon.ico</code> à la <strong>racine du domaine</strong> (pas dans ton dossier) → 404 dans la console.</p>
+</div><h2 id="images"><a class="anchor" href="#images">#</a>Images</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Image</th>
+<th>Où la mettre</th>
+<th>Comment la référencer</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Logo / image fixe du HTML</td>
+<td><code>public/images/</code></td>
+<td><code>&lt;img src=&quot;/images/logo.png&quot;&gt;</code></td>
+</tr>
+<tr>
+<td>Image de fond CSS</td>
+<td><code>public/images/</code> ou <code>src/assets/</code></td>
+<td><code>url(&quot;/images/fond.jpg&quot;)</code> ou <code>url(&quot;./assets/fond.jpg&quot;)</code> (relatif au CSS)</td>
+</tr>
+<tr>
+<td>Image utilisée dans le JS</td>
+<td><code>src/assets/</code></td>
+<td><code>import photo from &quot;./assets/photo.jpg&quot;</code></td>
+</tr>
+<tr>
+<td>Image de <code>public/</code> utilisée dans le JS</td>
+<td><code>public/images/</code></td>
+<td><code>`${import.meta.env.BASE_URL}images/x.png`</code></td>
+</tr>
+</tbody></table></div>
+<h2 id="les-pieges-a-l-aveugle-que-tu-ne-verras-pas-en-local"><a class="anchor" href="#les-pieges-a-l-aveugle-que-tu-ne-verras-pas-en-local">#</a>Les pièges « à l&#39;aveugle » (que tu ne verras pas en local)</h2>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : 1. Majuscules / minuscules</div><p>Windows et macOS ignorent la casse, <strong>le serveur Linux non</strong> : <code>&lt;img src=&quot;/images/Logo.png&quot;&gt;</code> avec un fichier <code>logo.png</code> marche chez toi et fait une 404 en ligne. → Tout en <strong>minuscules</strong>, et vérifie avec le script <code>check-dist.js</code> (plus bas), qui le détecte.</p>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention : 2. Espaces et accents dans les noms</div><p><code>mon image.png</code>, <code>été.jpg</code> → encodages bizarres, liens cassés. → <code>mon_image.png</code>, <code>ete.jpg</code>.</p>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention : 3. Envoyer le DOSSIER dist au lieu de son CONTENU</div><p>Si tu copies <code>dist/</code> lui-même, le site est à <code>/mon_dossier/dist/</code> et <code>base</code> ne correspond plus. Il faut que <code>index.html</code> soit <strong>directement</strong> dans <code>/mon_dossier/</code>. (<code>lftp mirror -R dist /mon_dossier</code> copie bien le contenu, testé.)</p>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention : 4. Chemins Windows</div><p>Jamais de <code>\</code> ni de <code>C:\...</code> dans le code : toujours <code>/</code>.</p>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention : 5. Ressources externes</div><p>Les Google Fonts (projet currency) se chargent depuis internet : OK en ligne. Mais tout fichier <strong>local</strong> doit être dans le projet.</p>
+</div><h2 id="verifier-dist-sans-serveur"><a class="anchor" href="#verifier-dist-sans-serveur">#</a>Vérifier <code>dist/</code> sans serveur</h2>
+<h3 id="1-npm-run-preview-le-plus-important"><a class="anchor" href="#1-npm-run-preview-le-plus-important">#</a>1. <code>npm run preview</code> (le plus important)</h3>
+<div class="code"><pre><code class="hljs lang-bash">npm run build
+npm run preview</code></pre></div>
+<p>Il affiche <code>http://localhost:4173/mon_dossier/</code> : il sert <code>dist/</code> <strong>comme le vrai serveur</strong>, sous le sous-dossier. Testé : <code>/mon_dossier/favicon.svg</code> → 200, <code>/images/logo.png</code> (chemin oublié sans base) → 404.</p>
+<p>Ouvre les <strong>DevTools</strong> (<kbd>F12</kbd>) → onglet <strong>Network / Réseau</strong> → recharge (<kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>R</kbd>) → trie par statut : <strong>aucune ligne rouge 404</strong>. Regarde aussi la <strong>Console</strong> et l&#39;icône de l&#39;onglet (favicon).</p>
+<h3 id="2-le-script-check-dist-js-fait-pour-cette-epreuve"><a class="anchor" href="#2-le-script-check-dist-js-fait-pour-cette-epreuve">#</a>2. Le script <code>check-dist.js</code> (fait pour cette épreuve)</h3>
+<p>Il analyse <code>dist/</code> sans serveur et signale : chemins absolus sans <code>base</code>, fichiers manquants, <strong>différences de majuscules</strong> (détectées même sous Windows/macOS), noms risqués, favicon absent.</p>
+<div class="code"><pre><code class="hljs lang-bash">npm run build
+node scripts/check-dist.js              <span class="hljs-comment"># lit base dans vite.config.js</span>
+node scripts/check-dist.js /mon_dossier/</code></pre></div>
+<p>Sortie sur un build correct :</p>
+<div class="code"><pre><code class="hljs lang-text">base = &quot;/mon_dossier/&quot;
+6 fichiers analysés dans dist/
+✅ Aucun lien cassé détecté : dist/ est prêt pour le FTP.</code></pre></div>
+<p>Sortie sur un build volontairement cassé (testé) :</p>
+<div class="code"><pre><code class="hljs lang-text">⚠️  nom de fichier risqué (majuscule, espace ou accent) : images/Logo.png
+❌ assets/index-Dj4gvqNB.css (css) : &quot;/mon_dossier/images/logo.png&quot; → MAJUSCULES/minuscules différentes (OK en local, 404 sur Linux)
+❌ assets/index-H81kUb9M.js (js) : &quot;/images/logo.png&quot; est absolu mais ne commence pas par &quot;/mon_dossier/&quot; → 404 sur le serveur</code></pre></div>
+<p>Le script complet est dans le <a href="modele.html#verifier-dist-sans-serveur">projet modèle</a> (<code>projets/modele/scripts/check-dist.js</code>) : copie-le dans ton projet.</p>
+<h3 id="3-recherche-manuelle"><a class="anchor" href="#3-recherche-manuelle">#</a>3. Recherche manuelle</h3>
+<div class="code"><pre><code class="hljs lang-bash">grep -rn <span class="hljs-string">&#x27;&quot;/&#x27;</span> dist/assets/*.js     <span class="hljs-comment"># chaînes qui commencent par &quot;/&quot; dans le JS</span>
+grep -rn <span class="hljs-string">&#x27;src=&quot;\|href=&quot;&#x27;</span> dist/index.html</code></pre></div>
+<p>Sous Windows (PowerShell) : <code>Select-String -Path dist\assets\*.js -Pattern &#39;&quot;/&#39;</code></p>
+<h2 id="envoyer-sur-le-serveur-ftp"><a class="anchor" href="#envoyer-sur-le-serveur-ftp">#</a>Envoyer sur le serveur FTP</h2>
+<h3 id="script-du-prof-lftp-env"><a class="anchor" href="#script-du-prof-lftp-env">#</a>Script du prof (lftp + .env)</h3>
+<div class="code"><pre><code class="hljs lang-bash">npm install -D dotenv-cli</code></pre></div>
+<div class="code"><div class="code-title">scripts/publish.sh</div><pre><code class="hljs lang-bash"><span class="hljs-meta">#!/usr/bin/env bash</span>
+<span class="hljs-built_in">set</span> -euo pipefail
+
+lftp -u <span class="hljs-string">&quot;<span class="hljs-variable">$FTP_USER</span>,<span class="hljs-variable">$FTP_PASS</span>&quot;</span> <span class="hljs-string">&quot;<span class="hljs-variable">$FTP_HOST</span>&quot;</span> \
+	-e <span class="hljs-string">&quot;mirror -R dist /root/<span class="hljs-variable">$FTP_DEST</span>; bye&quot;</span></code></pre></div>
+<div class="code"><div class="code-title">.env</div><pre><code class="hljs lang-ini"><span class="hljs-attr">FTP_HOST</span>=ftp.serveur.ch
+<span class="hljs-attr">FTP_USER</span>=mon_login
+<span class="hljs-attr">FTP_PASS</span>=mon_mot_de_passe
+<span class="hljs-attr">FTP_DEST</span>=mon_dossier</code></pre></div>
+<div class="code"><div class="code-title">package.json</div><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;publish&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dotenv -e .env -- bash scripts/publish.sh&quot;</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-bash">npm run build &amp;&amp; npm run publish</code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Élément</th>
+<th>Sens</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>dotenv -e .env --</code></td>
+<td>charge les variables de <code>.env</code> puis lance la commande</td>
+</tr>
+<tr>
+<td><code>set -euo pipefail</code></td>
+<td>arrête le script à la première erreur</td>
+</tr>
+<tr>
+<td><code>lftp -u &quot;user,pass&quot; host</code></td>
+<td>connexion FTP</td>
+</tr>
+<tr>
+<td><code>mirror -R dist /dest</code></td>
+<td><strong>R</strong>everse : envoie le <strong>contenu</strong> local de <code>dist</code> vers <code>/dest</code> (crée le dossier si besoin)</td>
+</tr>
+<tr>
+<td><code>--delete</code> (option)</td>
+<td>supprime sur le serveur ce qui n&#39;existe plus en local</td>
+</tr>
+<tr>
+<td><code>/root/$FTP_DEST</code></td>
+<td>chemin propre au serveur de l&#39;école (à adapter à la consigne)</td>
+</tr>
+<tr>
+<td><code>bye</code></td>
+<td>déconnexion</td>
+</tr>
+</tbody></table></div>
+<div class="box box-danger"><div class="box-title">🛑 Danger : Sécurité</div><p><code>.env</code> contient le mot de passe : il doit être dans <strong><code>.gitignore</code></strong>. Fournis plutôt un <code>.env.example</code> sans vrai mot de passe.</p>
+</div><p>Version du projet modèle (testée contre un vrai serveur FTP local : les 6 fichiers sont arrivés dans <code>/mon_dossier</code>, puis servis en HTTP 200) :</p>
+<div class="code"><div class="code-title">modele/scripts/publish.sh</div><pre><code class="hljs lang-bash"><span class="hljs-meta">#!/usr/bin/env bash</span>
+<span class="hljs-comment"># Envoie le contenu de dist/ dans le dossier FTP_DEST du serveur</span>
+<span class="hljs-built_in">set</span> -euo pipefail
+
+lftp -u <span class="hljs-string">&quot;<span class="hljs-variable">$FTP_USER</span>,<span class="hljs-variable">$FTP_PASS</span>&quot;</span> <span class="hljs-string">&quot;<span class="hljs-variable">$FTP_HOST</span>&quot;</span> \
+  -e <span class="hljs-string">&quot;set ssl:verify-certificate no; mirror -R --delete dist <span class="hljs-variable">$FTP_DEST</span>; bye&quot;</span></code></pre></div>
+<p class="file-link"><a href="../projets/modele/scripts/publish.sh">📄 ouvrir le fichier publish.sh</a></p><div class="box box-tip"><div class="box-title">💡 Astuce : npm run publish</div><p><code>npm publish</code> (sans <em>run</em>) est une autre commande : elle publie un paquet sur npmjs.com ! Le <code>&quot;private&quot;: true</code> du <code>package.json</code> l&#39;en empêche. Tape bien <strong><code>npm run publish</code></strong>.</p>
+</div><h3 id="sans-lftp"><a class="anchor" href="#sans-lftp">#</a>Sans lftp</h3>
+<ul>
+<li><strong>FileZilla</strong> / <strong>WinSCP</strong> (Windows) : hôte, utilisateur, mot de passe, port 21. À droite, ouvre <code>/mon_dossier</code> ; à gauche, entre <strong>dans</strong> <code>dist/</code>, sélectionne tout son contenu et glisse-le à droite.</li>
+<li><strong>curl</strong> (inclus dans Windows 10+), un fichier à la fois :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-bash">curl -T dist/index.html --ftp-create-dirs ftp://ftp.serveur.ch/mon_dossier/ --user login:motdepasse</code></pre></div>
+<h2 id="checklist-finale-ftp"><a class="anchor" href="#checklist-finale-ftp">#</a>Checklist finale FTP</h2>
+<ul>
+<li><input disabled="" type="checkbox"> <code>base: &quot;/nom_du_dossier/&quot;</code> dans <code>vite.config.js</code></li>
+<li><input disabled="" type="checkbox"> favicon dans <code>public/</code> + <code>&lt;link rel=&quot;icon&quot; href=&quot;/favicon.xxx&quot;&gt;</code></li>
+<li><input disabled="" type="checkbox"> aucune chaîne <code>&quot;/...&quot;</code> vers un fichier dans le JS (→ <code>import</code> ou <code>BASE_URL</code>)</li>
+<li><input disabled="" type="checkbox"> noms de fichiers en minuscules, sans espace ni accent</li>
+<li><input disabled="" type="checkbox"> <code>npm run build</code> sans avertissement</li>
+<li><input disabled="" type="checkbox"> <code>npm run preview</code> : 0 erreur 404 dans l&#39;onglet Réseau</li>
+<li><input disabled="" type="checkbox"> <code>node scripts/check-dist.js</code> : ✅</li>
+<li><input disabled="" type="checkbox"> script <code>publish</code> + <code>.env.example</code>, <code>.env</code> dans <code>.gitignore</code></li>
+<li><input disabled="" type="checkbox"> on envoie le <strong>contenu</strong> de <code>dist/</code>, pas le dossier</li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#le-probleme">Le problème</a><a class="toc-2" href="#la-solution-base">La solution : base</a><a class="toc-3" href="#alternative-base">Alternative : base: &quot;./&quot;</a><a class="toc-2" href="#qu-est-ce-qui-est-reecrit-teste-avec-base-mon-dossier">Qu'est-ce qui est réécrit ? (testé avec base: &quot;/mon_dossier/&quot; )</a><a class="toc-2" href="#favicon">Favicon</a><a class="toc-2" href="#images">Images</a><a class="toc-2" href="#les-pieges-a-l-aveugle-que-tu-ne-verras-pas-en-local">Les pièges « à l'aveugle » (que tu ne verras pas en local)</a><a class="toc-2" href="#verifier-dist-sans-serveur">Vérifier dist/ sans serveur</a><a class="toc-3" href="#1-npm-run-preview-le-plus-important">1. npm run preview (le plus important)</a><a class="toc-3" href="#2-le-script-check-dist-js-fait-pour-cette-epreuve">2. Le script check-dist.js (fait pour cette épreuve)</a><a class="toc-3" href="#3-recherche-manuelle">3. Recherche manuelle</a><a class="toc-2" href="#envoyer-sur-le-serveur-ftp">Envoyer sur le serveur FTP</a><a class="toc-3" href="#script-du-prof-lftp-env">Script du prof (lftp + .env)</a><a class="toc-3" href="#sans-lftp">Sans lftp</a><a class="toc-2" href="#checklist-finale-ftp">Checklist finale FTP</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../assets/app.js"></script>
+</body>
+</html>

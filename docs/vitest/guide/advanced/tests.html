@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Running Tests advanced (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/advanced/tests  <a class="ext small" href="https://vitest.dev/guide/advanced/tests">version en ligne</a></div>
+<h1 id="running-tests"><a class="anchor" href="#running-tests">#</a>Running Tests <Badge type="danger">advanced</Badge></h1>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This guide explains how to use the advanced API to run tests via a Node.js script. If you just want to <a href="../index.html">run tests</a>, you probably don&#39;t need this. It is primarily used by library authors.</p>
+</div><p>Vitest exposes two methods to initiate Vitest:</p>
+<ul>
+<li><code>startVitest</code> initiates Vitest, validates the packages are installed and runs tests immediately</li>
+<li><code>createVitest</code> only initiates Vitest and doesn&#39;t run any tests</li>
+</ul>
+<h2 id="startvitest"><a class="anchor" href="#startvitest">#</a><code>startVitest</code></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { startVitest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> vitest = <span class="hljs-keyword">await</span> <span class="hljs-title function_">startVitest</span>(
+  [], <span class="hljs-comment">// CLI filters</span>
+  {}, <span class="hljs-comment">// override test config</span>
+  {}, <span class="hljs-comment">// override Vite config</span>
+  {}, <span class="hljs-comment">// custom Vitest options</span>
+)
+<span class="hljs-keyword">const</span> testModules = vitest.<span class="hljs-property">state</span>.<span class="hljs-title function_">getTestModules</span>()
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> testModule <span class="hljs-keyword">of</span> testModules) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(testModule.<span class="hljs-property">moduleId</span>, testModule.<span class="hljs-title function_">ok</span>() ? <span class="hljs-string">&#x27;passed&#x27;</span> : <span class="hljs-string">&#x27;failed&#x27;</span>)
+}</code></pre></div>
+<h2 id="createvitest"><a class="anchor" href="#createvitest">#</a><code>createVitest</code></h2>
+<p>Creates a <a href="../../api/advanced/vitest.html">Vitest</a> instances without running tests.</p>
+<p><code>createVitest</code> method doesn&#39;t validate that required packages are installed. It also doesn&#39;t respect <code>config.standalone</code> or <code>config.mergeReports</code>. Vitest won&#39;t be closed automatically even if <code>watch</code> is disabled.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { createVitest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> vitest = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createVitest</span>(
+  {}, <span class="hljs-comment">// override test config</span>
+  {}, <span class="hljs-comment">// override Vite config</span>
+  {}, <span class="hljs-comment">// custom Vitest options</span>
+)
+
+<span class="hljs-comment">// called when `vitest.cancelCurrentRun()` is invoked</span>
+vitest.<span class="hljs-title function_">onCancel</span>(<span class="hljs-function">() =&gt;</span> {})
+<span class="hljs-comment">// called during `vitest.close()` call</span>
+vitest.<span class="hljs-title function_">onClose</span>(<span class="hljs-function">() =&gt;</span> {})
+<span class="hljs-comment">// called when Vitest reruns test files</span>
+vitest.<span class="hljs-title function_">onTestsRerun</span>(<span class="hljs-function">(<span class="hljs-params">files</span>) =&gt;</span> {})
+
+<span class="hljs-keyword">try</span> {
+  <span class="hljs-comment">// this will set process.exitCode to 1 if tests failed,</span>
+  <span class="hljs-comment">// and won&#x27;t close the process automatically</span>
+  <span class="hljs-keyword">await</span> vitest.<span class="hljs-title function_">start</span>([<span class="hljs-string">&#x27;my-filter&#x27;</span>])
+}
+<span class="hljs-keyword">catch</span> (err) {
+  <span class="hljs-comment">// this can throw</span>
+  <span class="hljs-comment">// &quot;FilesNotFoundError&quot; if no files were found</span>
+  <span class="hljs-comment">// &quot;GitNotFoundError&quot; with `--changed` and repository is not initialized</span>
+}
+<span class="hljs-keyword">finally</span> {
+  <span class="hljs-keyword">await</span> vitest.<span class="hljs-title function_">close</span>()
+}</code></pre></div>
+<p>If you intend to keep the <code>Vitest</code> instance, make sure to at least call <a href="../../api/advanced/vitest.html#init"><code>init</code></a>. This will initialise reporters and the coverage provider, but won&#39;t run any tests. It is also recommended to enable the <code>watch</code> mode even if you don&#39;t intend to use the Vitest watcher, but want to keep the instance running. Vitest relies on this flag for some of its features to work correctly in a continuous process.</p>
+<p>After reporters are initialised, use <a href="../../api/advanced/vitest.html#runtestspecifications"><code>runTestSpecifications</code></a> or <a href="../../api/advanced/vitest.html#reruntestspecifications"><code>rerunTestSpecifications</code></a> to run tests if manual run is required:</p>
+<div class="code"><pre><code class="hljs lang-ts">watcher.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;change&#x27;</span>, <span class="hljs-title function_">async</span> (file) =&gt; {
+  <span class="hljs-keyword">const</span> specifications = vitest.<span class="hljs-title function_">getModuleSpecifications</span>(file)
+  <span class="hljs-keyword">if</span> (specifications.<span class="hljs-property">length</span>) {
+    vitest.<span class="hljs-title function_">invalidateFile</span>(file)
+    <span class="hljs-comment">// you can use runTestSpecifications if &quot;reporter.onWatcher*&quot; hooks</span>
+    <span class="hljs-comment">// should not be invoked</span>
+    <span class="hljs-keyword">await</span> vitest.<span class="hljs-title function_">rerunTestSpecifications</span>(specifications)
+  }
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>The example above shows a potential use-case if you disable the default watcher behaviour. By default, Vitest already reruns tests if files change.</p>
+<p>Also note that <code>getModuleSpecifications</code> will not resolve test files unless they were already processed by <code>globTestSpecifications</code>. If the file was just created, use <code>project.matchesGlobPattern</code> instead:</p>
+<div class="code"><pre><code class="hljs lang-ts">watcher.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;add&#x27;</span>, <span class="hljs-title function_">async</span> (file) =&gt; {
+  <span class="hljs-keyword">const</span> specifications = []
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> project <span class="hljs-keyword">of</span> vitest.<span class="hljs-property">projects</span>) {
+    <span class="hljs-keyword">if</span> (project.<span class="hljs-title function_">matchesGlobPattern</span>(file)) {
+      specifications.<span class="hljs-title function_">push</span>(project.<span class="hljs-title function_">createSpecification</span>(file))
+    }
+  }
+
+  <span class="hljs-keyword">if</span> (specifications.<span class="hljs-property">length</span>) {
+    <span class="hljs-keyword">await</span> vitest.<span class="hljs-title function_">rerunTestSpecifications</span>(specifications)
+  }
+})</code></pre></div>
+</div><p>In cases where you need to disable the watcher, you can pass down <code>server.watch: null</code> since Vite 5.3 or <code>server.watch: { ignored: [&#39;*/*&#39;] }</code> to a Vite config:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> <span class="hljs-title function_">createVitest</span>(
+  {},
+  {
+    <span class="hljs-attr">plugins</span>: [
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;stop-watcher&#x27;</span>,
+        <span class="hljs-keyword">async</span> <span class="hljs-title function_">configureServer</span>(<span class="hljs-params">server</span>) {
+          <span class="hljs-keyword">await</span> server.<span class="hljs-property">watcher</span>.<span class="hljs-title function_">close</span>()
+        }
+      }
+    ],
+    <span class="hljs-attr">server</span>: {
+      <span class="hljs-attr">watch</span>: <span class="hljs-literal">null</span>,
+    },
+  }
+)</code></pre></div>
+
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

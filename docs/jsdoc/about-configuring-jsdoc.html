@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuring JSDoc with a configuration file (JSDoc) · ICT-324 Révision</title>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/hljs.css">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../index.html">Accueil</a><a class="nav-link" href="../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../docs/index.html">Index des docs</a><a class="nav-link" href="../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../docs/vite/index.html">Vite</a><a class="nav-link active" href="../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="index.html">JSDoc</a> › about-configuring-jsdoc  <a class="ext small" href="https://jsdoc.app/about-configuring-jsdoc.html">version en ligne</a></div>
+<h1>Configuring JSDoc with a configuration file</h1><h2 id="configuration-file-formats"><a class="anchor" href="#configuration-file-formats">#</a>Configuration file formats</h2>
+<p>To customize JSDoc&#39;s behavior, you can provide a configuration file to JSDoc in one of the following
+formats:</p>
+<ul>
+<li>A JSON file. In JSDoc 3.3.0 and later, this file may include comments.</li>
+<li>A CommonJS module that exports a single configuration object. This format is supported in JSDoc
+3.5.0 and later.</li>
+</ul>
+<p>To run JSDoc with a configuration file, use the <a href="about-commandline.html"><code>-c</code> command-line option</a> (for
+example, <code>jsdoc -c /path/to/conf.json</code> or <code>jsdoc -c /path/to/conf.js</code>).</p>
+<p>The following examples show a simple configuration file that enables JSDoc&#39;s <a href="plugins-markdown.html">Markdown
+plugin</a>. JSDoc&#39;s configuration options are explained in detail in the following sections.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : JSON configuration file</div><div class="code"><pre><code class="hljs lang-js">{
+    <span class="hljs-string">&quot;plugins&quot;</span>: [<span class="hljs-string">&quot;plugins/markdown&quot;</span>]
+}</code></pre></div>
+</div><div class="box box-example"><div class="box-title">🧪 Exemple : JavaScript configuration file</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-meta">&#x27;use strict&#x27;</span>;
+
+<span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = {
+    <span class="hljs-attr">plugins</span>: [<span class="hljs-string">&#x27;plugins/markdown&#x27;</span>]
+};</code></pre></div>
+</div><p>For a more comprehensive example of a JSON configuration file, see the file
+<a href="https://github.com/jsdoc3/jsdoc/blob/master/conf.json.EXAMPLE"><code>conf.json.EXAMPLE</code></a>.</p>
+<h2 id="default-configuration-options"><a class="anchor" href="#default-configuration-options">#</a>Default configuration options</h2>
+<p>If you do not specify a configuration file, JSDoc uses the following configuration options:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple</div><div class="code"><pre><code class="hljs lang-js">{
+    <span class="hljs-string">&quot;plugins&quot;</span>: [],
+    <span class="hljs-string">&quot;recurseDepth&quot;</span>: <span class="hljs-number">10</span>,
+    <span class="hljs-string">&quot;source&quot;</span>: {
+        <span class="hljs-string">&quot;includePattern&quot;</span>: <span class="hljs-string">&quot;.+\\.js(doc|x)?$&quot;</span>,
+        <span class="hljs-string">&quot;excludePattern&quot;</span>: <span class="hljs-string">&quot;(^|\\/|\\\\)_&quot;</span>
+    },
+    <span class="hljs-string">&quot;sourceType&quot;</span>: <span class="hljs-string">&quot;module&quot;</span>,
+    <span class="hljs-string">&quot;tags&quot;</span>: {
+        <span class="hljs-string">&quot;allowUnknownTags&quot;</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-string">&quot;dictionaries&quot;</span>: [<span class="hljs-string">&quot;jsdoc&quot;</span>,<span class="hljs-string">&quot;closure&quot;</span>]
+    },
+    <span class="hljs-string">&quot;templates&quot;</span>: {
+        <span class="hljs-string">&quot;cleverLinks&quot;</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-string">&quot;monospaceLinks&quot;</span>: <span class="hljs-literal">false</span>
+    }
+}</code></pre></div>
+</div><p>This means:</p>
+<ul>
+<li>No plugins are loaded (<code>plugins</code>).</li>
+<li>If recursion is enabled with the <a href="about-commandline.html"><code>-r</code> command-line flag</a>, JSDoc will search
+for files 10 levels deep (<code>recurseDepth</code>).</li>
+<li>Only files ending in <code>.js</code>, <code>.jsdoc</code>, and <code>.jsx</code> will be processed (<code>source.includePattern</code>).</li>
+<li>Any file starting with an underscore, or in a directory starting with an underscore, will be
+ignored (<code>source.excludePattern</code>).</li>
+<li>JSDoc supports code that uses <a href="howto-es2015-modules.html">ES2015 modules</a> (<code>sourceType</code>).</li>
+<li>JSDoc allows you to use unrecognized tags (<code>tags.allowUnknownTags</code>).</li>
+<li>Both standard JSDoc tags and <a href="https://github.com/google/closure-compiler/wiki/Annotating-JavaScript-for-the-Closure-Compiler#jsdoc-tags">Closure Compiler tags</a> are enabled
+(<code>tags.dictionaries</code>).</li>
+<li><a href="tags-inline-link.html">Inline <code>{@link}</code> tags</a> are rendered in plain text (<code>templates.cleverLinks</code>,
+<code>templates.monospaceLinks</code>).</li>
+</ul>
+<p>These options and others are explained in the following sections.</p>
+<h2 id="configuring-plugins"><a class="anchor" href="#configuring-plugins">#</a>Configuring plugins</h2>
+<p>To enable plugins, add their paths (relative to the JSDoc folder) into the <code>plugins</code> array.</p>
+<p>For example, the following JSON configuration file will enable the Markdown plugin, which converts
+Markdown-formatted text to HTML, and the &quot;summarize&quot; plugin, which autogenerates a summary for each
+doclet:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : JSON configuration file with plugins</div><div class="code"><pre><code class="hljs lang-txt">{
+    &quot;plugins&quot;: [
+        &quot;plugins/markdown&quot;,
+        &quot;plugins/summarize&quot;
+    ]
+}</code></pre></div>
+</div><p>See the <a href="about-plugins.html">plugin reference</a> for further information, and look in <a href="https://github.com/jsdoc3/jsdoc/tree/master/plugins">JSDoc&#39;s <code>plugins</code>
+directory</a> for the plugins built into JSDoc.</p>
+<p>You can configure the Markdown plugin by adding a <code>markdown</code> object to your configuration file. See
+<a href="plugins-markdown.html">Configuring the Markdown Plugin</a> for details.</p>
+<h2 id="specifying-recursion-depth"><a class="anchor" href="#specifying-recursion-depth">#</a>Specifying recursion depth</h2>
+<p>The <code>recurseDepth</code> option controls how many levels deep JSDoc will recursively search for source
+files and tutorials. This option is available in JSDoc 3.5.0 and later. This option is used only if
+you also specify the <a href="about-commandline.html"><code>-r</code> command-line flag</a>, which tells JSDoc to recursively
+search for input files.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple</div><div class="code"><pre><code class="hljs lang-js">{
+    <span class="hljs-string">&quot;recurseDepth&quot;</span>: <span class="hljs-number">10</span>
+}</code></pre></div>
+</div><h2 id="specifying-input-files"><a class="anchor" href="#specifying-input-files">#</a>Specifying input files</h2>
+<p>The <code>source</code> set of options, in combination with paths given to JSDoc on the command line,
+determines the set of input files that JSDoc uses to generate documentation.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple</div><div class="code"><pre><code class="hljs lang-js">{
+    <span class="hljs-string">&quot;source&quot;</span>: {
+        <span class="hljs-string">&quot;include&quot;</span>: [ <span class="hljs-comment">/* array of paths to files to generate documentation for */</span> ],
+        <span class="hljs-string">&quot;exclude&quot;</span>: [ <span class="hljs-comment">/* array of paths to exclude */</span> ],
+        <span class="hljs-string">&quot;includePattern&quot;</span>: <span class="hljs-string">&quot;.+\\.js(doc|x)?$&quot;</span>,
+        <span class="hljs-string">&quot;excludePattern&quot;</span>: <span class="hljs-string">&quot;(^|\\/|\\\\)_&quot;</span>
+    }
+}</code></pre></div>
+</div><ul>
+<li><code>source.include</code>: An optional array of paths that contain files for which JSDoc should generate
+documentation. The paths given to JSDoc on the command line are combined with these paths. You can
+use the <a href="about-commandline.html"><code>-r</code> command-line option</a> to recurse into subdirectories.</li>
+<li><code>source.exclude</code>: An optional array of paths that JSDoc should ignore. In JSDoc 3.3.0 and later,
+this array may include subdirectories of the paths in <code>source.include</code>.</li>
+<li><code>source.includePattern</code>: An optional string, interpreted as a regular expression. If present, all
+filenames must match this regular expression to be processed by JSDoc. By default, this option is
+set to &quot;.+\.js(doc|x)?$&quot;, meaning that only files with the extensions <code>.js</code>, <code>.jsdoc</code>, and
+<code>.jsx</code> will be processed.</li>
+<li><code>source.excludePattern</code>: An optional string, interpreted as a regular expression. If present, any
+file matching this regular expression will be ignored. By default, this option is set so that files
+beginning with an underscore (or anything under a directory beginning with an underscore) is
+ignored.</li>
+</ul>
+<p>These options are interpreted in the following order:</p>
+<ol>
+<li>Start with all paths given on the command line and in <code>source.include</code>.</li>
+<li>For each file found in Step 1, if the regular expression <code>source.includePattern</code> is present, the
+filename must match it, or it is ignored.</li>
+<li>For each file left from Step 2, if the regular expression <code>source.excludePattern</code> is present, any
+filename matching this regular expression is ignored.</li>
+<li>For each file left from Step 3, if the file&#39;s path is in <code>source.exclude</code>, it is ignored.</li>
+</ol>
+<p>All remaining files after these four steps are processed by JSDoc.</p>
+<p>As an example, suppose you have the following file structure:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple</div><div class="code"><pre><code class="hljs lang-txt">myProject/
+|- a.js
+|- b.js
+|- c.js
+|- _private
+|  |- a.js
+|- lib/
+   |- a.js
+   |- ignore.js
+   |- d.txt</code></pre></div>
+</div><p>In addition, suppose your <code>conf.json</code> file looks like this example:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple</div><div class="code"><pre><code class="hljs lang-js">{
+    <span class="hljs-string">&quot;source&quot;</span>: {
+        <span class="hljs-string">&quot;include&quot;</span>: [<span class="hljs-string">&quot;myProject/a.js&quot;</span>, <span class="hljs-string">&quot;myProject/lib&quot;</span>, <span class="hljs-string">&quot;myProject/_private&quot;</span>],
+        <span class="hljs-string">&quot;exclude&quot;</span>: [<span class="hljs-string">&quot;myProject/lib/ignore.js&quot;</span>],
+        <span class="hljs-string">&quot;includePattern&quot;</span>: <span class="hljs-string">&quot;.+\\.js(doc|x)?$&quot;</span>,
+        <span class="hljs-string">&quot;excludePattern&quot;</span>: <span class="hljs-string">&quot;(^|\\/|\\\\)_&quot;</span>
+    }
+}</code></pre></div>
+</div><p>If you run <code>jsdoc myProject/c.js -c /path/to/my/conf.json -r</code> from the file containing the
+<code>myProject</code> folder, JSDoc will generate documentation for the following files:</p>
+<ul>
+<li><code>myProject/a.js</code></li>
+<li><code>myProject/c.js</code></li>
+<li><code>myProject/lib/a.js</code></li>
+</ul>
+<p>Here&#39;s why:</p>
+<ol>
+<li>Given <code>source.include</code> and the paths given on the command line, JSDoc starts off with these
+files:<ul>
+<li><code>myProject/c.js</code> (from the command line)</li>
+<li><code>myProject/a.js</code> (from <code>source.include</code>)</li>
+<li><code>myProject/lib/a.js</code>, <code>myProject/lib/ignore.js</code>, <code>myProject/lib/d.txt</code> (from <code>source.include</code>
+ and using the <code>-r</code> option)</li>
+<li><code>myProject/_private/a.js</code> (from <code>source.include</code>)</li>
+</ul>
+</li>
+<li>JSDoc applies <code>source.includePattern</code>, leaving us with all of the above files <em>except</em>
+<code>myProject/lib/d.txt</code>, which does not end in <code>.js</code>, <code>.jsdoc</code>, or <code>.jsx</code>.</li>
+<li>JSDoc applies <code>source.excludePattern</code>, which removes <code>myProject/_private/a.js</code>.</li>
+<li>JSDoc applies <code>source.exclude</code>, which removes <code>myProject/lib/ignore.js</code>.</li>
+</ol>
+<h2 id="specifying-the-source-type"><a class="anchor" href="#specifying-the-source-type">#</a>Specifying the source type</h2>
+<p>The <code>sourceType</code> option affects how JSDoc parses your JavaScript files. This option is available in
+JSDoc 3.5.0 and later. This option accepts the following values:</p>
+<ul>
+<li><code>module</code> (default): Use this value for most types of JavaScript files.</li>
+<li><code>script</code>: Use this value if JSDoc logs errors such as <code>Delete of an unqualified identifier in strict mode</code> when it parses your code.</li>
+</ul>
+<div class="box box-example"><div class="box-title">🧪 Exemple</div><div class="code"><pre><code class="hljs lang-js">{
+    <span class="hljs-string">&quot;sourceType&quot;</span>: <span class="hljs-string">&quot;module&quot;</span>
+}</code></pre></div>
+</div><h2 id="incorporating-command-line-options-into-the-configuration-file"><a class="anchor" href="#incorporating-command-line-options-into-the-configuration-file">#</a>Incorporating command-line options into the configuration file</h2>
+<p>You can put many of JSDoc&#39;s <a href="about-commandline.html">command-line options</a> into the configuration file instead of
+specifying them on the command line. To do this, add the long names of the relevant options into an
+<code>opts</code> section of the configuration file, with the value set to the option&#39;s value.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : JSON configuration file with command-line options</div><div class="code"><pre><code class="hljs lang-js">{
+    <span class="hljs-string">&quot;opts&quot;</span>: {
+        <span class="hljs-string">&quot;template&quot;</span>: <span class="hljs-string">&quot;templates/default&quot;</span>,  <span class="hljs-comment">// same as -t templates/default</span>
+        <span class="hljs-string">&quot;encoding&quot;</span>: <span class="hljs-string">&quot;utf8&quot;</span>,               <span class="hljs-comment">// same as -e utf8</span>
+        <span class="hljs-string">&quot;destination&quot;</span>: <span class="hljs-string">&quot;./out/&quot;</span>,          <span class="hljs-comment">// same as -d ./out/</span>
+        <span class="hljs-string">&quot;recurse&quot;</span>: <span class="hljs-literal">true</span>,                  <span class="hljs-comment">// same as -r</span>
+        <span class="hljs-string">&quot;tutorials&quot;</span>: <span class="hljs-string">&quot;path/to/tutorials&quot;</span>, <span class="hljs-comment">// same as -u path/to/tutorials</span>
+    }
+}</code></pre></div>
+</div><p>By using the <code>source.include</code> and <code>opts</code> options, you can put almost all of the arguments to JSDoc
+in a configuration file, so that the command line reduces to:</p>
+<div class="code"><pre><code class="hljs lang-txt">jsdoc -c /path/to/conf.json</code></pre></div>
+<p>When options are specified on the command line <em>and</em> in the configuration file, the command line
+takes precedence.</p>
+<h2 id="configuring-tags-and-tag-dictionaries"><a class="anchor" href="#configuring-tags-and-tag-dictionaries">#</a>Configuring tags and tag dictionaries</h2>
+<p>The options in <code>tags</code> control which JSDoc tags are allowed and how each tag is interpreted.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple</div><div class="code"><pre><code class="hljs lang-js">{
+    <span class="hljs-string">&quot;tags&quot;</span>: {
+        <span class="hljs-string">&quot;allowUnknownTags&quot;</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-string">&quot;dictionaries&quot;</span>: [<span class="hljs-string">&quot;jsdoc&quot;</span>,<span class="hljs-string">&quot;closure&quot;</span>]
+    }
+}</code></pre></div>
+</div><p>The <code>tags.allowUnknownTags</code> property affects how JSDoc handles unrecognized tags. If you set this
+option to <code>false</code>, and JSDoc finds a tag that it does not recognize (for example, <code>@foo</code>), JSDoc
+logs a warning. By default, this option is set to <code>true</code>. In JSDoc 3.4.1 and later, you can also
+set this property to an array of tag names that JSDoc should allow (for example, <code>[&quot;foo&quot;,&quot;bar&quot;]</code>).</p>
+<p>The <code>tags.dictionaries</code> property controls which tags JSDoc recognizes, as well as how JSDoc
+interprets the tags that it recognizes. In JSDoc 3.3.0 and later, there are two built-in tag
+dictionaries:</p>
+<ul>
+<li><code>jsdoc</code>: Core JSDoc tags.</li>
+<li><code>closure</code>: <a href="https://github.com/google/closure-compiler/wiki/Annotating-JavaScript-for-the-Closure-Compiler#jsdoc-tags">Closure Compiler tags</a>.</li>
+</ul>
+<p>By default, both dictionaries are enabled. Also, by default, the <code>jsdoc</code> dictionary is listed first;
+as a result, if the <code>jsdoc</code> dictionary handles a tag differently than the <code>closure</code> dictionary, the
+<code>jsdoc</code> version of the tag takes precedence.</p>
+<p>If you are using JSDoc with a Closure Compiler project, and you want to avoid using tags that
+Closure Compiler does not recognize, change the <code>tags.dictionaries</code> setting to <code>[&quot;closure&quot;]</code>. You
+can also change this setting to <code>[&quot;closure&quot;,&quot;jsdoc&quot;]</code> if you want to allow core JSDoc tags, but you
+want to ensure that Closure Compiler-specific tags are interpreted as Closure Compiler would
+interpret them.</p>
+<h2 id="configuring-templates"><a class="anchor" href="#configuring-templates">#</a>Configuring templates</h2>
+<p>The options in <code>templates</code> affect the appearance and content of generated documentation. Third-party
+templates may not implement all of these options. See <a href="about-configuring-default-template.html">Configuring JSDoc&#39;s Default
+Template</a> for additional options that the default template supports.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple</div><div class="code"><pre><code class="hljs lang-js">{
+    <span class="hljs-string">&quot;templates&quot;</span>: {
+        <span class="hljs-string">&quot;cleverLinks&quot;</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-string">&quot;monospaceLinks&quot;</span>: <span class="hljs-literal">false</span>
+    }
+}</code></pre></div>
+</div><p>If <code>templates.monospaceLinks</code> is true, all link text from the <a href="tags-inline-link.html">inline <code>{@link}</code>
+tag</a> will be rendered in monospace.</p>
+<p>If <code>templates.cleverLinks</code> is true, <code>{@link asdf}</code> will be rendered in normal font if <code>asdf</code> is a
+URL, and monospace otherwise. For example, <code>{@link http://github.com}</code> will render in plain text,
+but <code>{@link MyNamespace.myFunction}</code> will be in monospace.</p>
+<p>If <code>templates.cleverLinks</code> is true, <code>templates.monospaceLinks</code> is ignored.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#configuration-file-formats">Configuration file formats</a><a class="toc-2" href="#default-configuration-options">Default configuration options</a><a class="toc-2" href="#configuring-plugins">Configuring plugins</a><a class="toc-2" href="#specifying-recursion-depth">Specifying recursion depth</a><a class="toc-2" href="#specifying-input-files">Specifying input files</a><a class="toc-2" href="#specifying-the-source-type">Specifying the source type</a><a class="toc-2" href="#incorporating-command-line-options-into-the-configuration-file">Incorporating command-line options into the configuration file</a><a class="toc-2" href="#configuring-tags-and-tag-dictionaries">Configuring tags and tag dictionaries</a><a class="toc-2" href="#configuring-templates">Configuring templates</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

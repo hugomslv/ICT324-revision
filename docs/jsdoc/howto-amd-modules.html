@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AMD Modules (JSDoc) · ICT-324 Révision</title>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/hljs.css">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../index.html">Accueil</a><a class="nav-link" href="../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../docs/index.html">Index des docs</a><a class="nav-link" href="../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../docs/vite/index.html">Vite</a><a class="nav-link active" href="../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="index.html">JSDoc</a> › howto-amd-modules  <a class="ext small" href="https://jsdoc.app/howto-amd-modules.html">version en ligne</a></div>
+<h1>AMD Modules</h1><h2 id="overview"><a class="anchor" href="#overview">#</a>Overview</h2>
+<p>JSDoc 3 makes it possible to document modules that use the <a href="https://github.com/amdjs/amdjs-api/blob/master/AMD.md">Asynchronous Module Definition (AMD)
+API</a>, which is implemented by libraries such as <a href="https://requirejs.org/">RequireJS</a>. This page explains
+how to document an AMD module for JSDoc, based on the coding conventions that your module uses.</p>
+<p>If you&#39;re documenting CommonJS or Node.js modules, see <a href="howto-commonjs-modules.html">CommonJS Modules</a> for
+instructions.</p>
+<h2 id="module-identifiers"><a class="anchor" href="#module-identifiers">#</a>Module identifiers</h2>
+<p>When you document an AMD module, you&#39;ll use an <a href="tags-exports.html"><code>@exports</code> tag</a> or
+<a href="tags-module.html"><code>@module</code> tag</a> to document the identifier that&#39;s passed to the <code>require()</code> function.
+For example, if users load the module by calling <code>require(&#39;my/shirt&#39;, /* callback */)</code>, you&#39;ll write
+a JSDoc comment that contains the tag <code>@exports my/shirt</code> or <code>@module my/shirt</code>. The examples below
+can help you decide which of these tags to use.</p>
+<p>If you use the <code>@exports</code> or <code>@module</code> tag without a value, JSDoc will try to guess the correct
+module identifier based on the filepath.</p>
+<p>When you use a JSDoc <a href="about-namepaths.html">namepath</a> to refer to a module from another JSDoc comment, you must
+add the prefix <code>module:</code>. For example, if you want the documentation for the module <code>my/pants</code> to
+link to the module <code>my/shirt</code>, you could use the <a href="tags-see.html"><code>@see</code> tag</a> to document <code>my/pants</code> as
+follows:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Pants module.
+ * <span class="hljs-doctag">@module</span> my/pants
+ * <span class="hljs-doctag">@see</span> module:my/shirt
+ */</span></code></pre></div>
+<p>Similarly, the namepath for each member of the module will start with <code>module:</code>, followed by the
+module name. For example, if your <code>my/pants</code> module exports a <code>Jeans</code> constructor, and <code>Jeans</code> has
+an instance method named <code>hem</code>, the instance method&#39;s longname is <code>module:my/pants.Jeans#hem</code>.</p>
+<h2 id="function-that-returns-an-object-literal"><a class="anchor" href="#function-that-returns-an-object-literal">#</a>Function that returns an object literal</h2>
+<p>If you define your AMD module as a function that returns an object literal, use the
+<a href="tags-exports.html"><code>@exports</code> tag</a> to document the module&#39;s name. JSDoc will automatically detect that
+the object&#39;s properties are members of the module.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Function that returns an object literal</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">define</span>(<span class="hljs-string">&#x27;my/shirt&#x27;</span>, <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+   <span class="hljs-comment">/**
+    * A module representing a shirt.
+    * <span class="hljs-doctag">@exports</span> my/shirt
+    */</span>
+    <span class="hljs-keyword">var</span> shirt = {
+        <span class="hljs-comment">/** The module&#x27;s `color` property. */</span>
+        <span class="hljs-attr">color</span>: <span class="hljs-string">&#x27;black&#x27;</span>,
+
+        <span class="hljs-comment">/**
+         * Create a new Turtleneck.
+         * <span class="hljs-doctag">@class</span>
+         * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">size</span> - The size (`XS`, `S`, `M`, `L`, `XL`, or `XXL`).
+         */</span>
+        <span class="hljs-title class_">Turtleneck</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">size</span>) {
+            <span class="hljs-comment">/** The class&#x27;s `size` property. */</span>
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">size</span> = size;
+        }
+    };
+
+    <span class="hljs-keyword">return</span> shirt;
+});</code></pre></div>
+</div><h2 id="function-that-returns-another-function"><a class="anchor" href="#function-that-returns-another-function">#</a>Function that returns another function</h2>
+<p>If you define your module as a function that exports another function, such as a constructor, you
+can use a standalone comment with a <a href="tags-module.html"><code>@module</code> tag</a> to document the module. You can then
+use an <a href="tags-alias.html"><code>@alias</code> tag</a> to tell JSDoc that the function uses the same longname as the
+module.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Function that returns a constructor</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * A module representing a jacket.
+ * <span class="hljs-doctag">@module</span> my/jacket
+ */</span>
+<span class="hljs-title function_">define</span>(<span class="hljs-string">&#x27;my/jacket&#x27;</span>, <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">/**
+     * Create a new jacket.
+     * <span class="hljs-doctag">@class</span>
+     * <span class="hljs-doctag">@alias</span> module:my/jacket
+     */</span>
+    <span class="hljs-keyword">var</span> <span class="hljs-title class_">Jacket</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// ...</span>
+    };
+
+    <span class="hljs-comment">/** Zip up the jacket. */</span>
+    <span class="hljs-title class_">Jacket</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">zip</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// ...</span>
+    };
+
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Jacket</span>;
+});</code></pre></div>
+</div><h2 id="module-declared-in-a-return-statement"><a class="anchor" href="#module-declared-in-a-return-statement">#</a>Module declared in a return statement</h2>
+<p>If you declare your module object in a function&#39;s <code>return</code> statement, you can use a standalone
+comment with a <a href="tags-module.html"><code>@module</code> tag</a> to document the module. You can then add an
+<a href="tags-alias.html"><code>@alias</code> tag</a> to tell JSDoc that the module object has the same longname as the module.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Module declared in a return statement</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Module representing a shirt.
+ * <span class="hljs-doctag">@module</span> my/shirt
+ */</span>
+
+<span class="hljs-title function_">define</span>(<span class="hljs-string">&#x27;my/shirt&#x27;</span>, <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// Do setup work here.</span>
+
+    <span class="hljs-keyword">return</span> <span class="hljs-comment">/** <span class="hljs-doctag">@alias</span> module:my/shirt */</span> {
+        <span class="hljs-comment">/** Color. */</span>
+        <span class="hljs-attr">color</span>: <span class="hljs-string">&#x27;black&#x27;</span>,
+        <span class="hljs-comment">/** Size. */</span>
+        <span class="hljs-attr">size</span>: <span class="hljs-string">&#x27;unisize&#x27;</span>
+    };
+});</code></pre></div>
+</div><h2 id="module-object-passed-to-a-function"><a class="anchor" href="#module-object-passed-to-a-function">#</a>Module object passed to a function</h2>
+<p>If the module object is passed into the function that defines your module, you can document the
+module by adding an <a href="tags-exports.html"><code>@exports</code> tag</a> to the function parameter. This pattern is
+supported in JSDoc 3.3.0 and later.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Module object passed to a function</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">define</span>(<span class="hljs-string">&#x27;my/jacket&#x27;</span>, <span class="hljs-keyword">function</span>(<span class="hljs-params">
+    <span class="hljs-comment">/**
+     * Utility functions for jackets.
+     * <span class="hljs-doctag">@exports</span> my/jacket
+     */</span>
+    <span class="hljs-variable language_">module</span></span>) {
+
+    <span class="hljs-comment">/**
+     * Zip up a jacket.
+     * <span class="hljs-doctag">@param</span> {<span class="hljs-type">Jacket</span>} <span class="hljs-variable">jacket</span> - The jacket to zip up.
+     */</span>
+    <span class="hljs-variable language_">module</span>.<span class="hljs-property">zip</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">jacket</span>) {
+        <span class="hljs-comment">// ...</span>
+    };
+});</code></pre></div>
+</div><h2 id="multiple-modules-defined-in-one-file"><a class="anchor" href="#multiple-modules-defined-in-one-file">#</a>Multiple modules defined in one file</h2>
+<p>If you define more than one AMD module in a single JavaScript file, use the
+<a href="tags-exports.html"><code>@exports</code> tag</a> to document each module object.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Multiple AMD modules defined in one file</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// one module</span>
+<span class="hljs-title function_">define</span>(<span class="hljs-string">&#x27;html/utils&#x27;</span>, <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">/**
+     * Utility functions to ease working with DOM elements.
+     * <span class="hljs-doctag">@exports</span> html/utils
+     */</span>
+    <span class="hljs-keyword">var</span> utils = {
+        <span class="hljs-comment">/**
+         * Get the value of a property on an element.
+         * <span class="hljs-doctag">@param</span> {<span class="hljs-type">HTMLElement</span>} <span class="hljs-variable">element</span> - The element.
+         * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">propertyName</span> - The name of the property.
+         * <span class="hljs-doctag">@return</span> {<span class="hljs-type">*</span>} The value of the property.
+         */</span>
+        <span class="hljs-attr">getStyleProperty</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">element, propertyName</span>) { }
+    };
+
+    <span class="hljs-comment">/**
+     * Determine if an element is in the document head.
+     * <span class="hljs-doctag">@param</span> {<span class="hljs-type">HTMLElement</span>} <span class="hljs-variable">element</span> - The element.
+     * <span class="hljs-doctag">@return</span> {<span class="hljs-type">boolean</span>} Set to `true` if the element is in the document head,
+     * `false` otherwise.
+     */</span>
+    utils.<span class="hljs-property">isInHead</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">element</span>) { }
+
+    <span class="hljs-keyword">return</span> utils;
+    }
+);
+
+<span class="hljs-comment">// another module</span>
+<span class="hljs-title function_">define</span>(<span class="hljs-string">&#x27;tag&#x27;</span>, <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">/** <span class="hljs-doctag">@exports</span> tag */</span>
+    <span class="hljs-keyword">var</span> tag = {
+        <span class="hljs-comment">/**
+         * Create a new Tag.
+         * <span class="hljs-doctag">@class</span>
+         * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">tagName</span> - The name of the tag.
+         */</span>
+        <span class="hljs-title class_">Tag</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">tagName</span>) {
+            <span class="hljs-comment">// ...</span>
+        }
+    };
+
+    <span class="hljs-keyword">return</span> tag;
+});</code></pre></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#overview">Overview</a><a class="toc-2" href="#module-identifiers">Module identifiers</a><a class="toc-2" href="#function-that-returns-an-object-literal">Function that returns an object literal</a><a class="toc-2" href="#function-that-returns-another-function">Function that returns another function</a><a class="toc-2" href="#module-declared-in-a-return-statement">Module declared in a return statement</a><a class="toc-2" href="#module-object-passed-to-a-function">Module object passed to a function</a><a class="toc-2" href="#multiple-modules-defined-in-one-file">Multiple modules defined in one file</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

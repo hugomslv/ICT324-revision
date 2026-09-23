@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>yoda (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/yoda <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/yoda">version en ligne</a></div>
+<h1>yoda</h1><p>Yoda conditions are so named because the literal value of the condition comes first while the variable comes second. For example, the following is a Yoda condition:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">if</span> (<span class="hljs-string">&quot;red&quot;</span> === color) {
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+<p>This is called a Yoda condition because it reads as, &quot;if red equals the color&quot;, similar to the way the Star Wars character Yoda speaks. Compare to the other way of arranging the operands:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">if</span> (color === <span class="hljs-string">&quot;red&quot;</span>) {
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+<p>This typically reads, &quot;if the color equals red&quot;, which is arguably a more natural way to describe the comparison.</p>
+<p>Proponents of Yoda conditions highlight that it is impossible to mistakenly use <code>=</code> instead of <code>==</code> because you cannot assign to a literal value. Doing so will cause a syntax error and you will be informed of the mistake early on. This practice was therefore very common in early programming where tools were not yet available.</p>
+<p>Opponents of Yoda conditions point out that tooling has made us better programmers because tools will catch the mistaken use of <code>=</code> instead of <code>==</code> (ESLint will catch this for you). Therefore, they argue, the utility of the pattern doesn&#39;t outweigh the readability hit the code takes while using Yoda conditions.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule aims to enforce consistent style of conditions which compare a variable to a literal value.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule can take a string option:</p>
+<ul>
+<li>If it is the default <code>&quot;never&quot;</code>, then comparisons must never be Yoda conditions.</li>
+<li>If it is <code>&quot;always&quot;</code>, then the literal value must always come first.</li>
+</ul>
+<p>The default <code>&quot;never&quot;</code> option can have exception options in an object literal:</p>
+<ul>
+<li>If the <code>&quot;exceptRange&quot;</code> property is <code>true</code>, the rule <em>allows</em> Yoda conditions in range comparisons which are wrapped directly in parentheses, including the parentheses of an <code>if</code> or <code>while</code> condition. The default value is <code>false</code>. A <em>range</em> comparison tests whether a variable is inside or outside the range between two literal values.</li>
+<li>If the <code>&quot;onlyEquality&quot;</code> property is <code>true</code>, the rule reports Yoda conditions <em>only</em> for the equality operators <code>==</code> and <code>===</code>. The default value is <code>false</code>.</li>
+</ul>
+<p>The <code>onlyEquality</code> option allows a superset of the exceptions which <code>exceptRange</code> allows, thus both options are not useful together.</p>
+<h3 id="never"><a class="anchor" href="#never">#</a>never</h3>
+<p>Examples of <strong>incorrect</strong> code for the default <code>&quot;never&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint yoda: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">if</span> (<span class="hljs-string">&quot;red&quot;</span> === color) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (<span class="hljs-string">`red`</span> === color) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (<span class="hljs-string">`red`</span> === <span class="hljs-string">`<span class="hljs-subst">${color}</span>`</span>) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span> == flag) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (<span class="hljs-number">5</span> &gt; count) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (-<span class="hljs-number">1</span> &lt; str.<span class="hljs-title function_">indexOf</span>(substr)) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (<span class="hljs-number">0</span> &lt;= x &amp;&amp; x &lt; <span class="hljs-number">1</span>) {
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the default <code>&quot;never&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint yoda: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">if</span> (<span class="hljs-number">5</span> &amp; value) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (value === <span class="hljs-string">&quot;red&quot;</span>) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (value === <span class="hljs-string">`red`</span>) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (<span class="hljs-string">`<span class="hljs-subst">${value}</span>`</span> === <span class="hljs-string">`red`</span>) {
+
+}</code></pre></div>
+</div><h3 id="exceptrange"><a class="anchor" href="#exceptrange">#</a>exceptRange</h3>
+<p>Examples of <strong>correct</strong> code for the <code>&quot;never&quot;, { &quot;exceptRange&quot;: true }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint yoda: [&quot;error&quot;, &quot;never&quot;, { &quot;exceptRange&quot;: true }]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">isReddish</span>(<span class="hljs-params">color</span>) {
+    <span class="hljs-keyword">return</span> (color.<span class="hljs-property">hue</span> &lt; <span class="hljs-number">60</span> || <span class="hljs-number">300</span> &lt; color.<span class="hljs-property">hue</span>);
+}
+
+<span class="hljs-keyword">if</span> (x &lt; -<span class="hljs-number">1</span> || <span class="hljs-number">1</span> &lt; x) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (count &lt; <span class="hljs-number">10</span> &amp;&amp; (<span class="hljs-number">0</span> &lt;= rand &amp;&amp; rand &lt; <span class="hljs-number">1</span>)) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (<span class="hljs-string">`blue`</span> &lt; x &amp;&amp; x &lt; <span class="hljs-string">`green`</span>) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">howLong</span>(<span class="hljs-params">arr</span>) {
+    <span class="hljs-keyword">return</span> (<span class="hljs-number">0</span> &lt;= arr.<span class="hljs-property">length</span> &amp;&amp; arr.<span class="hljs-property">length</span> &lt; <span class="hljs-number">10</span>) ? <span class="hljs-string">&quot;short&quot;</span> : <span class="hljs-string">&quot;long&quot;</span>;
+}</code></pre></div>
+</div><h3 id="onlyequality"><a class="anchor" href="#onlyequality">#</a>onlyEquality</h3>
+<p>Examples of <strong>correct</strong> code for the <code>&quot;never&quot;, { &quot;onlyEquality&quot;: true }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint yoda: [&quot;error&quot;, &quot;never&quot;, { &quot;onlyEquality&quot;: true }]*/</span>
+
+<span class="hljs-keyword">if</span> (x &lt; -<span class="hljs-number">1</span> || <span class="hljs-number">9</span> &lt; x) {
+}
+
+<span class="hljs-keyword">if</span> (x !== <span class="hljs-string">&#x27;foo&#x27;</span> &amp;&amp; <span class="hljs-string">&#x27;bar&#x27;</span> != x) {
+}
+
+<span class="hljs-keyword">if</span> (x !== <span class="hljs-string">`foo`</span> &amp;&amp; <span class="hljs-string">`bar`</span> != x) {
+}</code></pre></div>
+</div><h3 id="always"><a class="anchor" href="#always">#</a>always</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>&quot;always&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint yoda: [&quot;error&quot;, &quot;always&quot;]*/</span>
+
+<span class="hljs-keyword">if</span> (color == <span class="hljs-string">&quot;blue&quot;</span>) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (color == <span class="hljs-string">`blue`</span>) {
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>&quot;always&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint yoda: [&quot;error&quot;, &quot;always&quot;]*/</span>
+
+<span class="hljs-keyword">if</span> (<span class="hljs-string">&quot;blue&quot;</span> == value) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (<span class="hljs-string">`blue`</span> == value) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (<span class="hljs-string">`blue`</span> == <span class="hljs-string">`<span class="hljs-subst">${value}</span>`</span>) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (-<span class="hljs-number">1</span> &lt; str.<span class="hljs-title function_">indexOf</span>(substr)) {
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+</div><h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://en.wikipedia.org/wiki/Yoda_conditions">https://en.wikipedia.org/wiki/Yoda_conditions</a></li><li><a class="ext" href="http://thomas.tuerke.net/on/design/?with=1249091668#msg1146181680">http://thomas.tuerke.net/on/design/?with=1249091668#msg1146181680</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#never">never</a><a class="toc-3" href="#exceptrange">exceptRange</a><a class="toc-3" href="#onlyequality">onlyEquality</a><a class="toc-3" href="#always">always</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

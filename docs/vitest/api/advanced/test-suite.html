@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TestSuite (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/advanced/test-suite  <a class="ext small" href="https://vitest.dev/api/advanced/test-suite">version en ligne</a></div>
+<h1 id="testsuite"><a class="anchor" href="#testsuite">#</a>TestSuite</h1>
+<p>The <code>TestSuite</code> class represents a single suite. This class is only available in the main thread. Refer to the <a href="runner.html#tasks">&quot;Runner API&quot;</a> if you are working with runtime tasks.</p>
+<p>The <code>TestSuite</code> instance always has a <code>type</code> property with the value of <code>suite</code>. You can use it to distinguish between different task types:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">if</span> (task.<span class="hljs-property">type</span> === <span class="hljs-string">&#x27;suite&#x27;</span>) {
+  task <span class="hljs-comment">// TestSuite</span>
+}</code></pre></div>
+<h2 id="project"><a class="anchor" href="#project">#</a>project</h2>
+<p>This references the <a href="test-project.html"><code>TestProject</code></a> that the test belongs to.</p>
+<h2 id="module"><a class="anchor" href="#module">#</a>module</h2>
+<p>This is a direct reference to the <a href="test-module.html"><code>TestModule</code></a> where the test is defined.</p>
+<h2 id="name"><a class="anchor" href="#name">#</a>name</h2>
+<p>This is a suite name that was passed to the <code>describe</code> function.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;the validation logic&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// ...</span>
+})</code></pre></div>
+<h2 id="fullname"><a class="anchor" href="#fullname">#</a>fullName</h2>
+<p>The name of the suite including all parent suites separated with <code>&gt;</code> symbol. This suite has a full name &quot;the validation logic &gt; validating cities&quot;:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;the validation logic&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;validating cities&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// ...</span>
+  })
+})</code></pre></div>
+<h2 id="id"><a class="anchor" href="#id">#</a>id</h2>
+<p>This is suite&#39;s unique identifier. This ID is deterministic and will be the same for the same suite across multiple runs. The ID is based on the <a href="test-project.html">project</a> name, module ID and suite order.</p>
+<p>The ID looks like this:</p>
+<div class="code"><pre><code class="hljs lang-txt">1223128da3_0_0_0
+^^^^^^^^^^ the file hash
+           ^ suite index
+             ^ nested suite index
+               ^ test index</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You can generate file hash with <code>generateFileHash</code> function from <code>vitest/node</code> which is available since Vitest 3:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { generateFileHash } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> hash = <span class="hljs-title function_">generateFileHash</span>(
+  <span class="hljs-string">&#x27;/file/path.js&#x27;</span>, <span class="hljs-comment">// relative path</span>
+  <span class="hljs-literal">undefined</span>, <span class="hljs-comment">// the project name or `undefined` is not set</span>
+)</code></pre></div>
+</div><div class="box box-danger"><div class="box-title">🛑 Danger</div><p>Don&#39;t try to parse the ID. It can have a minus at the start: <code>-1223128da3_0_0_0</code>.</p>
+</div><h2 id="location"><a class="anchor" href="#location">#</a>location</h2>
+<p>The location in the module where the suite was defined. Locations are collected only if <a href="../../config/includetasklocation.html"><code>includeTaskLocation</code></a> is enabled in the config. Note that this option is automatically enabled if <code>--reporter=html</code>, <code>--ui</code> or <code>--browser</code> flags are used.</p>
+<p>The location of this suite will be equal to <code>{ line: 3, column: 1 }</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts:line-numbers">import { describe } from 'vitest'
+
+describe('the validation works correctly', () =&gt; {
+  // ...
+})</code></pre></div>
+<h2 id="parent"><a class="anchor" href="#parent">#</a>parent</h2>
+<p>Parent suite. If the suite was called directly inside the <a href="test-module.html">module</a>, the parent will be the module itself.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>options</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">TaskOptions</span> {
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">each</span>: <span class="hljs-built_in">boolean</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">fails</span>: <span class="hljs-built_in">boolean</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">concurrent</span>: <span class="hljs-built_in">boolean</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">shuffle</span>: <span class="hljs-built_in">boolean</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">retry</span>: <span class="hljs-built_in">number</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">repeats</span>: <span class="hljs-built_in">number</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">tags</span>: <span class="hljs-built_in">string</span>[] | <span class="hljs-literal">undefined</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">mode</span>: <span class="hljs-string">&#x27;run&#x27;</span> | <span class="hljs-string">&#x27;only&#x27;</span> | <span class="hljs-string">&#x27;skip&#x27;</span> | <span class="hljs-string">&#x27;todo&#x27;</span>
+}</code></pre></div>
+<p>The options that suite was collected with.</p>
+<h2 id="children"><a class="anchor" href="#children">#</a>children</h2>
+<p>This is a <a href="test-collection.html">collection</a> of all suites and tests inside the current suite.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> task <span class="hljs-keyword">of</span> suite.<span class="hljs-property">children</span>) {
+  <span class="hljs-keyword">if</span> (task.<span class="hljs-property">type</span> === <span class="hljs-string">&#x27;test&#x27;</span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;test&#x27;</span>, task.<span class="hljs-property">fullName</span>)
+  }
+  <span class="hljs-keyword">else</span> {
+    <span class="hljs-comment">// task is TaskSuite</span>
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;suite&#x27;</span>, task.<span class="hljs-property">name</span>)
+  }
+}</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that <code>suite.children</code> will only iterate the first level of nesting, it won&#39;t go deeper. If you need to iterate over all tests or suites, use <a href="test-collection.html#alltests"><code>children.allTests()</code></a> or <a href="test-collection.html#allsuites"><code>children.allSuites()</code></a>. If you need to iterate over everything, use recursive function:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">visit</span>(<span class="hljs-params"><span class="hljs-attr">collection</span>: <span class="hljs-title class_">TestCollection</span></span>) {
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> task <span class="hljs-keyword">of</span> collection) {
+    <span class="hljs-keyword">if</span> (task.<span class="hljs-property">type</span> === <span class="hljs-string">&#x27;suite&#x27;</span>) {
+      <span class="hljs-comment">// report a suite</span>
+      <span class="hljs-title function_">visit</span>(task.<span class="hljs-property">children</span>)
+    }
+    <span class="hljs-keyword">else</span> {
+      <span class="hljs-comment">// report a test</span>
+    }
+  }
+}</code></pre></div>
+</div><h2 id="ok"><a class="anchor" href="#ok">#</a>ok</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">ok</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">boolean</span></code></pre></div>
+<p>Checks if the suite has any failed tests. This will also return <code>false</code> if suite failed during collection. In that case, check the <a href="#errors"><code>errors()</code></a> for thrown errors.</p>
+<h2 id="state"><a class="anchor" href="#state">#</a>state</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">state</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">TestSuiteState</span></code></pre></div>
+<p>Checks the running state of the suite. Possible return values:</p>
+<ul>
+<li><strong>pending</strong>: the tests in this suite did not finish running yet.</li>
+<li><strong>failed</strong>: this suite has failed tests or they couldn&#39;t be collected. If <a href="#errors"><code>errors()</code></a> is not empty, it means the suite failed to collect tests.</li>
+<li><strong>passed</strong>: every test inside this suite has passed.</li>
+<li><strong>skipped</strong>: this suite was skipped during collection.</li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that <a href="test-module.html">test module</a> also has a <code>state</code> method that returns the same values, but it can also return an additional <code>queued</code> state if the module wasn&#39;t executed yet.</p>
+</div><h2 id="errors"><a class="anchor" href="#errors">#</a>errors</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">errors</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">TestError</span>[]</code></pre></div>
+<p>Errors that happened outside of the test run during collection, like syntax errors.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;collection failed&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;a custom error&#x27;</span>)
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that errors are serialized into simple objects: <code>instanceof Error</code> will always return <code>false</code>.</p>
+</div><h2 id="meta"><a class="anchor" href="#meta">#</a>meta <Version>3.1.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">meta</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">TaskMeta</span></code></pre></div>
+<p>Custom <a href="metadata.html">metadata</a> that was attached to the suite during its execution or collection. Since Vitest 4.1, the meta can be attached by providing a <code>meta</code> object during test collection:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, test, <span class="hljs-title class_">TestRunner</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;the validation works correctly&#x27;</span>, { <span class="hljs-attr">meta</span>: { <span class="hljs-attr">decorated</span>: <span class="hljs-literal">true</span> } }, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;some test&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ task }</span>) =&gt;</span> {
+    <span class="hljs-comment">// assign &quot;decorated&quot; during test run, it will be available</span>
+    <span class="hljs-comment">// only in onTestCaseReady hook</span>
+    task.<span class="hljs-property">suite</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">decorated</span> = <span class="hljs-literal">false</span>
+
+    <span class="hljs-comment">// tests inherit suite&#x27;s metadata</span>
+    task.<span class="hljs-property">meta</span>.<span class="hljs-property">decorated</span> === <span class="hljs-literal">true</span>
+  })
+})</code></pre></div>
+<p>Note that suite metadata will be inherited by tests since Vitest 4.1.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If metadata was attached during collection (outside of the <code>test</code> function), then it will be available in <a href="reporters.html#ontestmodulecollected"><code>onTestModuleCollected</code></a> hook in the custom reporter.</p>
+</div><h2 id="logs"><a class="anchor" href="#logs">#</a>logs <Version>5.0.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">logs</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">ReadonlyArray</span>&lt;<span class="hljs-title class_">UserConsoleLog</span>&gt;</code></pre></div>
+<p>Console logs recorded during test collection of this suite. For example:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;included&#x27;</span>)
+
+  <span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;included&#x27;</span>)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;not included&#x27;</span>)
+  })
+})</code></pre></div>
+<h2 id="totestspecification"><a class="anchor" href="#totestspecification">#</a>toTestSpecification <Version>4.1.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toTestSpecification</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">TestSpecification</span></code></pre></div>
+<p>Returns a new <a href="test-specification.html">test specification</a> that can be used to filter or run this specific test suite.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#project">project</a><a class="toc-2" href="#module">module</a><a class="toc-2" href="#name">name</a><a class="toc-2" href="#fullname">fullName</a><a class="toc-2" href="#id">id</a><a class="toc-2" href="#location">location</a><a class="toc-2" href="#parent">parent</a><a class="toc-2" href="#options">options</a><a class="toc-2" href="#children">children</a><a class="toc-2" href="#ok">ok</a><a class="toc-2" href="#state">state</a><a class="toc-2" href="#errors">errors</a><a class="toc-2" href="#meta">meta 3.1.0</a><a class="toc-2" href="#logs">logs 5.0.0</a><a class="toc-2" href="#totestspecification">toTestSpecification 4.1.0</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

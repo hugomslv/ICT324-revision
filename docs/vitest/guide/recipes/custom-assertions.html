@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Custom Assertion Helpers | Recipes (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/recipes/custom-assertions  <a class="ext small" href="https://vitest.dev/guide/recipes/custom-assertions">version en ligne</a></div>
+<h1 id="custom-assertion-helpers"><a class="anchor" href="#custom-assertion-helpers">#</a>Custom Assertion Helpers</h1>
+<p>Reusable assertion helpers make tests easier to read, at the cost of stack traces. When an assertion fails inside a helper, the trace points at the line inside the helper rather than the test that called it. With the same helper used across many tests, the stack trace alone doesn&#39;t identify which call site failed.</p>
+<p><a href="../../api/vi.html#vi-defineHelper"><code>vi.defineHelper</code></a> <Version>4.1.0</Version> wraps a function so Vitest strips its internals from the stack and points the error back at the call site instead.</p>
+<h2 id="pattern"><a class="anchor" href="#pattern">#</a>Pattern</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> assertPair = vi.<span class="hljs-title function_">defineHelper</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">a</span>: <span class="hljs-built_in">unknown</span>, <span class="hljs-attr">b</span>: <span class="hljs-built_in">unknown</span></span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(a).<span class="hljs-title function_">toEqual</span>(b) <span class="hljs-comment">// ❌ failure does NOT point here</span>
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;example&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">assertPair</span>(<span class="hljs-string">&#x27;left&#x27;</span>, <span class="hljs-string">&#x27;right&#x27;</span>) <span class="hljs-comment">// ✅ failure points here</span>
+})</code></pre></div>
+<p>When <code>assertPair</code> fails, the diff and stack frame surface the test line that called it. That&#39;s the same behaviour built-in matchers give you.</p>
+<h2 id="composing-multiple-expectations"><a class="anchor" href="#composing-multiple-expectations">#</a>Composing multiple expectations</h2>
+<p>The same wrapper works for helpers that bundle several assertions:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> expectValidUser = vi.<span class="hljs-title function_">defineHelper</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">user</span>: <span class="hljs-built_in">unknown</span></span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;id&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;email&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(user.<span class="hljs-property">email</span>).<span class="hljs-title function_">toMatch</span>(<span class="hljs-regexp">/@/</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;returns a valid user&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> user = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetchUser</span>(<span class="hljs-string">&#x27;alice&#x27;</span>)
+  <span class="hljs-title function_">expectValidUser</span>(user)
+})</code></pre></div>
+<p>A failure in any of the inner <code>expect</code> calls is reported against the <code>expectValidUser(user)</code> line in the test.</p>
+<p>Reach for <code>defineHelper</code> whenever a reusable check calls <code>expect</code> more than once, whether that&#39;s a domain-specific helper like <code>expectValidJWT</code> or any block of <code>expect</code> calls you&#39;d otherwise inline into every test.</p>
+<p>For asymmetric matchers and custom matchers attached to <code>expect.extend</code>, see <a href="../extending-matchers.html">Extending Matchers</a>.</p>
+<h2 id="see-also"><a class="anchor" href="#see-also">#</a>See also</h2>
+<ul>
+<li><a href="../../api/vi.html#vi-defineHelper"><code>vi.defineHelper</code></a></li>
+<li><a href="../extending-matchers.html">Extending Matchers</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#pattern">Pattern</a><a class="toc-2" href="#composing-multiple-expectations">Composing multiple expectations</a><a class="toc-2" href="#see-also">See also</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

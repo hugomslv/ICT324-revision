@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>strict (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/strict <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/strict">version en ligne</a></div>
+<h1>strict</h1><p>A strict mode directive is a <code>&quot;use strict&quot;</code> literal at the beginning of a script or function body. It enables strict mode semantics.</p>
+<p>When a directive occurs in global scope, strict mode applies to the entire script:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-meta">&quot;use strict&quot;</span>;
+
+<span class="hljs-comment">// strict mode</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// strict mode</span>
+}</code></pre></div>
+<p>When a directive occurs at the beginning of a function body, strict mode applies only to that function, including all contained functions:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-string">&quot;use strict&quot;</span>;
+    <span class="hljs-comment">// strict mode</span>
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo2</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// not strict mode</span>
+};
+
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-string">&quot;use strict&quot;</span>;
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// strict mode</span>
+    }
+}());</code></pre></div>
+<p>In the <strong>CommonJS</strong> module system, a hidden function wraps each module and limits the scope of a &quot;global&quot; strict mode directive.</p>
+<p>In <strong>ECMAScript</strong> modules, which always have strict mode semantics, the directives are unnecessary.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule requires or disallows strict mode directives.</p>
+<p>This rule disallows strict mode directives, no matter which option is specified, if ESLint configuration specifies either of the following as <a href="../use/configure/language-options.html#specify-javascript-options">parser options</a>:</p>
+<ul>
+<li><code>&quot;sourceType&quot;: &quot;module&quot;</code> that is, files are <strong>ECMAScript</strong> modules.</li>
+<li><code>&quot;impliedStrict&quot;: true</code> property in the <code>ecmaFeatures</code> object.</li>
+</ul>
+<p>This rule disallows strict mode directives, no matter which option is specified, in functions with non-simple parameter lists (for example, parameter lists with default parameter values) because that is a syntax error in <strong>ECMAScript 2016</strong> and later. See the examples of the <a href="#function">function</a> option.</p>
+<p>This rule does not apply to class static blocks, no matter which option is specified, because class static blocks do not have directives. Therefore, a <code>&quot;use strict&quot;</code> statement in a class static block is not a directive, and will be reported by the <a href="no-unused-expressions.html">no-unused-expressions</a> rule.</p>
+<p>The <code>--fix</code> option on the command line does not insert new <code>&quot;use strict&quot;</code> statements, but only removes unneeded statements.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has a string option:</p>
+<ul>
+<li><code>&quot;safe&quot;</code> (default) corresponds either of the following options:<ul>
+<li><code>&quot;global&quot;</code> if ESLint considers a file to be a <strong>CommonJS</strong> module</li>
+<li><code>&quot;function&quot;</code> otherwise</li>
+</ul>
+</li>
+<li><code>&quot;global&quot;</code> requires one strict mode directive in the global scope (and disallows any other strict mode directives)</li>
+<li><code>&quot;function&quot;</code> requires one strict mode directive in each top-level function declaration or expression (and disallows any other strict mode directives)</li>
+<li><code>&quot;never&quot;</code> disallows strict mode directives</li>
+</ul>
+<h3 id="safe"><a class="anchor" href="#safe">#</a>safe</h3>
+<p>The <code>&quot;safe&quot;</code> option corresponds to the <code>&quot;global&quot;</code> option if ESLint considers a file to be a <strong>Node.js</strong> or <strong>CommonJS</strong> module because the configuration specifies either of the following:</p>
+<ul>
+<li><code>&quot;sourceType&quot;: &quot;commonjs&quot;</code> in <a href="../use/configure/language-options.html#specify-javascript-options">language options</a></li>
+<li><code>&quot;globalReturn&quot;: true</code> property in the <code>ecmaFeatures</code> object of <a href="../use/configure/language-options.html#specify-parser-options">parser options</a></li>
+</ul>
+<p>Otherwise the <code>&quot;safe&quot;</code> option corresponds to the <code>&quot;function&quot;</code> option.</p>
+<h3 id="global"><a class="anchor" href="#global">#</a>global</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;global&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint strict: [&quot;error&quot;, &quot;global&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+}</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint strict: [&quot;error&quot;, &quot;global&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-string">&quot;use strict&quot;</span>;
+}</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint strict: [&quot;error&quot;, &quot;global&quot;]*/</span>
+<span class="hljs-meta">
+&quot;use strict&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-string">&quot;use strict&quot;</span>;
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;global&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint strict: [&quot;error&quot;, &quot;global&quot;]*/</span>
+<span class="hljs-meta">
+&quot;use strict&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+}</code></pre></div>
+</div><h3 id="function"><a class="anchor" href="#function">#</a>function</h3>
+<p>This option ensures that all function bodies are strict mode code, while global code is not. Particularly if a build step concatenates multiple scripts, a strict mode directive in global code of one script could unintentionally enable strict mode in another script that was not intended to be strict code.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;function&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint strict: [&quot;error&quot;, &quot;function&quot;]*/</span>
+<span class="hljs-meta">
+&quot;use strict&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+}</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint strict: [&quot;error&quot;, &quot;function&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+}
+
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-string">&quot;use strict&quot;</span>;
+    }
+}());</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint strict: [&quot;error&quot;, &quot;function&quot;]*/</span>
+
+<span class="hljs-comment">// Illegal &quot;use strict&quot; directive in function with non-simple parameter list.</span>
+<span class="hljs-comment">// This is a syntax error since ES2016.</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">a = <span class="hljs-number">1</span></span>) {
+    <span class="hljs-string">&quot;use strict&quot;</span>;
+}
+
+<span class="hljs-comment">// We cannot write &quot;use strict&quot; directive in this function.</span>
+<span class="hljs-comment">// So we have to wrap this function with a function with &quot;use strict&quot; directive.</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">a = <span class="hljs-number">1</span></span>) {
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;function&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint strict: [&quot;error&quot;, &quot;function&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-string">&quot;use strict&quot;</span>;
+}
+
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-string">&quot;use strict&quot;</span>;
+
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {
+    }
+
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">baz</span>(<span class="hljs-params">a = <span class="hljs-number">1</span></span>) {
+    }
+}());
+
+<span class="hljs-keyword">const</span> foo2 = (<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-string">&quot;use strict&quot;</span>;
+
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">a = <span class="hljs-number">1</span></span>) {
+    };
+}());</code></pre></div>
+</div><h3 id="never"><a class="anchor" href="#never">#</a>never</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;never&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint strict: [&quot;error&quot;, &quot;never&quot;]*/</span>
+<span class="hljs-meta">
+&quot;use strict&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+}</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint strict: [&quot;error&quot;, &quot;never&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-string">&quot;use strict&quot;</span>;
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;never&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint strict: [&quot;error&quot;, &quot;never&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+}</code></pre></div>
+</div><h3 id="earlier-default-removed"><a class="anchor" href="#earlier-default-removed">#</a>earlier default (removed)</h3>
+<p>(removed) The default option (that is, no string option specified) for this rule was <strong>removed</strong> in ESLint v1.0. The <code>&quot;function&quot;</code> option is most similar to the removed option.</p>
+<p>This option ensures that all functions are executed in strict mode. A strict mode directive must be present in global code or in every top-level function declaration or expression. It does not concern itself with unnecessary strict mode directives in nested functions that are already strict, nor with multiple strict mode directives at the same level.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with the earlier default option which has been removed:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// &quot;strict&quot;: &quot;error&quot;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+}</code></pre></div>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// &quot;strict&quot;: &quot;error&quot;</span>
+
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-string">&quot;use strict&quot;</span>;
+    }
+}());</code></pre></div>
+<p>Examples of <strong>correct</strong> code for this rule with the earlier default option which has been removed:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// &quot;strict&quot;: &quot;error&quot;</span>
+<span class="hljs-meta">
+&quot;use strict&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+}</code></pre></div>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// &quot;strict&quot;: &quot;error&quot;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-string">&quot;use strict&quot;</span>;
+}</code></pre></div>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// &quot;strict&quot;: &quot;error&quot;</span>
+
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-string">&quot;use strict&quot;</span>;
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-string">&quot;use strict&quot;</span>;
+    }
+}());</code></pre></div>
+<h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>In a codebase that has both strict and non-strict code, either turn this rule off, or <a href="../use/configure/rules.html#disable-rules">selectively disable it</a> where necessary. For example, functions referencing <code>arguments.callee</code> are invalid in strict mode. A <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode/Transitioning_to_strict_mode#Differences_from_non-strict_to_strict">full list of strict mode differences</a> is available on MDN.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#safe">safe</a><a class="toc-3" href="#global">global</a><a class="toc-3" href="#function">function</a><a class="toc-3" href="#never">never</a><a class="toc-3" href="#earlier-default-removed">earlier default (removed)</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

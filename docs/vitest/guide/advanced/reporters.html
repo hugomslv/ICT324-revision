@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Extending Reporters advanced (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/advanced/reporters  <a class="ext small" href="https://vitest.dev/guide/advanced/reporters">version en ligne</a></div>
+<h1 id="extending-reporters"><a class="anchor" href="#extending-reporters">#</a>Extending Reporters <Badge type="danger">advanced</Badge></h1>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This is an advanced API. If you just want to configure built-in reporters, read the <a href="../reporters.html">&quot;Reporters&quot;</a> guide.</p>
+</div><p>You can import reporters from <code>vitest/node</code> and extend them to create your custom reporters.</p>
+<h2 id="extending-built-in-reporters"><a class="anchor" href="#extending-built-in-reporters">#</a>Extending Built-in Reporters</h2>
+<p>In general, you don&#39;t need to create your reporter from scratch. <code>vitest</code> comes with several default reporting programs that you can extend.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">DefaultReporter</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MyDefaultReporter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">DefaultReporter</span> {
+  <span class="hljs-comment">// do something</span>
+}</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>However, note that exposed reports are not considered stable and can change the shape of their API within a minor version.</p>
+</div><p>Of course, you can create your reporter from scratch. Just implement the <a href="../../api/advanced/reporters.html"><code>Reporter</code></a> interface:</p>
+<p>And here is an example of a custom reporter:</p>
+<div class="code"><div class="code-title">custom-reporter.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">Reporter</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">CustomReporter</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Reporter</span> {
+  <span class="hljs-title function_">onTestModuleCollected</span>(<span class="hljs-params">testModule</span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(testModule.<span class="hljs-property">moduleId</span>, <span class="hljs-string">&#x27;is finished&#x27;</span>)
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> test <span class="hljs-keyword">of</span> testModule.<span class="hljs-property">children</span>.<span class="hljs-title function_">allTests</span>()) {
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(test.<span class="hljs-property">name</span>, test.<span class="hljs-title function_">result</span>().<span class="hljs-property">state</span>)
+    }
+  }
+}</code></pre></div>
+<p>Then you can use your custom reporter in the <code>vitest.config.ts</code> file:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">CustomReporter</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./custom-reporter.js&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-keyword">new</span> <span class="hljs-title class_">CustomReporter</span>()],
+  },
+})</code></pre></div>
+<h2 id="reported-tasks"><a class="anchor" href="#reported-tasks">#</a>Reported Tasks</h2>
+<p>Reported <a href="../../api/advanced/reporters.html">events</a> receive tasks for <a href="../../api/advanced/test-case.html">tests</a>, <a href="../../api/advanced/test-suite.html">suites</a> and <a href="../../api/advanced/test-module.html">modules</a>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">Reporter</span>, <span class="hljs-title class_">TestModule</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MyReporter</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Reporter</span> {
+  <span class="hljs-title function_">onTestRunEnd</span>(<span class="hljs-params"><span class="hljs-attr">testModules</span>: <span class="hljs-title class_">ReadonlyArray</span>&lt;<span class="hljs-title class_">TestModule</span>&gt;</span>) {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> testModule <span class="hljs-keyword">of</span> testModules) {
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> task <span class="hljs-keyword">of</span> testModule.<span class="hljs-property">children</span>) {
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;test run end&#x27;</span>, task.<span class="hljs-property">type</span>, task.<span class="hljs-property">fullName</span>)
+      }
+    }
+  }
+}</code></pre></div>
+<h2 id="storing-artifacts-on-file-system"><a class="anchor" href="#storing-artifacts-on-file-system">#</a>Storing artifacts on file system</h2>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Vitest provides <a href="../../api/advanced/vitest.html#createreport"><code>vitest.createReport</code></a> that exposes collection of utilities for writing artifacts on file system conveniently.</p>
+</div><p>If your custom reporter needs to store any artifacts on file system it should place them inside <code>.vitest</code> directory. This directory is a convention that Vitest reporters and third party integrations can use to co-locate their results in a single directory. This way users of your custom reporter do not need to add multiple exclusion in their <code>.gitignore</code>. Only the <code>.vitest</code> is needed.</p>
+<p>Reporters and other integrations should respect following rules around <code>.vitest</code> directory:</p>
+<ul>
+<li><code>.vitest</code> directory is placed in <a href="../../config/root.html">the <code>root</code> of the project</a></li>
+<li>Reporter can create <code>.vitest</code> directory if it does not already exist</li>
+<li>Reporter should never remove <code>.vitest</code> directory</li>
+<li>Reporter should create their own directory inside <code>.vitest</code>, for example <code>.vitest/yaml-reporter/</code></li>
+<li>Reporter can remove their own specific directory inside <code>.vitest</code>, for example <code>.vitest/yaml-reporter/</code></li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ansi">.vitest
+│
+├── yaml-reporter
+│   ├── results.yaml
+│   └── summary.yaml
+│
+└── junit-reporter
+    └── report.xml</code></pre></div>
+<h2 id="exported-reporters"><a class="anchor" href="#exported-reporters">#</a>Exported Reporters</h2>
+<p><code>vitest</code> comes with a few <a href="../reporters.html">built-in reporters</a> that you can use out of the box.</p>
+<h3 id="built-in-reporters"><a class="anchor" href="#built-in-reporters">#</a>Built-in reporters:</h3>
+<ol>
+<li><code>DefaultReporter</code></li>
+<li><code>DotReporter</code></li>
+<li><code>JsonReporter</code></li>
+<li><code>VerboseReporter</code></li>
+<li><code>TapReporter</code></li>
+<li><code>JUnitReporter</code></li>
+<li><code>TapFlatReporter</code></li>
+<li><code>HangingProcessReporter</code></li>
+<li><code>TreeReporter</code></li>
+</ol>
+<h3 id="interface-reporters"><a class="anchor" href="#interface-reporters">#</a>Interface reporters:</h3>
+<ol>
+<li><code>Reporter</code></li>
+</ol>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#extending-built-in-reporters">Extending Built-in Reporters</a><a class="toc-2" href="#reported-tasks">Reported Tasks</a><a class="toc-2" href="#storing-artifacts-on-file-system">Storing artifacts on file system</a><a class="toc-2" href="#exported-reporters">Exported Reporters</a><a class="toc-3" href="#built-in-reporters">Built-in reporters:</a><a class="toc-3" href="#interface-reporters">Interface reporters:</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

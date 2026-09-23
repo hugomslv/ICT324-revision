@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-restricted-syntax (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-restricted-syntax <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-restricted-syntax">version en ligne</a></div>
+<h1>no-restricted-syntax</h1><p>JavaScript has a lot of language features, and not everyone likes all of them. As a result, some projects choose to disallow the use of certain language features altogether. For instance, you might decide to disallow the use of <code>try-catch</code> or <code>class</code>, or you might decide to disallow the use of the <code>in</code> operator.</p>
+<p>Rather than creating separate rules for every language feature you want to turn off, this rule allows you to configure the syntax elements you want to restrict use of. For the JavaScript language, these elements are represented by their <a href="https://github.com/estree/estree">ESTree</a> node types. For example, a function declaration is represented by <code>FunctionDeclaration</code> and the <code>with</code> statement is represented by <code>WithStatement</code>. You may use <a href="https://explorer.eslint.org">Code Explorer</a> to determine the nodes that represent your code.</p>
+<p>You can also specify <a href="https://eslint.org/docs/latest/extend/selectors" class="ext" title="lien en ligne (non disponible hors-ligne)">AST selectors</a> to restrict, allowing much more precise control over syntax patterns.</p>
+<p>Note: This rule can be used with any language you lint using ESLint. To see what type of nodes your code in another language consists of, you can use:</p>
+<ul>
+<li><a href="https://typescript-eslint.io/play">typescript-eslint Playground</a> if you&#39;re using ESLint with <code>typescript-eslint</code>.</li>
+<li><a href="https://explorer.eslint.org/">ESLint Code Explorer</a> if you&#39;re using ESLint to lint JavaScript, JSON, Markdown, or CSS.</li>
+</ul>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule disallows specified (that is, user-defined) syntax.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule takes a list of strings, where each string is an AST selector:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;rules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;no-restricted-syntax&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;FunctionExpression&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;WithStatement&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;BinaryExpression[operator=&#x27;in&#x27;]&quot;</span><span class="hljs-punctuation">]</span>
+    <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Alternatively, the rule also accepts objects, where the selector and an optional custom message are specified:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;rules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;no-restricted-syntax&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+            <span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;selector&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;FunctionExpression&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Function expressions are not allowed.&quot;</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;selector&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;CallExpression[callee.name=&#x27;setTimeout&#x27;][arguments.length!=2]&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;setTimeout must always be invoked with two arguments.&quot;</span>
+            <span class="hljs-punctuation">}</span>
+        <span class="hljs-punctuation">]</span>
+    <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>If a custom message is specified with the <code>message</code> property, ESLint will use that message when reporting occurrences of the syntax specified in the <code>selector</code> property.</p>
+<p>The string and object formats can be freely mixed in the configuration as needed.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;FunctionExpression&quot;, &quot;WithStatement&quot;, BinaryExpression[operator=&#39;in&#39;]</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-restricted-syntax: [&quot;error&quot;, &quot;FunctionExpression&quot;, &quot;WithStatement&quot;, &quot;BinaryExpression[operator=&#x27;in&#x27;]&quot;] */</span>
+
+<span class="hljs-title function_">with</span> (me) {
+    <span class="hljs-title function_">dontMess</span>();
+}
+
+<span class="hljs-keyword">const</span> doSomething = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {};
+
+foo <span class="hljs-keyword">in</span> bar;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;FunctionExpression&quot;, &quot;WithStatement&quot;, BinaryExpression[operator=&#39;in&#39;]</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-restricted-syntax: [&quot;error&quot;, &quot;FunctionExpression&quot;, &quot;WithStatement&quot;, &quot;BinaryExpression[operator=&#x27;in&#x27;]&quot;] */</span>
+
+me.<span class="hljs-title function_">dontMess</span>();
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomething</span>(<span class="hljs-params"></span>) {};
+
+foo <span class="hljs-keyword">instanceof</span> bar;</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you don&#39;t want to restrict your code from using any JavaScript features or syntax, you should not use this rule.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="no-alert.html"><code>no-alert</code></a>, <a href="no-console.html"><code>no-console</code></a>, <a href="no-debugger.html"><code>no-debugger</code></a>, <a href="no-restricted-properties.html"><code>no-restricted-properties</code></a></p></div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

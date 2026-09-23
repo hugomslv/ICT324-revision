@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auto-Cleanup with `using` | Recipes (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/recipes/explicit-resources  <a class="ext small" href="https://vitest.dev/guide/recipes/explicit-resources">version en ligne</a></div>
+<h1 id="auto-cleanup-with-using"><a class="anchor" href="#auto-cleanup-with-using">#</a>Auto-Cleanup with <code>using</code></h1>
+<p>Spies and mocks need to be restored after the test that installed them, otherwise state leaks between tests. The usual approaches are an <code>afterEach(() =&gt; vi.restoreAllMocks())</code> at the suite level or a per-test <a href="../../api/hooks.html#ontestfinished"><code>onTestFinished(() =&gt; spy.mockRestore())</code></a> inline.</p>
+<p>If your runtime supports <a href="https://github.com/tc39/proposal-explicit-resource-management">Explicit Resource Management</a> (Node.js 24+, or via TypeScript 5.2+ in modern bundlers), there&#39;s a tighter option: declare the spy with <code>using</code> instead of <code>const</code>, and restoration happens automatically when the block exits.</p>
+<p>This works for <a href="../../api/vi.html#vi-spyon"><code>vi.spyOn</code></a>, <a href="../../api/vi.html#vi-fn"><code>vi.fn</code></a>, and <a href="../../api/vi.html#vi-domock"><code>vi.doMock</code></a>. <Version>3.2.0</Version></p>
+<h2 id="pattern"><a class="anchor" href="#pattern">#</a>Pattern</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, it, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">debug</span>(<span class="hljs-params"><span class="hljs-attr">message</span>: <span class="hljs-built_in">string</span></span>) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(message)
+}
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;calls console.log&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">using</span> spy = vi.<span class="hljs-title function_">spyOn</span>(<span class="hljs-variable language_">console</span>, <span class="hljs-string">&#x27;log&#x27;</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> {})
+  <span class="hljs-title function_">debug</span>(<span class="hljs-string">&#x27;message&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-title function_">toHaveBeenCalled</span>()
+})
+
+<span class="hljs-comment">// console.log is restored here without an afterEach</span></code></pre></div>
+<p>The same pattern works with <code>vi.doMock</code>, which returns a disposable that queues an unmock when the scope exits:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, it, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;uses the mocked module, then the real one&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  {
+    <span class="hljs-keyword">using</span> _mock = vi.<span class="hljs-title function_">doMock</span>(<span class="hljs-string">&#x27;./users&#x27;</span>, <span class="hljs-function">() =&gt;</span> ({
+      <span class="hljs-attr">loadUser</span>: <span class="hljs-function">() =&gt;</span> ({ <span class="hljs-attr">id</span>: <span class="hljs-string">&#x27;1&#x27;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span> }),
+    }))
+    <span class="hljs-keyword">const</span> { loadUser } = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./users&#x27;</span>)
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">loadUser</span>(<span class="hljs-string">&#x27;alice&#x27;</span>).<span class="hljs-property">name</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)
+  }
+
+  <span class="hljs-comment">// ./users is unmocked from here on</span>
+})</code></pre></div>
+<h2 id="scoped-to-any-block"><a class="anchor" href="#scoped-to-any-block">#</a>Scoped to any block</h2>
+<p><code>using</code> is block-scoped, so you can install a spy for just part of a test. This is the case neither <code>afterEach</code> nor <code>onTestFinished</code> covers, since both run after the test ends:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, it, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;only mocks fetch for the auth call&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// real fetch here</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">preloadConfig</span>(<span class="hljs-params"></span>)
+
+  {
+    <span class="hljs-keyword">using</span> fetchSpy = vi.<span class="hljs-title function_">spyOn</span>(globalThis, <span class="hljs-string">&#x27;fetch&#x27;</span>)
+      .<span class="hljs-title function_">mockResolvedValue</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Response</span>(<span class="hljs-string">&#x27;{&quot;ok&quot;:true}&#x27;</span>))
+
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">login</span>(<span class="hljs-string">&#x27;alice&#x27;</span>, <span class="hljs-string">&#x27;secret&#x27;</span>)
+    <span class="hljs-title function_">expect</span>(fetchSpy).<span class="hljs-title function_">toHaveBeenCalledOnce</span>()
+  }
+
+  <span class="hljs-comment">// real fetch is back</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">reportSuccess</span>()
+})</code></pre></div>
+<p>This is also a way to avoid turning on the global <a href="../../config/restoremocks.html"><code>restoreMocks: true</code></a> config when only a handful of calls actually need restoration.</p>
+<h2 id="compatibility"><a class="anchor" href="#compatibility">#</a>Compatibility</h2>
+<p><code>using</code> requires support for the TC39 Explicit Resource Management proposal:</p>
+<ul>
+<li>TypeScript ≥ 5.2 (with <code>target: &#39;es2022&#39;</code> or higher and the <code>disposable</code> lib included by default).</li>
+<li>Node.js ≥ 24 (or Node 22+ with <code>--harmony</code>-style flags) for native runtime support.</li>
+</ul>
+<p>If your environment doesn&#39;t support it yet, the closest equivalent for whole-test cleanup is <a href="../../api/hooks.html#ontestfinished"><code>onTestFinished</code></a>, which registers the cleanup inline and runs after the test completes regardless of pass or failure:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, it, onTestFinished, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;calls console.log&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">spyOn</span>(<span class="hljs-variable language_">console</span>, <span class="hljs-string">&#x27;log&#x27;</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> {})
+  <span class="hljs-title function_">onTestFinished</span>(<span class="hljs-function">() =&gt;</span> spy.<span class="hljs-title function_">mockRestore</span>())
+
+  <span class="hljs-title function_">debug</span>(<span class="hljs-string">&#x27;message&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-title function_">toHaveBeenCalled</span>()
+})</code></pre></div>
+<p><code>onTestFinished</code> can&#39;t tear down a spy mid-test the way <code>using</code> can, so the block-scoped pattern above remains specific to ERM.</p>
+<h2 id="see-also"><a class="anchor" href="#see-also">#</a>See also</h2>
+<ul>
+<li><a href="../../api/vi.html#vi-spyon"><code>vi.spyOn</code></a></li>
+<li><a href="../../api/vi.html#vi-fn"><code>vi.fn</code></a></li>
+<li><a href="../../api/vi.html#vi-domock"><code>vi.doMock</code></a></li>
+<li><a href="../../api/hooks.html#ontestfinished"><code>onTestFinished</code></a></li>
+<li><a href="../../config/restoremocks.html"><code>restoreMocks</code></a></li>
+<li><a href="https://github.com/tc39/proposal-explicit-resource-management">TC39 Explicit Resource Management proposal</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#pattern">Pattern</a><a class="toc-2" href="#scoped-to-any-block">Scoped to any block</a><a class="toc-2" href="#compatibility">Compatibility</a><a class="toc-2" href="#see-also">See also</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

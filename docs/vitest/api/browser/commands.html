@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commands | Browser Mode (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/browser/commands  <a class="ext small" href="https://vitest.dev/api/browser/commands">version en ligne</a></div>
+<h1 id="commands"><a class="anchor" href="#commands">#</a>Commands</h1>
+<p>Command is a function that invokes another function on the server and passes down the result back to the browser. Vitest exposes several built-in commands you can use in your browser tests.</p>
+<h2 id="built-in-commands"><a class="anchor" href="#built-in-commands">#</a>Built-in Commands</h2>
+<h3 id="files-handling"><a class="anchor" href="#files-handling">#</a>Files Handling</h3>
+<p>You can use the <code>readFile</code>, <code>writeFile</code>, and <code>removeFile</code> APIs to handle files in your browser tests. Since Vitest 3.2, all paths are resolved relative to the <a href="../../guide/projects.html">project</a> root (which is <code>process.cwd()</code>, unless overridden manually). Previously, paths were resolved relative to the test file.</p>
+<p>By default, Vitest uses <code>utf-8</code> encoding but you can override it with options.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>The built-in file commands follow Vite&#39;s <a href="https://vitejs.dev/config/server-options.html#server-fs-allow"><code>server.fs</code></a> restrictions for security reasons.</p>
+<p><code>writeFile</code> and <code>removeFile</code> also require write access through <a href="../../config/api.html#api-allowwrite"><code>api.allowWrite</code></a>.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { server } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">const</span> { readFile, writeFile, removeFile } = server.<span class="hljs-property">commands</span>
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;handles files&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> file = <span class="hljs-string">&#x27;./test.txt&#x27;</span>
+
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">writeFile</span>(file, <span class="hljs-string">&#x27;hello world&#x27;</span>)
+  <span class="hljs-keyword">const</span> content = <span class="hljs-keyword">await</span> <span class="hljs-title function_">readFile</span>(file)
+
+  <span class="hljs-title function_">expect</span>(content).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;hello world&#x27;</span>)
+
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">removeFile</span>(file)
+})</code></pre></div>
+<h2 id="cdp-session"><a class="anchor" href="#cdp-session">#</a>CDP Session</h2>
+<p>Vitest exposes access to raw Chrome DevTools Protocol via the <code>cdp</code> method exported from <code>vitest/browser</code>. It is mostly useful to library authors to build tools on top of it.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { cdp } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">const</span> input = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;input&#x27;</span>)
+<span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-title function_">appendChild</span>(input)
+input.<span class="hljs-title function_">focus</span>()
+
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">cdp</span>().<span class="hljs-title function_">send</span>(<span class="hljs-string">&#x27;Input.dispatchKeyEvent&#x27;</span>, {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;keyDown&#x27;</span>,
+  <span class="hljs-attr">text</span>: <span class="hljs-string">&#x27;a&#x27;</span>,
+})
+
+<span class="hljs-title function_">expect</span>(input).<span class="hljs-title function_">toHaveValue</span>(<span class="hljs-string">&#x27;a&#x27;</span>)</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>CDP session works only with <code>playwright</code> provider and only when using <code>chromium</code> browser. You can read more about it in playwright&#39;s <a href="https://playwright.dev/docs/api/class-cdpsession"><code>CDPSession</code></a> documentation.</p>
+<p>CDP is a privileged debugging API. It is available only when browser API write and exec operations are enabled through <a href="../../config/api.html#api-allowwrite"><code>api.allowWrite</code></a>, and <a href="../../config/api.html#api-allowexec"><code>api.allowExec</code></a>.</p>
+</div><h2 id="custom-commands"><a class="anchor" href="#custom-commands">#</a>Custom Commands</h2>
+<p>You can also add your own commands via <a href="../../config/browser/commands.html"><code>browser.commands</code></a> config option. If you develop a library, you can provide them via a <code>config</code> hook inside a plugin:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">Plugin</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">BrowserCommand</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">myCustomCommand</span>: <span class="hljs-title class_">BrowserCommand</span>&lt;[<span class="hljs-attr">arg1</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">arg2</span>: <span class="hljs-built_in">string</span>]&gt; = <span class="hljs-function">(<span class="hljs-params">{
+  testPath,
+  provider
+}, arg1, arg2</span>) =&gt;</span> {
+  <span class="hljs-keyword">if</span> (provider.<span class="hljs-property">name</span> === <span class="hljs-string">&#x27;playwright&#x27;</span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(testPath, arg1, arg2)
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">someValue</span>: <span class="hljs-literal">true</span> }
+  }
+
+  <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`provider <span class="hljs-subst">${provider.name}</span> is not supported`</span>)
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">BrowserCommands</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Plugin</span> {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;vitest:custom-commands&#x27;</span>,
+    <span class="hljs-title function_">config</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-keyword">return</span> {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">browser</span>: {
+            <span class="hljs-attr">commands</span>: {
+              myCustomCommand,
+            }
+          }
+        }
+      }
+    }
+  }
+}</code></pre></div>
+<p>Then you can call it inside your test by importing it from <code>vitest/browser</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { commands } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+<span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;custom command works correctly&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> commands.<span class="hljs-title function_">myCustomCommand</span>(<span class="hljs-string">&#x27;test1&#x27;</span>, <span class="hljs-string">&#x27;test2&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(result).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">someValue</span>: <span class="hljs-literal">true</span> })
+})
+
+<span class="hljs-comment">// if you are using TypeScript, you can augment the module</span>
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">BrowserCommands</span> {
+    <span class="hljs-attr">myCustomCommand</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">arg1</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">arg2</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;{
+      <span class="hljs-attr">someValue</span>: <span class="hljs-literal">true</span>
+    }&gt;
+  }
+}</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Custom functions will override built-in ones if they have the same name.</p>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention : Security</div><p>Custom commands run in the Vitest Node process and are callable from browser test code through Vitest&#39;s browser RPC connection. They can access local files, environment variables, network services, databases, shell commands, and other Node APIs.</p>
+<p>Vitest&#39;s built-in file commands validate paths against Vite&#39;s <a href="https://vite.dev/config/server-options#server-fs-allow"><code>server.fs</code></a> restrictions and separately check whether writes are allowed. Custom commands do not automatically inherit these protections. If a custom command accepts browser-provided input and uses it to read, write, delete, execute, or expose local resources, validate that input before using it.</p>
+<p>For file reads or fixture loading, use <code>isFileLoadingAllowed</code> from <code>vitest/node</code> or an explicit allowlist. For writes and deletes, also require an explicit mutation policy, such as <a href="../../config/api.html#api-allowwrite"><code>api.allowWrite</code></a>, and a command-specific allowed directory. For commands that execute code, shell commands, or project scripts, also check <a href="../../config/api.html#api-allowexec"><code>api.allowExec</code></a>.</p>
+<p>For example, if you create your own file-writing command instead of using Vitest&#39;s built-in <code>writeFile</code>, apply the same checks:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { mkdir, writeFile } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:fs/promises&#x27;</span>
+<span class="hljs-keyword">import</span> { dirname, resolve } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:path&#x27;</span>
+<span class="hljs-keyword">import</span> { normalizePath } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+<span class="hljs-keyword">import</span> { isFileLoadingAllowed } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">BrowserCommand</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">assertFileAccess</span>(<span class="hljs-params"><span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">project</span>: <span class="hljs-built_in">any</span></span>) {
+  <span class="hljs-keyword">if</span> (
+    !<span class="hljs-title function_">isFileLoadingAllowed</span>(project.<span class="hljs-property">vite</span>.<span class="hljs-property">config</span>, path)
+    &amp;&amp; !<span class="hljs-title function_">isFileLoadingAllowed</span>(project.<span class="hljs-property">vitest</span>.<span class="hljs-property">vite</span>.<span class="hljs-property">config</span>, path)
+  ) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`Access denied to &quot;<span class="hljs-subst">${path}</span>&quot;.`</span>)
+  }
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">assertWrite</span>(<span class="hljs-params"><span class="hljs-attr">project</span>: <span class="hljs-built_in">any</span></span>) {
+  <span class="hljs-keyword">if</span> (!project.<span class="hljs-property">config</span>.<span class="hljs-property">browser</span>.<span class="hljs-property">api</span>.<span class="hljs-property">allowWrite</span> || !project.<span class="hljs-property">vitest</span>.<span class="hljs-property">config</span>.<span class="hljs-property">api</span>.<span class="hljs-property">allowWrite</span>) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;Writing files is disabled.&#x27;</span>)
+  }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">myWriteFileCommand</span>: <span class="hljs-title class_">BrowserCommand</span>&lt;[<span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">content</span>: <span class="hljs-built_in">string</span>]&gt; = <span class="hljs-title function_">async</span> (
+  { project },
+  path,
+  content,
+) =&gt; {
+  <span class="hljs-title function_">assertWrite</span>(project)
+
+  <span class="hljs-keyword">const</span> file = <span class="hljs-title function_">resolve</span>(project.<span class="hljs-property">config</span>.<span class="hljs-property">root</span>, path)
+  <span class="hljs-title function_">assertFileAccess</span>(<span class="hljs-title function_">normalizePath</span>(file), project)
+
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">mkdir</span>(<span class="hljs-title function_">dirname</span>(file), { <span class="hljs-attr">recursive</span>: <span class="hljs-literal">true</span> })
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">writeFile</span>(file, content)
+}</code></pre></div>
+</div><h3 id="recording-trace-markers"><a class="anchor" href="#recording-trace-markers">#</a>Recording trace markers</h3>
+<p>Custom commands can record <a href="context.html#mark">trace markers</a> for the test that triggered them through <code>context.mark</code>. This is the server-side equivalent of <code>page.mark</code> and helps annotate the <a href="../../guide/browser/trace-view.html">trace view</a> with custom actions performed inside a command.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">BrowserCommand</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">uploadFixture</span>: <span class="hljs-title class_">BrowserCommand</span>&lt;[<span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>]&gt; = <span class="hljs-title function_">async</span> (
+  context,
+  name,
+) =&gt; {
+  <span class="hljs-keyword">await</span> context.<span class="hljs-title function_">mark</span>(<span class="hljs-string">`upload start: <span class="hljs-subst">${name}</span>`</span>, { <span class="hljs-attr">kind</span>: <span class="hljs-string">&#x27;action&#x27;</span> })
+  <span class="hljs-comment">// ... do server-side work</span>
+  <span class="hljs-keyword">await</span> context.<span class="hljs-title function_">mark</span>(<span class="hljs-string">`upload done: <span class="hljs-subst">${name}</span>`</span>, { <span class="hljs-attr">kind</span>: <span class="hljs-string">&#x27;action&#x27;</span> })
+}</code></pre></div>
+<p><code>context.mark</code> is a no-op when browser tracing is not enabled or no test is currently running in the session. Unlike <code>page.mark</code>, it does not accept a callback form.</p>
+<h3 id="custom-playwright-commands"><a class="anchor" href="#custom-playwright-commands">#</a>Custom <code>playwright</code> commands</h3>
+<p>Vitest exposes several <code>playwright</code> specific properties on the command context.</p>
+<ul>
+<li><code>page</code> references the full page that contains the test iframe. This is the orchestrator HTML and you most likely shouldn&#39;t touch it to not break things.</li>
+<li><code>frame</code> is an async method that will resolve tester <a href="https://playwright.dev/docs/api/class-frame"><code>Frame</code></a>. It has a similar API to the <code>page</code>, but it doesn&#39;t support certain methods. If you need to query an element, you should prefer using <code>context.iframe</code> instead because it is more stable and faster.</li>
+<li><code>iframe</code> is a <a href="https://playwright.dev/docs/api/class-framelocator"><code>FrameLocator</code></a> that should be used to query other elements on the page.</li>
+<li><code>context</code> refers to the unique <a href="https://playwright.dev/docs/api/class-browsercontext">BrowserContext</a>.</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">BrowserCommand</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">myCommand</span>: <span class="hljs-title class_">BrowserCommand</span>&lt;[<span class="hljs-built_in">string</span>, <span class="hljs-built_in">number</span>]&gt; = <span class="hljs-title function_">async</span> (
+  ctx,
+  <span class="hljs-attr">arg1</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">arg2</span>: <span class="hljs-built_in">number</span>
+) =&gt; {
+  <span class="hljs-keyword">if</span> (ctx.<span class="hljs-property">provider</span>.<span class="hljs-property">name</span> === <span class="hljs-string">&#x27;playwright&#x27;</span>) {
+    <span class="hljs-keyword">const</span> element = <span class="hljs-keyword">await</span> ctx.<span class="hljs-property">iframe</span>.<span class="hljs-title function_">findByRole</span>(<span class="hljs-string">&#x27;alert&#x27;</span>)
+    <span class="hljs-keyword">const</span> screenshot = <span class="hljs-keyword">await</span> element.<span class="hljs-title function_">screenshot</span>()
+    <span class="hljs-comment">// do something with the screenshot</span>
+    <span class="hljs-keyword">return</span> difference
+  }
+}</code></pre></div>
+<h3 id="custom-webdriverio-commands"><a class="anchor" href="#custom-webdriverio-commands">#</a>Custom <code>webdriverio</code> commands</h3>
+<p>Vitest exposes some <code>webdriverio</code> specific properties on the context object.</p>
+<ul>
+<li><code>browser</code> is the <code>WebdriverIO.Browser</code> API.</li>
+</ul>
+<p>Vitest automatically switches the <code>webdriver</code> context to the test iframe by calling <code>browser.switchFrame</code> before the command is called, so <code>$</code> and <code>$$</code> methods refer to the elements inside the iframe, not in the orchestrator, but non-webdriver APIs will still refer to the parent frame context.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#built-in-commands">Built-in Commands</a><a class="toc-3" href="#files-handling">Files Handling</a><a class="toc-2" href="#cdp-session">CDP Session</a><a class="toc-2" href="#custom-commands">Custom Commands</a><a class="toc-3" href="#recording-trace-markers">Recording trace markers</a><a class="toc-3" href="#custom-playwright-commands">Custom playwright commands</a><a class="toc-3" href="#custom-webdriverio-commands">Custom webdriverio commands</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

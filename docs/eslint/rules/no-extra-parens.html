@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-extra-parens (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-extra-parens <span class="badge badge-layout">mise en forme (layout)</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-extra-parens">version en ligne</a></div>
+<h1>no-extra-parens</h1><p>This rule restricts the use of parentheses to only where they are necessary.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule always ignores extra parentheses around the following:</p>
+<ul>
+<li>RegExp literals such as <code>(/abc/).test(var)</code> to avoid conflicts with the <a href="wrap-regex.html">wrap-regex</a> rule</li>
+<li>immediately-invoked function expressions (also known as IIFEs) such as <code>var x = (function () {})();</code> and <code>var x = (function () {}());</code> to avoid conflicts with the <a href="wrap-iife.html">wrap-iife</a> rule</li>
+<li>arrow function arguments to avoid conflicts with the <a href="arrow-parens.html">arrow-parens</a> rule</li>
+</ul>
+<p>Problems reported by this rule can be fixed automatically, except when removing the parentheses would create a new directive, because that could change the semantics of the code.
+For example, the following script prints <code>object</code> to the console, but if the parentheses around <code>&quot;use strict&quot;</code> were removed, it would print <code>undefined</code> instead.</p>
+<div class="code"><pre><code class="hljs lang-js">&lt;!--
+<span class="hljs-comment">// this is a script</span>
+<span class="hljs-comment">// --&gt;</span>
+
+(<span class="hljs-string">&quot;use strict&quot;</span>);
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">test</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-keyword">typeof</span> <span class="hljs-variable language_">this</span>);
+}
+
+<span class="hljs-title function_">test</span>();</code></pre></div>
+<p>In this case, the rule will not try to remove the parentheses around <code>&quot;use strict&quot;</code> but will still report them as a problem.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has a string option:</p>
+<ul>
+<li><code>&quot;all&quot;</code> (default) disallows unnecessary parentheses around <em>any</em> expression.</li>
+<li><code>&quot;functions&quot;</code> disallows unnecessary parentheses <em>only</em> around function expressions.</li>
+</ul>
+<p>This rule has an object option for exceptions to the <code>&quot;all&quot;</code> option:</p>
+<ul>
+<li><code>&quot;conditionalAssign&quot;: false</code> allows extra parentheses around assignments in conditional test expressions.</li>
+<li><code>&quot;returnAssign&quot;: false</code> allows extra parentheses around assignments in <code>return</code> statements.</li>
+<li><code>&quot;nestedBinaryExpressions&quot;: false</code> allows extra parentheses in nested binary expressions.</li>
+<li><code>&quot;ternaryOperandBinaryExpressions&quot;: false</code> allows extra parentheses around binary expressions that are operands of ternary <code>?:</code>.</li>
+<li><code>&quot;ignoreJSX&quot;: &quot;none|all|multi-line|single-line&quot;</code> allows extra parentheses around no/all/multi-line/single-line JSX components. Defaults to <code>none</code>.</li>
+<li><code>&quot;enforceForArrowConditionals&quot;: false</code> allows extra parentheses around ternary expressions which are the body of an arrow function.</li>
+<li><code>&quot;enforceForSequenceExpressions&quot;: false</code> allows extra parentheses around sequence expressions.</li>
+<li><code>&quot;enforceForNewInMemberExpressions&quot;: false</code> allows extra parentheses around <code>new</code> expressions in member expressions.</li>
+<li><code>&quot;enforceForFunctionPrototypeMethods&quot;: false</code> allows extra parentheses around immediate <code>.call</code> and <code>.apply</code> method calls on function expressions and around function expressions in the same context.</li>
+<li><code>&quot;allowParensAfterCommentPattern&quot;: &quot;any-string-pattern&quot;</code> allows extra parentheses preceded by a comment that matches a regular expression.</li>
+</ul>
+<h3 id="all"><a class="anchor" href="#all">#</a>all</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the default <code>&quot;all&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-extra-parens: &quot;error&quot; */</span>
+
+a = (b * c);
+
+(a * b) + c;
+
+<span class="hljs-keyword">for</span> (a <span class="hljs-title function_">in</span> (b, c));
+
+<span class="hljs-keyword">for</span> (a <span class="hljs-title function_">in</span> (b));
+
+<span class="hljs-keyword">for</span> (a <span class="hljs-title function_">of</span> (b));
+
+<span class="hljs-title function_">typeof</span> (a);
+
+(<span class="hljs-title class_">Object</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">toString</span>.<span class="hljs-title function_">call</span>());
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    [(x)] = <span class="hljs-number">1</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">B</span> {
+    x = (y + z);
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the default <code>&quot;all&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-extra-parens: &quot;error&quot; */</span>
+
+(<span class="hljs-number">0</span>).<span class="hljs-title function_">toString</span>();
+
+({}.<span class="hljs-property">toString</span>.<span class="hljs-title function_">call</span>());
+
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>){}) ? <span class="hljs-title function_">a</span>() : <span class="hljs-title function_">b</span>();
+
+(<span class="hljs-regexp">/^a$/</span>).<span class="hljs-title function_">test</span>(x);
+
+<span class="hljs-keyword">for</span> (a <span class="hljs-title function_">of</span> (b, c));
+
+<span class="hljs-keyword">for</span> (a <span class="hljs-keyword">of</span> b);
+
+<span class="hljs-keyword">for</span> (a <span class="hljs-keyword">in</span> b, c);
+
+<span class="hljs-keyword">for</span> (a <span class="hljs-keyword">in</span> b);
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+    [x] = <span class="hljs-number">1</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">B</span> {
+    x = y + z;
+}</code></pre></div>
+</div><h3 id="conditionalassign"><a class="anchor" href="#conditionalassign">#</a>conditionalAssign</h3>
+<p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;all&quot;</code> and <code>{ &quot;conditionalAssign&quot;: false }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;all&quot;, { &quot;conditionalAssign&quot;: false }] */</span>
+
+<span class="hljs-keyword">while</span> ((foo = <span class="hljs-title function_">bar</span>())) {}
+
+<span class="hljs-keyword">if</span> ((foo = <span class="hljs-title function_">bar</span>())) {}
+
+<span class="hljs-keyword">do</span>; <span class="hljs-keyword">while</span> ((foo = <span class="hljs-title function_">bar</span>()))
+
+<span class="hljs-keyword">for</span> (;(a = b););</code></pre></div>
+</div><h3 id="returnassign"><a class="anchor" href="#returnassign">#</a>returnAssign</h3>
+<p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;all&quot;</code> and <code>{ &quot;returnAssign&quot;: false }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;all&quot;, { &quot;returnAssign&quot;: false }] */</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">a1</span>(<span class="hljs-params">b</span>) {
+  <span class="hljs-keyword">return</span> (b = <span class="hljs-number">1</span>);
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">a2</span>(<span class="hljs-params">b</span>) {
+  <span class="hljs-keyword">return</span> b ? (c = d) : (c = e);
+}
+
+b =&gt; (b = <span class="hljs-number">1</span>);
+
+<span class="hljs-function"><span class="hljs-params">b</span> =&gt;</span> b ? (c = d) : (c = e);</code></pre></div>
+</div><h3 id="nestedbinaryexpressions"><a class="anchor" href="#nestedbinaryexpressions">#</a>nestedBinaryExpressions</h3>
+<p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;all&quot;</code> and <code>{ &quot;nestedBinaryExpressions&quot;: false }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;all&quot;, { &quot;nestedBinaryExpressions&quot;: false }] */</span>
+
+x = a || (b &amp;&amp; c);
+x = a + (b * c);
+x = (a * b) / c;</code></pre></div>
+</div><h3 id="ternaryoperandbinaryexpressions"><a class="anchor" href="#ternaryoperandbinaryexpressions">#</a>ternaryOperandBinaryExpressions</h3>
+<p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;all&quot;</code> and <code>{ &quot;ternaryOperandBinaryExpressions&quot;: false }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;all&quot;, { &quot;ternaryOperandBinaryExpressions&quot;: false }] */</span>
+
+(a &amp;&amp; b) ? foo : bar;
+
+(a - b &gt; a) ? foo : bar;
+
+foo ? (bar || baz) : qux;
+
+foo ? bar : (baz || qux);</code></pre></div>
+</div><h3 id="ignorejsx"><a class="anchor" href="#ignorejsx">#</a>ignoreJSX</h3>
+<p>Examples of <strong>correct</strong> code for this rule with the <code>all</code> and <code>{ &quot;ignoreJSX&quot;: &quot;all&quot; }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;all&quot;, { ignoreJSX: &quot;all&quot; }] */</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">ThisComponent</span> = (<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> /&gt;</span></span>)
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">ThatComponent</span> = (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>
+        <span class="hljs-attr">prop</span>=<span class="hljs-string">{true}</span>
+    /&gt;</span></span>
+)</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for this rule with the <code>all</code> and <code>{ &quot;ignoreJSX&quot;: &quot;multi-line&quot; }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;all&quot;, { ignoreJSX: &quot;multi-line&quot; }] */</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">ThisComponent</span> = (<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> /&gt;</span></span>)
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">ThatComponent</span> = (<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">p</span> /&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>)</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>all</code> and <code>{ &quot;ignoreJSX&quot;: &quot;multi-line&quot; }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;all&quot;, { ignoreJSX: &quot;multi-line&quot; }] */</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">ThisComponent</span> = (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+)
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">ThatComponent</span> = (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>
+        <span class="hljs-attr">prop</span>=<span class="hljs-string">{true}</span>
+    /&gt;</span></span>
+)</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for this rule with the <code>all</code> and <code>{ &quot;ignoreJSX&quot;: &quot;single-line&quot; }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;all&quot;, { ignoreJSX: &quot;single-line&quot; }] */</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">ThisComponent</span> = (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+)
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">ThatComponent</span> = (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>
+        <span class="hljs-attr">prop</span>=<span class="hljs-string">{true}</span>
+    /&gt;</span></span>
+)</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>all</code> and <code>{ &quot;ignoreJSX&quot;: &quot;single-line&quot; }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;all&quot;, { ignoreJSX: &quot;single-line&quot; }] */</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">ThisComponent</span> = (<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> /&gt;</span></span>)
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">ThatComponent</span> = (<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">p</span> /&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>)</code></pre></div>
+</div><h3 id="enforceforarrowconditionals"><a class="anchor" href="#enforceforarrowconditionals">#</a>enforceForArrowConditionals</h3>
+<p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;all&quot;</code> and <code>{ &quot;enforceForArrowConditionals&quot;: false }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;all&quot;, { &quot;enforceForArrowConditionals&quot;: false }] */</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">b</span> = a =&gt; <span class="hljs-number">1</span> ? <span class="hljs-number">2</span> : <span class="hljs-number">3</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">d</span> = c =&gt; (<span class="hljs-number">1</span> ? <span class="hljs-number">2</span> : <span class="hljs-number">3</span>);</code></pre></div>
+</div><h3 id="enforceforsequenceexpressions"><a class="anchor" href="#enforceforsequenceexpressions">#</a>enforceForSequenceExpressions</h3>
+<p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;all&quot;</code> and <code>{ &quot;enforceForSequenceExpressions&quot;: false }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;all&quot;, { &quot;enforceForSequenceExpressions&quot;: false }] */</span>
+
+(a, b);
+
+<span class="hljs-keyword">if</span> ((val = <span class="hljs-title function_">foo</span>(), val &lt; <span class="hljs-number">10</span>)) {}
+
+<span class="hljs-keyword">while</span> ((val = <span class="hljs-title function_">foo</span>(), val &lt; <span class="hljs-number">10</span>));</code></pre></div>
+</div><h3 id="enforcefornewinmemberexpressions"><a class="anchor" href="#enforcefornewinmemberexpressions">#</a>enforceForNewInMemberExpressions</h3>
+<p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;all&quot;</code> and <code>{ &quot;enforceForNewInMemberExpressions&quot;: false }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;all&quot;, { &quot;enforceForNewInMemberExpressions&quot;: false }] */</span>
+
+<span class="hljs-keyword">const</span> foo = (<span class="hljs-keyword">new</span> <span class="hljs-title class_">Bar</span>()).<span class="hljs-property">baz</span>;
+
+<span class="hljs-keyword">const</span> quux = (<span class="hljs-keyword">new</span> <span class="hljs-title class_">Bar</span>())[baz];
+
+(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Bar</span>()).<span class="hljs-title function_">doSomething</span>();</code></pre></div>
+</div><h3 id="enforceforfunctionprototypemethods"><a class="anchor" href="#enforceforfunctionprototypemethods">#</a>enforceForFunctionPrototypeMethods</h3>
+<p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;all&quot;</code> and <code>{ &quot;enforceForFunctionPrototypeMethods&quot;: false }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;all&quot;, { &quot;enforceForFunctionPrototypeMethods&quot;: false }] */</span>
+
+<span class="hljs-keyword">const</span> foo = (<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {}).<span class="hljs-title function_">call</span>();
+
+<span class="hljs-keyword">const</span> bar = (<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {}).<span class="hljs-title function_">apply</span>();
+
+<span class="hljs-keyword">const</span> baz = (<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {}.<span class="hljs-title function_">call</span>());
+
+<span class="hljs-keyword">const</span> quux = (<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {}.<span class="hljs-title function_">apply</span>());</code></pre></div>
+</div><h3 id="allowparensaftercommentpattern"><a class="anchor" href="#allowparensaftercommentpattern">#</a>allowParensAfterCommentPattern</h3>
+<p>To make this rule allow extra parentheses preceded by specific comments, set this option to a string pattern that will be passed to the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/RegExp"><code>RegExp</code> constructor</a>.</p>
+<p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;all&quot;</code> and <code>{ &quot;allowParensAfterCommentPattern&quot;: &quot;@type&quot; }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;all&quot;, { &quot;allowParensAfterCommentPattern&quot;: &quot;@type&quot; }] */</span>
+
+<span class="hljs-keyword">const</span> span = <span class="hljs-comment">/**<span class="hljs-doctag">@type</span> {<span class="hljs-type">HTMLSpanElement</span>}*/</span>(event.<span class="hljs-property">currentTarget</span>);
+
+<span class="hljs-keyword">if</span> (<span class="hljs-comment">/** <span class="hljs-doctag">@type</span> {<span class="hljs-type">Foo | Bar</span>} */</span>(options).<span class="hljs-property">baz</span>) <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Lint free&#x27;</span>);
+
+<span class="hljs-title function_">foo</span>(<span class="hljs-comment">/** <span class="hljs-doctag">@type</span> {<span class="hljs-type">Bar</span>} */</span> (bar), options, {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;name&quot;</span>,
+    <span class="hljs-attr">path</span>: <span class="hljs-string">&quot;path&quot;</span>,
+});
+
+<span class="hljs-keyword">if</span> (foo) {
+    <span class="hljs-comment">/** <span class="hljs-doctag">@type</span> {<span class="hljs-type">Bar</span>} */</span>
+    (bar).<span class="hljs-property">prop</span> = <span class="hljs-literal">false</span>;
+}</code></pre></div>
+</div><h3 id="functions"><a class="anchor" href="#functions">#</a>functions</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;functions&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;functions&quot;] */</span>
+
+((<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}))();
+
+<span class="hljs-keyword">var</span> y = (<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;});</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;functions&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-extra-parens: [&quot;error&quot;, &quot;functions&quot;] */</span>
+
+(<span class="hljs-number">0</span>).<span class="hljs-title function_">toString</span>();
+
+(<span class="hljs-title class_">Object</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">toString</span>.<span class="hljs-title function_">call</span>());
+
+({}.<span class="hljs-property">toString</span>.<span class="hljs-title function_">call</span>());
+
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>){} ? <span class="hljs-title function_">a</span>() : <span class="hljs-title function_">b</span>());
+
+(<span class="hljs-regexp">/^a$/</span>).<span class="hljs-title function_">test</span>(x);
+
+a = (b * c);
+
+(a * b) + c;
+
+<span class="hljs-title function_">typeof</span> (a);</code></pre></div>
+</div><div class="box box-info"><div class="box-title">Règles liées</div><p><a href="arrow-parens.html"><code>arrow-parens</code></a>, <a href="no-cond-assign.html"><code>no-cond-assign</code></a>, <a href="no-return-assign.html"><code>no-return-assign</code></a></p></div><h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#all">all</a><a class="toc-3" href="#conditionalassign">conditionalAssign</a><a class="toc-3" href="#returnassign">returnAssign</a><a class="toc-3" href="#nestedbinaryexpressions">nestedBinaryExpressions</a><a class="toc-3" href="#ternaryoperandbinaryexpressions">ternaryOperandBinaryExpressions</a><a class="toc-3" href="#ignorejsx">ignoreJSX</a><a class="toc-3" href="#enforceforarrowconditionals">enforceForArrowConditionals</a><a class="toc-3" href="#enforceforsequenceexpressions">enforceForSequenceExpressions</a><a class="toc-3" href="#enforcefornewinmemberexpressions">enforceForNewInMemberExpressions</a><a class="toc-3" href="#enforceforfunctionprototypemethods">enforceForFunctionPrototypeMethods</a><a class="toc-3" href="#allowparensaftercommentpattern">allowParensAfterCommentPattern</a><a class="toc-3" href="#functions">functions</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

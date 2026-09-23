@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TestSpecification (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/advanced/test-specification  <a class="ext small" href="https://vitest.dev/api/advanced/test-specification">version en ligne</a></div>
+<h1 id="testspecification"><a class="anchor" href="#testspecification">#</a>TestSpecification</h1>
+<p>The <code>TestSpecification</code> class describes what module to run as a test and its parameters.</p>
+<p>You can only create a specification by calling <a href="test-project.html#createspecification"><code>createSpecification</code></a> method on a test project:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> specification = project.<span class="hljs-title function_">createSpecification</span>(
+  <span class="hljs-title function_">resolve</span>(<span class="hljs-string">&#x27;./example.test.ts&#x27;</span>),
+  {
+    <span class="hljs-attr">testLines</span>: [<span class="hljs-number">20</span>, <span class="hljs-number">40</span>],
+    <span class="hljs-attr">testNamePattern</span>: <span class="hljs-regexp">/hello world/</span>,
+    <span class="hljs-attr">testIds</span>: [<span class="hljs-string">&#x27;1223128da3_0_0_0&#x27;</span>, <span class="hljs-string">&#x27;1223128da3_0_0&#x27;</span>],
+    <span class="hljs-attr">testTagsFilter</span>: [<span class="hljs-string">&#x27;frontend and backend&#x27;</span>],
+  } <span class="hljs-comment">// optional test filters</span>
+)</code></pre></div>
+<p><code>createSpecification</code> expects resolved module identifier. It doesn&#39;t auto-resolve the file or check that it exists on the file system.</p>
+<h2 id="taskid"><a class="anchor" href="#taskid">#</a>taskId</h2>
+<p><a href="test-suite.html#id">Test module&#39;s</a> identifier.</p>
+<h2 id="project"><a class="anchor" href="#project">#</a>project</h2>
+<p>This references the <a href="test-project.html"><code>TestProject</code></a> that the test module belongs to.</p>
+<h2 id="moduleid"><a class="anchor" href="#moduleid">#</a>moduleId</h2>
+<p>The ID of the module in Vite&#39;s module graph. Usually, it&#39;s an absolute file path using posix separator:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-string">&#x27;C:/Users/Documents/project/example.test.ts&#x27;</span> <span class="hljs-comment">// ✅</span>
+<span class="hljs-string">&#x27;/Users/mac/project/example.test.ts&#x27;</span> <span class="hljs-comment">// ✅</span>
+<span class="hljs-string">&#x27;C:\\Users\\Documents\\project\\example.test.ts&#x27;</span> <span class="hljs-comment">// ❌</span></code></pre></div>
+<h2 id="testmodule"><a class="anchor" href="#testmodule">#</a>testModule</h2>
+<p>Instance of <a href="test-module.html"><code>TestModule</code></a> associated with the specification. If test wasn&#39;t queued yet, this will be <code>undefined</code>.</p>
+<h2 id="pool"><a class="anchor" href="#pool">#</a>pool</h2>
+<p>The <a href="../../config/pool.html"><code>pool</code></a> in which the test module will run.</p>
+<div class="box box-danger"><div class="box-title">🛑 Danger</div><p>It&#39;s possible to have multiple pools in a single test project with <a href="../../config/typecheck.html#typecheck-enabled"><code>typecheck.enabled</code></a>. This means it&#39;s possible to have several specifications with the same <code>moduleId</code> but different <code>pool</code>. In later versions, the project will only support a single pool.</p>
+</div><h2 id="testlines"><a class="anchor" href="#testlines">#</a>testLines</h2>
+<p>This is an array of lines in the source code where the test files are defined. This field is defined only if the <code>createSpecification</code> method received an array.</p>
+<p>Note that if there is no test on at least one of the lines, the whole suite will fail. An example of a correct <code>testLines</code> configuration:</p>
+<div class="code-group"><div class="code"><div class="code-title">script.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> specification = project.<span class="hljs-title function_">createSpecification</span>(
+  <span class="hljs-title function_">resolve</span>(<span class="hljs-string">&#x27;./example.test.ts&#x27;</span>),
+  [<span class="hljs-number">3</span>, <span class="hljs-number">8</span>, <span class="hljs-number">9</span>],
+)</code></pre></div>
+<div class="code"><div class="code-title">example.test.js</div><pre><code class="hljs lang-ts:line-numbers">import { test, describe } from 'vitest'
+
+test('verification works')
+
+describe('a group of tests', () =&gt; {
+  // ...
+
+  test('nested test')
+  test.skip('skipped test')
+})</code></pre></div>
+</div><h2 id="testnamepattern"><a class="anchor" href="#testnamepattern">#</a>testNamePattern <Version>4.1.0</Version></h2>
+<p>A regexp that matches the name of the test in this module. This value will override the global <a href="../../config/testnamepattern.html"><code>testNamePattern</code></a> option if it&#39;s set.</p>
+<h2 id="testids"><a class="anchor" href="#testids">#</a>testIds <Version>4.1.0</Version></h2>
+<p>The ids of tasks inside of this specification to run.</p>
+<h2 id="testtagsfilter"><a class="anchor" href="#testtagsfilter">#</a>testTagsFilter <Version>4.1.0</Version></h2>
+<p>The <a href="../../guide/test-tags.html#syntax">tags filter</a> that a test must pass in order to be included in the run. Multiple filters are treated as <code>AND</code>.</p>
+<h2 id="tojson"><a class="anchor" href="#tojson">#</a>toJSON</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toJSON</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">SerializedTestSpecification</span></code></pre></div>
+<p><code>toJSON</code> generates a JSON-friendly object that can be consumed by the <a href="../../guide/browser/index.html">Browser Mode</a> or <a href="../../guide/ui.html">Vitest UI</a>.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#taskid">taskId</a><a class="toc-2" href="#project">project</a><a class="toc-2" href="#moduleid">moduleId</a><a class="toc-2" href="#testmodule">testModule</a><a class="toc-2" href="#pool">pool</a><a class="toc-2" href="#testlines">testLines</a><a class="toc-2" href="#testnamepattern">testNamePattern 4.1.0</a><a class="toc-2" href="#testids">testIds 4.1.0</a><a class="toc-2" href="#testtagsfilter">testTagsFilter 4.1.0</a><a class="toc-2" href="#tojson">toJSON</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

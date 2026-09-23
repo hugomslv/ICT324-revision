@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactivity API | Browser Mode (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/browser/interactivity  <a class="ext small" href="https://vitest.dev/api/browser/interactivity">version en ligne</a></div>
+<h1 id="interactivity-api"><a class="anchor" href="#interactivity-api">#</a>Interactivity API</h1>
+<p>Vitest implements a subset of <a href="https://testing-library.com/docs/user-event/intro"><code>@testing-library/user-event</code></a> APIs using <a href="https://chromedevtools.github.io/devtools-protocol/">Chrome DevTools Protocol</a> or <a href="https://www.w3.org/TR/webdriver/">webdriver</a> instead of faking events which makes the browser behaviour more reliable and consistent with how users interact with a page.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">click</span>(<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;.button&#x27;</span>))</code></pre></div>
+<p>Almost every <code>userEvent</code> method inherits its provider options.</p>
+<h2 id="userevent-setup"><a class="anchor" href="#userevent-setup">#</a>userEvent.setup</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">setup</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">UserEvent</span></code></pre></div>
+<p>Creates a new user event instance. This is useful if you need to keep the state of keyboard to press and release buttons correctly.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Unlike <code>@testing-library/user-event</code>, the default <code>userEvent</code> instance from <code>vitest/browser</code> is created once, not every time its methods are called! You can see the difference in how it works in this snippet:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { userEvent <span class="hljs-keyword">as</span> vitestUserEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+<span class="hljs-keyword">import</span> { userEvent <span class="hljs-keyword">as</span> originalUserEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@testing-library/user-event&#x27;</span>
+
+<span class="hljs-keyword">await</span> vitestUserEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;{Shift}&#x27;</span>) <span class="hljs-comment">// press shift without releasing</span>
+<span class="hljs-keyword">await</span> vitestUserEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;{/Shift}&#x27;</span>) <span class="hljs-comment">// releases shift</span>
+
+<span class="hljs-keyword">await</span> originalUserEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;{Shift}&#x27;</span>) <span class="hljs-comment">// press shift without releasing</span>
+<span class="hljs-keyword">await</span> originalUserEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;{/Shift}&#x27;</span>) <span class="hljs-comment">// DID NOT release shift because the state is different</span></code></pre></div>
+<p>This behaviour is more useful because we do not emulate the keyboard, we actually press the Shift, so keeping the original behaviour would cause unexpected issues when typing in the field.</p>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>With <code>playwright</code> and <code>webdriverio</code> providers, interactions are performed by the underlying browser driver. That means some interaction state, like pressed keys or pointer position and the resulting hover state, can persist between tests in the same file.</p>
+<p>Vitest resets unreleased keyboard state automatically before starting each test case, but pointer position and the resulting hover state are not reset automatically since resetting pointer position can be expensive.</p>
+<p>This applies both to <code>userEvent.*</code> calls and locator shortcuts like <code>locator.click()</code> or <code>locator.hover()</code>, because they use the same underlying interaction state.</p>
+<p>If your tests depend on a neutral hover state, reset it explicitly, for example in <code>beforeEach</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { beforeEach } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">beforeEach</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">unhover</span>(<span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>)
+})</code></pre></div>
+</div><h2 id="userevent-click"><a class="anchor" href="#userevent-click">#</a>userEvent.click</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">click</span>(<span class="hljs-params">
+  <span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventClickOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Click on an element. Inherits provider&#39;s options. Please refer to your provider&#39;s documentation for detailed explanation about how this method works.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;clicks on an element&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> logo = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;img&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/logo/</span> })
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">click</span>(logo)
+  <span class="hljs-comment">// or you can access it directly on the locator</span>
+  <span class="hljs-keyword">await</span> logo.<span class="hljs-title function_">click</span>()
+
+  <span class="hljs-comment">// With WebdriverIO, this uses either ElementClick (with no arguments) or</span>
+  <span class="hljs-comment">// actions (with arguments). Use an empty object to force the use of actions.</span>
+  <span class="hljs-keyword">await</span> logo.<span class="hljs-title function_">click</span>({})
+})</code></pre></div>
+<h3 id="clicking-with-a-modifier"><a class="anchor" href="#clicking-with-a-modifier">#</a>Clicking with a modifier</h3>
+<p>With either WebdriverIO or Playwright:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;{Shift&gt;}&#x27;</span>)
+<span class="hljs-comment">// By using an empty object as the option, this opts in to using a chain of actions</span>
+<span class="hljs-comment">// instead of an ElementClick in webdriver.</span>
+<span class="hljs-comment">// Firefox has a bug that makes this necessary.</span>
+<span class="hljs-comment">// Follow https://bugzilla.mozilla.org/show_bug.cgi?id=1456642 to know when this</span>
+<span class="hljs-comment">// will be fixed.</span>
+<span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">click</span>(element, {})
+<span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;{/Shift}&#x27;</span>)</code></pre></div>
+<p>With Playwright:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">click</span>(element, { <span class="hljs-attr">modifiers</span>: [<span class="hljs-string">&#x27;Shift&#x27;</span>] })</code></pre></div>
+<p>References:</p>
+<ul>
+<li><a href="https://playwright.dev/docs/api/class-locator#locator-click">Playwright <code>locator.click</code> API</a></li>
+<li><a href="https://webdriver.io/docs/api/element/click/">WebdriverIO <code>element.click</code> API</a></li>
+<li><a href="https://testing-library.com/docs/user-event/convenience/#click">testing-library <code>click</code> API</a></li>
+</ul>
+<h2 id="userevent-dblclick"><a class="anchor" href="#userevent-dblclick">#</a>userEvent.dblClick</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">dblClick</span>(<span class="hljs-params">
+  <span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventDoubleClickOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Triggers a double click event on an element.</p>
+<p>Please refer to your provider&#39;s documentation for detailed explanation about how this method works.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;triggers a double click on an element&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> logo = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;img&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/logo/</span> })
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">dblClick</span>(logo)
+  <span class="hljs-comment">// or you can access it directly on the locator</span>
+  <span class="hljs-keyword">await</span> logo.<span class="hljs-title function_">dblClick</span>()
+})</code></pre></div>
+<p>References:</p>
+<ul>
+<li><a href="https://playwright.dev/docs/api/class-locator#locator-dblclick">Playwright <code>locator.dblclick</code> API</a></li>
+<li><a href="https://webdriver.io/docs/api/element/doubleClick/">WebdriverIO <code>element.doubleClick</code> API</a></li>
+<li><a href="https://testing-library.com/docs/user-event/convenience/#dblClick">testing-library <code>dblClick</code> API</a></li>
+</ul>
+<h2 id="userevent-tripleclick"><a class="anchor" href="#userevent-tripleclick">#</a>userEvent.tripleClick</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">tripleClick</span>(<span class="hljs-params">
+  <span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventTripleClickOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Triggers a triple click event on an element. Since there is no <code>tripleclick</code> in browser api, this method will fire three click events in a row, and so you must check <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/click_event#usage_notes">click event detail</a> to filter the event: <code>evt.detail === 3</code>.</p>
+<p>Please refer to your provider&#39;s documentation for detailed explanation about how this method works.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;triggers a triple click on an element&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> logo = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;img&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/logo/</span> })
+  <span class="hljs-keyword">let</span> tripleClickFired = <span class="hljs-literal">false</span>
+  logo.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;click&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">evt</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (evt.<span class="hljs-property">detail</span> === <span class="hljs-number">3</span>) {
+      tripleClickFired = <span class="hljs-literal">true</span>
+    }
+  })
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">tripleClick</span>(logo)
+  <span class="hljs-comment">// or you can access it directly on the locator</span>
+  <span class="hljs-keyword">await</span> logo.<span class="hljs-title function_">tripleClick</span>()
+
+  <span class="hljs-title function_">expect</span>(tripleClickFired).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">true</span>)
+})</code></pre></div>
+<p>References:</p>
+<ul>
+<li><a href="https://playwright.dev/docs/api/class-locator#locator-click">Playwright <code>locator.click</code> API</a>: implemented via <code>click</code> with <code>clickCount: 3</code> .</li>
+<li><a href="https://webdriver.io/docs/api/browser/action/">WebdriverIO <code>browser.action</code> API</a>: implemented via actions api with <code>move</code> plus three <code>down + up + pause</code> events in a row</li>
+<li><a href="https://testing-library.com/docs/user-event/convenience/#tripleClick">testing-library <code>tripleClick</code> API</a></li>
+</ul>
+<h2 id="userevent-wheel"><a class="anchor" href="#userevent-wheel">#</a>userEvent.wheel <Version>4.1.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">wheel</span>(<span class="hljs-params">
+  <span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span>,
+  <span class="hljs-attr">options</span>: <span class="hljs-title class_">UserEventWheelOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Triggers a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/wheel_event"><code>wheel</code> event</a> on an element.</p>
+<p>You can specify the scroll amount using either <code>delta</code> for precise pixel-based control, or <code>direction</code> for simpler directional scrolling (<code>up</code>, <code>down</code>, <code>left</code>, <code>right</code>). When you need to trigger multiple wheel events, use the <code>times</code> option rather than calling the method multiple times for better performance.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;scroll using delta values&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> tablist = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;tablist&#x27;</span>)
+
+  <span class="hljs-comment">// Scroll right by 100 pixels</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">wheel</span>(tablist, { <span class="hljs-attr">delta</span>: { <span class="hljs-attr">x</span>: <span class="hljs-number">100</span> } })
+
+  <span class="hljs-comment">// Scroll down by 50 pixels</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">wheel</span>(tablist, { <span class="hljs-attr">delta</span>: { <span class="hljs-attr">y</span>: <span class="hljs-number">50</span> } })
+
+  <span class="hljs-comment">// Scroll diagonally 2 times</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">wheel</span>(tablist, { <span class="hljs-attr">delta</span>: { <span class="hljs-attr">x</span>: <span class="hljs-number">50</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">100</span> }, <span class="hljs-attr">times</span>: <span class="hljs-number">2</span> })
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;scroll using direction&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> tablist = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;tablist&#x27;</span>)
+
+  <span class="hljs-comment">// Scroll right 5 times</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">wheel</span>(tablist, { <span class="hljs-attr">direction</span>: <span class="hljs-string">&#x27;right&#x27;</span>, <span class="hljs-attr">times</span>: <span class="hljs-number">5</span> })
+
+  <span class="hljs-comment">// Scroll left once</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">wheel</span>(tablist, { <span class="hljs-attr">direction</span>: <span class="hljs-string">&#x27;left&#x27;</span> })
+})</code></pre></div>
+<p>Wheel events can also be triggered directly from <a href="locators.html#wheel">locators</a>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;tablist&#x27;</span>).<span class="hljs-title function_">wheel</span>({ <span class="hljs-attr">direction</span>: <span class="hljs-string">&#x27;right&#x27;</span> })</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This method is intended for testing UI that explicitly listens to <code>wheel</code> events (e.g., custom zoom controls, horizontal tab scrolling, canvas interactions). If you need to scroll the page to bring an element into view, rely on the built-in automatic scrolling functionality provided by other <code>userEvent</code> methods or <a href="locators.html#methods">locator actions</a> instead.</p>
+</div><h2 id="userevent-fill"><a class="anchor" href="#userevent-fill">#</a>userEvent.fill</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">fill</span>(<span class="hljs-params">
+  <span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span>,
+  <span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Set a value to the <code>input</code>/<code>textarea</code>/<code>contenteditable</code> field. This will remove any existing text in the input before setting the new value.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;update input&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> input = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;input&#x27;</span>)
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">fill</span>(input, <span class="hljs-string">&#x27;foo&#x27;</span>) <span class="hljs-comment">// input.value == foo</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">fill</span>(input, <span class="hljs-string">&#x27;{{a[[&#x27;</span>) <span class="hljs-comment">// input.value == {{a[[</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">fill</span>(input, <span class="hljs-string">&#x27;{Shift}&#x27;</span>) <span class="hljs-comment">// input.value == {Shift}</span>
+
+  <span class="hljs-comment">// or you can access it directly on the locator</span>
+  <span class="hljs-keyword">await</span> input.<span class="hljs-title function_">fill</span>(<span class="hljs-string">&#x27;foo&#x27;</span>) <span class="hljs-comment">// input.value == foo</span>
+})</code></pre></div>
+<p>This methods focuses the element, fills it and triggers an <code>input</code> event after filling. You can use an empty string to clear the field.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This API is faster than using <a href="#userevent-type"><code>userEvent.type</code></a> or <a href="#userevent-keyboard"><code>userEvent.keyboard</code></a>, but it <strong>doesn&#39;t support</strong> <a href="https://testing-library.com/docs/user-event/keyboard">user-event <code>keyboard</code> syntax</a> (e.g., <code>{Shift}{selectall}</code>).</p>
+<p>We recommend using this API over <a href="#userevent-type"><code>userEvent.type</code></a> in situations when you don&#39;t need to enter special characters or have granular control over keypress events.</p>
+</div><p>References:</p>
+<ul>
+<li><a href="https://playwright.dev/docs/api/class-locator#locator-fill">Playwright <code>locator.fill</code> API</a></li>
+<li><a href="https://webdriver.io/docs/api/element/setValue">WebdriverIO <code>element.setValue</code> API</a></li>
+<li><a href="https://testing-library.com/docs/user-event/utility/#type">testing-library <code>type</code> API</a></li>
+</ul>
+<h2 id="userevent-keyboard"><a class="anchor" href="#userevent-keyboard">#</a>userEvent.keyboard</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">keyboard</span>(<span class="hljs-params"><span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>The <code>userEvent.keyboard</code> allows you to trigger keyboard strokes. If any input has a focus, it will type characters into that input. Otherwise, it will trigger keyboard events on the currently focused element (<code>document.body</code> if there are no focused elements).</p>
+<p>This API supports <a href="https://testing-library.com/docs/user-event/keyboard">user-event <code>keyboard</code> syntax</a>. Common special keys that can be referenced inside the braces include:</p>
+<ul>
+<li><strong>Modifiers:</strong> <code>{Shift}</code>, <code>{Control}</code>, <code>{Alt}</code>, <code>{Meta}</code></li>
+<li><strong>Navigation:</strong> <code>{ArrowUp}</code>, <code>{ArrowDown}</code>, <code>{ArrowLeft}</code>, <code>{ArrowRight}</code>, <code>{Home}</code>, <code>{End}</code>, <code>{PageUp}</code>, <code>{PageDown}</code></li>
+<li><strong>Editing:</strong> <code>{Backspace}</code>, <code>{Delete}</code>, <code>{Insert}</code>, <code>{Tab}</code>, <code>{Enter}</code>, <code>{Escape}</code></li>
+<li><strong>Function keys:</strong> <code>{F1}</code> through <code>{F12}</code></li>
+</ul>
+<p>Note: The exact set of supported keys may vary depending on the underlying browser provider (Playwright vs WebdriverIO). If a key press doesn&#39;t trigger the expected behavior, consult your provider&#39;s documentation or file an issue.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;trigger keystrokes&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;foo&#x27;</span>) <span class="hljs-comment">// translates to: f, o, o</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;{{a[[&#x27;</span>) <span class="hljs-comment">// translates to: {, a, [</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;{Shift}{f}{o}{o}&#x27;</span>) <span class="hljs-comment">// translates to: Shift, f, o, o</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;{a&gt;5}&#x27;</span>) <span class="hljs-comment">// press a without releasing it and trigger 5 keydown</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;{a&gt;5/}&#x27;</span>) <span class="hljs-comment">// press a for 5 keydown and then release it</span>
+})</code></pre></div>
+<p>References:</p>
+<ul>
+<li><a href="https://playwright.dev/docs/api/class-keyboard">Playwright <code>Keyboard</code> API</a></li>
+<li><a href="https://webdriver.io/docs/api/browser/action#key-input-source">WebdriverIO <code>action(&#39;key&#39;)</code> API</a></li>
+<li><a href="https://testing-library.com/docs/user-event/utility/#type">testing-library <code>type</code> API</a></li>
+</ul>
+<h2 id="userevent-tab"><a class="anchor" href="#userevent-tab">#</a>userEvent.tab</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">tab</span>(<span class="hljs-params"><span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventTabOptions</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Sends a <code>Tab</code> key event. This is a shorthand for <code>userEvent.keyboard(&#39;{tab}&#39;)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;tab works&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> [input1, input2] = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;input&#x27;</span>).<span class="hljs-title function_">elements</span>()
+
+  <span class="hljs-title function_">expect</span>(input1).<span class="hljs-title function_">toHaveFocus</span>()
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">tab</span>()
+
+  <span class="hljs-title function_">expect</span>(input2).<span class="hljs-title function_">toHaveFocus</span>()
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">tab</span>({ <span class="hljs-attr">shift</span>: <span class="hljs-literal">true</span> })
+
+  <span class="hljs-title function_">expect</span>(input1).<span class="hljs-title function_">toHaveFocus</span>()
+})</code></pre></div>
+<p>References:</p>
+<ul>
+<li><a href="https://playwright.dev/docs/api/class-keyboard">Playwright <code>Keyboard</code> API</a></li>
+<li><a href="https://webdriver.io/docs/api/browser/action#key-input-source">WebdriverIO <code>action(&#39;key&#39;)</code> API</a></li>
+<li><a href="https://testing-library.com/docs/user-event/convenience/#tab">testing-library <code>tab</code> API</a></li>
+</ul>
+<h2 id="userevent-type"><a class="anchor" href="#userevent-type">#</a>userEvent.type</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">type</span>(<span class="hljs-params">
+  <span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span>,
+  <span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventTypeOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If you don&#39;t rely on <a href="https://testing-library.com/docs/user-event/keyboard">special characters</a> (e.g., <code>{shift}</code> or <code>{selectall}</code>), it is recommended to use <a href="#userevent-fill"><code>userEvent.fill</code></a> instead for better performance.</p>
+</div><p>The <code>type</code> method implements <code>@testing-library/user-event</code>&#39;s <a href="https://testing-library.com/docs/user-event/utility/#type"><code>type</code></a> utility built on top of <a href="https://testing-library.com/docs/user-event/keyboard"><code>keyboard</code></a> API.</p>
+<p>This function allows you to type characters into an <code>input</code>/<code>textarea</code>/<code>contenteditable</code> element. It supports <a href="https://testing-library.com/docs/user-event/keyboard">user-event <code>keyboard</code> syntax</a>.</p>
+<p>If you just need to press characters without an input, use <a href="#userevent-keyboard"><code>userEvent.keyboard</code></a> API.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;update input&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> input = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;input&#x27;</span>)
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">type</span>(input, <span class="hljs-string">&#x27;foo&#x27;</span>) <span class="hljs-comment">// input.value == foo</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">type</span>(input, <span class="hljs-string">&#x27;{{a[[&#x27;</span>) <span class="hljs-comment">// input.value == foo{a[</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">type</span>(input, <span class="hljs-string">&#x27;{Shift}&#x27;</span>) <span class="hljs-comment">// input.value == foo{a[</span>
+})</code></pre></div>
+<div class="box box-info"><div class="box-title">ℹ️ Info</div><p>Vitest doesn&#39;t expose <code>.type</code> method on the locator like <code>input.type</code> because it exists only for compatibility with the <code>userEvent</code> library. Consider using <code>.fill</code> instead as it is faster.</p>
+</div><p>References:</p>
+<ul>
+<li><a href="https://playwright.dev/docs/api/class-locator#locator-press">Playwright <code>locator.press</code> API</a></li>
+<li><a href="https://webdriver.io/docs/api/browser/action#key-input-source">WebdriverIO <code>action(&#39;key&#39;)</code> API</a></li>
+<li><a href="https://testing-library.com/docs/user-event/utility/#type">testing-library <code>type</code> API</a></li>
+</ul>
+<h2 id="userevent-clear"><a class="anchor" href="#userevent-clear">#</a>userEvent.clear</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">clear</span>(<span class="hljs-params"><span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventClearOptions</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This method clears the input element content.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;clears input&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> input = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;input&#x27;</span>)
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">fill</span>(input, <span class="hljs-string">&#x27;foo&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(input).<span class="hljs-title function_">toHaveValue</span>(<span class="hljs-string">&#x27;foo&#x27;</span>)
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">clear</span>(input)
+  <span class="hljs-comment">// or you can access it directly on the locator</span>
+  <span class="hljs-keyword">await</span> input.<span class="hljs-title function_">clear</span>()
+
+  <span class="hljs-title function_">expect</span>(input).<span class="hljs-title function_">toHaveValue</span>(<span class="hljs-string">&#x27;&#x27;</span>)
+})</code></pre></div>
+<p>References:</p>
+<ul>
+<li><a href="https://playwright.dev/docs/api/class-locator#locator-clear">Playwright <code>locator.clear</code> API</a></li>
+<li><a href="https://webdriver.io/docs/api/element/clearValue">WebdriverIO <code>element.clearValue</code> API</a></li>
+<li><a href="https://testing-library.com/docs/user-event/utility/#clear">testing-library <code>clear</code> API</a></li>
+</ul>
+<h2 id="userevent-selectoptions"><a class="anchor" href="#userevent-selectoptions">#</a>userEvent.selectOptions</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">selectOptions</span>(<span class="hljs-params">
+  <span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span>,
+  <span class="hljs-attr">values</span>:
+    | <span class="hljs-title class_">HTMLElement</span>
+    | <span class="hljs-title class_">HTMLElement</span>[]
+    | <span class="hljs-title class_">Locator</span>
+    | <span class="hljs-title class_">Locator</span>[]
+    | <span class="hljs-built_in">string</span>
+    | <span class="hljs-built_in">string</span>[],
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventSelectOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>The <code>userEvent.selectOptions</code> allows selecting a value in a <code>&lt;select&gt;</code> element.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If select element doesn&#39;t have <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#attr-multiple"><code>multiple</code></a> attribute, Vitest will select only the first element in the array.</p>
+<p>Unlike <code>@testing-library</code>, Vitest doesn&#39;t support <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/listbox_role">listbox</a> at the moment, but we plan to add support for it in the future.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;clears input&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> select = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;select&#x27;</span>)
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">selectOptions</span>(select, <span class="hljs-string">&#x27;Option 1&#x27;</span>)
+  <span class="hljs-comment">// or you can access it directly on the locator</span>
+  <span class="hljs-keyword">await</span> select.<span class="hljs-title function_">selectOptions</span>(<span class="hljs-string">&#x27;Option 1&#x27;</span>)
+
+  <span class="hljs-title function_">expect</span>(select).<span class="hljs-title function_">toHaveValue</span>(<span class="hljs-string">&#x27;option-1&#x27;</span>)
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">selectOptions</span>(select, <span class="hljs-string">&#x27;option-1&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(select).<span class="hljs-title function_">toHaveValue</span>(<span class="hljs-string">&#x27;option-1&#x27;</span>)
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">selectOptions</span>(select, [
+    page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;option&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Option 1&#x27;</span> }),
+    page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;option&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Option 2&#x27;</span> }),
+  ])
+  <span class="hljs-title function_">expect</span>(select).<span class="hljs-title function_">toHaveValue</span>([<span class="hljs-string">&#x27;option-1&#x27;</span>, <span class="hljs-string">&#x27;option-2&#x27;</span>])
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p><code>webdriverio</code> provider doesn&#39;t support selecting multiple elements because it doesn&#39;t provide API to do so.</p>
+</div><p>References:</p>
+<ul>
+<li><a href="https://playwright.dev/docs/api/class-locator#locator-select-option">Playwright <code>locator.selectOption</code> API</a></li>
+<li><a href="https://webdriver.io/docs/api/element/selectByIndex">WebdriverIO <code>element.selectByIndex</code> API</a></li>
+<li><a href="https://testing-library.com/docs/user-event/utility/#-selectoptions-deselectoptions">testing-library <code>selectOptions</code> API</a></li>
+</ul>
+<h2 id="userevent-hover"><a class="anchor" href="#userevent-hover">#</a>userEvent.hover</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">hover</span>(<span class="hljs-params">
+  <span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventHoverOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This method moves the cursor position to the selected element. Please refer to your provider&#39;s documentation for detailed explanation about how this method works.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If you are using <code>webdriverio</code> provider, the cursor will move to the center of the element by default.</p>
+<p>If you are using <code>playwright</code> provider, the cursor moves to &quot;some&quot; visible point of the element.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;hovers logo element&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> logo = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;img&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/logo/</span> })
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">hover</span>(logo)
+  <span class="hljs-comment">// or you can access it directly on the locator</span>
+  <span class="hljs-keyword">await</span> logo.<span class="hljs-title function_">hover</span>()
+})</code></pre></div>
+<p>References:</p>
+<ul>
+<li><a href="https://playwright.dev/docs/api/class-locator#locator-hover">Playwright <code>locator.hover</code> API</a></li>
+<li><a href="https://webdriver.io/docs/api/element/moveTo/">WebdriverIO <code>element.moveTo</code> API</a></li>
+<li><a href="https://testing-library.com/docs/user-event/convenience/#hover">testing-library <code>hover</code> API</a></li>
+</ul>
+<h2 id="userevent-unhover"><a class="anchor" href="#userevent-unhover">#</a>userEvent.unhover</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">unhover</span>(<span class="hljs-params">
+  <span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventHoverOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This works the same as <a href="#userevent-hover"><code>userEvent.hover</code></a>, but moves the cursor to the <code>document.body</code> element instead.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>By default, the cursor position is in &quot;some&quot; visible place (in <code>playwright</code> provider) or in the center (in <code>webdriverio</code> provider) of the body element, so if the currently hovered element is already in the same position, this method will have no effect.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;unhover logo element&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> logo = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;img&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/logo/</span> })
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">unhover</span>(logo)
+  <span class="hljs-comment">// or you can access it directly on the locator</span>
+  <span class="hljs-keyword">await</span> logo.<span class="hljs-title function_">unhover</span>()
+})</code></pre></div>
+<p>References:</p>
+<ul>
+<li><a href="https://playwright.dev/docs/api/class-locator#locator-hover">Playwright <code>locator.hover</code> API</a></li>
+<li><a href="https://webdriver.io/docs/api/element/moveTo/">WebdriverIO <code>element.moveTo</code> API</a></li>
+<li><a href="https://testing-library.com/docs/user-event/convenience/#hover">testing-library <code>hover</code> API</a></li>
+</ul>
+<h2 id="userevent-upload"><a class="anchor" href="#userevent-upload">#</a>userEvent.upload</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">upload</span>(<span class="hljs-params">
+  <span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span>,
+  <span class="hljs-attr">files</span>: <span class="hljs-built_in">string</span>[] | <span class="hljs-built_in">string</span> | <span class="hljs-title class_">File</span>[] | <span class="hljs-title class_">File</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventUploadOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Change a file input element to have the specified files.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;can upload a file&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> input = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/Upload files/</span> })
+
+  <span class="hljs-keyword">const</span> file = <span class="hljs-keyword">new</span> <span class="hljs-title class_">File</span>([<span class="hljs-string">&#x27;file&#x27;</span>], <span class="hljs-string">&#x27;file.png&#x27;</span>, { <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;image/png&#x27;</span> })
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">upload</span>(input, file)
+  <span class="hljs-comment">// or you can access it directly on the locator</span>
+  <span class="hljs-keyword">await</span> input.<span class="hljs-title function_">upload</span>(file)
+
+  <span class="hljs-comment">// you can also use file paths relative to the root of the project</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">upload</span>(input, <span class="hljs-string">&#x27;./fixtures/file.png&#x27;</span>)
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p><code>webdriverio</code> provider supports this command only in <code>chrome</code> and <code>edge</code> browsers. It also only supports string types at the moment.</p>
+</div><p>References:</p>
+<ul>
+<li><a href="https://playwright.dev/docs/api/class-locator#locator-set-input-files">Playwright <code>locator.setInputFiles</code> API</a></li>
+<li><a href="https://webdriver.io/docs/api/browser/uploadFile">WebdriverIO <code>browser.uploadFile</code> API</a></li>
+<li><a href="https://testing-library.com/docs/user-event/utility/#upload">testing-library <code>upload</code> API</a></li>
+</ul>
+<h2 id="userevent-draganddrop"><a class="anchor" href="#userevent-draganddrop">#</a>userEvent.dragAndDrop</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">dragAndDrop</span>(<span class="hljs-params">
+  <span class="hljs-attr">source</span>: <span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span>,
+  <span class="hljs-attr">target</span>: <span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventDragAndDropOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Drags the source element on top of the target element. Don&#39;t forget that the <code>source</code> element has to have the <code>draggable</code> attribute set to <code>true</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;drag and drop works&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> source = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;img&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/logo/</span> })
+  <span class="hljs-keyword">const</span> target = page.<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;logo-target&#x27;</span>)
+
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">dragAndDrop</span>(source, target)
+  <span class="hljs-comment">// or you can access it directly on the locator</span>
+  <span class="hljs-keyword">await</span> source.<span class="hljs-title function_">dropTo</span>(target)
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(target).<span class="hljs-title function_">toHaveTextContent</span>(<span class="hljs-string">&#x27;Logo is processed&#x27;</span>)
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This API is not supported by the default <code>preview</code> provider.</p>
+</div><p>References:</p>
+<ul>
+<li><a href="https://playwright.dev/docs/api/class-frame#frame-drag-and-drop">Playwright <code>frame.dragAndDrop</code> API</a></li>
+<li><a href="https://webdriver.io/docs/api/element/dragAndDrop/">WebdriverIO <code>element.dragAndDrop</code> API</a></li>
+</ul>
+<h2 id="userevent-copy"><a class="anchor" href="#userevent-copy">#</a>userEvent.copy</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">copy</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Copy the selected text to the clipboard.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;copy and paste&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// write to &#x27;source&#x27;</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">click</span>(page.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&#x27;source&#x27;</span>))
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;hello&#x27;</span>)
+
+  <span class="hljs-comment">// select and copy &#x27;source&#x27;</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">dblClick</span>(page.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&#x27;source&#x27;</span>))
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">copy</span>()
+
+  <span class="hljs-comment">// paste to &#x27;target&#x27;</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">click</span>(page.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&#x27;target&#x27;</span>))
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">paste</span>()
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&#x27;source&#x27;</span>)).<span class="hljs-title function_">toHaveTextContent</span>(<span class="hljs-string">&#x27;hello&#x27;</span>)
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&#x27;target&#x27;</span>)).<span class="hljs-title function_">toHaveTextContent</span>(<span class="hljs-string">&#x27;hello&#x27;</span>)
+})</code></pre></div>
+<p>References:</p>
+<ul>
+<li><a href="https://testing-library.com/docs/user-event/convenience/#copy">testing-library <code>copy</code> API</a></li>
+</ul>
+<h2 id="userevent-cut"><a class="anchor" href="#userevent-cut">#</a>userEvent.cut</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">cut</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Cut the selected text to the clipboard.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { page, userEvent } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;copy and paste&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// write to &#x27;source&#x27;</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">click</span>(page.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&#x27;source&#x27;</span>))
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;hello&#x27;</span>)
+
+  <span class="hljs-comment">// select and cut &#x27;source&#x27;</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">dblClick</span>(page.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&#x27;source&#x27;</span>))
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">cut</span>()
+
+  <span class="hljs-comment">// paste to &#x27;target&#x27;</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">click</span>(page.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&#x27;target&#x27;</span>))
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">paste</span>()
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&#x27;source&#x27;</span>)).<span class="hljs-title function_">toHaveTextContent</span>(<span class="hljs-string">&#x27;&#x27;</span>)
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&#x27;target&#x27;</span>)).<span class="hljs-title function_">toHaveTextContent</span>(<span class="hljs-string">&#x27;hello&#x27;</span>)
+})</code></pre></div>
+<p>References:</p>
+<ul>
+<li><a href="https://testing-library.com/docs/user-event/clipboard#cut">testing-library <code>cut</code> API</a></li>
+</ul>
+<h2 id="userevent-paste"><a class="anchor" href="#userevent-paste">#</a>userEvent.paste</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">paste</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Paste the text from the clipboard. See <a href="#userevent-copy"><code>userEvent.copy</code></a> and <a href="#userevent-cut"><code>userEvent.cut</code></a> for usage examples.</p>
+<p>References:</p>
+<ul>
+<li><a href="https://testing-library.com/docs/user-event/clipboard#paste">testing-library <code>paste</code> API</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#userevent-setup">userEvent.setup</a><a class="toc-2" href="#userevent-click">userEvent.click</a><a class="toc-3" href="#clicking-with-a-modifier">Clicking with a modifier</a><a class="toc-2" href="#userevent-dblclick">userEvent.dblClick</a><a class="toc-2" href="#userevent-tripleclick">userEvent.tripleClick</a><a class="toc-2" href="#userevent-wheel">userEvent.wheel 4.1.0</a><a class="toc-2" href="#userevent-fill">userEvent.fill</a><a class="toc-2" href="#userevent-keyboard">userEvent.keyboard</a><a class="toc-2" href="#userevent-tab">userEvent.tab</a><a class="toc-2" href="#userevent-type">userEvent.type</a><a class="toc-2" href="#userevent-clear">userEvent.clear</a><a class="toc-2" href="#userevent-selectoptions">userEvent.selectOptions</a><a class="toc-2" href="#userevent-hover">userEvent.hover</a><a class="toc-2" href="#userevent-unhover">userEvent.unhover</a><a class="toc-2" href="#userevent-upload">userEvent.upload</a><a class="toc-2" href="#userevent-draganddrop">userEvent.dragAndDrop</a><a class="toc-2" href="#userevent-copy">userEvent.copy</a><a class="toc-2" href="#userevent-cut">userEvent.cut</a><a class="toc-2" href="#userevent-paste">userEvent.paste</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

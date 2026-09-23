@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vitest-browser-vue (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/browser/vue  <a class="ext small" href="https://vitest.dev/api/browser/vue">version en ligne</a></div>
+<h1 id="vitest-browser-vue"><a class="anchor" href="#vitest-browser-vue">#</a>vitest-browser-vue</h1>
+<p>The community <a href="https://npmx.dev/package/vitest-browser-vue"><code>vitest-browser-vue</code></a> package renders <a href="https://vuejs.org/">Vue</a> components in <a href="../../guide/browser/index.html">Browser Mode</a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-vue&#x27;</span>
+<span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Component</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./Component.vue&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;counter button increments the count&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">Component</span>, {
+    <span class="hljs-attr">props</span>: {
+      <span class="hljs-attr">initialCount</span>: <span class="hljs-number">1</span>,
+    }
+  })
+
+  <span class="hljs-keyword">await</span> screen.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Increment&#x27;</span> }).<span class="hljs-title function_">click</span>()
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(screen.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Count is 2&#x27;</span>)).<span class="hljs-title function_">toBeVisible</span>()
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This library takes inspiration from <a href="https://github.com/testing-library/vue-testing-library"><code>@testing-library/vue</code></a>.</p>
+<p>If you have used <code>@testing-library/vue</code> in your tests before, you can keep using it, however the <code>vitest-browser-vue</code> package provides certain benefits unique to the Browser Mode that <code>@testing-library/vue</code> lacks:</p>
+<p><code>vitest-browser-vue</code> returns APIs that interact well with built-in <a href="locators.html">locators</a>, <a href="interactivity.html">user events</a> and <a href="assertions.html">assertions</a>: for example, Vitest will automatically retry the element until the assertion is successful, even if it was rerendered between the assertions.</p>
+</div><p>The package exposes two entry points: <code>vitest-browser-vue</code> and <code>vitest-browser-vue/pure</code>. They expose identical API, but the <code>pure</code> entry point doesn&#39;t add a handler to remove the component before the next test has started.</p>
+<h2 id="render"><a class="anchor" href="#render">#</a>render</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">
+  <span class="hljs-attr">component</span>: <span class="hljs-title class_">Component</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">ComponentRenderOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">RenderResult</span>&gt;</code></pre></div>
+<p>The <code>render</code> function records a <code>vue.render</code> trace mark, visible in the <a href="../../guide/browser/trace-view.html">Trace View</a>.</p>
+<h3 id="options"><a class="anchor" href="#options">#</a>Options</h3>
+<p>The <code>render</code> function supports all <a href="https://test-utils.vuejs.org/api/#mount"><code>mount</code> options</a> from <code>@vue/test-utils</code> (except <code>attachTo</code> - use <code>container</code> instead). In addition to them, there are also <code>container</code> and <code>baseElement</code>.</p>
+<h4 id="container"><a class="anchor" href="#container">#</a>container</h4>
+<p>By default, Vitest will create a <code>div</code>, append it to <code>document.body</code>, and render your component there. If you provide your own <code>HTMLElement</code> container, it will not be appended automatically — you&#39;ll need to call <code>document.body.appendChild(container)</code> before <code>render</code>.</p>
+<p>For example, if you are unit testing a <code>tbody</code> element, it cannot be a child of a <code>div</code>. In this case, you can specify a <code>table</code> as the render container.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> table = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;table&#x27;</span>)
+
+<span class="hljs-keyword">const</span> { container } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">TableBody</span>, {
+  props,
+  <span class="hljs-comment">// ⚠️ appending the element to `body` manually before rendering</span>
+  <span class="hljs-attr">container</span>: <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-title function_">appendChild</span>(table),
+})</code></pre></div>
+<h4 id="baseelement"><a class="anchor" href="#baseelement">#</a>baseElement</h4>
+<p>If the <code>container</code> is specified, then this defaults to that, otherwise this defaults to <code>document.body</code>. This is used as the base element for the queries as well as what is printed when you use <code>debug()</code>.</p>
+<h3 id="render-result"><a class="anchor" href="#render-result">#</a>Render Result</h3>
+<p>In addition to documented return value, the <code>render</code> function also returns all available <a href="locators.html">locators</a> relative to the <a href="#baseelement"><code>baseElement</code></a>, including <a href="locators.html#custom-locators">custom ones</a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">TableBody</span>, { props })
+
+<span class="hljs-keyword">await</span> screen.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;link&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Expand&#x27;</span> }).<span class="hljs-title function_">click</span>()</code></pre></div>
+<h4 id="container-2"><a class="anchor" href="#container-2">#</a>container</h4>
+<p>The containing DOM node where your Vue component is rendered. This is a regular DOM node, so you technically could call <code>container.querySelector</code> etc. to inspect the children.</p>
+<div class="box box-danger"><div class="box-title">🛑 Danger</div><p>If you find yourself using <code>container</code> to query for rendered elements then you should reconsider! The <a href="locators.html">locators</a> are designed to be more resilient to changes that will be made to the component you&#39;re testing. Avoid using <code>container</code> to query for elements!</p>
+</div><h4 id="baseelement-2"><a class="anchor" href="#baseelement-2">#</a>baseElement</h4>
+<p>The containing DOM node where your Vue component is rendered in the <code>container</code>. If you don&#39;t specify the <code>baseElement</code> in the options of render, it will default to <code>document.body</code>.</p>
+<p>This is useful when the component you want to test renders something outside the container <code>div</code>, e.g. when you want to snapshot test your portal component which renders its HTML directly in the body.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>The queries returned by the <code>render</code> looks into <code>baseElement</code>, so you can use queries to test your portal component without the <code>baseElement</code>.</p>
+</div><h4 id="locator"><a class="anchor" href="#locator">#</a>locator</h4>
+<p>The <a href="locators.html">locator</a> of your <code>container</code>. It is useful to use queries scoped only to your component, or pass it down to other assertions:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-vue&#x27;</span>
+
+<span class="hljs-keyword">const</span> { locator } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">NumberDisplay</span>, {
+  <span class="hljs-attr">props</span>: { <span class="hljs-attr">number</span>: <span class="hljs-number">2</span> }
+})
+
+<span class="hljs-keyword">await</span> locator.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>).<span class="hljs-title function_">click</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(locator).<span class="hljs-title function_">toHaveTextContent</span>(<span class="hljs-string">&#x27;Hello World&#x27;</span>)</code></pre></div>
+<h4 id="debug"><a class="anchor" href="#debug">#</a>debug</h4>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">debug</span>(<span class="hljs-params">
+  <span class="hljs-attr">el</span>?: <span class="hljs-title class_">HTMLElement</span> | <span class="hljs-title class_">HTMLElement</span>[] | <span class="hljs-title class_">Locator</span> | <span class="hljs-title class_">Locator</span>[],
+  <span class="hljs-attr">maxLength</span>?: <span class="hljs-built_in">number</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">PrettyDOMOptions</span>,
+</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>This method is a shortcut for <code>console.log(prettyDOM(baseElement))</code>. It will print the DOM content of the container or specified elements to the console.</p>
+<h4 id="rerender"><a class="anchor" href="#rerender">#</a>rerender</h4>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">rerender</span>(<span class="hljs-params"><span class="hljs-attr">props</span>: <span class="hljs-title class_">Partial</span>&lt;<span class="hljs-title class_">Props</span>&gt;</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Also records a <code>vue.rerender</code> trace mark in the <a href="../../guide/browser/trace-view.html">Trace View</a>.</p>
+<p>It is better if you test the component that&#39;s doing the prop updating to ensure that the props are being updated correctly to avoid relying on implementation details in your tests. That said, if you&#39;d prefer to update the props of a rendered component in your test, this function can be used to update props of the rendered component.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-vue&#x27;</span>
+
+<span class="hljs-keyword">const</span> { rerender } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">NumberDisplay</span>, { <span class="hljs-attr">props</span>: { <span class="hljs-attr">number</span>: <span class="hljs-number">1</span> } })
+
+<span class="hljs-comment">// re-render the same component with different props</span>
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">rerender</span>({ <span class="hljs-attr">number</span>: <span class="hljs-number">2</span> })</code></pre></div>
+<h4 id="unmount"><a class="anchor" href="#unmount">#</a>unmount</h4>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">unmount</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This will cause the rendered component to be unmounted. Also records a <code>vue.unmount</code> trace mark in the <a href="../../guide/browser/trace-view.html">Trace View</a>. This is useful for testing what happens when your component is removed from the page (like testing that you don&#39;t leave event handlers hanging around causing memory leaks).</p>
+<h4 id="emitted"><a class="anchor" href="#emitted">#</a>emitted</h4>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> emitted&lt;T = <span class="hljs-built_in">unknown</span>&gt;(): <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, T[]&gt;
+<span class="hljs-keyword">function</span> emitted&lt;T = <span class="hljs-built_in">unknown</span>[]&gt;(<span class="hljs-attr">eventName</span>: <span class="hljs-built_in">string</span>): <span class="hljs-literal">undefined</span> | T[]</code></pre></div>
+<p>Returns the emitted events from the Component.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Emitted values are an implementation detail not exposed directly to the user, so it is better to test how your emitted values are changing the displayed content by using <a href="locators.html">locators</a> instead.</p>
+</div><h2 id="cleanup"><a class="anchor" href="#cleanup">#</a>cleanup</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">cleanup</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Remove all components rendered with <a href="#render"><code>render</code></a>.</p>
+<h2 id="extend-queries"><a class="anchor" href="#extend-queries">#</a>Extend Queries</h2>
+<p>To extend locator queries, see <a href="locators.html#custom-locators"><code>&quot;Custom Locators&quot;</code></a>. For example, to make <code>render</code> return a new custom locator, define it using the <code>locators.extend</code> API:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { locators } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+<span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-vue&#x27;</span>
+
+locators.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-title function_">getByArticleTitle</span>(<span class="hljs-params">title</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`[data-title=&quot;<span class="hljs-subst">${title}</span>&quot;]`</span>
+  },
+})
+
+<span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="hljs-title class_">Component</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(
+  screen.<span class="hljs-title function_">getByArticleTitle</span>(<span class="hljs-string">&#x27;Hello World&#x27;</span>)
+).<span class="hljs-title function_">toBeVisible</span>()</code></pre></div>
+<h2 id="configuration"><a class="anchor" href="#configuration">#</a>Configuration</h2>
+<p>You can configure <a href="https://test-utils.vuejs.org/api/#config">Vue Test Utils</a> options by assigning properties to the <code>config</code> export (available in both <code>vitest-browser-vue</code> and <code>vitest-browser-vue/pure</code>):</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { config } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-vue/pure&#x27;</span>
+
+config.<span class="hljs-property">global</span>.<span class="hljs-property">stubs</span>.<span class="hljs-property">CustomComponent</span> = {
+  <span class="hljs-attr">template</span>: <span class="hljs-string">&#x27;&lt;div&gt;&lt;/div&gt;&#x27;</span>,
+}</code></pre></div>
+<h2 id="see-also"><a class="anchor" href="#see-also">#</a>See also</h2>
+<ul>
+<li><a href="https://testing-library.com/docs/vue-testing-library/intro">Vue Testing Library documentation</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#render">render</a><a class="toc-3" href="#options">Options</a><a class="toc-3" href="#render-result">Render Result</a><a class="toc-2" href="#cleanup">cleanup</a><a class="toc-2" href="#extend-queries">Extend Queries</a><a class="toc-2" href="#configuration">Configuration</a><a class="toc-2" href="#see-also">See also</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

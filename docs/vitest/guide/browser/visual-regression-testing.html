@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visual Regression Testing (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/browser/visual-regression-testing  <a class="ext small" href="https://vitest.dev/guide/browser/visual-regression-testing">version en ligne</a></div>
+<h1 id="visual-regression-testing"><a class="anchor" href="#visual-regression-testing">#</a>Visual Regression Testing</h1>
+<p>Vitest can run visual regression tests out of the box. It captures screenshots of your UI components and pages, then compares them against reference images to detect unintended visual changes.</p>
+<p>Unlike functional tests that verify behavior, visual tests catch styling issues, layout shifts, and rendering problems that might otherwise go unnoticed without thorough manual testing.</p>
+<h2 id="why-visual-regression-testing"><a class="anchor" href="#why-visual-regression-testing">#</a>Why visual regression testing?</h2>
+<p>Visual bugs don’t throw errors, they just look wrong. That’s where visual testing comes in.</p>
+<ul>
+<li>That button still submits the form... but why is it hot pink now?</li>
+<li>The text fits perfectly... until someone views it on mobile</li>
+<li>Everything works great... except those two containers are outside the viewport</li>
+<li>That careful CSS refactor works... but broke the layout on a page no one tests</li>
+</ul>
+<p>Visual regression testing acts as a safety net for your UI, automatically catching these visual changes before they reach production.</p>
+<h2 id="example"><a class="anchor" href="#example">#</a>Example</h2>
+<p>Visual regression testing in Vitest can be done through the <a href="../../api/browser/assertions.html#tomatchscreenshot"><code>toMatchScreenshot</code> assertion</a>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;button renders in default state&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// render your component</span>
+
+  <span class="hljs-comment">// capture and compare screenshot</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>)).<span class="hljs-title function_">toMatchScreenshot</span>()
+})</code></pre></div>
+<h2 id="getting-started"><a class="anchor" href="#getting-started">#</a>Getting started</h2>
+<h3 id="environmental-stability"><a class="anchor" href="#environmental-stability">#</a>Environmental stability</h3>
+<p>Visual regression tests are <strong>sensitive to environmental differences</strong> because rendering is not perfectly deterministic across environments and depends on multiple factors:</p>
+<ul>
+<li>GPU, drivers, and hardware acceleration</li>
+<li>Operating System</li>
+<li>Font rendering pipelines</li>
+<li>Browser, browser versions, and settings</li>
+<li>Whether the browser is running headless or headed</li>
+<li>Screen scaling, color profiles, and display settings</li>
+<li>...and occasionally what feels like the phase of the moon <MoonPhase /></li>
+</ul>
+<p>In practice, even seemingly identical environments can occasionally produce subtle rendering differences. For this reason, <strong>visual regression tests are most reliable when run in a standardized and tightly controlled environment</strong>. This is also why <a href="https://playwright.dev/docs/docker">Docker containers</a>, <a href="#visual-testing-for-teams">CI-only visual testing workflows, or cloud services</a> are strongly recommended.</p>
+<h3 id="not-a-replacement-for-behavior-testing"><a class="anchor" href="#not-a-replacement-for-behavior-testing">#</a>Not a replacement for behavior testing</h3>
+<p>When a visual test fails alongside behavior tests, it&#39;s harder to tell what&#39;s actually broken or why. Visual failures are also expected during intentional UI work, but a failing unit test usually is not. Keeping them separate means each suite can fail loudly for the right reasons.</p>
+<p>It&#39;s worth calling out that <strong><code>toMatchScreenshot</code> is not a substitute for proper assertions</strong>.</p>
+<p>A test that renders a button and just takes a screenshot is just documenting the current state. There&#39;s no way to tell from a screenshot whether users can interact with the button. <strong>Visual tests work best as a complementary layer on top of behavior tests, not a replacement for them</strong>.</p>
+<p>Put another way, <strong>visual testing doesn&#39;t tell you why something renders the way it does</strong>. It just tells you that something rendered a certain way, or a different way than it did last time.</p>
+<p>For example, take a business requirement to sort recent purchases in a table by purchase date. If you&#39;re looking only at the visual regression tests, you might notice that the same items from the last test are in a different order. This could be because you just introduced the sorting or because the sorting is broken. Either way, you don&#39;t know why the order is different just by looking at the UI. Someone could dismiss the visual diff as noise because the table &quot;looks the same&quot;, even though the ordering logic is now broken. Now you have a broken business requirement in production.</p>
+<h3 id="project-structure"><a class="anchor" href="#project-structure">#</a>Project structure</h3>
+<p>Separating your visual suite from other tests gives you cleaner failure signals and a more deliberate update workflow. The recommended setup uses <a href="../projects.html">projects</a> with a <code>[name].vrt.test.[ext]</code> naming convention to keep them distinct, and runs them in headless mode for consistency. As the browser instance might have a different default size, it also sets a specific viewport size.</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defaultExclude, defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">const</span> vrtPattern = <span class="hljs-string">&#x27;**/*.vrt.test.[tj]s?(x)&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-comment">// ...other configurations</span>
+    <span class="hljs-attr">projects</span>: [
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;unit&#x27;</span>,
+          <span class="hljs-attr">exclude</span>: [vrtPattern, ...defaultExclude],
+        },
+      },
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;vrt&#x27;</span>,
+          <span class="hljs-attr">browser</span>: {
+            <span class="hljs-attr">headless</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">instances</span>: [
+              {
+                <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;[browser-name]&#x27;</span>,
+                <span class="hljs-attr">viewport</span>: { <span class="hljs-attr">width</span>: <span class="hljs-number">1280</span>, <span class="hljs-attr">height</span>: <span class="hljs-number">720</span> },
+              },
+            ],
+          },
+          <span class="hljs-attr">include</span>: [vrtPattern],
+        },
+      },
+    ],
+  },
+})</code></pre></div>
+<p>With this configuration in place, add scripts to launch each project separately:</p>
+<div class="code"><div class="code-title">package.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;test:unit&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest --project unit&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;test:visual&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest --project vrt&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<h3 id="creating-references"><a class="anchor" href="#creating-references">#</a>Creating references</h3>
+<p>When you run a visual test for the first time, Vitest creates a reference (also called baseline) screenshot and fails the test with the following error message:</p>
+<div class="code"><pre><code class="hljs lang-txt">expect(element).toMatchScreenshot()
+
+No existing reference screenshot found; a new one was created. Review it before running tests again.
+
+Reference screenshot:
+  tests/__screenshots__/button.vrt.test.ts/button-default-state-chromium-darwin.png</code></pre></div>
+<p>This is normal. Check that the screenshot looks right, then run the test again. Vitest will now compare future runs against this baseline.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Reference screenshots live in <code>__screenshots__</code> folders next to your tests. <strong>Commit them to your repository.</strong></p>
+</div><h3 id="screenshot-organization"><a class="anchor" href="#screenshot-organization">#</a>Screenshot organization</h3>
+<p>By default, screenshots are organized as:</p>
+<div class="code"><pre><code class="hljs lang-txt">.
+├── __screenshots__
+│   └── test-file.vrt.test.ts
+│       ├── test-name-chromium-darwin.png
+│       ├── test-name-firefox-linux.png
+│       └── test-name-webkit-win32.png
+└── test-file.vrt.test.ts</code></pre></div>
+<p>The naming convention includes:</p>
+<ul>
+<li><strong>Test name</strong>: either the first argument of the <code>toMatchScreenshot()</code> call, or automatically generated from the test&#39;s name.</li>
+<li><strong>Browser name</strong>: depends on the configured browser provider, for example <code>chrome</code>, <code>chromium</code>, <code>firefox</code> or <code>webkit</code>.</li>
+<li><strong>Platform</strong>: <code>aix</code>, <code>darwin</code>, <code>freebsd</code>, <code>linux</code>, <code>openbsd</code>, <code>sunos</code>, or <code>win32</code>.</li>
+</ul>
+<p>This ensures screenshots from different environments don&#39;t overwrite each other.</p>
+<h3 id="updating-references"><a class="anchor" href="#updating-references">#</a>Updating references</h3>
+<p>When you intentionally change your UI, you&#39;ll need to update the reference screenshots just as you would update snapshots:</p>
+<div class="code"><pre><code class="hljs lang-bash">$ vitest --project vrt --update</code></pre></div>
+<p>Review updated screenshots before committing to make sure changes are intentional.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Stale screenshots</div><p>Note that <strong>screenshots for deleted or renamed tests aren&#39;t removed automatically</strong>. Clean up the <code>__screenshots__</code> folder manually when you remove or rename tests, otherwise stale references will accumulate over time.</p>
+</div><h3 id="debugging-failed-tests"><a class="anchor" href="#debugging-failed-tests">#</a>Debugging failed tests</h3>
+<p>When a visual test fails, Vitest provides three images to help debug:</p>
+<ol>
+<li><strong>Reference screenshot</strong>: the expected baseline image</li>
+<li><strong>Actual screenshot</strong>: what was captured during the test</li>
+<li><strong>Diff image</strong>: highlights the differences; only generated when the screenshots have the same dimensions (behavior may vary with custom matchers)</li>
+</ol>
+<p>You&#39;ll see something like this in the CLI output:</p>
+<div class="code"><pre><code class="hljs lang-txt">expect(element).toMatchScreenshot()
+
+Screenshot does not match the stored reference.
+245 pixels (ratio 0.03) differ.
+
+Reference screenshot:
+  tests/__screenshots__/button.vrt.test.ts/button-chromium-darwin.png
+
+Actual screenshot:
+  tests/.vitest/attachments/button.vrt.test.ts/button-chromium-darwin-actual.png
+
+Diff image:
+  tests/.vitest/attachments/button.vrt.test.ts/button-chromium-darwin-diff.png</code></pre></div>
+<p>While in UI mode, Vitest shows a tabbed diff view with an A/B slider as shown below.</p>
+<center>
+  <span class="img-missing">[image]</span>
+  <span class="img-missing">[image]</span><p>  <sup>An example of the visual regression diff UI, showing the &quot;Diff&quot;, &quot;Reference&quot;, &quot;Actual&quot;, and &quot;Slider&quot; tabs, and how the slider reveals unexpected visual changes in a component.</sup></p>
+</center><h4 id="understanding-the-diff-image"><a class="anchor" href="#understanding-the-diff-image">#</a>Understanding the diff image</h4>
+<ul>
+<li><strong>Red pixels</strong> are areas that differ between reference and actual</li>
+<li><strong>Yellow pixels</strong> are anti-aliasing differences (when anti-alias is not ignored)</li>
+<li><strong>Transparent/original</strong> are unchanged areas</li>
+</ul>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If the diff is mostly red, something&#39;s really wrong. If it&#39;s speckled with a few red pixels around text, you probably just need to bump your threshold.</p>
+</div><h2 id="configuring-the-tomatchscreenshot-assertion"><a class="anchor" href="#configuring-the-tomatchscreenshot-assertion">#</a>Configuring the <code>toMatchScreenshot</code> assertion</h2>
+<p>It&#39;s possible to configure the <code>toMatchScreenshot</code> assertion either globally, by changing its default options, or on a per-test basis.</p>
+<p>To change the defaults, you have to change the <a href="../../config/browser/expect.html#tomatchscreenshot">Vitest config</a>:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">expect</span>: {
+        <span class="hljs-attr">toMatchScreenshot</span>: {
+          <span class="hljs-attr">comparatorName</span>: <span class="hljs-string">&#x27;pixelmatch&#x27;</span>,
+          <span class="hljs-attr">comparatorOptions</span>: {
+            <span class="hljs-comment">// 0-1, how different can colors be?</span>
+            <span class="hljs-attr">threshold</span>: <span class="hljs-number">0.2</span>,
+            <span class="hljs-comment">// 1% of pixels can differ</span>
+            <span class="hljs-attr">allowedMismatchedPixelRatio</span>: <span class="hljs-number">0.01</span>,
+          },
+        },
+      },
+    },
+  },
+})</code></pre></div>
+<p>For more fine-grained control, override global settings in specific tests by passing options directly to the assertion:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(element).<span class="hljs-title function_">toMatchScreenshot</span>(<span class="hljs-string">&#x27;button&#x27;</span>, {
+  <span class="hljs-attr">comparatorName</span>: <span class="hljs-string">&#x27;pixelmatch&#x27;</span>,
+  <span class="hljs-attr">comparatorOptions</span>: {
+    <span class="hljs-comment">// more lax comparison for text-heavy elements</span>
+    <span class="hljs-attr">allowedMismatchedPixelRatio</span>: <span class="hljs-number">0.1</span>,
+  },
+})</code></pre></div>
+<h2 id="third-party-comparators"><a class="anchor" href="#third-party-comparators">#</a>Third-party comparators</h2>
+<p>Vitest ships with <code>pixelmatch</code> as its built-in comparator. It&#39;s fast, compares images pixel-by-pixel, has no native dependencies, and handles the majority of cases well. Perceptual comparators aren&#39;t included by default because they bring heavier dependencies and there&#39;s no clear single &quot;best one&quot; to pick as different algorithms make different trade-offs, but the comparator API exists precisely to let you plug in whatever fits your needs. This decision may change as the ecosystem matures, though.</p>
+<p>For use cases where pixel-level diffing produces excessive noise, a perceptual or structural similarity comparator may be a better fit. These compare images more like a human would, tolerating minor rendering differences while still detecting meaningful visual changes.</p>
+<p>There are many algorithms, so these are a useful starting point:</p>
+<ul>
+<li><a href="https://blazediff.dev/docs/ssim"><code>@blazediff/ssim</code></a>, <a href="https://en.wikipedia.org/wiki/Structural_similarity_index_measure">SSIM (Structural Similarity Index)</a> implementations for perceptual image quality assessment. It offers standard SSIM, MS-SSIM (Multi-Scale SSIM), and Hitchhiker’s SSIM for various use cases</li>
+<li><a href="https://blazediff.dev/docs/gmsd"><code>@blazediff/gmsd</code></a>, a single-threaded GMSD (Gradient Magnitude Similarity Deviation) metric for perceptual image quality assessment, good for CI environments</li>
+</ul>
+<p>To use one, install and register it:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> ssim <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@blazediff/ssim/ssim&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">SsimOptionsExtended</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@blazediff/ssim/ssim&#x27;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ScreenshotComparatorRegistry</span> {
+    <span class="hljs-string">&#x27;standard-ssim&#x27;</span>: <span class="hljs-title class_">SsimOptionsExtended</span> &amp; {
+      <span class="hljs-attr">threshold</span>?: <span class="hljs-built_in">number</span>
+    }
+  }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">expect</span>: {
+        <span class="hljs-attr">toMatchScreenshot</span>: {
+          <span class="hljs-attr">comparators</span>: {
+            <span class="hljs-comment">// naive implementation, always check the library&#x27;s docs</span>
+            <span class="hljs-string">&#x27;standard-ssim&#x27;</span>: <span class="hljs-function">(<span class="hljs-params">
+              reference,
+              actual,
+              { createDiff, ...options }
+            </span>) =&gt;</span> {
+              <span class="hljs-keyword">const</span> diffBuffer = createDiff
+                ? <span class="hljs-keyword">new</span> <span class="hljs-title class_">Uint8Array</span>(reference.<span class="hljs-property">data</span>.<span class="hljs-property">length</span>)
+                : <span class="hljs-literal">undefined</span>
+
+              <span class="hljs-keyword">const</span> output = <span class="hljs-title function_">ssim</span>(
+                reference.<span class="hljs-property">data</span>,
+                actual.<span class="hljs-property">data</span>,
+                diffBuffer,
+                reference.<span class="hljs-property">metadata</span>.<span class="hljs-property">width</span>,
+                reference.<span class="hljs-property">metadata</span>.<span class="hljs-property">height</span>,
+                options,
+              )
+
+              <span class="hljs-keyword">const</span> pass = output &gt;= (options.<span class="hljs-property">threshold</span> ?? <span class="hljs-number">0.95</span>)
+
+              <span class="hljs-keyword">return</span> {
+                pass,
+                <span class="hljs-attr">diff</span>: diffBuffer ?? <span class="hljs-literal">null</span>,
+                <span class="hljs-attr">message</span>: pass ? <span class="hljs-literal">null</span> : <span class="hljs-string">`SSIM score: <span class="hljs-subst">${output}</span>.`</span>,
+              }
+            },
+          },
+        },
+      },
+    },
+  },
+})</code></pre></div>
+<p>Once registered, the comparator can be referenced by name in your config or on a per-test basis:</p>
+<div class="code-group"><div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">expect</span>: {
+        <span class="hljs-attr">toMatchScreenshot</span>: {
+          <span class="hljs-attr">comparatorName</span>: <span class="hljs-string">&#x27;standard-ssim&#x27;</span>,
+        },
+      },
+    },
+  },
+})</code></pre></div>
+<div class="code"><div class="code-title">button.vrt.test.tsx</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(button).<span class="hljs-title function_">toMatchScreenshot</span>(<span class="hljs-string">&#x27;button&#x27;</span>, {
+  <span class="hljs-attr">comparatorName</span>: <span class="hljs-string">&#x27;standard-ssim&#x27;</span>,
+})</code></pre></div>
+</div><h2 id="best-practices"><a class="anchor" href="#best-practices">#</a>Best practices</h2>
+<h3 id="test-specific-elements"><a class="anchor" href="#test-specific-elements">#</a>Test specific elements</h3>
+<p>Unless you explicitly want to test the whole page, prefer capturing specific components to reduce false positives:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// ❌ Captures entire page; prone to unrelated changes</span>
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page).<span class="hljs-title function_">toMatchScreenshot</span>()
+
+<span class="hljs-comment">// ✅ Captures only the component under test</span>
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(
+  page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;article&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Tote bag&#x27;</span> })
+).<span class="hljs-title function_">toMatchScreenshot</span>()</code></pre></div>
+<h3 id="handle-dynamic-content"><a class="anchor" href="#handle-dynamic-content">#</a>Handle dynamic content</h3>
+<p>Dynamic content like timestamps, user data, or random values will cause tests to fail. Either mock the underlying data sources or mask them using the <a href="https://playwright.dev/docs/api/class-page#page-screenshot-option-mask"><code>mask</code> option</a> in <code>screenshotOptions</code> when using the Playwright provider.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> profile = page.<span class="hljs-title function_">getByRole</span>(
+  <span class="hljs-string">&#x27;article&#x27;</span>,
+  { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Gracie\&#x27;s profile&#x27;</span> },
+)
+
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(profile).<span class="hljs-title function_">toMatchScreenshot</span>({
+  <span class="hljs-attr">screenshotOptions</span>: {
+    <span class="hljs-attr">mask</span>: [profile.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;status&#x27;</span>)],
+  },
+})</code></pre></div>
+<h3 id="disable-animations"><a class="anchor" href="#disable-animations">#</a>Disable animations</h3>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>When using the Playwright provider, animations are automatically disabled when using the built-in assertion: the <code>animations</code> option&#39;s value in <code>screenshotOptions</code> is set to <code>&quot;disabled&quot;</code> by default.</p>
+<p>If you prefer to disable all animations to save some execution time, continue reading.</p>
+</div><p>Animations can cause flaky tests. Disable them during testing by injecting a custom CSS snippet using <a href="../../config/setupfiles.html"><code>setupFiles</code></a> or directly in your tests:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> stylesheet = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;style&#x27;</span>)
+
+stylesheet.<span class="hljs-property">textContent</span> = <span class="hljs-comment">/* css */</span><span class="hljs-string">`
+  *, *::before, *::after {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+`</span>
+
+<span class="hljs-variable language_">document</span>.<span class="hljs-property">head</span>.<span class="hljs-title function_">appendChild</span>(stylesheet)</code></pre></div>
+<p>Alternatively, you can declare the CSS in a custom HTML template by using <a href="../../config/browser/testerhtmlpath.html"><code>browser.testerHtmlPath</code></a>.</p>
+<h3 id="set-appropriate-thresholds"><a class="anchor" href="#set-appropriate-thresholds">#</a>Set appropriate thresholds</h3>
+<p>Tuning thresholds is tricky. It depends on the content, test environment, what&#39;s acceptable for your app, and might also change based on the test.</p>
+<p>Vitest does not define a default tolerance for mismatched pixels. The appropriate value depends on your application and environment. The recommendation is to use <code>allowedMismatchedPixelRatio</code>, so that the threshold is computed on the size of the screenshot and not a fixed number.</p>
+<p>When setting both <code>allowedMismatchedPixelRatio</code> and <code>allowedMismatchedPixels</code>, Vitest uses whichever limit is stricter.</p>
+<h3 id="use-git-lfs"><a class="anchor" href="#use-git-lfs">#</a>Use Git LFS</h3>
+<p>Store reference screenshots in <a href="https://github.com/git-lfs/git-lfs?tab=readme-ov-file">Git LFS</a> if you plan to have a large test suite.</p>
+<h2 id="common-issues-and-solutions"><a class="anchor" href="#common-issues-and-solutions">#</a>Common issues and solutions</h2>
+<h3 id="false-positives-from-font-rendering"><a class="anchor" href="#false-positives-from-font-rendering">#</a>False positives from font rendering</h3>
+<p>Font availability and rendering varies significantly between systems. Some possible solutions might be to:</p>
+<ul>
+<li><p>Use web fonts and wait for them to load:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// wait for fonts to load</span>
+<span class="hljs-keyword">await</span> <span class="hljs-variable language_">document</span>.<span class="hljs-property">fonts</span>.<span class="hljs-property">ready</span>
+
+<span class="hljs-comment">// continue with your tests</span></code></pre></div>
+</li>
+<li><p>Increase comparison threshold for text-heavy areas:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(
+  page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;article&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;How to grow tomatoes&#x27;</span> })
+).<span class="hljs-title function_">toMatchScreenshot</span>({
+  <span class="hljs-attr">comparatorName</span>: <span class="hljs-string">&#x27;pixelmatch&#x27;</span>,
+  <span class="hljs-attr">comparatorOptions</span>: {
+    <span class="hljs-comment">// 10% of the pixels are allowed to change</span>
+    <span class="hljs-attr">allowedMismatchedPixelRatio</span>: <span class="hljs-number">0.1</span>,
+  },
+})</code></pre></div>
+</li>
+<li><p><a href="#visual-testing-for-teams">Consider a shared environment setup</a> for consistent font rendering.</p>
+</li>
+</ul>
+<h3 id="flaky-tests-or-different-screenshot-sizes"><a class="anchor" href="#flaky-tests-or-different-screenshot-sizes">#</a>Flaky tests or different screenshot sizes</h3>
+<p>If tests pass and fail randomly, or if screenshots have different dimensions between runs:</p>
+<ul>
+<li>Wait for everything to load, including loading indicators</li>
+<li>Set explicit viewport sizes: <code>await page.viewport(1920, 1080)</code></li>
+<li>Check for responsive behavior at viewport boundaries</li>
+<li>Check for unintended animations or transitions</li>
+<li>Increase test timeout for large screenshots</li>
+<li><a href="#visual-testing-for-teams">Consider a shared environment setup</a></li>
+</ul>
+<h2 id="visual-testing-for-teams"><a class="anchor" href="#visual-testing-for-teams">#</a>Visual testing for teams</h2>
+<p>Even with a controlled local setup, references generated on one machine will often fail on another. This matters as soon as more than one person is running the suite.</p>
+<p>Running the visual regression suite in a shared environment solves this problem. There are three ways to do this:</p>
+<ol>
+<li><strong>Self-hosted runners</strong> (e.g., Docker images), complex to set up and maintain</li>
+<li><strong>Generate references in CI</strong>, which requires some setup</li>
+<li><strong>Cloud services</strong>, like <a href="https://azure.microsoft.com/en-us/products/app-testing/">Azure App Testing</a>, built to solve this exact problem, but usually restricted to specific providers and browsers</li>
+</ol>
+<p>Options 2 and 3 are the quickest to get running, so those are covered below.</p>
+<p>:::: tabs key:shared-environment-vrt
+=== GitHub Actions (CI)</p>
+<p>GitHub runners don&#39;t have browsers preinstalled. Install them before running tests, using the steps for your provider:</p>
+<p>::: tabs key:provider
+== Playwright</p>
+<p><a href="https://npmx.dev/package/playwright">Playwright</a> makes this easy. Just pin your version and add this step before running tests:</p>
+<div class="code"><div class="code-title">.github/workflows/ci.yml</div><pre><code class="hljs lang-yaml"><span class="hljs-comment"># ...the rest of the workflow</span>
+<span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Install</span> <span class="hljs-string">Playwright</span> <span class="hljs-string">Browsers</span>
+  <span class="hljs-attr">run:</span> <span class="hljs-string">npx</span> <span class="hljs-string">--no</span> <span class="hljs-string">playwright</span> <span class="hljs-string">install</span> <span class="hljs-string">--with-deps</span> <span class="hljs-string">--only-shell</span></code></pre></div>
+<p>== WebdriverIO</p>
+<p><a href="https://npmx.dev/package/webdriverio">WebdriverIO</a> installs browsers automatically if none can be found when a test run starts, but it&#39;s recommended to decouple the installation process. To help with this, the folks at <a href="https://github.com/browser-actions">@browser-actions</a> have packaged scripts to install <a href="https://github.com/browser-actions/setup-chrome">Chrome</a>, <a href="https://github.com/browser-actions/setup-edge">Edge</a>, and <a href="https://github.com/browser-actions/setup-firefox">Firefox</a> in convenient reusable actions:</p>
+<div class="code"><div class="code-title">.github/workflows/ci.yml</div><pre><code class="hljs lang-yaml"><span class="hljs-comment"># ...the rest of the workflow</span>
+<span class="hljs-bullet">-</span> <span class="hljs-attr">uses:</span> <span class="hljs-string">browser-actions/setup-chrome@v1</span>
+  <span class="hljs-attr">with:</span>
+    <span class="hljs-attr">chrome-version:</span> <span class="hljs-number">120</span></code></pre></div>
+<p>:::</p>
+<p>Then in your existing workflow run the visual tests:</p>
+<div class="code"><div class="code-title">.github/workflows/ci.yml</div><pre><code class="hljs lang-yaml"><span class="hljs-comment"># ...the rest of the workflow</span>
+<span class="hljs-comment"># ...browser setup</span>
+<span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Visual</span> <span class="hljs-string">Regression</span> <span class="hljs-string">Testing</span>
+  <span class="hljs-attr">run:</span> <span class="hljs-string">npm</span> <span class="hljs-string">run</span> <span class="hljs-string">test:visual</span></code></pre></div>
+<h3 id="the-update-workflow"><a class="anchor" href="#the-update-workflow">#</a>The update workflow</h3>
+<p>Running <code>vitest --update</code> locally would generate screenshots on your machine, defeating the whole point of a controlled environment. Instead, you need a way to trigger the update in CI where the environment matches the one that runs the tests.</p>
+<p>You don&#39;t want this to happen automatically on every PR <small><em>(chaos!)</em></small>. Instead, create a manually-triggered workflow that runs when there are intentional changes to the UI.</p>
+<p>The workflow below:</p>
+<ul>
+<li>Only runs on feature branches (never on main)</li>
+<li>Credits the person who triggered it as co-author</li>
+<li>Prevents concurrent runs on the same branch</li>
+<li>Shows a nice summary:<ul>
+<li><p><strong>When screenshots changed</strong>, it lists what changed</p>
+<span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span>
+</li>
+<li><p><strong>When nothing changed</strong>, well, it tells you that too</p>
+<span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span></li>
+</ul>
+</li>
+</ul>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This is just one approach. Some prefer PR comments (<code>/update-screenshots</code>), others use labels. Adjust it to fit your workflow.</p>
+<p>The important part is having a controlled way to update reference screenshots.</p>
+</div><div class="code"><div class="code-title">.github/workflows/update-screenshots.yml</div><pre><code class="hljs lang-yaml"><span class="hljs-attr">name:</span> <span class="hljs-string">Update</span> <span class="hljs-string">Visual</span> <span class="hljs-string">Regression</span> <span class="hljs-string">Screenshots</span>
+
+<span class="hljs-attr">on:</span>
+  <span class="hljs-attr">workflow_dispatch:</span> <span class="hljs-comment"># manual trigger only</span>
+
+<span class="hljs-attr">env:</span>
+  <span class="hljs-attr">AUTHOR_NAME:</span> <span class="hljs-string">&#x27;github-actions[bot]&#x27;</span>
+  <span class="hljs-attr">AUTHOR_EMAIL:</span> <span class="hljs-string">&#x27;41898282+github-actions[bot]@users.noreply.github.com&#x27;</span>
+  <span class="hljs-attr">COMMIT_MESSAGE:</span> <span class="hljs-string">|
+    test: update visual regression screenshots
+</span>
+    <span class="hljs-attr">Co-authored-by:</span> <span class="hljs-string">${{</span> <span class="hljs-string">github.actor</span> <span class="hljs-string">}}</span> <span class="hljs-string">&lt;${{</span> <span class="hljs-string">github.actor_id</span> <span class="hljs-string">}}+${{</span> <span class="hljs-string">github.actor</span> <span class="hljs-string">}}@users.noreply.github.com&gt;</span>
+
+<span class="hljs-attr">jobs:</span>
+  <span class="hljs-attr">update-screenshots:</span>
+    <span class="hljs-attr">runs-on:</span> <span class="hljs-string">ubuntu-24.04</span>
+
+    <span class="hljs-comment"># safety first: don&#x27;t run on main</span>
+    <span class="hljs-attr">if:</span> <span class="hljs-string">github.ref_name</span> <span class="hljs-type">!=</span> <span class="hljs-string">github.event.repository.default_branch</span>
+
+    <span class="hljs-comment"># one at a time per branch</span>
+    <span class="hljs-attr">concurrency:</span>
+      <span class="hljs-attr">group:</span> <span class="hljs-string">visual-regression-screenshots@${{</span> <span class="hljs-string">github.ref_name</span> <span class="hljs-string">}}</span>
+      <span class="hljs-attr">cancel-in-progress:</span> <span class="hljs-literal">true</span>
+
+    <span class="hljs-attr">permissions:</span>
+      <span class="hljs-attr">contents:</span> <span class="hljs-string">write</span> <span class="hljs-comment"># needs to push changes</span>
+
+    <span class="hljs-attr">steps:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Checkout</span> <span class="hljs-string">selected</span> <span class="hljs-string">branch</span>
+        <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/checkout@v4</span>
+        <span class="hljs-attr">with:</span>
+          <span class="hljs-attr">ref:</span> <span class="hljs-string">${{</span> <span class="hljs-string">github.ref_name</span> <span class="hljs-string">}}</span>
+          <span class="hljs-comment"># use PAT if triggering other workflows</span>
+          <span class="hljs-comment"># token: ${{ secrets.GITHUB_TOKEN }}</span>
+
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Configure</span> <span class="hljs-string">Git</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">|
+          git config --global user.name &quot;${{ env.AUTHOR_NAME }}&quot;
+          git config --global user.email &quot;${{ env.AUTHOR_EMAIL }}&quot;
+</span>
+      <span class="hljs-comment"># your setup steps here (node, pnpm, whatever)</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Setup</span> <span class="hljs-string">Node.js</span>
+        <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/setup-node@v4</span>
+        <span class="hljs-attr">with:</span>
+          <span class="hljs-attr">node-version:</span> <span class="hljs-number">24</span>
+
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Install</span> <span class="hljs-string">dependencies</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">npm</span> <span class="hljs-string">ci</span>
+
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Install</span> <span class="hljs-string">Playwright</span> <span class="hljs-string">Browsers</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">npx</span> <span class="hljs-string">--no</span> <span class="hljs-string">playwright</span> <span class="hljs-string">install</span> <span class="hljs-string">--with-deps</span> <span class="hljs-string">--only-shell</span>
+
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Update</span> <span class="hljs-string">Visual</span> <span class="hljs-string">Regression</span> <span class="hljs-string">Screenshots</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">npm</span> <span class="hljs-string">run</span> <span class="hljs-string">test:visual</span> <span class="hljs-string">--update</span>
+
+      <span class="hljs-comment"># check what changed</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Check</span> <span class="hljs-string">for</span> <span class="hljs-string">changes</span>
+        <span class="hljs-attr">id:</span> <span class="hljs-string">check_changes</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">|
+          CHANGED_FILES=$(git status --porcelain | awk &#x27;{print $2}&#x27;)
+          if [ &quot;${CHANGED_FILES:+x}&quot; ]; then
+            echo &quot;changes=true&quot; &gt;&gt; $GITHUB_OUTPUT
+            echo &quot;Changes detected&quot;
+</span>
+            <span class="hljs-comment"># save the list for the summary</span>
+            <span class="hljs-string">echo</span> <span class="hljs-string">&quot;changed_files&lt;&lt;EOF&quot;</span> <span class="hljs-string">&gt;&gt;</span> <span class="hljs-string">$GITHUB_OUTPUT</span>
+            <span class="hljs-string">echo</span> <span class="hljs-string">&quot;$CHANGED_FILES&quot;</span> <span class="hljs-string">&gt;&gt;</span> <span class="hljs-string">$GITHUB_OUTPUT</span>
+            <span class="hljs-string">echo</span> <span class="hljs-string">&quot;EOF&quot;</span> <span class="hljs-string">&gt;&gt;</span> <span class="hljs-string">$GITHUB_OUTPUT</span>
+            <span class="hljs-string">echo</span> <span class="hljs-string">&quot;changed_count=$(echo &quot;</span><span class="hljs-string">$CHANGED_FILES&quot;</span> <span class="hljs-string">|</span> <span class="hljs-string">wc</span> <span class="hljs-string">-l)&quot;</span> <span class="hljs-string">&gt;&gt;</span> <span class="hljs-string">$GITHUB_OUTPUT</span>
+          <span class="hljs-string">else</span>
+            <span class="hljs-string">echo</span> <span class="hljs-string">&quot;changes=false&quot;</span> <span class="hljs-string">&gt;&gt;</span> <span class="hljs-string">$GITHUB_OUTPUT</span>
+            <span class="hljs-string">echo</span> <span class="hljs-string">&quot;No changes detected&quot;</span>
+          <span class="hljs-string">fi</span>
+
+      <span class="hljs-comment"># commit if there are changes</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Commit</span> <span class="hljs-string">changes</span>
+        <span class="hljs-attr">if:</span> <span class="hljs-string">steps.check_changes.outputs.changes</span> <span class="hljs-string">==</span> <span class="hljs-string">&#x27;true&#x27;</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">|
+          git add -A
+          git commit -m &quot;${{ env.COMMIT_MESSAGE }}&quot;
+</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Push</span> <span class="hljs-string">changes</span>
+        <span class="hljs-attr">if:</span> <span class="hljs-string">steps.check_changes.outputs.changes</span> <span class="hljs-string">==</span> <span class="hljs-string">&#x27;true&#x27;</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">git</span> <span class="hljs-string">push</span> <span class="hljs-string">origin</span> <span class="hljs-string">${{</span> <span class="hljs-string">github.ref_name</span> <span class="hljs-string">}}</span>
+
+      <span class="hljs-comment"># pretty summary for humans</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Summary</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">|
+          if [[ &quot;${{ steps.check_changes.outputs.changes }}&quot; == &quot;true&quot; ]]; then
+            echo &quot;### 📸 Visual Regression Screenshots Updated&quot; &gt;&gt; $GITHUB_STEP_SUMMARY
+            echo &quot;&quot; &gt;&gt; $GITHUB_STEP_SUMMARY
+            echo &quot;Successfully updated **${{ steps.check_changes.outputs.changed_count }}** screenshot(s) on \`${{ github.ref_name }}\`&quot; &gt;&gt; $GITHUB_STEP_SUMMARY
+            echo &quot;&quot; &gt;&gt; $GITHUB_STEP_SUMMARY
+            echo &quot;#### Changed Files:&quot; &gt;&gt; $GITHUB_STEP_SUMMARY
+            echo &quot;\`\`\`&quot; &gt;&gt; $GITHUB_STEP_SUMMARY
+            echo &quot;${{ steps.check_changes.outputs.changed_files }}&quot; &gt;&gt; $GITHUB_STEP_SUMMARY
+            echo &quot;\`\`\`&quot; &gt;&gt; $GITHUB_STEP_SUMMARY
+            echo &quot;&quot; &gt;&gt; $GITHUB_STEP_SUMMARY
+            echo &quot;✅ The updated screenshots have been committed and pushed. Your visual regression baseline is now up to date!&quot; &gt;&gt; $GITHUB_STEP_SUMMARY
+          else
+            echo &quot;### ℹ️ No Screenshot Updates Required&quot; &gt;&gt; $GITHUB_STEP_SUMMARY
+            echo &quot;&quot; &gt;&gt; $GITHUB_STEP_SUMMARY
+            echo &quot;The visual regression test command ran successfully but no screenshots needed updating.&quot; &gt;&gt; $GITHUB_STEP_SUMMARY
+            echo &quot;&quot; &gt;&gt; $GITHUB_STEP_SUMMARY
+            echo &quot;All screenshots are already up to date! 🎉&quot; &gt;&gt; $GITHUB_STEP_SUMMARY
+          fi</span></code></pre></div>
+<p>=== Azure App Testing (Cloud service)</p>
+<p>With this method, your tests stay local but the browsers run in the cloud. This is built on top of Playwright&#39;s remote browser feature and Azure handles all the infrastructure.</p>
+<p>Everyone uses the same cloud browsers, so references are consistent regardless of who runs them. Tests work locally, you pay only for what you use, and there&#39;s nothing to maintain.</p>
+<h3 id="configuration"><a class="anchor" href="#configuration">#</a>Configuration</h3>
+<p>To have Playwright connect to the browsers spawned within the service, you have to update the provider configuration.</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { env } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:process&#x27;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-comment">// ...other configurations</span>
+    <span class="hljs-attr">projects</span>: [
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;vrt&#x27;</span>,
+          <span class="hljs-attr">browser</span>: {
+            <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>({
+              <span class="hljs-attr">connectOptions</span>: {
+                <span class="hljs-attr">wsEndpoint</span>: <span class="hljs-string">`<span class="hljs-subst">${env.PLAYWRIGHT_SERVICE_URL}</span>?<span class="hljs-subst">${<span class="hljs-keyword">new</span> URLSearchParams({
+                  <span class="hljs-string">&#x27;api-version&#x27;</span>: <span class="hljs-string">&#x27;2025-09-01&#x27;</span>,
+                  <span class="hljs-string">&#x27;os&#x27;</span>: <span class="hljs-string">&#x27;linux&#x27;</span>, // always use Linux <span class="hljs-keyword">for</span> consistency
+                  // helps identifying runs <span class="hljs-keyword">in</span> the service<span class="hljs-string">&#x27;s dashboard
+                  &#x27;</span>runName<span class="hljs-string">&#x27;: `Vitest ${env.CI ? &#x27;</span>CI<span class="hljs-string">&#x27; : &#x27;</span>local<span class="hljs-string">&#x27;} run @${new Date().toISOString()}`,
+                })}`,
+                exposeNetwork: &#x27;</span>&lt;loopback&gt;<span class="hljs-string">&#x27;,
+                headers: {
+                  Authorization: `Bearer ${env.PLAYWRIGHT_SERVICE_ACCESS_TOKEN}`,
+                },
+                timeout: 30_000,
+              }
+            }),
+            headless: true,
+            instances: [
+              {
+                browser: &#x27;</span>[browser-name]<span class="hljs-string">&#x27;,
+                viewport: { width: 1280, height: 720 },
+              },
+            ],
+          },
+          include: [vrtPattern],
+        },
+      },
+      // ...other projects
+    ],
+  },
+})</span></span></span></code></pre></div>
+<p>To create a Playwright Workspace follow the <a href="https://learn.microsoft.com/en-us/azure/app-testing/playwright-workspaces/quickstart-run-end-to-end-tests?tabs=playwrightcli&amp;pivots=playwright-test-runner#create-a-workspace">official guide</a>.</p>
+<p>Once your workspace is created, configure Vitest to use it:</p>
+<ol>
+<li><strong>Set the endpoint URL</strong>: following the <a href="https://learn.microsoft.com/en-us/azure/app-testing/playwright-workspaces/quickstart-run-end-to-end-tests?tabs=playwrightcli&amp;pivots=playwright-test-runner#configure-the-browser-endpoint">official guide</a>, retrieve the URL and set it as the <code>PLAYWRIGHT_SERVICE_URL</code> environment variable.</li>
+<li><strong>Enable token authentication</strong>: <a href="https://learn.microsoft.com/en-us/azure/app-testing/playwright-workspaces/how-to-manage-authentication?pivots=playwright-test-runner#enable-authentication-using-access-tokens">enable access tokens</a> for your workspace, then <a href="https://learn.microsoft.com/en-us/azure/app-testing/playwright-workspaces/how-to-manage-access-tokens#generate-a-workspace-access-token">generate a token</a> and set it as the <code>PLAYWRIGHT_SERVICE_ACCESS_TOKEN</code> environment variable.</li>
+</ol>
+<div class="box box-danger"><div class="box-title">🛑 Danger : Keep that token secret!</div><p>Never commit <code>PLAYWRIGHT_SERVICE_ACCESS_TOKEN</code> to your repository. Anyone with the token can rack up your bill. Use environment variables locally and secrets in CI.</p>
+</div><h3 id="running-tests"><a class="anchor" href="#running-tests">#</a>Running tests</h3>
+<div class="code"><pre><code class="hljs lang-bash"><span class="hljs-comment"># Local development</span>
+npm run <span class="hljs-built_in">test</span>:unit    <span class="hljs-comment"># runs locally using your browsers</span>
+npm run <span class="hljs-built_in">test</span>:visual  <span class="hljs-comment"># uses cloud browsers</span>
+
+<span class="hljs-comment"># Update screenshots</span>
+npm run <span class="hljs-built_in">test</span>:visual -- --update</code></pre></div>
+<h3 id="ci-setup"><a class="anchor" href="#ci-setup">#</a>CI setup</h3>
+<p>Add the secrets to your CI configuration:</p>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-attr">env:</span>
+  <span class="hljs-attr">PLAYWRIGHT_SERVICE_URL:</span> <span class="hljs-string">${{</span> <span class="hljs-string">vars.PLAYWRIGHT_SERVICE_URL</span> <span class="hljs-string">}}</span>
+  <span class="hljs-attr">PLAYWRIGHT_SERVICE_ACCESS_TOKEN:</span> <span class="hljs-string">${{</span> <span class="hljs-string">secrets.PLAYWRIGHT_SERVICE_ACCESS_TOKEN</span> <span class="hljs-string">}}</span></code></pre></div>
+<p>Then run your tests like normal. The service handles the browser infrastructure.</p>
+<p>::::</p>
+<h3 id="picking-the-right-option"><a class="anchor" href="#picking-the-right-option">#</a>Picking the right option</h3>
+<p>All approaches work. The real question is what pain points matter most to you and your team.</p>
+<p>If you&#39;re comfortable with containerization, a self-hosted Docker setup gives you a controlled environment without any external dependencies or costs. The downside is maintenance as you own the setup, the browser versions, and any breakage.</p>
+<p>CI runs work with any browser provider and give you full control, but screenshots can only be generated in CI. If someone runs <code>vitest --update</code> locally and commits the result, those references will likely fail on the next CI run. This is preventable by guarding the command behind a CI environment check.</p>
+<p>A cloud service makes sense if you want developers to be able to run and update visual tests locally without risking mismatched references. It becomes even more useful when designers are involved in reviewing changes, or when the push-wait-check-fix-push cycle becomes a real bottleneck.</p>
+<p>Still on the fence? Start with the CI workflow. You can always move to a container or cloud service later if it becomes a pain point.</p>
+<h2 id="going-deeper"><a class="anchor" href="#going-deeper">#</a>Going deeper</h2>
+<h3 id="how-vitest-ensures-screenshot-stability"><a class="anchor" href="#how-vitest-ensures-screenshot-stability">#</a>How Vitest ensures screenshot stability</h3>
+<p>Visual regression tests rely on screenshots remaining stable across runs. In practice, pages are not instantly stable: images load asynchronously, animations finish at different times, fonts render, and layouts settle. To mitigate this, Vitest uses a &quot;Stable Screenshot Detection&quot; strategy:</p>
+<ol>
+<li>It takes an initial screenshot (or uses the reference screenshot if available) as baseline</li>
+<li>It takes another screenshot and compares it with the baseline<ul>
+<li>If the screenshots match, the page is stable and testing continues</li>
+<li>If they differ, Vitest uses the newest screenshot as the baseline and repeats</li>
+</ul>
+</li>
+<li>This continues until stability is achieved or the timeout is reached</li>
+</ol>
+<p>This ensures that transient visual changes (like loading spinners or animations) don&#39;t cause false positives. If something never stops animating, though, you&#39;ll hit the timeout, so consider <a href="#disable-animations">disabling animations during testing</a>.</p>
+<p>If a stable screenshot is captured after one or more retries and a reference screenshot exists, Vitest performs a final comparison with the reference using <code>createDiff: true</code>. This will generate a diff image if they don&#39;t match.</p>
+<p>During stability detection, Vitest calls comparators with <code>createDiff: false</code> since it only needs to know if screenshots match. This keeps the detection process fast.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#why-visual-regression-testing">Why visual regression testing?</a><a class="toc-2" href="#example">Example</a><a class="toc-2" href="#getting-started">Getting started</a><a class="toc-3" href="#environmental-stability">Environmental stability</a><a class="toc-3" href="#not-a-replacement-for-behavior-testing">Not a replacement for behavior testing</a><a class="toc-3" href="#project-structure">Project structure</a><a class="toc-3" href="#creating-references">Creating references</a><a class="toc-3" href="#screenshot-organization">Screenshot organization</a><a class="toc-3" href="#updating-references">Updating references</a><a class="toc-3" href="#debugging-failed-tests">Debugging failed tests</a><a class="toc-2" href="#configuring-the-tomatchscreenshot-assertion">Configuring the toMatchScreenshot assertion</a><a class="toc-2" href="#third-party-comparators">Third-party comparators</a><a class="toc-2" href="#best-practices">Best practices</a><a class="toc-3" href="#test-specific-elements">Test specific elements</a><a class="toc-3" href="#handle-dynamic-content">Handle dynamic content</a><a class="toc-3" href="#disable-animations">Disable animations</a><a class="toc-3" href="#set-appropriate-thresholds">Set appropriate thresholds</a><a class="toc-3" href="#use-git-lfs">Use Git LFS</a><a class="toc-2" href="#common-issues-and-solutions">Common issues and solutions</a><a class="toc-3" href="#false-positives-from-font-rendering">False positives from font rendering</a><a class="toc-3" href="#flaky-tests-or-different-screenshot-sizes">Flaky tests or different screenshot sizes</a><a class="toc-2" href="#visual-testing-for-teams">Visual testing for teams</a><a class="toc-3" href="#the-update-workflow">The update workflow</a><a class="toc-3" href="#configuration">Configuration</a><a class="toc-3" href="#running-tests">Running tests</a><a class="toc-3" href="#ci-setup">CI setup</a><a class="toc-3" href="#picking-the-right-option">Picking the right option</a><a class="toc-2" href="#going-deeper">Going deeper</a><a class="toc-3" href="#how-vitest-ensures-screenshot-stability">How Vitest ensures screenshot stability</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

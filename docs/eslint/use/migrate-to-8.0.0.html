@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Migrate to v8.0.0 (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › use/migrate-to-8.0.0  <a class="ext small" href="https://eslint.org/docs/latest/use/migrate-to-8.0.0">version en ligne</a></div>
+<h1>Migrate to v8.0.0</h1><p>ESLint v8.0.0 is a major release of ESLint. We have made a few breaking changes in this release. This guide is intended to walk you through the breaking changes.</p>
+<p>The lists below are ordered roughly by the number of users each change is expected to affect, where the first items are expected to affect the most users.</p>
+<h2 id="table-of-contents"><a class="anchor" href="#table-of-contents">#</a>Table of Contents</h2>
+<h3 id="breaking-changes-for-users"><a class="anchor" href="#breaking-changes-for-users">#</a>Breaking changes for users</h3>
+<ul>
+<li><a href="#drop-old-node">Node.js 10, 13, and 15 are no longer supported</a></li>
+<li><a href="#removed-formatters">Removed <code>codeframe</code> and <code>table</code> formatters</a></li>
+<li><a href="#comma-dangle"><code>comma-dangle</code> rule schema is stricter</a></li>
+<li><a href="#directives">Unused disable directives are now fixable</a></li>
+<li><a href="#eslint-recommended"><code>eslint:recommended</code> has been updated</a></li>
+</ul>
+<h3 id="breaking-changes-for-plugin-developers"><a class="anchor" href="#breaking-changes-for-plugin-developers">#</a>Breaking changes for plugin developers</h3>
+<ul>
+<li><a href="#drop-old-node">Node.js 10, 13, and 15 are no longer supported</a></li>
+<li><a href="#suggestions">Rules require <code>meta.hasSuggestions</code> to provide suggestions</a></li>
+<li><a href="#fixes">Rules require <code>meta.fixable</code> to provide fixes</a></li>
+<li><a href="#get-comments"><code>SourceCode#getComments()</code> fails in <code>RuleTester</code></a></li>
+<li><a href="#ast-format">Changes to shorthand property AST format</a></li>
+</ul>
+<h3 id="breaking-changes-for-integration-developers"><a class="anchor" href="#breaking-changes-for-integration-developers">#</a>Breaking changes for integration developers</h3>
+<ul>
+<li><a href="#drop-old-node">Node.js 10, 13, and 15 are no longer supported</a></li>
+<li><a href="#remove-cliengine">The <code>CLIEngine</code> class has been removed</a></li>
+<li><a href="#remove-linter">The <code>linter</code> object has been removed</a></li>
+<li><a href="#remove-lib">The <code>/lib</code> entrypoint has been removed</a></li>
+</ul>
+<hr>
+<h2 id="drop-old-node"><a class="anchor" href="#drop-old-node">#</a>Node.js 10, 13, and 15 are no longer supported</h2>
+<p>Node.js 10, 13, 15 all reached end of life either in 2020 or early 2021. ESLint is officially dropping support for these versions of Node.js starting with ESLint v8.0.0. ESLint now supports the following versions of Node.js:</p>
+<ul>
+<li>Node.js 12.22 and above</li>
+<li>Node.js 14 and above</li>
+<li>Node.js 16 and above</li>
+</ul>
+<p><strong>To address:</strong> Make sure you upgrade to at least Node.js <code>12.22.0</code> when using ESLint v8.0.0. One important thing to double check is the Node.js version supported by your editor when using ESLint via editor integrations. If you are unable to upgrade, we recommend continuing to use ESLint 7 until you are able to upgrade Node.js.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/14023">#14023</a></p>
+<h2 id="removed-formatters"><a class="anchor" href="#removed-formatters">#</a>Removed <code>codeframe</code> and <code>table</code> formatters</h2>
+<p>ESLint v8.0.0 has removed the <code>codeframe</code> and <code>table</code> formatters from the core. These formatters required dependencies that weren&#39;t used anywhere else in ESLint, and removing them allows us to reduce the size of ESLint, allowing for faster installation.</p>
+<p><strong>To address:</strong> If you are using the <code>codeframe</code> or <code>table</code> formatters, you&#39;ll need to install the standalone <a href="https://github.com/eslint-community/eslint-formatter-codeframe"><code>eslint-formatter-codeframe</code></a> or <a href="https://github.com/eslint-community/eslint-formatter-table"><code>eslint-formatter-table</code></a> packages, respectively, to be able to use them in ESLint v8.0.0.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/14277">#14277</a>, <a href="https://github.com/eslint/eslint/pull/14316">#14316</a></p>
+<h2 id="comma-dangle"><a class="anchor" href="#comma-dangle">#</a><code>comma-dangle</code> rule schema is stricter</h2>
+<p>In ESLint v7.0.0, the <code>comma-dangle</code> rule could be configured like this without error:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;rules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;comma-dangle&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;never&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;arrays&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;always&quot;</span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>With this configuration, the rule would ignore the third element in the array because only the second element is read. In ESLint v8.0.0, this configuration will cause ESLint to throw an error.</p>
+<p><strong>To address:</strong> Change your rule configuration so that there are only two elements in the array, and the second element is either a string or an object, such as:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;comma-dangle&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;never&quot;</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>or</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;comma-dangle&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+		<span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-punctuation">{</span>
+			<span class="hljs-attr">&quot;arrays&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;never&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;objects&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;never&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;never&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;exports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;never&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;functions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;never&quot;</span>
+		<span class="hljs-punctuation">}</span>
+	<span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/13739">#13739</a></p>
+<h2 id="directives"><a class="anchor" href="#directives">#</a>Unused disable directives are now fixable</h2>
+<p>In ESLint v7.0.0, using both <code>--report-unused-disable-directives</code> and <code>--fix</code> on the command line would fix only rules but leave unused disable directives in place. In ESLint v8.0.0, this combination of command-line options will result in the unused disable directives being removed.</p>
+<p><strong>To address:</strong> If you are using <code>--report-unused-disable-directives</code> and <code>--fix</code> together on the command line, and you don&#39;t want unused disable directives to be removed, add <code>--fix-type problem,suggestion,layout</code> as a command line option.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/11815">#11815</a></p>
+<h2 id="eslint-recommended"><a class="anchor" href="#eslint-recommended">#</a><code>eslint:recommended</code> has been updated</h2>
+<p>Four new rules have been enabled in the <code>eslint:recommended</code> preset.</p>
+<ul>
+<li><a href="../rules/no-loss-of-precision.html"><code>no-loss-of-precision</code></a></li>
+<li><a href="../rules/no-nonoctal-decimal-escape.html"><code>no-nonoctal-decimal-escape</code></a></li>
+<li><a href="../rules/no-unsafe-optional-chaining.html"><code>no-unsafe-optional-chaining</code></a></li>
+<li><a href="../rules/no-useless-backreference.html"><code>no-useless-backreference</code></a></li>
+</ul>
+<p><strong>To address:</strong> Fix errors or disable these rules.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/14673">#14673</a></p>
+<h2 id="suggestions"><a class="anchor" href="#suggestions">#</a>Rules require <code>meta.hasSuggestions</code> to provide suggestions</h2>
+<p>In ESLint v7.0.0, rules that <a href="https://eslint.org/docs/latest/extend/custom-rules#providing-suggestions" class="ext" title="lien en ligne (non disponible hors-ligne)">provided suggestions</a> did not need to let ESLint know. In v8.0.0, rules providing suggestions need to set their <code>meta.hasSuggestions</code> to <code>true</code>. This informs ESLint that the rule intends to provide suggestions. Without this property, any attempt to provide a suggestion will result in an error.</p>
+<p><strong>To address:</strong> If your rule provides suggestions, add <code>meta.hasSuggestions</code> to the object, such as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = {
+	<span class="hljs-attr">meta</span>: {
+		<span class="hljs-attr">hasSuggestions</span>: <span class="hljs-literal">true</span>,
+	},
+	<span class="hljs-title function_">create</span>(<span class="hljs-params">context</span>) {
+		<span class="hljs-comment">// your rule</span>
+	},
+};</code></pre></div>
+<p>The <a href="https://github.com/eslint-community/eslint-plugin-eslint-plugin/blob/main/docs/rules/require-meta-has-suggestions.md">eslint-plugin/require-meta-has-suggestions</a> rule can automatically fix and enforce that your rules are properly specifying <code>meta.hasSuggestions</code>.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/14312">#14312</a></p>
+<h2 id="fixes"><a class="anchor" href="#fixes">#</a>Rules require <code>meta.fixable</code> to provide fixes</h2>
+<p>In ESLint v7.0.0, rules that were written as a function (rather than object) were able to provide fixes. In ESLint v8.0.0, only rules written as an object are allowed to provide fixes and must have a <code>meta.fixable</code> property set to either <code>&quot;code&quot;</code> or <code>&quot;whitespace&quot;</code>.</p>
+<p><strong>To address:</strong> If your rule makes fixes and is written as a function, such as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">context</span>) {
+	<span class="hljs-comment">// your rule</span>
+};</code></pre></div>
+<p>Then rewrite your rule in this format:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = {
+	<span class="hljs-attr">meta</span>: {
+		<span class="hljs-attr">fixable</span>: <span class="hljs-string">&quot;code&quot;</span>, <span class="hljs-comment">// or &quot;whitespace&quot;</span>
+	},
+	<span class="hljs-title function_">create</span>(<span class="hljs-params">context</span>) {
+		<span class="hljs-comment">// your rule</span>
+	},
+};</code></pre></div>
+<p>The <a href="https://github.com/eslint-community/eslint-plugin-eslint-plugin/blob/main/docs/rules/require-meta-fixable.md">eslint-plugin/require-meta-fixable</a> rule can automatically fix and enforce that your rules are properly specifying <code>meta.fixable</code>.</p>
+<p>The <a href="https://github.com/eslint-community/eslint-plugin-eslint-plugin/blob/main/docs/rules/prefer-object-rule.md">eslint-plugin/prefer-object-rule</a> rule can automatically fix and enforce that your rules are written with the object format instead of the deprecated function format.</p>
+<p>See the <a href="https://eslint.org/docs/latest/extend/custom-rules" class="ext" title="lien en ligne (non disponible hors-ligne)">rule documentation</a> for more information on writing rules.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/13349">#13349</a></p>
+<h2 id="get-comments"><a class="anchor" href="#get-comments">#</a><code>SourceCode#getComments()</code> fails in <code>RuleTester</code></h2>
+<p>Back in ESLint v4.0.0, we deprecated <code>SourceCode#getComments()</code>, but we neglected to remove it. Rather than removing it completely in v8.0.0, we are taking the intermediate step of updating <code>RuleTester</code> to fail when <code>SourceCode#getComments()</code> is used inside of a rule. As such, all existing rules will continue to work, but when the developer runs tests for the rule there will be a failure.</p>
+<p>The <code>SourceCode#getComments()</code> method will be removed in v9.0.0.</p>
+<p><strong>To address:</strong> If your rule uses <code>SourceCode#getComments()</code>, please use <a href="https://eslint.org/docs/latest/extend/custom-rules#accessing-comments" class="ext" title="lien en ligne (non disponible hors-ligne)"><code>SourceCode#getCommentsBefore()</code>, <code>SourceCode#getCommentsAfter()</code>, or <code>SourceCode#getCommentsInside()</code></a>.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/14744">#14744</a></p>
+<h2 id="ast-format"><a class="anchor" href="#ast-format">#</a>Changes to shorthand property AST format</h2>
+<p>ESLint v8.0.0 includes an upgrade to Espree v8.0.0 to support new syntax. This Espree upgrade, in turn, contains an upgrade to Acorn v8.0.0, which changed how shorthand properties were represented in the AST. Here&#39;s an example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> version = <span class="hljs-number">8</span>;
+<span class="hljs-keyword">const</span> x = {
+	version,
+};</code></pre></div>
+<p>This code creates a property node that looks like this:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Property&quot;</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;method&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;shorthand&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;computed&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;key&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Identifier&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;version&quot;</span>
+	<span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;kind&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;init&quot;</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;value&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Identifier&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;version&quot;</span>
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Note that both the <code>key</code> and the <code>value</code> properties contain the same information. Prior to Acorn v8.0.0 (and therefore prior to ESLint v8.0.0), these two nodes were represented by the same object, so you could use <code>===</code> to determine if they represented the same node, such as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// true in ESLint v7.x, false in ESLint v8.0.0</span>
+<span class="hljs-keyword">if</span> (propertyNode.<span class="hljs-property">key</span> === propertyNode.<span class="hljs-property">value</span>) {
+	<span class="hljs-comment">// do something</span>
+}</code></pre></div>
+<p>In ESLint v8.0.0 (via Acorn v8.0.0), the key and value are now separate objects and therefore no longer equivalent.</p>
+<p><strong>To address:</strong> If your rule makes a comparison between the key and value of a shorthand object literal property to determine if they are the same node, you&#39;ll need to change your code in one of two ways:</p>
+<ol>
+<li>Use <code>propertyNode.shorthand</code> to determine if the property is a shorthand property node.</li>
+<li>Use the <code>range</code> property of each node to determine if the key and value occupy the same location.</li>
+</ol>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/pull/14591#issuecomment-887733070">#14591</a></p>
+<h2 id="remove-cliengine"><a class="anchor" href="#remove-cliengine">#</a>The <code>CLIEngine</code> class has been removed</h2>
+<p>The <code>CLIEngine</code> class has been removed and replaced by the <a href="https://eslint.org/docs/latest/integrate/nodejs-api#eslint-class" class="ext" title="lien en ligne (non disponible hors-ligne)"><code>ESLint</code> class</a>.</p>
+<p><strong>To address:</strong> Update your code to use the new <code>ESLint</code> class if you are currently using <code>CLIEngine</code>. The following table maps the existing <code>CLIEngine</code> methods to their <code>ESLint</code> counterparts:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th align="left"><code>CLIEngine</code></th>
+<th align="left"><code>ESLint</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>executeOnFiles(patterns)</code></td>
+<td align="left"><code>lintFiles(patterns)</code></td>
+</tr>
+<tr>
+<td align="left"><code>executeOnText(text, filePath, warnIgnored)</code></td>
+<td align="left"><code>lintText(text, options)</code></td>
+</tr>
+<tr>
+<td align="left"><code>getFormatter(name)</code></td>
+<td align="left"><code>loadFormatter(name)</code></td>
+</tr>
+<tr>
+<td align="left"><code>getConfigForFile(filePath)</code></td>
+<td align="left"><code>calculateConfigForFile(filePath)</code></td>
+</tr>
+<tr>
+<td align="left"><code>isPathIgnored(filePath)</code></td>
+<td align="left"><code>isPathIgnored(filePath)</code></td>
+</tr>
+<tr>
+<td align="left"><code>static outputFixes(results)</code></td>
+<td align="left"><code>static outputFixes(results)</code></td>
+</tr>
+<tr>
+<td align="left"><code>static getErrorResults(results)</code></td>
+<td align="left"><code>static getErrorResults(results)</code></td>
+</tr>
+<tr>
+<td align="left"><code>static getFormatter(name)</code></td>
+<td align="left">(removed ※1)</td>
+</tr>
+<tr>
+<td align="left"><code>addPlugin(pluginId, definition)</code></td>
+<td align="left">the <code>plugins</code> constructor option</td>
+</tr>
+<tr>
+<td align="left"><code>getRules()</code></td>
+<td align="left">(removed ※2)</td>
+</tr>
+<tr>
+<td align="left"><code>resolveFileGlobPatterns()</code></td>
+<td align="left">(removed ※3)</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>※1 The <code>engine.getFormatter()</code> method currently returns the object of loaded packages as-is, which made it difficult to add new features to formatters for backward compatibility reasons. The new <code>eslint.loadFormatter()</code> method returns an adapter object that wraps the object of loaded packages, to ease the process of adding new features. Additionally, the adapter object has access to the <code>ESLint</code> instance to calculate default data (using loaded plugin rules to make <code>rulesMeta</code>, for example). As a result, the <code>ESLint</code> class only implements an instance version of the <code>loadFormatter()</code> method.</li>
+<li>※2 The <code>CLIEngine#getRules()</code> method had side effects and so was removed. If you were using <code>CLIEngine#getRules()</code> to retrieve meta information about rules based on linting results, use <code>ESLint#getRulesMetaForResults()</code> instead. If you were using <code>CLIEngine#getRules()</code> to retrieve all built-in rules, import <code>builtinRules</code> from <code>eslint/use-at-your-own-risk</code> for an unsupported API that allows access to internal rules.</li>
+<li>※3 Since ESLint v6.0.0, ESLint uses different logic from the <code>resolveFileGlobPatterns()</code> method to iterate files, making this method obsolete.</li>
+</ul>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/rfcs/tree/main/designs/2021-package-exports">RFC80</a>, <a href="https://github.com/eslint/eslint/pull/14716">#14716</a>, <a href="https://github.com/eslint/eslint/issues/13654">#13654</a></p>
+<h2 id="remove-linter"><a class="anchor" href="#remove-linter">#</a>The <code>linter</code> object has been removed</h2>
+<p>The deprecated <code>linter</code> object has been removed from the ESLint package in v8.0.0.</p>
+<p><strong>To address:</strong> If you are using the <code>linter</code> object, such as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> { linter } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;eslint&quot;</span>);</code></pre></div>
+<p>Change your code to this:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> { <span class="hljs-title class_">Linter</span> } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;eslint&quot;</span>);
+<span class="hljs-keyword">const</span> linter = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Linter</span>();</code></pre></div>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/rfcs/tree/main/designs/2021-package-exports">RFC80</a>, <a href="https://github.com/eslint/eslint/pull/14716">#14716</a>, <a href="https://github.com/eslint/eslint/issues/13654">#13654</a></p>
+<h2 id="remove-lib"><a class="anchor" href="#remove-lib">#</a>The <code>/lib</code> entrypoint has been removed</h2>
+<p>Beginning in v8.0.0, ESLint is strictly defining its public API. Previously, you could reach into individual files such as <code>require(&quot;eslint/lib/rules/semi&quot;)</code> and this is no longer allowed. There are a limited number of existing APIs that are now available through the <code>/use-at-your-own-risk</code> entrypoint for backwards compatibility, but these APIs are not formally supported and may break or disappear at any point in time.</p>
+<p><strong>To address:</strong> If you are accessing rules directly through the <code>/lib</code> entrypoint, such as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> rule = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;eslint/lib/rules/semi&quot;</span>);</code></pre></div>
+<p>Change your code to this:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> { builtinRules } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;eslint/use-at-your-own-risk&quot;</span>);
+<span class="hljs-keyword">const</span> rule = builtinRules.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;semi&quot;</span>);</code></pre></div>
+<p>If you are accessing <code>FileEnumerator</code> directly through the <code>/lib</code> entrypoint, such as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> { <span class="hljs-title class_">FileEnumerator</span> } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;eslint/lib/cli-engine/file-enumerator&quot;</span>);</code></pre></div>
+<p>Change your code to this:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> { <span class="hljs-title class_">FileEnumerator</span> } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;eslint/use-at-your-own-risk&quot;</span>);</code></pre></div>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/rfcs/tree/main/designs/2021-package-exports">RFC80</a>, <a href="https://github.com/eslint/eslint/pull/14716">#14716</a>, <a href="https://github.com/eslint/eslint/issues/13654">#13654</a></p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#table-of-contents">Table of Contents</a><a class="toc-3" href="#breaking-changes-for-users">Breaking changes for users</a><a class="toc-3" href="#breaking-changes-for-plugin-developers">Breaking changes for plugin developers</a><a class="toc-3" href="#breaking-changes-for-integration-developers">Breaking changes for integration developers</a><a class="toc-2" href="#drop-old-node">Node.js 10, 13, and 15 are no longer supported</a><a class="toc-2" href="#removed-formatters">Removed codeframe and table formatters</a><a class="toc-2" href="#comma-dangle">comma-dangle rule schema is stricter</a><a class="toc-2" href="#directives">Unused disable directives are now fixable</a><a class="toc-2" href="#eslint-recommended">eslint:recommended has been updated</a><a class="toc-2" href="#suggestions">Rules require meta.hasSuggestions to provide suggestions</a><a class="toc-2" href="#fixes">Rules require meta.fixable to provide fixes</a><a class="toc-2" href="#get-comments">SourceCode#getComments() fails in RuleTester</a><a class="toc-2" href="#ast-format">Changes to shorthand property AST format</a><a class="toc-2" href="#remove-cliengine">The CLIEngine class has been removed</a><a class="toc-2" href="#remove-linter">The linter object has been removed</a><a class="toc-2" href="#remove-lib">The /lib entrypoint has been removed</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

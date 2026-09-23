@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-unexpected-multiline (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-unexpected-multiline <span class="badge badge-problem">problème</span> <span class="badge badge-reco">✅ dans js/recommended</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-unexpected-multiline">version en ligne</a></div>
+<h1>no-unexpected-multiline</h1><p>Semicolons are usually optional in JavaScript, because of automatic semicolon insertion (ASI). You can require or disallow semicolons with the <a href="semi.html">semi</a> rule.</p>
+<p>The rules for ASI are relatively straightforward: As once described by Isaac Schlueter, a newline character always ends a statement, just like a semicolon, <strong>except</strong> where one of the following is true:</p>
+<ul>
+<li>The statement has an unclosed paren, array literal, or object literal or ends in some other way that is not a valid way to end a statement. (For instance, ending with <code>.</code> or <code>,</code>.)</li>
+<li>The line is <code>--</code> or <code>++</code> (in which case it will decrement/increment the next token.)</li>
+<li>It is a <code>for()</code>, <code>while()</code>, <code>do</code>, <code>if()</code>, or <code>else</code>, and there is no <code>{</code></li>
+<li>The next line starts with <code>[</code>, <code>(</code>, <code>+</code>, <code>*</code>, <code>/</code>, <code>-</code>, <code>,</code>, <code>.</code>, or some other binary operator that can only be found between two tokens in a single expression.</li>
+</ul>
+<p>In the exceptions where a newline does <strong>not</strong> end a statement, a typing mistake to omit a semicolon causes two unrelated consecutive lines to be interpreted as one expression. Especially for a coding style without semicolons, readers might overlook the mistake. Although syntactically correct, the code might throw exceptions when it is executed.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule disallows confusing multiline expressions where a newline looks like it is ending a statement, but is not.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unexpected-multiline: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-title function_">bar</span>
+(<span class="hljs-number">1</span> || <span class="hljs-number">2</span>).<span class="hljs-title function_">baz</span>();
+
+<span class="hljs-keyword">const</span> hello = <span class="hljs-string">&#x27;world&#x27;</span>
+[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>].<span class="hljs-title function_">forEach</span>(addNumber);
+
+<span class="hljs-keyword">const</span> x = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}
+<span class="hljs-string">`hello`</span>
+
+<span class="hljs-keyword">const</span> y = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}
+y
+<span class="hljs-string">`hello`</span>
+
+<span class="hljs-keyword">const</span> z = foo
+/regex/g.<span class="hljs-title function_">test</span>(bar)</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unexpected-multiline: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> foo = bar;
+(<span class="hljs-number">1</span> || <span class="hljs-number">2</span>).<span class="hljs-title function_">baz</span>();
+
+<span class="hljs-keyword">const</span> baz = bar
+;(<span class="hljs-number">1</span> || <span class="hljs-number">2</span>).<span class="hljs-title function_">baz</span>()
+
+<span class="hljs-keyword">const</span> hello = <span class="hljs-string">&#x27;world&#x27;</span>;
+[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>].<span class="hljs-title function_">forEach</span>(addNumber);
+
+<span class="hljs-keyword">const</span> hi = <span class="hljs-string">&#x27;world&#x27;</span>
+<span class="hljs-keyword">void</span> [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>].<span class="hljs-title function_">forEach</span>(addNumber);
+
+<span class="hljs-keyword">const</span> x = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+<span class="hljs-string">`hello`</span>
+
+<span class="hljs-keyword">const</span> tag = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}
+tag <span class="hljs-string">`hello`</span></code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has no options.</p>
+<h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>You can turn this rule off if you are confident that you will not accidentally introduce code like this.</p>
+<p>Note that the patterns considered problems are <strong>not</strong> flagged by the <a href="semi.html">semi</a> rule.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

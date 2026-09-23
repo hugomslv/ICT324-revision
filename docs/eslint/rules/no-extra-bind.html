@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-extra-bind (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-extra-bind <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-extra-bind">version en ligne</a></div>
+<h1>no-extra-bind</h1><p>The <code>bind()</code> method is used to create functions with specific <code>this</code> values and, optionally, binds arguments to specific values. When used to specify the value of <code>this</code>, it&#39;s important that the function actually uses <code>this</code> in its function body. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> boundGetName = (<span class="hljs-keyword">function</span> <span class="hljs-title function_">getName</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span>;
+}).<span class="hljs-title function_">bind</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;ESLint&quot;</span> });
+
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">boundGetName</span>());      <span class="hljs-comment">// &quot;ESLint&quot;</span></code></pre></div>
+<p>This code is an example of a good use of <code>bind()</code> for setting the value of <code>this</code>.</p>
+<p>Sometimes during the course of code maintenance, the <code>this</code> value is removed from the function body. In that case, you can end up with a call to <code>bind()</code> that doesn&#39;t accomplish anything:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// useless bind</span>
+<span class="hljs-keyword">const</span> boundGetName = (<span class="hljs-keyword">function</span> <span class="hljs-title function_">getName</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;ESLint&quot;</span>;
+}).<span class="hljs-title function_">bind</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;ESLint&quot;</span> });
+
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">boundGetName</span>());      <span class="hljs-comment">// &quot;ESLint&quot;</span></code></pre></div>
+<p>In this code, the reference to <code>this</code> has been removed but <code>bind()</code> is still used. In this case, the <code>bind()</code> is unnecessary overhead (and a performance hit) and can be safely removed.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule is aimed at avoiding the unnecessary use of <code>bind()</code> and as such will warn whenever an immediately-invoked function expression (IIFE) is using <code>bind()</code> and doesn&#39;t have an appropriate <code>this</code> value. This rule won&#39;t flag usage of <code>bind()</code> that includes function argument binding.</p>
+<p><strong>Note:</strong> Arrow functions can never have their <code>this</code> value set using <code>bind()</code>. This rule flags all uses of <code>bind()</code> with arrow functions as a problem</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-extra-bind: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> x = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+    <span class="hljs-title function_">foo</span>();
+}.<span class="hljs-title function_">bind</span>(bar);
+
+<span class="hljs-keyword">const</span> y = (<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">foo</span>();
+}).<span class="hljs-title function_">bind</span>(bar);
+
+<span class="hljs-keyword">const</span> z = (<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">foo</span>();
+}).<span class="hljs-title function_">bind</span>(bar);
+
+<span class="hljs-keyword">const</span> a = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+    (<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">foo</span>();
+    }());
+}.<span class="hljs-title function_">bind</span>(bar);
+
+<span class="hljs-keyword">const</span> b = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">bar</span>();
+    }
+}.<span class="hljs-title function_">bind</span>(baz);</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-extra-bind: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> x = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">foo</span>();
+}.<span class="hljs-title function_">bind</span>(bar);
+
+<span class="hljs-keyword">const</span> y = <span class="hljs-keyword">function</span> (<span class="hljs-params">a</span>) {
+    <span class="hljs-keyword">return</span> a + <span class="hljs-number">1</span>;
+}.<span class="hljs-title function_">bind</span>(foo, bar);</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has no options.</p>
+<h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you are not concerned about unnecessary calls to <code>bind()</code>, you can safely disable this rule.</p>
+<h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind</a></li><li><a class="ext" href="https://www.smashingmagazine.com/2014/01/understanding-javascript-function-prototype-bind/">https://www.smashingmagazine.com/2014/01/understanding-javascript-function-prototype-bind/</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

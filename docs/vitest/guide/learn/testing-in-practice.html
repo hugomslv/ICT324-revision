@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testing in Practice | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/learn/testing-in-practice  <a class="ext small" href="https://vitest.dev/guide/learn/testing-in-practice">version en ligne</a></div>
+<h1 id="testing-in-practice"><a class="anchor" href="#testing-in-practice">#</a>Testing in Practice</h1>
+<p>The previous pages covered the Vitest API: assertions, mocking, snapshots, and test lifecycle hooks. This page focuses on applying those tools to real code. It covers how to decide what to test, how to structure tests effectively, and how to organize test files as a project grows.</p>
+<h2 id="what-to-test"><a class="anchor" href="#what-to-test">#</a>What to Test</h2>
+<p>When you sit down to write tests for a function or module, start by thinking about its <strong>contract</strong>: what does it promise to do for the code that calls it? The contract is defined by its inputs (arguments, configuration) and its outputs (return values, side effects, errors). These are the things your tests should verify.</p>
+<p>Consider a <code>formatPrice</code> function:</p>
+<div class="code"><div class="code-title">formatPrice.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">formatPrice</span>(<span class="hljs-params">amount, currency</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Intl</span>.<span class="hljs-title class_">NumberFormat</span>(<span class="hljs-string">&#x27;en-US&#x27;</span>, {
+    <span class="hljs-attr">style</span>: <span class="hljs-string">&#x27;currency&#x27;</span>,
+    currency,
+  }).<span class="hljs-title function_">format</span>(amount)
+}</code></pre></div>
+<p>The contract here is: given an amount and a currency code, return a formatted price string. Good tests for this function would cover:</p>
+<div class="code"><div class="code-title">formatPrice.test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { formatPrice } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./formatPrice.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;formats USD prices&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">formatPrice</span>(<span class="hljs-number">10</span>, <span class="hljs-string">&#x27;USD&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;$10.00&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;formats EUR prices&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">formatPrice</span>(<span class="hljs-number">10</span>, <span class="hljs-string">&#x27;EUR&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;€10.00&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;handles zero&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">formatPrice</span>(<span class="hljs-number">0</span>, <span class="hljs-string">&#x27;USD&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;$0.00&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;handles negative amounts&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">formatPrice</span>(-<span class="hljs-number">5.5</span>, <span class="hljs-string">&#x27;USD&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;-$5.50&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;rounds to two decimal places&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">formatPrice</span>(<span class="hljs-number">10.999</span>, <span class="hljs-string">&#x27;USD&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;$11.00&#x27;</span>)
+})</code></pre></div>
+<p>Notice what these tests <em>don&#39;t</em> do. They don&#39;t check which internal <code>Intl.NumberFormat</code> options were passed, or whether an intermediate variable was set. They only check the output.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>A good rule of thumb: if someone refactors the internals but the output stays the same, should the test break? If it would, you&#39;re probably testing implementation details rather than behavior.</p>
+</div><h2 id="structuring-a-test"><a class="anchor" href="#structuring-a-test">#</a>Structuring a Test</h2>
+<p>Most tests follow a natural three-part structure, sometimes called &quot;Arrange, Act, Assert&quot;:</p>
+<ol>
+<li><strong>Set up</strong> the data your test needs</li>
+<li><strong>Call</strong> the function or perform the action you&#39;re testing</li>
+<li><strong>Check</strong> that the result matches your expectations</li>
+</ol>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;removes an item from the list&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// Set up</span>
+  <span class="hljs-keyword">const</span> list = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ShoppingList</span>()
+  list.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;milk&#x27;</span>)
+  list.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;bread&#x27;</span>)
+
+  <span class="hljs-comment">// Act</span>
+  list.<span class="hljs-title function_">remove</span>(<span class="hljs-string">&#x27;milk&#x27;</span>)
+
+  <span class="hljs-comment">// Check</span>
+  <span class="hljs-title function_">expect</span>(list.<span class="hljs-title function_">getItems</span>()).<span class="hljs-title function_">toEqual</span>([<span class="hljs-string">&#x27;bread&#x27;</span>])
+})</code></pre></div>
+<p>You don&#39;t need comments labeling each section. The structure becomes natural once you&#39;ve written a few tests. The important thing is keeping each test focused on one behavior.</p>
+<h3 id="one-behavior-per-test"><a class="anchor" href="#one-behavior-per-test">#</a>One Behavior Per Test</h3>
+<p>If you find yourself writing &quot;and&quot; in a test name (&quot;formats price and handles errors and logs the result&quot;), that&#39;s a sign you should split it into separate tests.</p>
+<h3 id="descriptive-names"><a class="anchor" href="#descriptive-names">#</a>Descriptive Names</h3>
+<p>Write test names that describe the behavior, not the implementation. &quot;returns formatted price for USD&quot; is better than &quot;calls Intl.NumberFormat with correct options&quot;. When a test fails, the name should tell you what broke without having to read the test body.</p>
+<h2 id="testing-edge-cases"><a class="anchor" href="#testing-edge-cases">#</a>Testing Edge Cases</h2>
+<p>After covering the main behavior, think about the boundaries. What happens at the edges? What inputs are unusual but valid? What should happen when things go wrong?</p>
+<p>Here&#39;s an example with a <code>parseAge</code> function that takes user input and returns a number:</p>
+<div class="code"><div class="code-title">parseAge.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">parseAge</span>(<span class="hljs-params">input</span>) {
+  <span class="hljs-keyword">const</span> age = <span class="hljs-title class_">Number</span>(input)
+  <span class="hljs-keyword">if</span> (<span class="hljs-title class_">Number</span>.<span class="hljs-built_in">isNaN</span>(age) || age &lt; <span class="hljs-number">0</span> || age &gt; <span class="hljs-number">150</span>) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`Invalid age: <span class="hljs-subst">${input}</span>`</span>)
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>(age)
+}</code></pre></div>
+<p>The happy path is straightforward, but the edge cases are where bugs hide:</p>
+<div class="code"><div class="code-title">parseAge.test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { parseAge } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./parseAge.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;parses a valid age&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">parseAge</span>(<span class="hljs-string">&#x27;25&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">25</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;rounds down decimal ages&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">parseAge</span>(<span class="hljs-string">&#x27;25.9&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">25</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;handles zero&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">parseAge</span>(<span class="hljs-string">&#x27;0&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">0</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;handles the upper boundary&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">parseAge</span>(<span class="hljs-string">&#x27;150&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">150</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;throws for negative numbers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">parseAge</span>(<span class="hljs-string">&#x27;-1&#x27;</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;Invalid age: -1&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;throws for numbers above 150&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">parseAge</span>(<span class="hljs-string">&#x27;151&#x27;</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;Invalid age: 151&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;throws for non-numeric strings&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">parseAge</span>(<span class="hljs-string">&#x27;abc&#x27;</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;Invalid age: abc&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;throws for empty string&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">parseAge</span>(<span class="hljs-string">&#x27;&#x27;</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;Invalid age: &#x27;</span>)
+})</code></pre></div>
+<p>You don&#39;t need to test every possible input. Focus on the boundaries (0, 150, 151, -1), the error paths, and the types of inputs your function might realistically receive.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If you&#39;re unsure whether an edge case matters, ask yourself: could a real user or a real caller trigger this? If yes, test it.</p>
+</div><h3 id="property-based-testing"><a class="anchor" href="#property-based-testing">#</a>Property-Based Testing</h3>
+<p>For functions with a wide range of valid inputs, manually choosing edge cases can only go so far. <strong>Property-based testing</strong> is a technique where you describe the <em>properties</em> that should hold for any input, and the testing framework generates hundreds of random inputs to try to find one that breaks.</p>
+<p>For example, you might say &quot;for any valid age string, <code>parseAge</code> should return a non-negative integer&quot; and let the tool find the counterexample. <a href="https://fast-check.dev/">fast-check</a> is a popular property-based testing library that integrates well with Vitest. It&#39;s an advanced technique, but worth knowing about as your testing needs grow.</p>
+<h2 id="when-to-mock"><a class="anchor" href="#when-to-mock">#</a>When to Mock</h2>
+<p>Mocking is a powerful tool, but it&#39;s easy to overuse.</p>
+<h3 id="slow-dependencies"><a class="anchor" href="#slow-dependencies">#</a>Slow Dependencies</h3>
+<p>Network requests, file system operations, and database calls can make your tests take seconds instead of milliseconds. Replace them with mocks to keep the feedback loop fast.</p>
+<p>For HTTP requests specifically, consider using <a href="https://mswjs.io/">Mock Service Worker</a> instead of mocking fetch directly. See the <a href="../mocking/requests.html">Mocking Requests</a> guide for setup instructions.</p>
+<h3 id="non-deterministic-values"><a class="anchor" href="#non-deterministic-values">#</a>Non-Deterministic Values</h3>
+<p>If your code depends on the current date, a random number, or a UUID generator, mock those to make your tests predictable. Vitest provides <a href="../../api/vi.html#vi-usefaketimers"><code>vi.useFakeTimers()</code></a> and <a href="../../api/vi.html#vi-setsystemtime"><code>vi.setSystemTime()</code></a> for controlling time in tests.</p>
+<h3 id="what-not-to-mock"><a class="anchor" href="#what-not-to-mock">#</a>What Not to Mock</h3>
+<p>Don&#39;t mock the thing you&#39;re testing. If you&#39;re testing a <code>UserService</code>, don&#39;t mock the <code>UserService</code>. Mock its <em>dependencies</em> (the database, the email sender) and let the service itself run for real.</p>
+<p>Also, prefer real implementations when they&#39;re fast and reliable. If a dependency is a simple in-memory data structure or a pure function, there&#39;s no reason to mock it. The closer your tests are to real usage, the more confidence they give you.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Only reach for mocks when the real thing is slow, flaky, or has side effects you can&#39;t control in a test.</p>
+</div><h2 id="fixing-bugs-with-tests"><a class="anchor" href="#fixing-bugs-with-tests">#</a>Fixing Bugs with Tests</h2>
+<p>When you find a bug, it&#39;s tempting to jump straight into the code and fix it. A better approach is to write a failing test first that reproduces the bug, then fix the code and watch the test turn green.</p>
+<p>This has several benefits. The test proves the bug is real and not just a misunderstanding. It documents exactly what was broken. And it prevents the same bug from coming back later, because the test will catch it if someone accidentally reintroduces the same problem.</p>
+<p>Here&#39;s what this looks like in practice. Suppose users report that <code>parseAge</code> crashes when given a string with leading spaces like <code>&quot; 25&quot;</code>. First, write a test that reproduces the problem:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;handles leading spaces&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">parseAge</span>(<span class="hljs-string">&#x27; 25&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">25</span>)
+})</code></pre></div>
+<p>Run it and confirm it fails. Now you know exactly what&#39;s broken and have a clear target. Fix the implementation:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">parseAge</span>(<span class="hljs-params">input</span>) {
+  <span class="hljs-keyword">const</span> age = <span class="hljs-title class_">Number</span>(input.<span class="hljs-title function_">trim</span>())
+  <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+<p>Run the test again. It passes. The bug is fixed, and you have a regression test that will catch it if someone removes the <code>.trim()</code> call later.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If you use AI agents to fix bugs, configure them to follow the same principle: reproduce the issue with a failing test first, then fix the code. This prevents the agent from &quot;fixing&quot; a bug by changing the test instead of the code, and gives you confidence that the fix actually works.</p>
+</div><h2 id="organizing-test-files"><a class="anchor" href="#organizing-test-files">#</a>Organizing Test Files</h2>
+<p>There&#39;s no single right way to organize tests, but some patterns scale better than others.</p>
+<h3 id="file-layout"><a class="anchor" href="#file-layout">#</a>File Layout</h3>
+<p>The simplest starting point is one test file per source file. For every <code>utils.js</code>, there&#39;s a <code>utils.test.js</code> right next to it. This makes it easy to find the tests for any given piece of code, and most editors will show them side by side in the file tree:</p>
+<div class="code"><pre><code class="hljs lang-txt">src/
+  utils.js
+  utils.test.js
+  formatPrice.js
+  formatPrice.test.js</code></pre></div>
+<p>Some teams prefer a separate <code>__tests__</code> or <code>test</code> directory instead. Either approach works. The important thing is consistency across the project. Vitest&#39;s <a href="../../config/include.html"><code>include</code></a> pattern matches both layouts by default.</p>
+<h3 id="grouping-with-describe"><a class="anchor" href="#grouping-with-describe">#</a>Grouping with <code>describe</code></h3>
+<p>When a module exports multiple functions, use <code>describe</code> blocks to group the tests for each one. This keeps the test output organized and makes it clear which function a failing test belongs to:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;formatPrice&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;formats USD prices&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* ... */</span> })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;handles zero&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* ... */</span> })
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;parseAmount&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;parses valid amounts&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* ... */</span> })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;throws for invalid input&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* ... */</span> })
+})</code></pre></div>
+<p>Avoid nesting <code>describe</code> blocks more than one or two levels deep. Deeply nested test trees are hard to read and usually mean the source module is doing too many things at once.</p>
+<h3 id="splitting-large-files"><a class="anchor" href="#splitting-large-files">#</a>Splitting Large Files</h3>
+<p>As a project grows, some test files will inevitably get long. If a test file grows beyond a few hundred lines, consider splitting it by theme or feature area. For example, <code>userService.test.js</code> might become <code>userService.creation.test.js</code> and <code>userService.auth.test.js</code>. This also makes it faster to run a subset of tests during development.</p>
+<h3 id="naming-tests"><a class="anchor" href="#naming-tests">#</a>Naming Tests</h3>
+<p>Test names matter more than you might expect. When a test fails in CI, the name is often the first thing someone reads. Names like &quot;works correctly&quot; or &quot;handles edge case&quot; don&#39;t tell you what broke.</p>
+<p>Prefer names that describe the specific behavior: &quot;returns 0 for an empty cart&quot;, &quot;throws if the email format is invalid&quot;, &quot;preserves existing items when adding a new one&quot;. The test output should read like a specification of what the module does.</p>
+<h2 id="a-worked-example"><a class="anchor" href="#a-worked-example">#</a>A Worked Example</h2>
+<p>Let&#39;s put it all together. Here&#39;s a small <code>TodoList</code> module:</p>
+<div class="code"><div class="code-title">todoList.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">let</span> nextId = <span class="hljs-number">1</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createTodoList</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> items = []
+
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-title function_">add</span>(<span class="hljs-params">text</span>) {
+      <span class="hljs-keyword">if</span> (!text.<span class="hljs-title function_">trim</span>()) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;Todo text cannot be empty&#x27;</span>)
+      }
+      <span class="hljs-keyword">const</span> todo = { <span class="hljs-attr">id</span>: nextId++, text, <span class="hljs-attr">completed</span>: <span class="hljs-literal">false</span> }
+      items.<span class="hljs-title function_">push</span>(todo)
+      <span class="hljs-keyword">return</span> todo
+    },
+
+    <span class="hljs-title function_">remove</span>(<span class="hljs-params">id</span>) {
+      <span class="hljs-keyword">const</span> index = items.<span class="hljs-title function_">findIndex</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item.<span class="hljs-property">id</span> === id)
+      <span class="hljs-keyword">if</span> (index === -<span class="hljs-number">1</span>) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`Todo with id <span class="hljs-subst">${id}</span> not found`</span>)
+      }
+      items.<span class="hljs-title function_">splice</span>(index, <span class="hljs-number">1</span>)
+    },
+
+    <span class="hljs-title function_">toggle</span>(<span class="hljs-params">id</span>) {
+      <span class="hljs-keyword">const</span> todo = items.<span class="hljs-title function_">find</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item.<span class="hljs-property">id</span> === id)
+      <span class="hljs-keyword">if</span> (!todo) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`Todo with id <span class="hljs-subst">${id}</span> not found`</span>)
+      }
+      todo.<span class="hljs-property">completed</span> = !todo.<span class="hljs-property">completed</span>
+    },
+
+    <span class="hljs-title function_">getAll</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-keyword">return</span> items
+    },
+
+    <span class="hljs-title function_">getCompleted</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-keyword">return</span> items.<span class="hljs-title function_">filter</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> item.<span class="hljs-property">completed</span>)
+    },
+  }
+}</code></pre></div>
+<p>Looking at this code, we can identify the behaviors to test:</p>
+<ul>
+<li>Adding items (the main purpose)</li>
+<li>Adding empty items (should fail)</li>
+<li>Removing items by ID</li>
+<li>Removing items that don&#39;t exist (should fail)</li>
+<li>Toggling completion status</li>
+<li>Getting all items vs. completed items</li>
+</ul>
+<p>Here&#39;s how the test file might look:</p>
+<div class="code"><div class="code-title">todoList.test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { describe, expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { createTodoList } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./todoList.js&#x27;</span>
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;add&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;adds a new todo&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> list = <span class="hljs-title function_">createTodoList</span>()
+    <span class="hljs-keyword">const</span> todo = list.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;Buy groceries&#x27;</span>)
+
+    <span class="hljs-title function_">expect</span>(todo.<span class="hljs-property">text</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Buy groceries&#x27;</span>)
+    <span class="hljs-title function_">expect</span>(todo.<span class="hljs-property">completed</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">false</span>)
+    <span class="hljs-title function_">expect</span>(list.<span class="hljs-title function_">getAll</span>()).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">1</span>)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assigns unique IDs to each todo&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> list = <span class="hljs-title function_">createTodoList</span>()
+    <span class="hljs-keyword">const</span> first = list.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;First&#x27;</span>)
+    <span class="hljs-keyword">const</span> second = list.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;Second&#x27;</span>)
+
+    <span class="hljs-title function_">expect</span>(first.<span class="hljs-property">id</span>).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBe</span>(second.<span class="hljs-property">id</span>)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;throws when text is empty&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> list = <span class="hljs-title function_">createTodoList</span>()
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> list.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;&#x27;</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;Todo text cannot be empty&#x27;</span>)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;throws when text is only whitespace&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> list = <span class="hljs-title function_">createTodoList</span>()
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> list.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;   &#x27;</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;Todo text cannot be empty&#x27;</span>)
+  })
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;remove&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;removes a todo by ID&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> list = <span class="hljs-title function_">createTodoList</span>()
+    <span class="hljs-keyword">const</span> todo = list.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;Buy groceries&#x27;</span>)
+
+    list.<span class="hljs-title function_">remove</span>(todo.<span class="hljs-property">id</span>)
+
+    <span class="hljs-title function_">expect</span>(list.<span class="hljs-title function_">getAll</span>()).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">0</span>)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;keeps other items when removing one&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> list = <span class="hljs-title function_">createTodoList</span>()
+    <span class="hljs-keyword">const</span> first = list.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;First&#x27;</span>)
+    list.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;Second&#x27;</span>)
+
+    list.<span class="hljs-title function_">remove</span>(first.<span class="hljs-property">id</span>)
+
+    <span class="hljs-title function_">expect</span>(list.<span class="hljs-title function_">getAll</span>()).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">1</span>)
+    <span class="hljs-title function_">expect</span>(list.<span class="hljs-title function_">getAll</span>()[<span class="hljs-number">0</span>].<span class="hljs-property">text</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Second&#x27;</span>)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;throws when ID does not exist&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> list = <span class="hljs-title function_">createTodoList</span>()
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> list.<span class="hljs-title function_">remove</span>(<span class="hljs-number">999</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;Todo with id 999 not found&#x27;</span>)
+  })
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;toggle&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;marks a todo as completed&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> list = <span class="hljs-title function_">createTodoList</span>()
+    <span class="hljs-keyword">const</span> todo = list.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;Buy groceries&#x27;</span>)
+
+    list.<span class="hljs-title function_">toggle</span>(todo.<span class="hljs-property">id</span>)
+
+    <span class="hljs-title function_">expect</span>(list.<span class="hljs-title function_">getAll</span>()[<span class="hljs-number">0</span>].<span class="hljs-property">completed</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">true</span>)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;toggles back to incomplete&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> list = <span class="hljs-title function_">createTodoList</span>()
+    <span class="hljs-keyword">const</span> todo = list.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;Buy groceries&#x27;</span>)
+
+    list.<span class="hljs-title function_">toggle</span>(todo.<span class="hljs-property">id</span>)
+    list.<span class="hljs-title function_">toggle</span>(todo.<span class="hljs-property">id</span>)
+
+    <span class="hljs-title function_">expect</span>(list.<span class="hljs-title function_">getAll</span>()[<span class="hljs-number">0</span>].<span class="hljs-property">completed</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">false</span>)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;throws when ID does not exist&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> list = <span class="hljs-title function_">createTodoList</span>()
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> list.<span class="hljs-title function_">toggle</span>(<span class="hljs-number">999</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;Todo with id 999 not found&#x27;</span>)
+  })
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;getCompleted&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;returns only completed todos&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> list = <span class="hljs-title function_">createTodoList</span>()
+    <span class="hljs-keyword">const</span> buy = list.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;Buy groceries&#x27;</span>)
+    list.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;Clean house&#x27;</span>)
+    list.<span class="hljs-title function_">toggle</span>(buy.<span class="hljs-property">id</span>)
+
+    <span class="hljs-keyword">const</span> completed = list.<span class="hljs-title function_">getCompleted</span>()
+
+    <span class="hljs-title function_">expect</span>(completed).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">1</span>)
+    <span class="hljs-title function_">expect</span>(completed[<span class="hljs-number">0</span>].<span class="hljs-property">text</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Buy groceries&#x27;</span>)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;returns empty array when nothing is completed&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> list = <span class="hljs-title function_">createTodoList</span>()
+    list.<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;Buy groceries&#x27;</span>)
+
+    <span class="hljs-title function_">expect</span>(list.<span class="hljs-title function_">getCompleted</span>()).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">0</span>)
+  })
+})</code></pre></div>
+<p>Each <code>describe</code> block focuses on one method. Each test verifies one specific behavior. The test names read like a specification of what the module does. And if any of these tests fail, the name and the assertion will tell you exactly what broke.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Notice that we create a fresh <code>createTodoList()</code> in every test. This keeps tests independent, which means they can run in any order without affecting each other. If you find yourself repeating the same setup in every test, that&#39;s a good candidate for <a href="../../api/hooks.html#beforeeach"><code>beforeEach</code></a> or a <a href="../test-context.html#extend-test-context"><code>test.extend</code></a> fixture.</p>
+</div><details class="box"><summary>What about <code>nextId</code>?</summary><p>The <code>nextId</code> counter at the top of the module is shared across all calls to <code>createTodoList()</code>, including across tests. This means IDs aren&#39;t predictable: one test might get IDs 1 and 2, while another gets 3 and 4 depending on execution order. This works fine here because the tests only check <em>relative</em> uniqueness (<code>first.id !== second.id</code>), not specific ID values. If a test asserted <code>expect(todo.id).toBe(1)</code>, it would break depending on which tests ran before it. When you have shared module-level state like this, make sure your tests don&#39;t depend on its specific value.</p>
+</details><hr>
+<p>If you&#39;re building a web application and want to test components in a real browser environment, check out <a href="../browser/component-testing.html">Component Testing</a> for testing React, Vue, Svelte, and other UI frameworks.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#what-to-test">What to Test</a><a class="toc-2" href="#structuring-a-test">Structuring a Test</a><a class="toc-3" href="#one-behavior-per-test">One Behavior Per Test</a><a class="toc-3" href="#descriptive-names">Descriptive Names</a><a class="toc-2" href="#testing-edge-cases">Testing Edge Cases</a><a class="toc-3" href="#property-based-testing">Property-Based Testing</a><a class="toc-2" href="#when-to-mock">When to Mock</a><a class="toc-3" href="#slow-dependencies">Slow Dependencies</a><a class="toc-3" href="#non-deterministic-values">Non-Deterministic Values</a><a class="toc-3" href="#what-not-to-mock">What Not to Mock</a><a class="toc-2" href="#fixing-bugs-with-tests">Fixing Bugs with Tests</a><a class="toc-2" href="#organizing-test-files">Organizing Test Files</a><a class="toc-3" href="#file-layout">File Layout</a><a class="toc-3" href="#grouping-with-describe">Grouping with describe</a><a class="toc-3" href="#splitting-large-files">Splitting Large Files</a><a class="toc-3" href="#naming-tests">Naming Tests</a><a class="toc-2" href="#a-worked-example">A Worked Example</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

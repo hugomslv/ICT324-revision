@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build Options (Vite) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link active" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vite</a> › config/build-options  <a class="ext small" href="https://vite.dev/config/build-options">version en ligne</a></div>
+<h1 id="build-options"><a class="anchor" href="#build-options">#</a>Build Options</h1>
+<p>Unless noted, the options in this section are only applied to build.</p>
+<h2 id="build-target"><a class="anchor" href="#build-target">#</a>build.target</h2>
+<ul>
+<li><strong>Type:</strong> <code>string | string[]</code></li>
+<li><strong>Default:</strong> <code>&#39;baseline-widely-available&#39;</code></li>
+<li><strong>Related:</strong> <a href="../guide/build.html#browser-compatibility">Browser Compatibility</a></li>
+</ul>
+<p>Browser compatibility target for the final bundle. The default value is a Vite special value, <code>&#39;baseline-widely-available&#39;</code>, which targets the minimum browser versions compatible with <a href="https://web-platform-dx.github.io/baseline/">Baseline</a> Widely Available as of a date fixed for each major release (<a href="https://web-platform-dx.github.io/supported-browsers/?widelyAvailableOnDate=2026-01-01">2026-01-01 for this major</a>). Specifically, it is <code>[&#39;chrome111&#39;, &#39;edge111&#39;, &#39;firefox114&#39;, &#39;safari16.4&#39;, &#39;ios16.4&#39;]</code>.</p>
+<p>Another special value is <code>&#39;esnext&#39;</code> - which assumes native dynamic imports support and will only perform minimal transpiling.</p>
+<p>The transform is performed with Oxc Transformer and the value should be a valid <a href="https://oxc.rs/docs/guide/usage/transformer/lowering#target">Oxc Transformer target option</a>. Custom targets can either be an ES version (e.g. <code>es2015</code>), a browser with version (e.g. <code>chrome58</code>), or an array of multiple target strings.</p>
+<p>Note the build will output a warning if the code contains features that cannot be safely transpiled by Oxc. See <a href="https://oxc.rs/docs/guide/usage/transformer/lowering#warnings">Oxc docs</a> for more details.</p>
+<h2 id="build-modulepreload"><a class="anchor" href="#build-modulepreload">#</a>build.modulePreload</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean | { polyfill?: boolean, resolveDependencies?: ResolveModulePreloadDependenciesFn }</code></li>
+<li><strong>Default:</strong> <code>{ polyfill: true }</code></li>
+</ul>
+<p>By default, a <a href="https://guybedford.com/es-module-preloading-integrity#modulepreload-polyfill">module preload polyfill</a> is automatically injected. The polyfill is auto injected into the proxy module of each <code>index.html</code> entry. If the build is configured to use a non-HTML custom entry via <code>build.rolldownOptions.input</code>, then it is necessary to manually import the polyfill in your custom entry:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/modulepreload-polyfill&#x27;</span></code></pre></div>
+<p>Note: the polyfill does <strong>not</strong> apply to <a href="../guide/build.html#library-mode">Library Mode</a>. If you need to support browsers without native dynamic import, you should probably avoid using it in your library.</p>
+<p>The polyfill can be disabled using <code>{ polyfill: false }</code>.</p>
+<p>The list of chunks to preload for each dynamic import is computed by Vite. By default, an absolute path including the <code>base</code> will be used when loading these dependencies. If the <code>base</code> is relative (<code>&#39;&#39;</code> or <code>&#39;./&#39;</code>), <code>import.meta.url</code> is used at runtime to avoid absolute paths that depend on the final deployed base.</p>
+<p>There is experimental support for fine grained control over the dependencies list and their paths using the <code>resolveDependencies</code> function. <a href="https://github.com/vitejs/vite/discussions/13841">Give Feedback</a>. It expects a function of type <code>ResolveModulePreloadDependenciesFn</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">type</span> <span class="hljs-title class_">ResolveModulePreloadDependenciesFn</span> = <span class="hljs-function">(<span class="hljs-params">
+  <span class="hljs-attr">url</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">deps</span>: <span class="hljs-built_in">string</span>[],
+  <span class="hljs-attr">context</span>: {
+    hostId: <span class="hljs-built_in">string</span>
+    hostType: <span class="hljs-string">&#x27;html&#x27;</span> | <span class="hljs-string">&#x27;js&#x27;</span>
+  },
+</span>) =&gt;</span> <span class="hljs-built_in">string</span>[]</code></pre></div>
+<p>The <code>resolveDependencies</code> function will be called for each dynamic import with a list of the chunks it depends on, and it will also be called for each chunk imported in entry HTML files. A new dependencies array can be returned with these filtered or more dependencies injected, and their paths modified. The <code>deps</code> paths are relative to the <code>build.outDir</code>. The return value should be a relative path to the <code>build.outDir</code>.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/** <span class="hljs-doctag">@type</span> {<span class="hljs-type">import(&#x27;vite&#x27;).UserConfig</span>} */</span>
+<span class="hljs-keyword">const</span> config = {
+  <span class="hljs-comment">// prettier-ignore</span>
+  <span class="hljs-attr">build</span>: {
+<span class="hljs-attr">modulePreload</span>: {
+  <span class="hljs-attr">resolveDependencies</span>: <span class="hljs-function">(<span class="hljs-params">filename, deps, { hostId, hostType }</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> deps.<span class="hljs-title function_">filter</span>(condition)
+  },
+},
+  },
+}</code></pre></div>
+<p>The resolved dependency paths can be further modified using <a href="../guide/build.html#advanced-base-options"><code>experimental.renderBuiltUrl</code></a>.</p>
+<h2 id="build-polyfillmodulepreload"><a class="anchor" href="#build-polyfillmodulepreload">#</a>build.polyfillModulePreload</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+<li><strong>Deprecated</strong> use <code>build.modulePreload.polyfill</code> instead</li>
+</ul>
+<p>Whether to automatically inject a <a href="https://guybedford.com/es-module-preloading-integrity#modulepreload-polyfill">module preload polyfill</a>.</p>
+<h2 id="build-outdir"><a class="anchor" href="#build-outdir">#</a>build.outDir</h2>
+<ul>
+<li><strong>Type:</strong> <code>string</code></li>
+<li><strong>Default:</strong> <code>dist</code></li>
+</ul>
+<p>Specify the output directory (relative to <a href="../guide/index.html#index-html-and-project-root">project root</a>).</p>
+<h2 id="build-assetsdir"><a class="anchor" href="#build-assetsdir">#</a>build.assetsDir</h2>
+<ul>
+<li><strong>Type:</strong> <code>string</code></li>
+<li><strong>Default:</strong> <code>assets</code></li>
+</ul>
+<p>Specify the directory to nest generated assets under (relative to <code>build.outDir</code>). This is not used in <a href="../guide/build.html#library-mode">Library Mode</a>.</p>
+<h2 id="build-assetsinlinelimit"><a class="anchor" href="#build-assetsinlinelimit">#</a>build.assetsInlineLimit</h2>
+<ul>
+<li><strong>Type:</strong> <code>number</code> | <code>((filePath: string, content: Buffer) =&gt; boolean | undefined)</code></li>
+<li><strong>Default:</strong> <code>4096</code> (4 KiB)</li>
+</ul>
+<p>Imported or referenced assets that are smaller than this threshold will be inlined as base64 URLs to avoid extra http requests. Set to <code>0</code> to disable inlining altogether.</p>
+<p>If a callback is passed, a boolean can be returned to opt-in or opt-out. If nothing is returned the default logic applies.</p>
+<p>Git LFS placeholders are automatically excluded from inlining because they do not contain the content of the file they represent.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Note</div><p>If you specify <code>build.lib</code>, <code>build.assetsInlineLimit</code> will be ignored and assets will always be inlined, regardless of file size or being a Git LFS placeholder.</p>
+</div><h2 id="build-csscodesplit"><a class="anchor" href="#build-csscodesplit">#</a>build.cssCodeSplit</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+</ul>
+<p>Enable/disable CSS code splitting. When enabled, CSS imported in async JS chunks will be preserved as chunks and fetched together when the chunk is fetched.</p>
+<p>If disabled, all CSS in the entire project will be extracted into a single CSS file.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Note</div><p>If you specify <code>build.lib</code>, <code>build.cssCodeSplit</code> will be <code>false</code> as default.</p>
+</div><h2 id="build-csstarget"><a class="anchor" href="#build-csstarget">#</a>build.cssTarget</h2>
+<ul>
+<li><strong>Type:</strong> <code>string | string[]</code></li>
+<li><strong>Default:</strong> the same as <a href="#build-target"><code>build.target</code></a></li>
+</ul>
+<p>This option allows users to set a different browser target for CSS minification from the one used for JavaScript transpilation.</p>
+<p>When <code>build.cssMinify</code> is <code>&#39;lightningcss&#39;</code> (the default), this option takes precedence over <a href="shared-options.html#css-lightningcss"><code>css.lightningcss.targets</code></a> for the minification step.</p>
+<p>It should only be used when you are targeting a non-mainstream browser.
+One example is Android WeChat WebView, which supports most modern JavaScript features but not the <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#rgb_colors"><code>#RGBA</code> hexadecimal color notation in CSS</a>.
+In this case, you need to set <code>build.cssTarget</code> to <code>chrome61</code> to prevent Vite from transforming <code>rgba()</code> colors into <code>#RGBA</code> hexadecimal notations.</p>
+<h2 id="build-cssminify"><a class="anchor" href="#build-cssminify">#</a>build.cssMinify</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean | &#39;lightningcss&#39; | &#39;esbuild&#39;</code></li>
+<li><strong>Default:</strong> <code>&#39;lightningcss&#39;</code>, but <code>false</code> if <a href="#build-minify"><code>build.minify</code></a> is disabled for client build</li>
+</ul>
+<p>This option allows users to override CSS minification specifically instead of defaulting to <code>build.minify</code>, so you can configure minification for JS and CSS separately. Vite uses <a href="https://lightningcss.dev/minification.html">Lightning CSS</a> by default to minify CSS. It can be configured using <a href="shared-options.html#css-lightningcss"><code>css.lightningcss</code></a>. Set the option to <code>&#39;esbuild&#39;</code> to use esbuild instead.</p>
+<p>esbuild must be installed when it is set to <code>&#39;esbuild&#39;</code>.</p>
+<div class="code"><pre><code class="hljs lang-sh">npm add -D esbuild</code></pre></div>
+<h2 id="build-sourcemap"><a class="anchor" href="#build-sourcemap">#</a>build.sourcemap</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean | &#39;inline&#39; | &#39;hidden&#39;</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+</ul>
+<p>Generate production source maps. If <code>true</code>, a separate sourcemap file will be created. If <code>&#39;inline&#39;</code>, the sourcemap will be appended to the resulting output file as a data URI. <code>&#39;hidden&#39;</code> works like <code>true</code> except that the corresponding sourcemap comments in the bundled files are suppressed.</p>
+<h2 id="build-chunkimportmap"><a class="anchor" href="#build-chunkimportmap">#</a>build.chunkImportMap</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Experimental</strong></li>
+<li><strong>Related:</strong> <a href="../guide/features.html#chunk-import-map-optimization">Chunk Import Map Optimization</a></li>
+</ul>
+<p>Whether to use import maps feature to optimize chunk caching efficiency.</p>
+<p>Note that this option requires <a href="https://caniuse.com/mdn-javascript_operators_import_meta_resolve"><code>import.meta.resolve</code> support</a>. If you need to support older browsers, check out <a href="https://github.com/vitejs/vite/tree/main/packages/plugin-legacy"><code>@vitejs/plugin-legacy</code></a>.</p>
+<h2 id="build-rolldownoptions"><a class="anchor" href="#build-rolldownoptions">#</a>build.rolldownOptions</h2>
+<ul>
+<li><strong>Type:</strong> <a href="https://rolldown.rs/reference/"><code>RolldownOptions</code></a></li>
+</ul>
+<p>Directly customize the underlying Rolldown bundle. This is the same as options that can be exported from a Rolldown config file and will be merged with Vite&#39;s internal Rolldown options. See <a href="https://rolldown.rs/reference/">Rolldown options docs</a> for more details.</p>
+<p>Vite overrides Rolldown&#39;s default for <code>preserveEntrySignatures</code>. When this option is not set, Vite uses <code>false</code> for regular client builds, <code>&#39;strict&#39;</code> for library builds, and <code>&#39;allow-extension&#39;</code> for SSR builds.</p>
+<p>Instead of <code>build.rolldownOptions.input</code>, it is recommended to set the top-level <a href="shared-options.html#input"><code>input</code></a> option, because it will be used in dev as well. If <code>build.rolldownOptions.input</code> is set, it overrides the top-level <code>input</code> option for build only.</p>
+<h2 id="build-rollupoptions"><a class="anchor" href="#build-rollupoptions">#</a>build.rollupOptions</h2>
+<ul>
+<li><strong>Type:</strong> <code>RolldownOptions</code></li>
+<li><strong>Deprecated</strong></li>
+</ul>
+<p>This option is an alias of <code>build.rolldownOptions</code> option. Use <code>build.rolldownOptions</code> option instead.</p>
+<h2 id="build-dynamicimportvarsoptions"><a class="anchor" href="#build-dynamicimportvarsoptions">#</a>build.dynamicImportVarsOptions</h2>
+<ul>
+<li><strong>Type:</strong> <code>{ include?: string | RegExp | (string | RegExp)[], exclude?: string | RegExp | (string | RegExp)[] }</code></li>
+<li><strong>Related:</strong> <a href="../guide/features.html#dynamic-import">Dynamic Import</a></li>
+</ul>
+<p>Whether to transform dynamic imports with variables.</p>
+<h2 id="build-lib"><a class="anchor" href="#build-lib">#</a>build.lib</h2>
+<ul>
+<li><strong>Type:</strong> <code>{ entry?: string | string[] | { [entryAlias: string]: string }, name?: string, formats?: (&#39;es&#39; | &#39;cjs&#39; | &#39;umd&#39; | &#39;iife&#39;)[], fileName?: string | ((format: ModuleFormat, entryName: string) =&gt; string), cssFileName?: string }</code></li>
+<li><strong>Related:</strong> <a href="../guide/build.html#library-mode">Library Mode</a></li>
+</ul>
+<p>Build as a library. <code>entry</code> defaults to the top-level <a href="shared-options.html#input"><code>input</code></a> option, and one of them is required since the library cannot use HTML as entry. <code>name</code> is the exposed global variable and is required when <code>formats</code> includes <code>&#39;umd&#39;</code> or <code>&#39;iife&#39;</code>. Default <code>formats</code> are <code>[&#39;es&#39;, &#39;umd&#39;]</code>, or <code>[&#39;es&#39;, &#39;cjs&#39;]</code>, if multiple entries are used.</p>
+<p><code>fileName</code> is the name of the package file output, which defaults to the <code>&quot;name&quot;</code> in <code>package.json</code>. It can also be defined as a function taking the <code>format</code> and <code>entryName</code> as arguments, and returning the file name.</p>
+<p>If your package imports CSS, <code>cssFileName</code> can be used to specify the name of the CSS file output. It defaults to the same value as <code>fileName</code> if it&#39;s set a string, otherwise it also falls back to the <code>&quot;name&quot;</code> in <code>package.json</code>.</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">build</span>: {
+    <span class="hljs-attr">lib</span>: {
+      <span class="hljs-attr">entry</span>: [<span class="hljs-string">&#x27;src/main.js&#x27;</span>],
+      <span class="hljs-attr">fileName</span>: <span class="hljs-function">(<span class="hljs-params">format, entryName</span>) =&gt;</span> <span class="hljs-string">`my-lib-<span class="hljs-subst">${entryName}</span>.<span class="hljs-subst">${format}</span>.js`</span>,
+      <span class="hljs-attr">cssFileName</span>: <span class="hljs-string">&#x27;my-lib-style&#x27;</span>,
+    },
+  },
+})</code></pre></div>
+<h2 id="build-license"><a class="anchor" href="#build-license">#</a>build.license</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean | { fileName?: string }</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Related:</strong> <a href="../guide/features.html#license">License</a></li>
+</ul>
+<p>When set to <code>true</code>, the build will generate a <code>.vite/license.md</code> file that includes all bundled dependencies&#39; licenses.</p>
+<p>If <code>fileName</code> is passed, it will be used as the license file name relative to the <code>outDir</code>. If it ends with <code>.json</code>, the raw JSON metadata will be generated instead and can be used for further processing. For example:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">[</span>
+  <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dep-1&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1.2.3&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;identifier&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;CC0-1.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;CC0 1.0 Universal\n\n...&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dep-2&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;4.5.6&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;identifier&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;MIT&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;MIT License\n\n...&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">]</span></code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If you&#39;d like to reference the license file in the built code, you can use <a href="https://rolldown.rs/reference/OutputOptions.postBanner#postbanner"><code>build.rolldownOptions.output.postBanner</code></a> to inject a comment at the top of the files. For example:</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">build</span>: {
+    <span class="hljs-attr">license</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">rolldownOptions</span>: {
+      <span class="hljs-attr">output</span>: {
+        <span class="hljs-attr">postBanner</span>:
+          <span class="hljs-string">&#x27;/* See licenses of bundled dependencies at https://example.com/license.md */&#x27;</span>,
+      },
+    },
+  },
+})</code></pre></div>
+</div><h2 id="build-manifest"><a class="anchor" href="#build-manifest">#</a>build.manifest</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean | string</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Related:</strong> <a href="../guide/backend-integration.html">Backend Integration</a></li>
+</ul>
+<p>Whether to generate a manifest file that contains a mapping of non-hashed asset filenames to their hashed versions, which can then be used by a server framework to render the correct asset links.</p>
+<p>When the value is a string, it will be used as the manifest file path relative to <code>build.outDir</code>. When set to <code>true</code>, the path would be <code>.vite/manifest.json</code>.</p>
+<p>If you are writing a plugin and need to inspect each output chunk or asset&#39;s related CSS and static assets during the build, you can also use <a href="../guide/api-plugin.html#output-bundle-metadata"><code>viteMetadata</code> output bundle metadata API</a>.</p>
+<h2 id="build-ssrmanifest"><a class="anchor" href="#build-ssrmanifest">#</a>build.ssrManifest</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean | string</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Related:</strong> <a href="../guide/ssr.html">Server-Side Rendering</a></li>
+</ul>
+<p>Whether to generate a SSR manifest file for determining style links and asset preload directives in production.</p>
+<p>When the value is a string, it will be used as the manifest file path relative to <code>build.outDir</code>. When set to <code>true</code>, the path would be <code>.vite/ssr-manifest.json</code>.</p>
+<h2 id="build-ssr"><a class="anchor" href="#build-ssr">#</a>build.ssr</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean | string</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>Related:</strong> <a href="../guide/ssr.html">Server-Side Rendering</a></li>
+</ul>
+<p>Produce SSR-oriented build. The value can be a string to directly specify the SSR entry, or <code>true</code>, which requires specifying the SSR entry via <a href="shared-options.html#input"><code>input</code></a> or <code>build.rolldownOptions.input</code>.</p>
+<h2 id="build-emitassets"><a class="anchor" href="#build-emitassets">#</a>build.emitAssets</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+</ul>
+<p>During non-client builds, static assets aren&#39;t emitted as it is assumed they would be emitted as part of the client build. This option allows frameworks to force emitting them in other environments build. It is responsibility of the framework to merge the assets with a post build step.</p>
+<h2 id="build-ssremitassets"><a class="anchor" href="#build-ssremitassets">#</a>build.ssrEmitAssets</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+</ul>
+<p>During the SSR build, static assets aren&#39;t emitted as it is assumed they would be emitted as part of the client build. This option allows frameworks to force emitting them in both the client and SSR build. It is responsibility of the framework to merge the assets with a post build step. This option will be replaced by <code>build.emitAssets</code> once Environment API is stable.</p>
+<h2 id="build-minify"><a class="anchor" href="#build-minify">#</a>build.minify</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean | &#39;oxc&#39; | &#39;terser&#39; | &#39;esbuild&#39;</code></li>
+<li><strong>Default:</strong> <code>&#39;oxc&#39;</code> for client build, <code>false</code> for SSR build</li>
+</ul>
+<p>Set to <code>false</code> to disable minification, or specify the minifier to use. The default is <a href="https://oxc.rs/docs/guide/usage/minifier">Oxc Minifier</a> which is 30 ~ 90x faster than terser and only 0.5 ~ 2% worse compression. <a href="https://github.com/privatenumber/minification-benchmarks">Benchmarks</a></p>
+<p><code>build.minify: &#39;esbuild&#39;</code> is deprecated and will be removed in the future.</p>
+<p>Note the <code>build.minify</code> option does not minify whitespaces when using the <code>&#39;es&#39;</code> format in lib mode, as it removes pure annotations and breaks tree-shaking.</p>
+<p>esbuild or Terser must be installed when it is set to <code>&#39;esbuild&#39;</code> or <code>&#39;terser&#39;</code> respectively.</p>
+<div class="code"><pre><code class="hljs lang-sh">npm add -D esbuild
+npm add -D terser</code></pre></div>
+<h2 id="build-terseroptions"><a class="anchor" href="#build-terseroptions">#</a>build.terserOptions</h2>
+<ul>
+<li><strong>Type:</strong> <code>TerserOptions</code></li>
+</ul>
+<p>Additional <a href="https://terser.org/docs/api-reference#minify-options">minify options</a> to pass on to Terser.</p>
+<p>In addition, you can also pass a <code>maxWorkers: number</code> option to specify the max number of workers to spawn. Defaults to the number of CPUs minus 1.</p>
+<h2 id="build-write"><a class="anchor" href="#build-write">#</a>build.write</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+</ul>
+<p>Set to <code>false</code> to disable writing the bundle to disk. This is mostly used in <a href="../guide/api-javascript.html#build">programmatic <code>build()</code> calls</a> where further post processing of the bundle is needed before writing to disk.</p>
+<h2 id="build-emptyoutdir"><a class="anchor" href="#build-emptyoutdir">#</a>build.emptyOutDir</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code> if <code>outDir</code> is inside <code>root</code></li>
+</ul>
+<p>By default, Vite will empty the <code>outDir</code> on build if it is inside project root. It will emit a warning if <code>outDir</code> is outside of root to avoid accidentally removing important files. You can explicitly set this option to suppress the warning. This is also available via command line as <code>--emptyOutDir</code>.</p>
+<h2 id="build-copypublicdir"><a class="anchor" href="#build-copypublicdir">#</a>build.copyPublicDir</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+</ul>
+<p>By default, Vite will copy files from the <code>publicDir</code> into the <code>outDir</code> on build. Set to <code>false</code> to disable this.</p>
+<h2 id="build-reportcompressedsize"><a class="anchor" href="#build-reportcompressedsize">#</a>build.reportCompressedSize</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+</ul>
+<p>Enable/disable gzip-compressed size reporting. Compressing large output files can be slow, so disabling this may increase build performance for large projects.</p>
+<h2 id="build-chunksizewarninglimit"><a class="anchor" href="#build-chunksizewarninglimit">#</a>build.chunkSizeWarningLimit</h2>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Default:</strong> <code>500</code></li>
+</ul>
+<p>Limit for chunk size warnings (in kB). It is compared against the uncompressed chunk size as the <a href="https://v8.dev/blog/cost-of-javascript-2019">JavaScript size itself is related to the execution time</a>.</p>
+<h2 id="build-watch"><a class="anchor" href="#build-watch">#</a>build.watch</h2>
+<ul>
+<li><strong>Type:</strong> <a href="https://rolldown.rs/reference/InputOptions.watch"><code>WatcherOptions</code></a><code>| null</code></li>
+<li><strong>Default:</strong> <code>null</code></li>
+</ul>
+<p>Set to <code>{}</code> to enable Rolldown watcher. This is mostly used in cases that involve build-only plugins or integrations processes.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Using Vite on Windows Subsystem for Linux (WSL) 2</div><p>There are cases that file system watching does not work with WSL2.
+See <a href="server-options.html#server-watch"><code>server.watch</code></a> for more details.</p>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#build-target">build.target</a><a class="toc-2" href="#build-modulepreload">build.modulePreload</a><a class="toc-2" href="#build-polyfillmodulepreload">build.polyfillModulePreload</a><a class="toc-2" href="#build-outdir">build.outDir</a><a class="toc-2" href="#build-assetsdir">build.assetsDir</a><a class="toc-2" href="#build-assetsinlinelimit">build.assetsInlineLimit</a><a class="toc-2" href="#build-csscodesplit">build.cssCodeSplit</a><a class="toc-2" href="#build-csstarget">build.cssTarget</a><a class="toc-2" href="#build-cssminify">build.cssMinify</a><a class="toc-2" href="#build-sourcemap">build.sourcemap</a><a class="toc-2" href="#build-chunkimportmap">build.chunkImportMap</a><a class="toc-2" href="#build-rolldownoptions">build.rolldownOptions</a><a class="toc-2" href="#build-rollupoptions">build.rollupOptions</a><a class="toc-2" href="#build-dynamicimportvarsoptions">build.dynamicImportVarsOptions</a><a class="toc-2" href="#build-lib">build.lib</a><a class="toc-2" href="#build-license">build.license</a><a class="toc-2" href="#build-manifest">build.manifest</a><a class="toc-2" href="#build-ssrmanifest">build.ssrManifest</a><a class="toc-2" href="#build-ssr">build.ssr</a><a class="toc-2" href="#build-emitassets">build.emitAssets</a><a class="toc-2" href="#build-ssremitassets">build.ssrEmitAssets</a><a class="toc-2" href="#build-minify">build.minify</a><a class="toc-2" href="#build-terseroptions">build.terserOptions</a><a class="toc-2" href="#build-write">build.write</a><a class="toc-2" href="#build-emptyoutdir">build.emptyOutDir</a><a class="toc-2" href="#build-copypublicdir">build.copyPublicDir</a><a class="toc-2" href="#build-reportcompressedsize">build.reportCompressedSize</a><a class="toc-2" href="#build-chunksizewarninglimit">build.chunkSizeWarningLimit</a><a class="toc-2" href="#build-watch">build.watch</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

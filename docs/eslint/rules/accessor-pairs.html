@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>accessor-pairs (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/accessor-pairs <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/accessor-pairs">version en ligne</a></div>
+<h1>accessor-pairs</h1><p>It&#39;s a common mistake in JavaScript to create an object with just a setter for a property but never have a corresponding getter defined for it. Without a getter, you cannot read the property, so it ends up not being used.</p>
+<p>Here are some examples:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// Bad</span>
+<span class="hljs-keyword">const</span> o = {
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    }
+};
+
+
+<span class="hljs-comment">// Good</span>
+<span class="hljs-keyword">const</span> p = {
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    },
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">a</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span>;
+    }
+};
+</code></pre></div>
+<p>This rule warns if setters are defined without getters. Using an option <code>getWithoutSet</code>, it will warn if you have a getter without a setter also.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule enforces a style where it requires to have a getter for every property which has a setter defined.</p>
+<p>By activating the option <code>getWithoutSet</code> it enforces the presence of a setter for every property which has a getter defined.</p>
+<p>This rule always checks object literals and property descriptors. By default, it also checks class declarations and class expressions.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<ul>
+<li><code>setWithoutGet</code> set to <code>true</code> will warn for setters without getters (Default <code>true</code>).</li>
+<li><code>getWithoutSet</code> set to <code>true</code> will warn for getters without setters (Default <code>false</code>).</li>
+<li><code>enforceForClassMembers</code> set to <code>true</code> additionally applies this rule to class getters/setters (Default <code>true</code>). Set <code>enforceForClassMembers</code> to <code>false</code> if you want this rule to ignore class declarations and class expressions.</li>
+<li><code>enforceForTSTypes</code>: set to <code>true</code> additionally applies this rule to TypeScript type definitions (Default <code>false</code>).</li>
+</ul>
+<h3 id="setwithoutget"><a class="anchor" href="#setwithoutget">#</a>setWithoutGet</h3>
+<p>Examples of <strong>incorrect</strong> code for the default <code>{ &quot;setWithoutGet&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint accessor-pairs: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> q = {
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    }
+};
+
+
+<span class="hljs-keyword">const</span> r = {<span class="hljs-attr">d</span>: <span class="hljs-number">1</span>};
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">defineProperty</span>(r, <span class="hljs-string">&#x27;c&#x27;</span>, {
+    <span class="hljs-attr">set</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    }
+});</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the default <code>{ &quot;setWithoutGet&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint accessor-pairs: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> s = {
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    },
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">a</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span>;
+    }
+};
+
+<span class="hljs-keyword">const</span> t = {<span class="hljs-attr">d</span>: <span class="hljs-number">1</span>};
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">defineProperty</span>(t, <span class="hljs-string">&#x27;c&#x27;</span>, {
+    <span class="hljs-attr">set</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    },
+    <span class="hljs-attr">get</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span>;
+    }
+});
+</code></pre></div>
+</div><h3 id="getwithoutset"><a class="anchor" href="#getwithoutset">#</a>getWithoutSet</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;getWithoutSet&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint accessor-pairs: [&quot;error&quot;, { &quot;getWithoutSet&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> u = {
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    }
+};
+
+<span class="hljs-keyword">const</span> v = {
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">a</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span>;
+    }
+};
+
+<span class="hljs-keyword">const</span> w = {<span class="hljs-attr">d</span>: <span class="hljs-number">1</span>};
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">defineProperty</span>(w, <span class="hljs-string">&#x27;c&#x27;</span>, {
+    <span class="hljs-attr">set</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    }
+});
+
+<span class="hljs-keyword">const</span> x = {<span class="hljs-attr">d</span>: <span class="hljs-number">1</span>};
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">defineProperty</span>(x, <span class="hljs-string">&#x27;c&#x27;</span>, {
+    <span class="hljs-attr">get</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span>;
+    }
+});</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;getWithoutSet&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint accessor-pairs: [&quot;error&quot;, { &quot;getWithoutSet&quot;: true }]*/</span>
+<span class="hljs-keyword">const</span> y = {
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    },
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">a</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span>;
+    }
+};
+
+<span class="hljs-keyword">const</span> z = {<span class="hljs-attr">d</span>: <span class="hljs-number">1</span>};
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">defineProperty</span>(z, <span class="hljs-string">&#x27;c&#x27;</span>, {
+    <span class="hljs-attr">set</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    },
+    <span class="hljs-attr">get</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span>;
+    }
+});
+</code></pre></div>
+</div><h3 id="enforceforclassmembers"><a class="anchor" href="#enforceforclassmembers">#</a>enforceForClassMembers</h3>
+<p>When <code>enforceForClassMembers</code> is set to <code>true</code> (default):</p>
+<ul>
+<li><code>&quot;getWithoutSet&quot;: true</code> will also warn for getters without setters in classes.</li>
+<li><code>&quot;setWithoutGet&quot;: true</code> will also warn for setters without getters in classes.</li>
+</ul>
+<p>Examples of <strong>incorrect</strong> code for <code>{ &quot;getWithoutSet&quot;: true, &quot;enforceForClassMembers&quot;: true }</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint accessor-pairs: [&quot;error&quot;, { &quot;getWithoutSet&quot;: true, &quot;enforceForClassMembers&quot;: true }]*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> {
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">a</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span>;
+    }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Bar</span> {
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">get</span> <span class="hljs-title function_">a</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span>;
+    }
+}
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Baz</span> = <span class="hljs-keyword">class</span> {
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">a</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span>;
+    }
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">set</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    }
+}</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for <code>{ &quot;setWithoutGet&quot;: true, &quot;enforceForClassMembers&quot;: true }</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint accessor-pairs: [&quot;error&quot;, { &quot;setWithoutGet&quot;: true, &quot;enforceForClassMembers&quot;: true }]*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> {
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    }
+}
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Bar</span> = <span class="hljs-keyword">class</span> {
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">set</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    }
+}</code></pre></div>
+</div><p>When <code>enforceForClassMembers</code> is set to <code>false</code>, this rule ignores classes.</p>
+<p>Examples of <strong>correct</strong> code for <code>{ &quot;getWithoutSet&quot;: true, &quot;setWithoutGet&quot;: true, &quot;enforceForClassMembers&quot;: false }</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint accessor-pairs: [&quot;error&quot;, {
+    &quot;getWithoutSet&quot;: true, &quot;setWithoutGet&quot;: true, &quot;enforceForClassMembers&quot;: false
+}]*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> {
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">a</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span>;
+    }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Bar</span> {
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">set</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    }
+}
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Baz</span> = <span class="hljs-keyword">class</span> {
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">get</span> <span class="hljs-title function_">a</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span>;
+    }
+}
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Quux</span> = <span class="hljs-keyword">class</span> {
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    }
+}</code></pre></div>
+</div><h3 id="enforcefortstypes"><a class="anchor" href="#enforcefortstypes">#</a>enforceForTSTypes</h3>
+<p>When <code>enforceForTSTypes</code> is set to <code>true</code>:</p>
+<ul>
+<li><code>&quot;getWithoutSet&quot;: true</code> will also warn for getters without setters in TypeScript types.</li>
+<li><code>&quot;setWithoutGet&quot;: true</code> will also warn for setters without getters in TypeScript types.</li>
+</ul>
+<p>Examples of <strong>incorrect</strong> code for <code>{ &quot;getWithoutSet&quot;: true, &quot;enforceForTSTypes&quot;: true }</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint accessor-pairs: [&quot;error&quot;, { &quot;getWithoutSet&quot;: true, &quot;enforceForTSTypes&quot;: true }]*/</span>
+
+<span class="hljs-keyword">interface</span> I {
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">a</span>(): <span class="hljs-built_in">string</span>
+}
+
+<span class="hljs-keyword">type</span> T = {
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">a</span>(): <span class="hljs-built_in">number</span>
+}</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for <code>{ &quot;setWithoutGet&quot;: true, &quot;enforceForTSTypes&quot;: true }</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint accessor-pairs: [&quot;error&quot;, { &quot;setWithoutGet&quot;: true, &quot;enforceForTSTypes&quot;: true }]*/</span>
+
+<span class="hljs-keyword">interface</span> I {
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">a</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-built_in">void</span>
+}
+
+<span class="hljs-keyword">type</span> T = {
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">a</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-built_in">void</span>
+}</code></pre></div>
+</div><p>When <code>enforceForTSTypes</code> is set to <code>false</code>, this rule ignores TypeScript types.</p>
+<p>Examples of <strong>correct</strong> code for <code>{ &quot;getWithoutSet&quot;: true, &quot;setWithoutGet&quot;: true, &quot;enforceForTSTypes&quot;: false }</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint accessor-pairs: [&quot;error&quot;, {
+    &quot;getWithoutSet&quot;: true, &quot;setWithoutGet&quot;: true, &quot;enforceForTSTypes&quot;: false
+}]*/</span>
+
+<span class="hljs-keyword">interface</span> I {
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">a</span>(): <span class="hljs-built_in">string</span>
+}
+
+<span class="hljs-keyword">type</span> T = {
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">a</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-built_in">void</span>
+}</code></pre></div>
+</div><h2 id="known-limitations"><a class="anchor" href="#known-limitations">#</a>Known Limitations</h2>
+<p>Due to the limits of static analysis, this rule does not account for possible side effects and in certain cases
+might not report a missing pair for a getter/setter that has a computed key, like in the following example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint accessor-pairs: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> z = <span class="hljs-number">1</span>;
+
+<span class="hljs-comment">// no warnings</span>
+<span class="hljs-keyword">const</span> a = {
+    get [z++]() {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span>;
+    },
+    set [z++](value) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    }
+};</code></pre></div>
+<p>Also, this rule does not disallow duplicate keys in object literals and class definitions, and in certain cases with duplicate keys
+might not report a missing pair for a getter/setter, like in the following example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint accessor-pairs: &quot;error&quot;*/</span>
+
+<span class="hljs-comment">// no warnings</span>
+<span class="hljs-keyword">const</span> b = {
+    <span class="hljs-keyword">get</span> <span class="hljs-title function_">a</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span>;
+    },
+    <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-keyword">set</span> <span class="hljs-title function_">a</span>(<span class="hljs-params">value</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">val</span> = value;
+    }
+};</code></pre></div>
+<p>The code above creates an object with just a setter for the property <code>&quot;a&quot;</code>.</p>
+<p>See <a href="no-dupe-keys.html">no-dupe-keys</a> if you also want to disallow duplicate keys in object literals.</p>
+<p>See <a href="no-dupe-class-members.html">no-dupe-class-members</a> if you also want to disallow duplicate names in class definitions.</p>
+<h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>You can turn this rule off if you are not concerned with the simultaneous presence of setters and getters on objects.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="no-dupe-keys.html"><code>no-dupe-keys</code></a>, <a href="no-dupe-class-members.html"><code>no-dupe-class-members</code></a></p></div><h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/set">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/set</a></li><li><a class="ext" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/get">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/get</a></li><li><a class="ext" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_Objects">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_Objects</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#setwithoutget">setWithoutGet</a><a class="toc-3" href="#getwithoutset">getWithoutSet</a><a class="toc-3" href="#enforceforclassmembers">enforceForClassMembers</a><a class="toc-3" href="#enforcefortstypes">enforceForTSTypes</a><a class="toc-2" href="#known-limitations">Known Limitations</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watching Non-Imported Files | Recipes (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/recipes/watch-templates  <a class="ext small" href="https://vitest.dev/guide/recipes/watch-templates">version en ligne</a></div>
+<h1 id="watching-non-imported-files"><a class="anchor" href="#watching-non-imported-files">#</a>Watching Non-Imported Files</h1>
+<p>In watch mode, Vitest tracks the import graph: when you change a file, every test whose imports reach that file reruns. That covers most cases. It misses tests that depend on files they don&#39;t <code>import</code>, like email templates loaded with <code>fs.readFile</code>, JSON fixtures parsed at runtime, HTML or CSS pulled in by a build step, or generated artifacts the tests assert against. Editing one of those files leaves the related tests stale, and the watch loop has no way to know.</p>
+<p><a href="../../config/watchtriggerpatterns.html"><code>watchTriggerPatterns</code></a> <Version>3.2.0</Version> makes these dependencies explicit. You declare a regex over file paths and a callback that returns which tests to rerun when a matching file changes.</p>
+<h2 id="pattern"><a class="anchor" href="#pattern">#</a>Pattern</h2>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">watchTriggerPatterns</span>: [
+      {
+        <span class="hljs-attr">pattern</span>: <span class="hljs-regexp">/src\/templates\/(.*)\.(ts|html|txt)$/</span>,
+        <span class="hljs-attr">testsToRun</span>: <span class="hljs-function">(<span class="hljs-params">file, match</span>) =&gt;</span> {
+          <span class="hljs-comment">// edit `src/templates/welcome.html` ⇒ rerun `api/tests/mailers/welcome.test.ts`</span>
+          <span class="hljs-keyword">return</span> <span class="hljs-string">`api/tests/mailers/<span class="hljs-subst">${match[<span class="hljs-number">1</span>]}</span>.test.ts`</span>
+        },
+      },
+    ],
+  },
+})</code></pre></div>
+<p><code>testsToRun</code> returns one or more test file paths to rerun (as a string or string array), or <code>undefined</code> if no tests should rerun. Paths are resolved against the workspace root and are not interpreted as globs. <code>match</code> is the result of <code>RegExp.exec</code> against the changed file.</p>
+<h2 id="variations"><a class="anchor" href="#variations">#</a>Variations</h2>
+<p>Multiple patterns can coexist. The first below derives the test path from the directory of the changed file; the second maps a single shared fixture to a fixed list of test files:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">watchTriggerPatterns</span>: [
+      {
+        <span class="hljs-attr">pattern</span>: <span class="hljs-regexp">/src\/(.*)\/schema\.json$/</span>,
+        <span class="hljs-attr">testsToRun</span>: <span class="hljs-function">(<span class="hljs-params">_file, match</span>) =&gt;</span> <span class="hljs-string">`src/<span class="hljs-subst">${match[<span class="hljs-number">1</span>]}</span>/__tests__/index.test.ts`</span>,
+      },
+      {
+        <span class="hljs-attr">pattern</span>: <span class="hljs-regexp">/test\/shared-fixture\.json$/</span>,
+        <span class="hljs-attr">testsToRun</span>: <span class="hljs-function">() =&gt;</span> [
+          <span class="hljs-string">&#x27;test/integration/users.test.ts&#x27;</span>,
+          <span class="hljs-string">&#x27;test/integration/billing.test.ts&#x27;</span>,
+        ],
+      },
+    ],
+  },
+})</code></pre></div>
+<p><a href="../../config/forcereruntriggers.html"><code>forceRerunTriggers</code></a> covers the same general gap, except it reruns every test on every match. <code>watchTriggerPatterns</code> reruns only the tests you map for a given pattern, which keeps the watch loop fast.</p>
+<h2 id="see-also"><a class="anchor" href="#see-also">#</a>See also</h2>
+<ul>
+<li><a href="../../config/watchtriggerpatterns.html"><code>watchTriggerPatterns</code></a></li>
+<li><a href="../../config/forcereruntriggers.html"><code>forceRerunTriggers</code></a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#pattern">Pattern</a><a class="toc-2" href="#variations">Variations</a><a class="toc-2" href="#see-also">See also</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

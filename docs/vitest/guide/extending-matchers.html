@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Extending Matchers | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/extending-matchers  <a class="ext small" href="https://vitest.dev/guide/extending-matchers">version en ligne</a></div>
+<h1 id="extending-matchers"><a class="anchor" href="#extending-matchers">#</a>Extending Matchers</h1>
+<p>Since Vitest is compatible with both Chai and Jest, you can use either the <a href="https://www.chaijs.com/guide/plugins/"><code>chai.use</code></a> API or <code>expect.extend</code>, whichever you prefer.</p>
+<p>This guide will explore extending matchers with <code>expect.extend</code>. If you are interested in Chai&#39;s API, check <a href="https://www.chaijs.com/guide/plugins/">their guide</a>.</p>
+<p>To extend default matchers, call <code>expect.extend</code> with an object containing your matchers.</p>
+<div class="code"><pre><code class="hljs lang-ts">expect.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-title function_">toBeFoo</span>(<span class="hljs-params">received</span>) {
+    <span class="hljs-keyword">const</span> { isNot } = <span class="hljs-variable language_">this</span>
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-comment">// do not alter your &quot;pass&quot; based on isNot. Vitest does it for you</span>
+      <span class="hljs-attr">pass</span>: received === <span class="hljs-string">&#x27;foo&#x27;</span>,
+      <span class="hljs-attr">message</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-string">`<span class="hljs-subst">${received}</span> is<span class="hljs-subst">${isNot ? <span class="hljs-string">&#x27; not&#x27;</span> : <span class="hljs-string">&#x27;&#x27;</span>}</span> foo`</span>
+    }
+  }
+})</code></pre></div>
+<p>If you are using TypeScript, you can extend default <code>Matchers</code> interface in an ambient declaration file (e.g: <code>vitest.d.ts</code>) with the code below:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Matchers</span>&lt;R, T&gt; {
+    <span class="hljs-attr">toBeFoo</span>: <span class="hljs-function">() =&gt;</span> R
+  }
+}</code></pre></div>
+<p><code>R</code> is the assertion return type, and <code>T</code> is the type of the received value.</p>
+<p>Return <code>R</code> from matchers that run synchronously. This makes the return type <code>void</code> for a regular assertion and <code>Promise&lt;void&gt;</code> when the assertion is used with <code>.resolves</code>, <code>.rejects</code>, <a href="../api/expect.html#poll"><code>expect.poll</code></a>, or <a href="../api/browser/assertions.html"><code>expect.element</code></a>. You can use <code>T</code> when an expected argument should have the same type as the received value:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Matchers</span>&lt;R, T&gt; {
+    <span class="hljs-attr">toEqualTyped</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">expected</span>: T</span>) =&gt;</span> R
+  }
+}</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Importing <code>vitest</code> makes TypeScript think this is an ES module file, type declaration won&#39;t work without it.</p>
+</div><p>Extending the <code>Matchers</code> interface will add a type to <code>expect.extend</code>, <code>expect().*</code>, and <code>expect.*</code> methods at the same time.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Don&#39;t forget to include the ambient declaration file in your <code>tsconfig.json</code>.</p>
+</div><p>The return value of a matcher should be compatible with the following types:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">SyncMatcherResult</span> {
+  <span class="hljs-attr">pass</span>: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-attr">message</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">string</span>
+  <span class="hljs-comment">// If you pass these, they will automatically appear inside a diff when</span>
+  <span class="hljs-comment">// the matcher does not pass, so you don&#x27;t need to print the diff yourself</span>
+  <span class="hljs-attr">actual</span>?: <span class="hljs-built_in">unknown</span>
+  <span class="hljs-attr">expected</span>?: <span class="hljs-built_in">unknown</span>
+  <span class="hljs-attr">meta</span>?: <span class="hljs-built_in">object</span>
+}
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">MatcherResult</span> = <span class="hljs-title class_">SyncMatcherResult</span> | <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">SyncMatcherResult</span>&gt;</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If a matcher implementation is asynchronous, declare its return type as <code>Promise&lt;void&gt;</code> instead of <code>R</code> and don&#39;t forget to <code>await</code> it in the test:</p>
+<div class="code"><pre><code class="hljs lang-ts">expect.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">toBeAsyncAssertion</span>(<span class="hljs-params">received</span>) {
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">pass</span>: received === <span class="hljs-string">&#x27;foo&#x27;</span>,
+      <span class="hljs-attr">message</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-string">`expected <span class="hljs-subst">${received}</span> to be foo`</span>,
+    }
+  }
+})
+
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Matchers</span>&lt;R, T&gt; {
+    <span class="hljs-attr">toBeAsyncAssertion</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  }
+}
+
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-string">&#x27;foo&#x27;</span>).<span class="hljs-title function_">toBeAsyncAssertion</span>()</code></pre></div>
+</div><p>The first argument inside a matcher&#39;s function is the received value (the one inside <code>expect(received)</code>). The rest are arguments passed directly to the matcher. Since version 4.1, Vitest exposes several types that can be used by your custom matcher:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> {
+  <span class="hljs-comment">// the function type</span>
+  <span class="hljs-title class_">Matcher</span>,
+  <span class="hljs-comment">// the return value</span>
+  <span class="hljs-title class_">MatcherResult</span>,
+  <span class="hljs-comment">// state available as `this`</span>
+  <span class="hljs-title class_">MatcherState</span>,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// a simple matcher, using &quot;function&quot; to have access to &quot;this&quot;</span>
+<span class="hljs-keyword">const</span> <span class="hljs-attr">customMatcher</span>: <span class="hljs-title class_">Matcher</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">received</span>) {
+  <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// a matcher with arguments</span>
+<span class="hljs-keyword">const</span> <span class="hljs-attr">customMatcher</span>: <span class="hljs-title class_">Matcher</span>&lt;<span class="hljs-title class_">MatcherState</span>, [<span class="hljs-attr">arg1</span>: <span class="hljs-built_in">unknown</span>, <span class="hljs-attr">arg2</span>: <span class="hljs-built_in">unknown</span>]&gt; = <span class="hljs-keyword">function</span> (<span class="hljs-params">received, arg1, arg2</span>) {
+  <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// a matcher with custom annotations</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">customMatcher</span>(<span class="hljs-params"><span class="hljs-attr">this</span>: <span class="hljs-title class_">MatcherState</span>, <span class="hljs-attr">received</span>: <span class="hljs-built_in">unknown</span>, <span class="hljs-attr">arg1</span>: <span class="hljs-built_in">unknown</span>, <span class="hljs-attr">arg2</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-title class_">MatcherResult</span> {
+  <span class="hljs-comment">// ...</span>
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">pass</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">message</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;something went wrong!&#x27;</span>,
+  }
+}
+
+expect.<span class="hljs-title function_">extend</span>({ customMatcher })</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>To build custom <strong>snapshot matchers</strong> (wrappers around <code>toMatchSnapshot()</code> / <code>toMatchInlineSnapshot()</code> / <code>toMatchFileSnapshot()</code>), use <code>Snapshots</code> exported from <code>vitest</code>. See <a href="snapshot.html#custom-snapshot-matchers">Custom Snapshot Matchers</a>.</p>
+</div><p>Matcher function has access to <code>this</code> context with the following properties:</p>
+<h2 id="isnot"><a class="anchor" href="#isnot">#</a><code>isNot</code></h2>
+<p>Returns true, if matcher was called on <code>not</code> (<code>expect(received).not.toBeFoo()</code>). You do not need to respect it, Vitest will reverse the value of <code>pass</code> automatically.</p>
+<h2 id="promise"><a class="anchor" href="#promise">#</a><code>promise</code></h2>
+<p>If matcher was called on <code>resolved/rejected</code>, this value will contain the name of modifier. Otherwise, it will be an empty string.</p>
+<h2 id="equals"><a class="anchor" href="#equals">#</a><code>equals</code></h2>
+<p>This is a utility function that allows you to compare two values. It will return <code>true</code> if values are equal, <code>false</code> otherwise. This function is used internally for almost every matcher. It supports objects with asymmetric matchers by default.</p>
+<h2 id="utils"><a class="anchor" href="#utils">#</a><code>utils</code></h2>
+<p>This contains a set of utility functions that you can use to display messages.</p>
+<p><code>this</code> context also contains information about the current test. You can also get it by calling <code>expect.getState()</code>. The most useful properties are:</p>
+<h2 id="currenttestname"><a class="anchor" href="#currenttestname">#</a><code>currentTestName</code></h2>
+<p>Full name of the current test (including describe block).</p>
+<h2 id="task"><a class="anchor" href="#task">#</a><code>task</code> <Advanced /> <Version>4.1.0</Version></h2>
+<p>Contains a reference to <a href="../api/advanced/runner.html#tasks">the <code>Test</code> runner task</a> when available.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>When using the global <code>expect</code> with concurrent tests, <code>this.task</code> is <code>undefined</code>. Use <code>context.expect</code> instead to ensure <code>task</code> is available in custom matchers.</p>
+</div><h2 id="testpath"><a class="anchor" href="#testpath">#</a><code>testPath</code></h2>
+<p>File path to the current test.</p>
+<h2 id="environment"><a class="anchor" href="#environment">#</a><code>environment</code></h2>
+<p>The name of the current <a href="../config/environment.html"><code>environment</code></a> (for example, <code>jsdom</code>).</p>
+<h2 id="soft"><a class="anchor" href="#soft">#</a><code>soft</code></h2>
+<p>Was assertion called as a <a href="../api/expect.html#soft"><code>soft</code></a> one. You don&#39;t need to respect it, Vitest will always catch the error.</p>
+<h2 id="assertion"><a class="anchor" href="#assertion">#</a><code>assertion</code> <Advanced /> <Version>5.0.0</Version></h2>
+<p>The underlying <a href="https://www.chaijs.com/guide/plugins/">Chai assertion</a> object. This is the same instance that Chai plugins receive, giving you access to Chai&#39;s flag system and chainable methods. This can be useful for building custom matchers that need to interact with Chai&#39;s internals.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>These are not all of the available properties, only the most useful ones. The other state values are used by Vitest internally.</p>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#isnot">isNot</a><a class="toc-2" href="#promise">promise</a><a class="toc-2" href="#equals">equals</a><a class="toc-2" href="#utils">utils</a><a class="toc-2" href="#currenttestname">currentTestName</a><a class="toc-2" href="#task">task 4.1.0</a><a class="toc-2" href="#testpath">testPath</a><a class="toc-2" href="#environment">environment</a><a class="toc-2" href="#soft">soft</a><a class="toc-2" href="#assertion">assertion 5.0.0</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

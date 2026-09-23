@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Environment API (Vite) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link active" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vite</a> › guide/api-environment  <a class="ext small" href="https://vite.dev/guide/api-environment">version en ligne</a></div>
+<h1 id="environment-api"><a class="anchor" href="#environment-api">#</a>Environment API</h1>
+<div class="box box-info"><div class="box-title">ℹ️ Info : Release Candidate</div><p>The Environment API is generally in the release candidate phase. We&#39;ll maintain stability in the APIs between major releases to allow the ecosystem to experiment and build upon them. However, note that <a href="https://vite.dev/changes/#considering" class="ext" title="lien en ligne (non disponible hors-ligne)">some specific APIs</a> are still considered experimental.</p>
+<p>We plan to stabilize these new APIs (with potential breaking changes) in a future major release once downstream projects have had time to experiment with the new features and validate them.</p>
+<p>Resources:</p>
+<ul>
+<li><a href="https://github.com/vitejs/vite/discussions/16358">Feedback discussion</a> where we are gathering feedback about the new APIs.</li>
+<li><a href="https://github.com/vitejs/vite/pull/16471">Environment API PR</a> where the new APIs were implemented and reviewed.</li>
+</ul>
+<p>Please share your feedback with us.</p>
+</div><h2 id="formalizing-environments"><a class="anchor" href="#formalizing-environments">#</a>Formalizing Environments</h2>
+<p>Vite 6 formalizes the concept of Environments. Until Vite 5, there were two implicit Environments (<code>client</code>, and optionally <code>ssr</code>). The new Environment API allows users and framework authors to create as many environments as needed to map the way their apps work in production. This new capability required a big internal refactoring, but a lot of effort has been placed on backward compatibility. The initial goal of Vite 6 is to move the ecosystem to the new major as smoothly as possible, delaying the adoption of the APIs until enough users have migrated and frameworks and plugin authors have validated the new design.</p>
+<h2 id="closing-the-gap-between-build-and-dev"><a class="anchor" href="#closing-the-gap-between-build-and-dev">#</a>Closing the Gap Between Build and Dev</h2>
+<p>For a simple SPA/MPA, no new APIs around environments are exposed to the config. Internally, Vite will apply the options to a <code>client</code> environment, but it&#39;s not necessary to know of this concept when configuring Vite. The config and behavior from Vite 5 should work seamlessly here.</p>
+<p>When we move to a typical server-side rendered (SSR) app, we&#39;ll have two environments:</p>
+<ul>
+<li><code>client</code>: runs the app in the browser.</li>
+<li><code>ssr</code>: runs the app in node (or other server runtimes) which renders pages before sending them to the browser.</li>
+</ul>
+<p>In dev, Vite executes the server code in the same Node process as the Vite dev server, giving a close approximation to the production environment. However, it is also possible for servers to run in other JS runtimes, like <a href="https://github.com/cloudflare/workerd">Cloudflare&#39;s workerd</a> which have different constraints. Modern apps may also run in more than two environments, e.g. a browser, a node server, and an edge server. Vite 5 didn&#39;t allow to properly represent these environments.</p>
+<p>Vite 6 allows users to configure their app during build and dev to map all of its environments. During dev, a single Vite dev server can now be used to run code in multiple different environments concurrently. The app source code is still transformed by Vite dev server. On top of the shared HTTP server, middlewares, resolved config, and plugins pipeline, the Vite dev server now has a set of independent dev environments. Each of them is configured to match the production environment as closely as possible, and is connected to a dev runtime where the code is executed (for workerd, the server code can now run in miniflare locally). In the client, the browser imports and executes the code. In other environments, a module runner fetches and evaluates the transformed code.</p>
+<p><span class="img-missing">[image : Vite Environments]</span></p>
+<h2 id="environments-configuration"><a class="anchor" href="#environments-configuration">#</a>Environments Configuration</h2>
+<p>For an SPA/MPA, the configuration will look similar to Vite 5. Internally these options are used to configure the <code>client</code> environment.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">build</span>: {
+    <span class="hljs-attr">sourcemap</span>: <span class="hljs-literal">false</span>,
+  },
+  <span class="hljs-attr">optimizeDeps</span>: {
+    <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;lib&#x27;</span>],
+  },
+})</code></pre></div>
+<p>This is important because we&#39;d like to keep Vite approachable and avoid exposing new concepts until they are needed.</p>
+<p>If the app is composed of several environments, then these environments can be configured explicitly with the <code>environments</code> config option.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+  <span class="hljs-attr">build</span>: {
+    <span class="hljs-attr">sourcemap</span>: <span class="hljs-literal">false</span>,
+  },
+  <span class="hljs-attr">optimizeDeps</span>: {
+    <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;lib&#x27;</span>],
+  },
+  <span class="hljs-attr">environments</span>: {
+    <span class="hljs-attr">server</span>: {},
+    <span class="hljs-attr">edge</span>: {
+      <span class="hljs-attr">resolve</span>: {
+        <span class="hljs-attr">noExternal</span>: <span class="hljs-literal">true</span>,
+      },
+    },
+  },
+}</code></pre></div>
+<p>When not explicitly documented, environment inherits the configured top-level config options (for example, the new <code>server</code> and <code>edge</code> environments will inherit the <code>build.sourcemap: false</code> option). A small number of top-level options, like <code>optimizeDeps</code>, only apply to the <code>client</code> environment, as they don&#39;t work well when applied as a default to server environments. Those options have <NonInheritBadge /> badge in <a href="../config/index.html">the reference</a>. The <code>client</code> environment can also be configured explicitly through <code>environments.client</code>, but we recommend to do it with the top-level options so the client config remains unchanged when adding new environments.</p>
+<p>The <code>EnvironmentOptions</code> interface exposes all the per-environment options. There are environment options that apply to both <code>build</code> and <code>dev</code>, like <code>resolve</code>. And there are <code>DevEnvironmentOptions</code> and <code>BuildEnvironmentOptions</code> for dev and build specific options (like <code>dev.warmup</code> or <code>build.outDir</code>). Some options like <code>optimizeDeps</code> only applies to dev, but is kept as top level instead of nested in <code>dev</code> for backward compatibility.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">EnvironmentOptions</span> {
+  <span class="hljs-attr">define</span>?: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">any</span>&gt;
+  <span class="hljs-attr">resolve</span>?: <span class="hljs-title class_">EnvironmentResolveOptions</span>
+  <span class="hljs-attr">optimizeDeps</span>: <span class="hljs-title class_">DepOptimizationOptions</span>
+  <span class="hljs-attr">consumer</span>?: <span class="hljs-string">&#x27;client&#x27;</span> | <span class="hljs-string">&#x27;server&#x27;</span>
+  <span class="hljs-attr">dev</span>: <span class="hljs-title class_">DevOptions</span>
+  <span class="hljs-attr">build</span>: <span class="hljs-title class_">BuildOptions</span>
+}</code></pre></div>
+<p>The <code>UserConfig</code> interface extends from the <code>EnvironmentOptions</code> interface, allowing to configure the client and defaults for other environments, configured through the <code>environments</code> option. The <code>client</code> and a server environment named <code>ssr</code> are always present during dev. This allows backward compatibility with <code>server.ssrLoadModule(url)</code> and <code>server.moduleGraph</code>. During build, the <code>client</code> environment is always present, and the <code>ssr</code> environment is only present if it is explicitly configured (using <code>environments.ssr</code> or for backward compatibility <code>build.ssr</code>). An app doesn&#39;t need to use the <code>ssr</code> name for its SSR environment, it could name it <code>server</code> for example.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">UserConfig</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">EnvironmentOptions</span> {
+  <span class="hljs-attr">environments</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-title class_">EnvironmentOptions</span>&gt;
+  <span class="hljs-comment">// other options</span>
+}</code></pre></div>
+<p>Note that the <code>ssr</code> top-level property is going to be deprecated once the Environment API is stable. This option has the same role as <code>environments</code>, but for the default <code>ssr</code> environment and only allowed configuring of a small set of options.</p>
+<h2 id="custom-environment-instances"><a class="anchor" href="#custom-environment-instances">#</a>Custom Environment Instances</h2>
+<p>Low level configuration APIs are available so runtime providers can provide environments with proper defaults for their runtimes. These environments can also spawn other processes or threads to run the modules during dev in a closer runtime to the production environment.</p>
+<p>For example, the <a href="https://developers.cloudflare.com/workers/vite-plugin/">Cloudflare Vite plugin</a> uses the Environment API to run code in the Cloudflare Workers runtime (<code>workerd</code>) during development.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { customEnvironment } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite-environment-provider&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+  <span class="hljs-attr">build</span>: {
+    <span class="hljs-attr">outDir</span>: <span class="hljs-string">&#x27;/dist/client&#x27;</span>,
+  },
+  <span class="hljs-attr">environments</span>: {
+    <span class="hljs-attr">ssr</span>: <span class="hljs-title function_">customEnvironment</span>({
+      <span class="hljs-attr">build</span>: {
+        <span class="hljs-attr">outDir</span>: <span class="hljs-string">&#x27;/dist/ssr&#x27;</span>,
+      },
+    }),
+  },
+}</code></pre></div>
+<h2 id="backward-compatibility"><a class="anchor" href="#backward-compatibility">#</a>Backward Compatibility</h2>
+<p>The current Vite server API is not yet deprecated and is backward compatible with Vite 5.</p>
+<p>The <code>server.moduleGraph</code> returns a mixed view of the client and ssr module graphs. Backward compatible mixed module nodes will be returned from all its methods. The same scheme is used for the module nodes passed to <code>handleHotUpdate</code>.</p>
+<p>We don&#39;t recommend switching to Environment API yet. We are aiming for a good portion of the user base to adopt Vite 6 before so plugins don&#39;t need to maintain two versions. Checkout the future breaking changes section for information on future deprecations and upgrade path:</p>
+<ul>
+<li><a href="https://vite.dev/changes/this-environment-in-hooks" class="ext" title="lien en ligne (non disponible hors-ligne)"><code>this.environment</code> in Hooks</a></li>
+<li><a href="https://vite.dev/changes/hotupdate-hook" class="ext" title="lien en ligne (non disponible hors-ligne)">HMR <code>hotUpdate</code> Plugin Hook</a></li>
+<li><a href="https://vite.dev/changes/per-environment-apis" class="ext" title="lien en ligne (non disponible hors-ligne)">Move to Per-environment APIs</a></li>
+<li><a href="https://vite.dev/changes/ssr-using-modulerunner" class="ext" title="lien en ligne (non disponible hors-ligne)">SSR Using <code>ModuleRunner</code> API</a></li>
+<li><a href="https://vite.dev/changes/shared-plugins-during-build" class="ext" title="lien en ligne (non disponible hors-ligne)">Shared Plugins During Build</a></li>
+</ul>
+<h2 id="target-users"><a class="anchor" href="#target-users">#</a>Target Users</h2>
+<p>This guide provides the basic concepts about environments for end users.</p>
+<p>Plugin authors have a more consistent API available to interact with the current environment configuration. If you&#39;re building on top of Vite, the <a href="api-environment-plugins.html">Environment API Plugins Guide</a> guide describes the way extended plugin APIs available to support multiple custom environments.</p>
+<p>Frameworks could decide to expose environments at different levels. If you&#39;re a framework author, continue reading the <a href="api-environment-frameworks.html">Environment API Frameworks Guide</a> to learn about the Environment API programmatic side.</p>
+<p>For Runtime providers, the <a href="api-environment-runtimes.html">Environment API Runtimes Guide</a> explains how to offer custom environments to be consumed by frameworks and users.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#formalizing-environments">Formalizing Environments</a><a class="toc-2" href="#closing-the-gap-between-build-and-dev">Closing the Gap Between Build and Dev</a><a class="toc-2" href="#environments-configuration">Environments Configuration</a><a class="toc-2" href="#custom-environment-instances">Custom Environment Instances</a><a class="toc-2" href="#backward-compatibility">Backward Compatibility</a><a class="toc-2" href="#target-users">Target Users</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

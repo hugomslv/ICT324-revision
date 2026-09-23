@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-unsafe-optional-chaining (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-unsafe-optional-chaining <span class="badge badge-problem">problème</span> <span class="badge badge-reco">✅ dans js/recommended</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-unsafe-optional-chaining">version en ligne</a></div>
+<h1>no-unsafe-optional-chaining</h1><p>The optional chaining (<code>?.</code>) expression can short-circuit with a return value of <code>undefined</code>. Therefore, treating an evaluated optional chaining expression as a function, object, number, etc., can cause TypeError or unexpected results. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> obj = <span class="hljs-literal">undefined</span>;
+
+<span class="hljs-number">1</span> <span class="hljs-keyword">in</span> obj?.<span class="hljs-property">foo</span>;  <span class="hljs-comment">// TypeError</span>
+<span class="hljs-title function_">with</span> (obj?.<span class="hljs-property">foo</span>);  <span class="hljs-comment">// TypeError</span>
+<span class="hljs-keyword">for</span> (bar <span class="hljs-keyword">of</span> obj?.<span class="hljs-property">foo</span>);  <span class="hljs-comment">// TypeError</span>
+bar <span class="hljs-keyword">instanceof</span> obj?.<span class="hljs-property">foo</span>;  <span class="hljs-comment">// TypeError</span>
+<span class="hljs-keyword">const</span> { bar } = obj?.<span class="hljs-property">foo</span>;  <span class="hljs-comment">// TypeError</span></code></pre></div>
+<p>Also, parentheses limit the scope of short-circuiting in chains. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> obj = <span class="hljs-literal">undefined</span>;
+
+(obj?.<span class="hljs-property">foo</span>)(); <span class="hljs-comment">// TypeError</span>
+(obj?.<span class="hljs-property">foo</span>).<span class="hljs-property">bar</span>; <span class="hljs-comment">// TypeError</span></code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule aims to detect some cases where the use of optional chaining doesn&#39;t prevent runtime errors. In particular, it flags optional chaining expressions in positions where short-circuiting to <code>undefined</code> causes throwing a TypeError afterward.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unsafe-optional-chaining: &quot;error&quot;*/</span>
+
+(obj?.<span class="hljs-property">foo</span>)();
+
+(obj?.<span class="hljs-property">foo</span>).<span class="hljs-property">bar</span>;
+
+(foo?.()).<span class="hljs-property">bar</span>;
+
+(foo?.()).<span class="hljs-title function_">bar</span>();
+
+(obj?.<span class="hljs-property">foo</span> ?? obj?.<span class="hljs-property">bar</span>)();
+
+(foo || obj?.<span class="hljs-property">foo</span>)();
+
+(obj?.<span class="hljs-property">foo</span> &amp;&amp; foo)();
+
+(foo ? obj?.<span class="hljs-property">foo</span> : bar)();
+
+(foo, obj?.<span class="hljs-property">bar</span>).<span class="hljs-property">baz</span>;
+
+(obj?.<span class="hljs-property">foo</span>)<span class="hljs-string">`template`</span>;
+
+<span class="hljs-title function_">new</span> (obj?.<span class="hljs-property">foo</span>)();
+
+[...obj?.<span class="hljs-property">foo</span>];
+
+<span class="hljs-title function_">bar</span>(...obj?.<span class="hljs-property">foo</span>);
+
+<span class="hljs-number">1</span> <span class="hljs-keyword">in</span> obj?.<span class="hljs-property">foo</span>;
+
+bar <span class="hljs-keyword">instanceof</span> obj?.<span class="hljs-property">foo</span>;
+
+<span class="hljs-keyword">for</span> (bar <span class="hljs-keyword">of</span> obj?.<span class="hljs-property">foo</span>);
+
+<span class="hljs-keyword">const</span> { bar } = obj?.<span class="hljs-property">foo</span>;
+
+[{ bar } = obj?.<span class="hljs-property">foo</span>] = [];
+
+<span class="hljs-title function_">with</span> (obj?.<span class="hljs-property">foo</span>);
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">obj</span>?.<span class="hljs-property">foo</span> {}
+
+<span class="hljs-keyword">const</span> a = <span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">obj</span>?.<span class="hljs-property">foo</span> {};
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span> (<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> { bar } = <span class="hljs-keyword">await</span> obj?.<span class="hljs-property">foo</span>;
+   (<span class="hljs-keyword">await</span> obj?.<span class="hljs-property">foo</span>)();
+   (<span class="hljs-keyword">await</span> obj?.<span class="hljs-property">foo</span>).<span class="hljs-property">bar</span>;
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unsafe-optional-chaining: &quot;error&quot;*/</span>
+
+(obj?.<span class="hljs-property">foo</span>)?.();
+
+obj?.<span class="hljs-title function_">foo</span>();
+
+(obj?.<span class="hljs-property">foo</span> ?? bar)();
+
+obj?.<span class="hljs-property">foo</span>.<span class="hljs-property">bar</span>;
+
+obj.<span class="hljs-property">foo</span>?.<span class="hljs-property">bar</span>;
+
+foo?.()?.<span class="hljs-property">bar</span>;
+
+(obj?.<span class="hljs-property">foo</span> ?? bar)<span class="hljs-string">`template`</span>;
+
+<span class="hljs-title function_">new</span> (obj?.<span class="hljs-property">foo</span> ?? bar)();
+
+<span class="hljs-keyword">const</span> baz = {...obj?.<span class="hljs-property">foo</span>};
+
+<span class="hljs-keyword">const</span> { bar } = obj?.<span class="hljs-property">foo</span> || baz;
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span> (<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> { bar } = <span class="hljs-keyword">await</span> obj?.<span class="hljs-property">foo</span> || baz;
+   (<span class="hljs-keyword">await</span> obj?.<span class="hljs-property">foo</span>)?.();
+   (<span class="hljs-keyword">await</span> obj?.<span class="hljs-property">foo</span>)?.<span class="hljs-property">bar</span>;
+}</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has an object option:</p>
+<ul>
+<li><code>disallowArithmeticOperators</code>: Disallow arithmetic operations on optional chaining expressions (Default <code>false</code>). If this is <code>true</code>, this rule warns arithmetic operations on optional chaining expressions, which possibly result in <code>NaN</code>.</li>
+</ul>
+<h3 id="disallowarithmeticoperators"><a class="anchor" href="#disallowarithmeticoperators">#</a>disallowArithmeticOperators</h3>
+<p>With this option set to <code>true</code> the rule is enforced for:</p>
+<ul>
+<li>Unary operators: <code>-</code>, <code>+</code></li>
+<li>Arithmetic operators: <code>+</code>, <code>-</code>, <code>/</code>, <code>*</code>, <code>%</code>, <code>**</code></li>
+<li>Assignment operators: <code>+=</code>, <code>-=</code>, <code>/=</code>, <code>*=</code>, <code>%=</code>, <code>**=</code></li>
+</ul>
+<p>Examples of additional <strong>incorrect</strong> code for this rule with the <code>{ &quot;disallowArithmeticOperators&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unsafe-optional-chaining: [&quot;error&quot;, { &quot;disallowArithmeticOperators&quot;: true }]*/</span>
+
++obj?.<span class="hljs-property">foo</span>;
+-obj?.<span class="hljs-property">foo</span>;
+
+obj?.<span class="hljs-property">foo</span> + bar;
+obj?.<span class="hljs-property">foo</span> - bar;
+obj?.<span class="hljs-property">foo</span> / bar;
+obj?.<span class="hljs-property">foo</span> * bar;
+obj?.<span class="hljs-property">foo</span> % bar;
+obj?.<span class="hljs-property">foo</span> ** bar;
+
+baz += obj?.<span class="hljs-property">foo</span>;
+baz -= obj?.<span class="hljs-property">foo</span>;
+baz /= obj?.<span class="hljs-property">foo</span>;
+baz *= obj?.<span class="hljs-property">foo</span>;
+baz %= obj?.<span class="hljs-property">foo</span>;
+baz **= obj?.<span class="hljs-property">foo</span>;
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span> (<span class="hljs-params"></span>) {
+  +<span class="hljs-keyword">await</span> obj?.<span class="hljs-property">foo</span>;
+  <span class="hljs-keyword">await</span> obj?.<span class="hljs-property">foo</span> + bar;
+  baz += <span class="hljs-keyword">await</span> obj?.<span class="hljs-property">foo</span>;
+}</code></pre></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#disallowarithmeticoperators">disallowArithmeticOperators</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

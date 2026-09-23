@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>@module (JSDoc) · ICT-324 Révision</title>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/hljs.css">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../index.html">Accueil</a><a class="nav-link" href="../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../docs/index.html">Index des docs</a><a class="nav-link" href="../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../docs/vite/index.html">Vite</a><a class="nav-link active" href="../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="index.html">JSDoc</a> › tags-module <span class="badge">Document a JavaScript module.</span> <a class="ext small" href="https://jsdoc.app/tags-module.html">version en ligne</a></div>
+<h2 id="syntax"><a class="anchor" href="#syntax">#</a>Syntax</h2>
+<p><code>@module [[{&lt;type&gt;}] &lt;moduleName&gt;]</code></p>
+<p>In JSDoc 3.3.0 and later, <code>&lt;moduleName&gt;</code> may include the <code>module:</code> prefix. In previous versions, you
+must omit this prefix.</p>
+<p>Note: If you provide a type, you <em>must</em> also provide a name.</p>
+<h2 id="overview"><a class="anchor" href="#overview">#</a>Overview</h2>
+<p>The @module tag marks the current file as being its own module. All symbols in the file are assumed
+to be members of the module unless documented otherwise.</p>
+<p>Link to a module (e.g. within a <a href="tags-inline-link.html">@link</a> or <a href="tags-see.html">@see</a> tag) using &quot;module:moduleName&quot;.
+For example, &quot;@module foo/bar&quot; can be linked to using &quot;{@link module:foo/bar}&quot;.</p>
+<p>If the module name is not provided, it is derived from the module&#39;s path and filename. For example,
+suppose I have a file <code>test.js</code>, located in the <code>src</code> directory, that contains the block comment
+<code>/** @module */</code>. Here are some scenarios for running JSDoc and the resulting module names for
+test.js:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Derived module names if none is provided.</div><div class="code"><pre><code class="hljs lang-txt"># from src/
+jsdoc ./test.js   # module name 'test'
+
+# from src's parent directory:
+jsdoc src/test.js # module name 'src/test'
+jsdoc -r src/     # module name 'test'</code></pre></div>
+</div><h2 id="examples"><a class="anchor" href="#examples">#</a>Examples</h2>
+<p>The following example shows the namepaths that are used for symbols in a module. The first symbol
+is a module-private, or &quot;inner,&quot; variable--it can be only accessed within the module. The second
+symbol is a static function that is exported by the module.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Basic @module use</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/** <span class="hljs-doctag">@module</span> myModule */</span>
+
+<span class="hljs-comment">/** will be module:myModule~foo */</span>
+<span class="hljs-keyword">var</span> foo = <span class="hljs-number">1</span>;
+
+<span class="hljs-comment">/** will be module:myModule.bar */</span>
+<span class="hljs-keyword">var</span> bar = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};</code></pre></div>
+</div><p>When an exported symbol is defined as a member of <code>module.exports</code>, <code>exports</code>, or <code>this</code>, JSDoc
+infers that the symbol is a static member of the module.</p>
+<p>In the following example, the Book class is documented as a static member, &quot;module:bookshelf.Book&quot;,
+with one instance member, &quot;module:bookshelf.Book#title&quot;.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Defining exported symbols as a member of 'this'</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/** <span class="hljs-doctag">@module</span> bookshelf */</span>
+<span class="hljs-comment">/** <span class="hljs-doctag">@class</span> */</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">Book</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">title</span>) {
+    <span class="hljs-comment">/** The title. */</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">title</span> = title;
+};</code></pre></div>
+</div><p>In the following example, the two functions have the namepaths &quot;module:color/mixer.blend&quot; and
+&quot;module:color/mixer.darken&quot;.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Defining exported symbols as a member of 'module.exports' or 'exports'</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/** <span class="hljs-doctag">@module</span> color/mixer */</span>
+<span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = {
+    <span class="hljs-comment">/** Blend two colours together. */</span>
+    <span class="hljs-attr">blend</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">color1, color2</span>) {}
+};
+<span class="hljs-comment">/** Darkens a color. */</span>
+<span class="hljs-built_in">exports</span>.<span class="hljs-property">darken</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">color, shade</span>) {};</code></pre></div>
+</div><p>See <a href="howto-commonjs-modules.html">Documenting JavaScript Modules</a> for further examples.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#syntax">Syntax</a><a class="toc-2" href="#overview">Overview</a><a class="toc-2" href="#examples">Examples</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sharedViteServer | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/sharedviteserver  <a class="ext small" href="https://vitest.dev/config/sharedviteserver">version en ligne</a></div>
+<h1 id="sharedviteserver"><a class="anchor" href="#sharedviteserver">#</a>sharedViteServer <CRoot /></h1>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+<li><strong>CLI:</strong> <code>--sharedViteServer=false</code></li>
+</ul>
+<p>Inline <a href="../guide/projects.html">projects</a> that don&#39;t modify the Vite config reuse the Vite server of the config that declares them. Instead of resolving a new Vite config and creating a new server for every project, such projects share the declaring config&#39;s server and its transform cache, so shared source files are transformed once instead of once per project and tests run faster. The performance improvement varies depending on the number of inline projects and how many source files they have in common.</p>
+<p>This option <em>only</em> applies to inline projects. Projects referenced as config files or directories always resolve their own Vite config and create their own server.</p>
+<p>A project still gets its own Vite server when it defines Vite-level options that change the server (<code>plugins</code>, <code>resolve</code>, and so on), when its <code>extends</code> doesn&#39;t point to the declaring config (<code>extends: true</code> and a path that resolves to the declaring config file are equivalent), or when it defines test options that affect the Vite config:</p>
+<ul>
+<li><a href="alias.html"><code>alias</code></a></li>
+<li><a href="browser/enabled.html"><code>browser</code></a></li>
+<li><a href="css.html"><code>css</code></a></li>
+<li><a href="deps.html#deps-moduledirectories"><code>deps.moduleDirectories</code></a></li>
+<li><a href="deps.html#deps-optimizer"><code>deps.optimizer</code></a></li>
+<li><code>mode</code></li>
+<li><a href="root.html"><code>root</code></a></li>
+</ul>
+<p>Options like <code>env</code>, <code>setupFiles</code>, <code>server.deps</code>, or <code>environment</code> don&#39;t prevent sharing: every project keeps its own module resolution rules, module runner, and module instances on top of the shared server.</p>
+<p>The same applies to Vite-level values that don&#39;t change the server: an empty <code>plugins</code> list (<code>plugins: isCI ? [ciPlugin()] : []</code>) and <code>define</code>.</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [
+      <span class="hljs-comment">// these projects share the root Vite server</span>
+      { <span class="hljs-attr">test</span>: { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;unit&#x27;</span>, <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;**/*.unit.test.ts&#x27;</span>] } },
+      { <span class="hljs-attr">test</span>: { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;integration&#x27;</span>, <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;**/*.integration.test.ts&#x27;</span>] } },
+      <span class="hljs-comment">// `define` doesn&#x27;t create a new server, so this project also shares it</span>
+      { <span class="hljs-attr">define</span>: { <span class="hljs-attr">__DEV__</span>: <span class="hljs-string">&#x27;true&#x27;</span> }, <span class="hljs-attr">test</span>: { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;dev&#x27;</span> } },
+      <span class="hljs-comment">// this project resolves its own Vite config because of `alias`</span>
+      { <span class="hljs-attr">test</span>: { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;aliased&#x27;</span>, <span class="hljs-attr">alias</span>: { <span class="hljs-attr">lib</span>: <span class="hljs-string">&#x27;./src/lib&#x27;</span> } } },
+    ],
+  },
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If every project repeats the same <code>plugins</code> entry, move it to the declaring config. The projects inherit it from the shared server and keep sharing:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> react <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitejs/plugin-react&#x27;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-comment">// hoisted: instantiated once on the shared server</span>
+  <span class="hljs-attr">plugins</span>: [<span class="hljs-title function_">react</span>()],
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [
+      { <span class="hljs-attr">test</span>: { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;unit&#x27;</span>, <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;**/*.unit.test.ts&#x27;</span>] } },
+      { <span class="hljs-attr">test</span>: { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;integration&#x27;</span>, <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;**/*.integration.test.ts&#x27;</span>] } },
+    ],
+  },
+})</code></pre></div>
+</div><p>To see the decision for every project, including why a project resolves its own server, run Vitest with <code>DEBUG=vitest:projects</code>. API consumers can check whether a project reuses the declaring config&#39;s server via <a href="../api/advanced/test-project.html#sharedviteserver"><code>project.sharedViteServer</code></a>.</p>
+<p>The option applies to every level: inline projects of a <a href="../guide/projects.html#nested-projects">nested projects container</a> share the container&#39;s server the same way.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>When projects share a server, the declaring config file is executed once instead of once per project. Plugins are instantiated once, and their <code>config</code> hooks cannot observe per-project test options. If a plugin needs to behave differently per project, disable this option or don&#39;t share the server for that project (for example, set <code>extends: false</code> or define the project in its own config file).</p>
+</div>
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

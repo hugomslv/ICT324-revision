@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-magic-numbers (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-magic-numbers <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-magic-numbers">version en ligne</a></div>
+<h1>no-magic-numbers</h1><p>&#39;Magic numbers&#39; are numbers that occur multiple times in code without an explicit meaning.
+They should preferably be replaced by named constants.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> now = <span class="hljs-title class_">Date</span>.<span class="hljs-title function_">now</span>(),
+    inOneHour = now + (<span class="hljs-number">60</span> * <span class="hljs-number">60</span> * <span class="hljs-number">1000</span>);</code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>The <code>no-magic-numbers</code> rule aims to make code more readable and refactoring easier by ensuring that special numbers
+are declared as constants to make their meaning explicit.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-magic-numbers: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> dutyFreePrice = <span class="hljs-number">100</span>,
+    finalPrice = dutyFreePrice + (dutyFreePrice * <span class="hljs-number">0.25</span>);</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-magic-numbers: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> data = [<span class="hljs-string">&#x27;foo&#x27;</span>, <span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-string">&#x27;baz&#x27;</span>];
+
+<span class="hljs-keyword">const</span> dataLast = data[<span class="hljs-number">2</span>];</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-magic-numbers: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">let</span> <span class="hljs-variable constant_">SECONDS</span>;
+
+<span class="hljs-variable constant_">SECONDS</span> = <span class="hljs-number">60</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-magic-numbers: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">TAX</span> = <span class="hljs-number">0.25</span>;
+
+<span class="hljs-keyword">const</span> dutyFreePrice = <span class="hljs-number">100</span>,
+    finalPrice = dutyFreePrice + (dutyFreePrice * <span class="hljs-variable constant_">TAX</span>);</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<h3 id="ignore"><a class="anchor" href="#ignore">#</a>ignore</h3>
+<p>An array of numbers to ignore. It&#39;s set to <code>[]</code> by default.
+If provided, it must be an <code>Array</code>.</p>
+<p>The array can contain values of <code>number</code> and <code>string</code> types.
+If it&#39;s a string, the text must be parsed as <code>bigint</code> literal (e.g., <code>&quot;100n&quot;</code>).</p>
+<p>Examples of <strong>correct</strong> code for the sample <code>{ &quot;ignore&quot;: [1] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignore&quot;: [1] }]*/</span>
+
+<span class="hljs-keyword">const</span> data = [<span class="hljs-string">&#x27;foo&#x27;</span>, <span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-string">&#x27;baz&#x27;</span>];
+<span class="hljs-keyword">const</span> dataLast = data.<span class="hljs-property">length</span> &amp;&amp; data[data.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>];</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the sample <code>{ &quot;ignore&quot;: [&quot;1n&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignore&quot;: [&quot;1n&quot;] }]*/</span>
+
+<span class="hljs-title function_">foo</span>(<span class="hljs-number">1n</span>);</code></pre></div>
+</div><h3 id="ignorearrayindexes"><a class="anchor" href="#ignorearrayindexes">#</a>ignoreArrayIndexes</h3>
+<p>A boolean to specify if numbers used in the context of array indexes (e.g., <code>data[2]</code>) are considered okay. <code>false</code> by default.</p>
+<p>This option allows only valid array indexes: numbers that will be coerced to one of <code>&quot;0&quot;</code>, <code>&quot;1&quot;</code>, <code>&quot;2&quot;</code> ... <code>&quot;4294967294&quot;</code>.</p>
+<p>Arrays are objects, so they can have property names such as <code>&quot;-1&quot;</code> or <code>&quot;2.5&quot;</code>. However, those are just &quot;normal&quot; object properties that don&#39;t represent array elements. They don&#39;t influence the array&#39;s <code>length</code>, and they are ignored by array methods like <code>.map</code> or <code>.forEach</code>.</p>
+<p>Additionally, since the maximum <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/length">array length</a> is 2<sup>32</sup> - 1, all values above 2<sup>32</sup> - 2 also represent just normal property names and are thus not considered to be array indexes.</p>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;ignoreArrayIndexes&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignoreArrayIndexes&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> item = data[<span class="hljs-number">2</span>];
+
+data[<span class="hljs-number">100</span>] = a;
+
+<span class="hljs-title function_">f</span>(data[<span class="hljs-number">0</span>]);
+
+a = data[-<span class="hljs-number">0</span>]; <span class="hljs-comment">// same as data[0], -0 will be coerced to &quot;0&quot;</span>
+a = data[+<span class="hljs-number">1</span>]; <span class="hljs-comment">// same as data[1], +1 will be coerced to &quot;1&quot;</span>
+
+a = data[<span class="hljs-number">0xAB</span>];
+
+a = data[<span class="hljs-number">5.6e1</span>];
+
+a = data[<span class="hljs-number">10n</span>]; <span class="hljs-comment">// same as data[10], 10n will be coerced to &quot;10&quot;</span>
+
+a = data[<span class="hljs-number">4294967294</span>]; <span class="hljs-comment">// max array index</span></code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;ignoreArrayIndexes&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignoreArrayIndexes&quot;: true }]*/</span>
+
+<span class="hljs-title function_">f</span>(<span class="hljs-number">2</span>); <span class="hljs-comment">// not used as array index</span>
+
+a = data[-<span class="hljs-number">1</span>];
+
+a = data[<span class="hljs-number">2.5</span>];
+
+a = data[<span class="hljs-number">5.67e1</span>];
+
+a = data[-<span class="hljs-number">10n</span>];
+
+a = data[<span class="hljs-number">4294967295</span>]; <span class="hljs-comment">// above the max array index</span>
+
+a = data[<span class="hljs-number">1e500</span>]; <span class="hljs-comment">// same as data[&quot;Infinity&quot;]</span></code></pre></div>
+</div><h3 id="ignoredefaultvalues"><a class="anchor" href="#ignoredefaultvalues">#</a>ignoreDefaultValues</h3>
+<p>A boolean to specify if numbers used in default value assignments are considered okay. <code>false</code> by default.</p>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;ignoreDefaultValues&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignoreDefaultValues&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> { tax = <span class="hljs-number">0.25</span> } = accountancy;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">mapParallel</span>(<span class="hljs-params">concurrency = <span class="hljs-number">3</span></span>) { <span class="hljs-comment">/***/</span> }</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignoreDefaultValues&quot;: true }]*/</span>
+
+<span class="hljs-keyword">let</span> head;
+[head = <span class="hljs-number">100</span>] = []</code></pre></div>
+</div><h3 id="ignoreclassfieldinitialvalues"><a class="anchor" href="#ignoreclassfieldinitialvalues">#</a>ignoreClassFieldInitialValues</h3>
+<p>A boolean to specify if numbers used as initial values of class fields are considered okay. <code>false</code> by default.</p>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;ignoreClassFieldInitialValues&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignoreClassFieldInitialValues&quot;: true }]*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+    foo = <span class="hljs-number">2</span>;
+    bar = -<span class="hljs-number">3</span>;
+    tux = +<span class="hljs-number">1</span>;
+    #baz = <span class="hljs-number">4</span>;
+    <span class="hljs-keyword">static</span> qux = <span class="hljs-number">5</span>;
+}</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;ignoreClassFieldInitialValues&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignoreClassFieldInitialValues&quot;: true }]*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+    foo = <span class="hljs-number">2</span> + <span class="hljs-number">3</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">D</span> {
+    <span class="hljs-number">2</span>;
+}</code></pre></div>
+</div><h3 id="enforceconst"><a class="anchor" href="#enforceconst">#</a>enforceConst</h3>
+<p>A boolean to specify if we should check for the const keyword in variable declaration of numbers. <code>false</code> by default.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;enforceConst&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;enforceConst&quot;: true }]*/</span>
+
+<span class="hljs-keyword">let</span> <span class="hljs-variable constant_">TAX</span> = <span class="hljs-number">0.25</span>;
+
+<span class="hljs-keyword">let</span> dutyFreePrice = <span class="hljs-number">100</span>,
+    finalPrice = dutyFreePrice + (dutyFreePrice * <span class="hljs-variable constant_">TAX</span>);</code></pre></div>
+</div><h3 id="detectobjects"><a class="anchor" href="#detectobjects">#</a>detectObjects</h3>
+<p>A boolean to specify if we should detect numbers when setting object properties for example. <code>false</code> by default.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;detectObjects&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;detectObjects&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> magic = {
+  <span class="hljs-attr">tax</span>: <span class="hljs-number">0.25</span>
+};
+
+<span class="hljs-keyword">const</span> dutyFreePrice = <span class="hljs-number">100</span>,
+    finalPrice = dutyFreePrice + (dutyFreePrice * magic.<span class="hljs-property">tax</span>);</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;detectObjects&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;detectObjects&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">TAX</span> = <span class="hljs-number">0.25</span>;
+
+<span class="hljs-keyword">const</span> magic = {
+  <span class="hljs-attr">tax</span>: <span class="hljs-variable constant_">TAX</span>
+};
+
+<span class="hljs-keyword">const</span> dutyFreePrice = <span class="hljs-number">100</span>,
+    finalPrice = dutyFreePrice + (dutyFreePrice * magic.<span class="hljs-property">tax</span>);</code></pre></div>
+</div><h3 id="ignoreenums-typescript-only"><a class="anchor" href="#ignoreenums-typescript-only">#</a>ignoreEnums (TypeScript only)</h3>
+<p>Whether enums used in TypeScript are considered okay. <code>false</code> by default.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;ignoreEnums&quot;: false }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignoreEnums&quot;: false }]*/</span>
+
+<span class="hljs-keyword">enum</span> foo {
+  <span class="hljs-variable constant_">SECOND</span> = <span class="hljs-number">1000</span>,
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;ignoreEnums&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignoreEnums&quot;: true }]*/</span>
+
+<span class="hljs-keyword">enum</span> foo {
+  <span class="hljs-variable constant_">SECOND</span> = <span class="hljs-number">1000</span>,
+}</code></pre></div>
+</div><h3 id="ignorenumericliteraltypes-typescript-only"><a class="anchor" href="#ignorenumericliteraltypes-typescript-only">#</a>ignoreNumericLiteralTypes (TypeScript only)</h3>
+<p>Whether numbers used in TypeScript numeric literal types are considered okay. <code>false</code> by default.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;ignoreNumericLiteralTypes&quot;: false }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignoreNumericLiteralTypes&quot;: false }]*/</span>
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Foo</span> = <span class="hljs-number">1</span> | <span class="hljs-number">2</span> | <span class="hljs-number">3</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;ignoreNumericLiteralTypes&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignoreNumericLiteralTypes&quot;: true }]*/</span>
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Foo</span> = <span class="hljs-number">1</span> | <span class="hljs-number">2</span> | <span class="hljs-number">3</span>;</code></pre></div>
+</div><h3 id="ignorereadonlyclassproperties-typescript-only"><a class="anchor" href="#ignorereadonlyclassproperties-typescript-only">#</a>ignoreReadonlyClassProperties (TypeScript only)</h3>
+<p>Whether numbers used in TypeScript readonly class properties are considered okay. <code>false</code> by default.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;ignoreReadonlyClassProperties&quot;: false }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignoreReadonlyClassProperties&quot;: false }]*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> {
+  <span class="hljs-keyword">readonly</span> A = <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">readonly</span> B = <span class="hljs-number">2</span>;
+  <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">readonly</span> C = <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">static</span> <span class="hljs-keyword">readonly</span> D = <span class="hljs-number">1</span>;
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;ignoreReadonlyClassProperties&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignoreReadonlyClassProperties&quot;: true }]*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> {
+  <span class="hljs-keyword">readonly</span> A = <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">readonly</span> B = <span class="hljs-number">2</span>;
+  <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">readonly</span> C = <span class="hljs-number">1</span>;
+  <span class="hljs-keyword">static</span> <span class="hljs-keyword">readonly</span> D = <span class="hljs-number">1</span>;
+}</code></pre></div>
+</div><h3 id="ignoretypeindexes-typescript-only"><a class="anchor" href="#ignoretypeindexes-typescript-only">#</a>ignoreTypeIndexes (TypeScript only)</h3>
+<p>Whether numbers used to index types are okay. <code>false</code> by default.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;ignoreTypeIndexes&quot;: false }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignoreTypeIndexes&quot;: false }]*/</span>
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Foo</span> = <span class="hljs-title class_">Bar</span>[<span class="hljs-number">0</span>];
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Baz</span> = <span class="hljs-title class_">Parameters</span>&lt;<span class="hljs-title class_">Foo</span>&gt;[<span class="hljs-number">2</span>];</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;ignoreTypeIndexes&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-magic-numbers: [&quot;error&quot;, { &quot;ignoreTypeIndexes&quot;: true }]*/</span>
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Foo</span> = <span class="hljs-title class_">Bar</span>[<span class="hljs-number">0</span>];
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Baz</span> = <span class="hljs-title class_">Parameters</span>&lt;<span class="hljs-title class_">Foo</span>&gt;[<span class="hljs-number">2</span>];</code></pre></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#ignore">ignore</a><a class="toc-3" href="#ignorearrayindexes">ignoreArrayIndexes</a><a class="toc-3" href="#ignoredefaultvalues">ignoreDefaultValues</a><a class="toc-3" href="#ignoreclassfieldinitialvalues">ignoreClassFieldInitialValues</a><a class="toc-3" href="#enforceconst">enforceConst</a><a class="toc-3" href="#detectobjects">detectObjects</a><a class="toc-3" href="#ignoreenums-typescript-only">ignoreEnums (TypeScript only)</a><a class="toc-3" href="#ignorenumericliteraltypes-typescript-only">ignoreNumericLiteralTypes (TypeScript only)</a><a class="toc-3" href="#ignorereadonlyclassproperties-typescript-only">ignoreReadonlyClassProperties (TypeScript only)</a><a class="toc-3" href="#ignoretypeindexes-typescript-only">ignoreTypeIndexes (TypeScript only)</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

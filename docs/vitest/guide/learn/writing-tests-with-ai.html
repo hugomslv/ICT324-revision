@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Writing Tests with AI | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/learn/writing-tests-with-ai  <a class="ext small" href="https://vitest.dev/guide/learn/writing-tests-with-ai">version en ligne</a></div>
+<h1 id="writing-tests-with-ai"><a class="anchor" href="#writing-tests-with-ai">#</a>Writing Tests with AI</h1>
+<p>AI coding assistants can help you write tests faster, but the quality of the output depends heavily on what you put in. A vague prompt produces vague tests. A specific prompt with the right context produces tests that are actually worth keeping.</p>
+<p>This page covers how to get good test code from AI tools, and what to watch for when reviewing the results.</p>
+<h2 id="providing-context"><a class="anchor" href="#providing-context">#</a>Providing Context</h2>
+<p>The single most important thing you can do is give the AI enough context to understand what it&#39;s testing.</p>
+<p>Start with the source file itself. The AI needs to see the actual implementation, not just a description of what the function does. Include the full file, or at least the function you want tested along with its imports and types.</p>
+<p>Share existing test files from the same project. This helps the AI match your conventions: whether you use <code>test</code> or <code>it</code>, how you structure <code>describe</code> blocks, whether you prefer <code>test.extend</code> fixtures or <code>beforeEach</code>, and how you name your tests. AI tools are good at pattern matching, but they need patterns to match against.</p>
+<p>Include your Vitest config, especially if you&#39;ve enabled <a href="../../config/globals.html"><code>globals</code></a>, set a custom <a href="../../config/environment.html"><code>environment</code></a>, or configured <a href="../../config/setupfiles.html"><code>setupFiles</code></a>. Without this context, the AI might generate unnecessary imports, use the wrong test environment, or miss setup that your tests depend on.</p>
+<p>If the code under test has dependencies that need mocking, share those files too (or at least their type signatures). The AI can&#39;t write a useful mock for a database client it&#39;s never seen.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If your project has an <code>AGENTS.md</code> or similar file with coding conventions, include that as well. Many AI tools pick up on these automatically and will follow the rules defined there.</p>
+</div><h2 id="writing-good-prompts"><a class="anchor" href="#writing-good-prompts">#</a>Writing Good Prompts</h2>
+<p>Specific prompts produce better tests than generic ones. Compare these two:</p>
+<p><strong>Vague:</strong> &quot;Write tests for <code>userService.js</code>&quot;</p>
+<p>This will produce tests, but they&#39;ll likely be shallow: one happy-path test per function, minimal edge case coverage, and generic test names.</p>
+<p><strong>Better:</strong> &quot;Write tests for the <code>createUser</code> function in <code>userService.js</code>. Cover validation errors (missing name, invalid email format, duplicate email), the successful creation path, and verify that the password is hashed before being stored.&quot;</p>
+<p>This tells the AI exactly which function to focus on, which scenarios matter, and what behavior to verify. The output will be more thorough and more relevant.</p>
+<h3 id="tips-for-better-prompts"><a class="anchor" href="#tips-for-better-prompts">#</a>Tips for Better Prompts</h3>
+<ul>
+<li>Ask for edge cases explicitly. &quot;Include tests for empty inputs, boundary values, and error handling&quot; produces more comprehensive coverage than leaving it to the AI&#39;s judgment. Without this nudge, most tools will generate a handful of happy-path tests and stop there.</li>
+<li>Mention specific Vitest features if you want them used. &quot;Use <code>toMatchInlineSnapshot</code> for the error messages&quot; or &quot;use <code>test.for</code> for the different currency formats&quot; guides the AI toward the right tools instead of letting it fall back to repetitive copy-paste tests.</li>
+<li>If you&#39;re testing async code, say so. &quot;The function returns a Promise&quot; or &quot;this calls an external API&quot; helps the AI use <code>async</code>/<code>await</code> and appropriate matchers like <code>.resolves</code> and <code>.rejects</code>.</li>
+<li>Tell the AI what <em>not</em> to do. &quot;Test against the real implementation, don&#39;t mock any modules&quot; or &quot;don&#39;t use snapshot tests&quot; prevents common defaults you don&#39;t want. AI tools tend to over-mock, and an explicit constraint prevents that.</li>
+<li>Describe the test structure you want. &quot;Group tests by method using <code>describe</code> blocks&quot; or &quot;use <code>test.extend</code> fixtures for the database connection instead of <code>beforeEach</code>&quot; saves you from restructuring the output afterwards.</li>
+<li>Reference existing tests when asking for additions. &quot;Follow the same style as the tests in <code>auth.test.js</code>&quot; is more effective than describing the style from scratch. The AI will pick up on naming conventions, assertion patterns, and import styles from the example.</li>
+<li>If the first result isn&#39;t right, iterate. &quot;These tests are too focused on implementation details. Rewrite them to only assert on the return values and thrown errors&quot; is a valid follow-up. Refining through conversation often produces better results than trying to write the perfect prompt upfront.</li>
+</ul>
+<h2 id="reviewing-ai-generated-tests"><a class="anchor" href="#reviewing-ai-generated-tests">#</a>Reviewing AI-Generated Tests</h2>
+<p>AI-generated tests can look convincing at first glance but still have problems. Here&#39;s what to check before committing them.</p>
+<h3 id="do-the-tests-actually-assert-something-meaningful"><a class="anchor" href="#do-the-tests-actually-assert-something-meaningful">#</a>Do the tests actually assert something meaningful?</h3>
+<p>Watch for tests that call a function but only check that it doesn&#39;t throw, or tests that assert on the mock itself rather than the behavior. A test like this gives false confidence:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;creates a user&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> user = <span class="hljs-title function_">createUser</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>, <span class="hljs-string">&#x27;alice@example.com&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toBeDefined</span>() <span class="hljs-comment">// this passes for almost anything</span>
+})</code></pre></div>
+<p>A better assertion checks the actual properties:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;creates a user with the correct fields&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> user = <span class="hljs-title function_">createUser</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>, <span class="hljs-string">&#x27;alice@example.com&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toMatchObject</span>({
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span>,
+    <span class="hljs-attr">email</span>: <span class="hljs-string">&#x27;alice@example.com&#x27;</span>,
+  })
+  <span class="hljs-title function_">expect</span>(user.<span class="hljs-property">id</span>).<span class="hljs-title function_">toBeTypeOf</span>(<span class="hljs-string">&#x27;string&#x27;</span>)
+})</code></pre></div>
+<h3 id="are-they-testing-behavior-or-implementation"><a class="anchor" href="#are-they-testing-behavior-or-implementation">#</a>Are they testing behavior or implementation?</h3>
+<p>AI tends to over-mock. If you see a test that mocks every dependency and then asserts that specific internal methods were called in a specific order, that&#39;s testing implementation details. These tests break every time you refactor, even if the behavior stays the same.</p>
+<p>Ask yourself: if someone changed the internals but the function still returned the correct result, would this test break? If yes, it&#39;s probably too coupled to the implementation. See <a href="testing-in-practice.html#what-to-test">Testing in Practice</a> for more on this distinction.</p>
+<h3 id="do-the-tests-actually-run"><a class="anchor" href="#do-the-tests-actually-run">#</a>Do the tests actually run?</h3>
+<p>Always run the tests before committing. AI-generated tests can have import errors, reference functions that don&#39;t exist, or use APIs incorrectly. A test that looks correct in a chat window might fail immediately when you actually execute it:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest run src/userService.test.js</code></pre></div>
+<h3 id="are-there-real-edge-cases"><a class="anchor" href="#are-there-real-edge-cases">#</a>Are there real edge cases?</h3>
+<p>AI tools tend to generate happy-path tests and skip the hard cases. After reviewing the generated tests, ask yourself: what happens with empty input? What about <code>null</code> or <code>undefined</code>? What if the network request fails? What if the list is empty?</p>
+<p>If these scenarios aren&#39;t covered, ask the AI to add them, or write them yourself.</p>
+<h2 id="iterating-on-the-output"><a class="anchor" href="#iterating-on-the-output">#</a>Iterating on the Output</h2>
+<p>Treat AI-generated tests as a first draft, not a finished product. A good workflow looks like:</p>
+<ol>
+<li><strong>Generate</strong> the initial tests with a specific prompt and good context</li>
+<li><strong>Run</strong> them immediately to catch errors</li>
+<li><strong>Review</strong> each test for the issues described above</li>
+<li><strong>Ask for revisions</strong> if entire sections need improvement (&quot;these tests mock too much, rewrite them to test the actual integration with the database module&quot;)</li>
+<li><strong>Edit manually</strong> for small fixes rather than re-prompting for every detail</li>
+</ol>
+<p>Over time, as the AI sees more of your codebase and test patterns, its output will improve. The earlier tests in your project set the pattern for everything that follows, so it&#39;s worth getting those right.</p>
+<h2 id="common-pitfalls"><a class="anchor" href="#common-pitfalls">#</a>Common Pitfalls</h2>
+<h3 id="wrong-apis"><a class="anchor" href="#wrong-apis">#</a>Wrong APIs</h3>
+<p>The most frequent issue with AI-generated Vitest tests is using the wrong API surface. AI models are trained on a lot of Jest code, so they sometimes generate <code>jest.fn()</code> instead of <code>vi.fn()</code>, or <code>jest.mock</code> instead of <code>vi.mock</code>. These will fail immediately.</p>
+<p>A related problem is imports: if your config has <code>globals: true</code>, the AI might still add <code>import { test, expect } from &#39;vitest&#39;</code> (harmless but unnecessary), or the reverse, generating tests without imports when globals aren&#39;t enabled. If you keep seeing Jest APIs, point the AI to the <a href="../../api/vi.html">Vitest API reference</a> or include it in the context.</p>
+<h3 id="mock-cleanup"><a class="anchor" href="#mock-cleanup">#</a>Mock Cleanup</h3>
+<p>AI-generated tests often set up spies with <code>vi.spyOn</code> or replace modules with <code>vi.mock</code> but never restore them. If your config doesn&#39;t have <a href="../../config/restoremocks.html"><code>restoreMocks: true</code></a>, these mocks leak between tests and cause confusing failures. The easiest fix is enabling that config option globally.</p>
+<p>On a related note, AI tools tend to mock modules using string paths (<code>vi.mock(&#39;./module.js&#39;)</code>) when the <code>import()</code> form (<code>vi.mock(import(&#39;./module.js&#39;))</code>) is preferable for type safety and automatic refactoring. See <a href="mock-functions.html#mocking-modules">Mock Functions</a> for why this matters.</p>
+<h3 id="verbose-test-names"><a class="anchor" href="#verbose-test-names">#</a>Verbose Test Names</h3>
+<p>AI tends to produce names like &quot;should correctly return the formatted price string when given a valid positive number and a supported currency code.&quot; These are hard to scan when you have dozens of tests. Shorter names that describe the behavior work better: &quot;formats USD prices&quot;, &quot;throws for negative amounts&quot;, &quot;returns empty array when no items match.&quot;</p>
+<h3 id="watch-mode"><a class="anchor" href="#watch-mode">#</a>Watch Mode</h3>
+<p>Vitest runs in watch mode by default, waiting for file changes and re-running tests interactively. Vitest tries to detect CI and non-interactive or agent environments and disable watch mode automatically, but this detection can be fragile.</p>
+<p>When telling an AI agent to run tests, always use <code>vitest run</code> or <code>vitest --no-watch</code> to ensure the process exits after the tests finish.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#providing-context">Providing Context</a><a class="toc-2" href="#writing-good-prompts">Writing Good Prompts</a><a class="toc-3" href="#tips-for-better-prompts">Tips for Better Prompts</a><a class="toc-2" href="#reviewing-ai-generated-tests">Reviewing AI-Generated Tests</a><a class="toc-3" href="#do-the-tests-actually-assert-something-meaningful">Do the tests actually assert something meaningful?</a><a class="toc-3" href="#are-they-testing-behavior-or-implementation">Are they testing behavior or implementation?</a><a class="toc-3" href="#do-the-tests-actually-run">Do the tests actually run?</a><a class="toc-3" href="#are-there-real-edge-cases">Are there real edge cases?</a><a class="toc-2" href="#iterating-on-the-output">Iterating on the Output</a><a class="toc-2" href="#common-pitfalls">Common Pitfalls</a><a class="toc-3" href="#wrong-apis">Wrong APIs</a><a class="toc-3" href="#mock-cleanup">Mock Cleanup</a><a class="toc-3" href="#verbose-test-names">Verbose Test Names</a><a class="toc-3" href="#watch-mode">Watch Mode</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

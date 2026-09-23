@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>func-style (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/func-style <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/func-style">version en ligne</a></div>
+<h1>func-style</h1><p>There are two ways of defining functions in JavaScript: <code>function</code> declarations and function expressions assigned to variables. Function declarations are statements that begin with the <code>function</code> keyword. Function expressions can either be arrow functions or use the <code>function</code> keyword with an optional name. Here are some examples:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// function declaration</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomething</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// arrow function expression assigned to a variable</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">doSomethingElse</span> = (<span class="hljs-params"></span>) =&gt; {
+    <span class="hljs-comment">// ...</span>
+};
+
+<span class="hljs-comment">// function expression assigned to a variable</span>
+<span class="hljs-keyword">const</span> doSomethingAgain = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};</code></pre></div>
+<p>The primary difference between <code>function</code> declarations and function expressions is that declarations are <em>hoisted</em> to the top of the scope in which they are defined, which allows you to write code that uses the function before its declaration. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">doSomething</span>(); <span class="hljs-comment">// ok</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomething</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+<p>For function expressions, you must define the function before it is used, otherwise it causes an error. Example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">doSomething</span>();  <span class="hljs-comment">// error!</span>
+
+<span class="hljs-keyword">const</span> doSomething = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};</code></pre></div>
+<p>In this case, <code>doSomething</code> is <code>undefined</code> at the time of invocation and so causes a runtime error.</p>
+<p>Due to these different behaviors, it is common to have guidelines as to which style of function should be used. There is really no correct or incorrect choice here, it is just a preference.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule enforces a particular type of function style, either <code>function</code> declarations or expressions assigned to variables. You can specify which you prefer in the configuration.</p>
+<p>Note: This rule does not apply to <em>all</em> functions. For example, a callback function passed as an argument to another function is not considered by this rule.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has a string option:</p>
+<ul>
+<li><code>&quot;expression&quot;</code> (default) requires the use of function expressions instead of function declarations</li>
+<li><code>&quot;declaration&quot;</code> requires the use of function declarations instead of function expressions</li>
+</ul>
+<p>This rule has an object option for two exceptions:</p>
+<ul>
+<li><code>&quot;allowArrowFunctions&quot;</code>: <code>true</code> (default <code>false</code>) allows the use of arrow functions. This option applies only when the string option is set to <code>&quot;declaration&quot;</code> (arrow functions are always allowed when the string option is set to <code>&quot;expression&quot;</code>, regardless of this option)</li>
+<li><code>&quot;allowTypeAnnotation&quot;</code>: <code>true</code> (default <code>false</code>) allows the use of function expressions and arrow functions when the variable declaration has type annotation, regardless of the <code>allowArrowFunctions</code> option. This option applies only when the string option is set to <code>&quot;declaration&quot;</code>. (TypeScript only)</li>
+<li><code>&quot;overrides&quot;</code>:<ul>
+<li><code>&quot;namedExports&quot;: &quot;expression&quot; | &quot;declaration&quot; | &quot;ignore&quot;</code>: used to override function styles in named exports<ul>
+<li><code>&quot;expression&quot;</code>: like string option</li>
+<li><code>&quot;declaration&quot;</code>: like string option</li>
+<li><code>&quot;ignore&quot;</code>: either style is acceptable</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="expression"><a class="anchor" href="#expression">#</a>expression</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the default <code>&quot;expression&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-style: [&quot;error&quot;, &quot;expression&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the default <code>&quot;expression&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-style: [&quot;error&quot;, &quot;expression&quot;]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">foo1</span> = (<span class="hljs-params"></span>) =&gt; {};
+
+<span class="hljs-comment">// allowed as allowArrowFunctions : false is applied only for declaration</span></code></pre></div>
+</div><p>Overloaded function declarations are not reported as errors by this rule. These are functions that have multiple declarations with the same name but different parameter types or return types (commonly used in TypeScript to provide type information for different ways of calling the same function).</p>
+<p>Examples of <strong>correct</strong> TypeScript code for this rule with the default <code>&quot;expression&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint func-style: [&quot;error&quot;, &quot;expression&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">process</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">string</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">process</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">number</span></span>): <span class="hljs-built_in">number</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">process</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>) {
+    <span class="hljs-keyword">return</span> value;
+}</code></pre></div>
+</div><h3 id="declaration"><a class="anchor" href="#declaration">#</a>declaration</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;declaration&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-style: [&quot;error&quot;, &quot;declaration&quot;]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">foo1</span> = (<span class="hljs-params"></span>) =&gt; {};</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;declaration&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-style: [&quot;error&quot;, &quot;declaration&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// Methods (functions assigned to objects) are not checked by this rule</span>
+<span class="hljs-title class_">SomeObject</span>.<span class="hljs-property">foo</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};</code></pre></div>
+</div><h3 id="allowarrowfunctions"><a class="anchor" href="#allowarrowfunctions">#</a>allowArrowFunctions</h3>
+<p>Examples of additional <strong>correct</strong> code for this rule with the <code>&quot;declaration&quot;, { &quot;allowArrowFunctions&quot;: true }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-style: [&quot;error&quot;, &quot;declaration&quot;, { &quot;allowArrowFunctions&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">foo</span> = (<span class="hljs-params"></span>) =&gt; {};</code></pre></div>
+</div><h3 id="allowtypeannotation"><a class="anchor" href="#allowtypeannotation">#</a>allowTypeAnnotation</h3>
+<p>Examples of <strong>incorrect</strong> TypeScript code for this rule with the <code>&quot;declaration&quot;, { &quot;allowTypeAnnotation&quot;: true }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint func-style: [&quot;error&quot;, &quot;declaration&quot;, { &quot;allowTypeAnnotation&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">void</span> {};</code></pre></div>
+</div><p>Examples of <strong>correct</strong> TypeScript code for this rule with the <code>&quot;declaration&quot;, { &quot;allowTypeAnnotation&quot;: true }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint func-style: [&quot;error&quot;, &quot;declaration&quot;, { &quot;allowTypeAnnotation&quot;: true }]*/</span>
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Fn</span> = <span class="hljs-function">() =&gt;</span> <span class="hljs-literal">undefined</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">foo</span>: <span class="hljs-title class_">Fn</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">bar</span>: <span class="hljs-title class_">Fn</span> = <span class="hljs-function">() =&gt;</span> {};</code></pre></div>
+</div><h3 id="overrides"><a class="anchor" href="#overrides">#</a>overrides</h3>
+<h4 id="namedexports"><a class="anchor" href="#namedexports">#</a>namedExports</h4>
+<h5 id="expression-2"><a class="anchor" href="#expression-2">#</a>expression</h5>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;declaration&quot;</code> and <code>{&quot;overrides&quot;: { &quot;namedExports&quot;: &quot;expression&quot; }}</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-style: [&quot;error&quot;, &quot;declaration&quot;, { &quot;overrides&quot;: { &quot;namedExports&quot;: &quot;expression&quot; } }]*/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;declaration&quot;</code> and <code>{&quot;overrides&quot;: { &quot;namedExports&quot;: &quot;expression&quot; }}</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-style: [&quot;error&quot;, &quot;declaration&quot;, { &quot;overrides&quot;: { &quot;namedExports&quot;: &quot;expression&quot; } }]*/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">bar</span> = (<span class="hljs-params"></span>) =&gt; {};</code></pre></div>
+</div><h5 id="declaration-2"><a class="anchor" href="#declaration-2">#</a>declaration</h5>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;expression&quot;</code> and <code>{&quot;overrides&quot;: { &quot;namedExports&quot;: &quot;declaration&quot; }}</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-style: [&quot;error&quot;, &quot;expression&quot;, { &quot;overrides&quot;: { &quot;namedExports&quot;: &quot;declaration&quot; } }]*/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">bar</span> = (<span class="hljs-params"></span>) =&gt; {};</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;expression&quot;</code> and <code>{&quot;overrides&quot;: { &quot;namedExports&quot;: &quot;declaration&quot; }}</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-style: [&quot;error&quot;, &quot;expression&quot;, { &quot;overrides&quot;: { &quot;namedExports&quot;: &quot;declaration&quot; } }]*/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;expression&quot;</code> and <code>{ &quot;allowTypeAnnotation&quot;: true, &quot;overrides&quot;: { &quot;namedExports&quot;: &quot;declaration&quot; }}</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint func-style: [&quot;error&quot;, &quot;expression&quot;, { &quot;allowTypeAnnotation&quot;: true, &quot;overrides&quot;: { &quot;namedExports&quot;: &quot;declaration&quot; } }]*/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">foo</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">void</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {}</code></pre></div>
+</div><h5 id="ignore"><a class="anchor" href="#ignore">#</a>ignore</h5>
+<p>Examples of <strong>correct</strong> code for this rule with the <code>{&quot;overrides&quot;: { &quot;namedExports&quot;: &quot;ignore&quot; }}</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-style: [&quot;error&quot;, &quot;expression&quot;, { &quot;overrides&quot;: { &quot;namedExports&quot;: &quot;ignore&quot; } }]*/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">bar</span> = (<span class="hljs-params"></span>) =&gt; {};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">baz</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you want to allow developers to each decide how they want to write functions on their own, then you can disable this rule.</p>
+<h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://www.adequatelygood.com/JavaScript-Scoping-and-Hoisting.html">https://www.adequatelygood.com/JavaScript-Scoping-and-Hoisting.html</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#expression">expression</a><a class="toc-3" href="#declaration">declaration</a><a class="toc-3" href="#allowarrowfunctions">allowArrowFunctions</a><a class="toc-3" href="#allowtypeannotation">allowTypeAnnotation</a><a class="toc-3" href="#overrides">overrides</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open Telemetry Support (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/open-telemetry  <a class="ext small" href="https://vitest.dev/guide/open-telemetry">version en ligne</a></div>
+<h1 id="open-telemetry-support"><a class="anchor" href="#open-telemetry-support">#</a>Open Telemetry Support <Experimental /></h1>
+<div class="box box-tip"><div class="box-title">💡 Astuce : FEEDBACK</div><p>Please, leave feedback regarding this feature in a <a href="https://github.com/vitest-dev/vitest/discussions/9222">GitHub Discussion</a>.</p>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce : Example Project</div><p><a href="https://github.com/vitest-dev/vitest/tree/main/examples/opentelemetry">GitHub</a></p>
+</div><p><a href="https://opentelemetry.io/">OpenTelemetry</a> traces can be a useful tool to debug the performance and behavior of your application inside tests.</p>
+<p>If enabled, Vitest integration generates spans that are scoped to your test&#39;s worker.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>OpenTelemetry initialization increases the startup time of every test unless Vitest runs without <a href="../config/isolate.html">isolation</a>. You can see it as the <code>vitest.runtime.traces</code> span inside <code>vitest.worker.start</code>.</p>
+</div><p>To start using OpenTelemetry in Vitest, specify an SDK module path via <a href="../config/experimental.html#experimental-opentelemetry"><code>experimental.openTelemetry.sdkPath</code></a> and set <code>experimental.openTelemetry.enabled</code> to <code>true</code>. Vitest will automatically instrument the whole process and each individual test worker.</p>
+<p>Make sure to export the SDK as a default export, so that Vitest can flush the network requests before the process is closed. Note that Vitest doesn&#39;t automatically call <code>start</code>.</p>
+<h2 id="quickstart"><a class="anchor" href="#quickstart">#</a>Quickstart</h2>
+<p>Before previewing your application traces, install required packages and specify the path to your instrumentation file in the config.</p>
+<div class="code"><pre><code class="hljs lang-shell">npm i @opentelemetry/sdk-node @opentelemetry/auto-instrumentations-node @opentelemetry/exporter-trace-otlp-proto</code></pre></div>
+<div class="code-group"><div class="code"><div class="code-title">otel.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { getNodeAutoInstrumentations } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@opentelemetry/auto-instrumentations-node&#x27;</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">OTLPTraceExporter</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@opentelemetry/exporter-trace-otlp-proto&#x27;</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">NodeSDK</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@opentelemetry/sdk-node&#x27;</span>
+
+<span class="hljs-keyword">const</span> sdk = <span class="hljs-keyword">new</span> <span class="hljs-title class_">NodeSDK</span>({
+  <span class="hljs-attr">serviceName</span>: <span class="hljs-string">&#x27;vitest&#x27;</span>,
+  <span class="hljs-attr">traceExporter</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">OTLPTraceExporter</span>(),
+  <span class="hljs-attr">instrumentations</span>: [<span class="hljs-title function_">getNodeAutoInstrumentations</span>()],
+})
+
+sdk.<span class="hljs-title function_">start</span>()
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> sdk</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">experimental</span>: {
+      <span class="hljs-attr">openTelemetry</span>: {
+        <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">sdkPath</span>: <span class="hljs-string">&#x27;./otel.js&#x27;</span>,
+      },
+    },
+  },
+})</code></pre></div>
+</div><div class="box box-danger"><div class="box-title">🛑 Danger : FAKE TIMERS</div><p>If you are using fake timers, it is important to reset them before the test ends, otherwise traces might not be tracked properly.</p>
+</div><p>Vitest doesn&#39;t process the <code>sdkPath</code> module, so it is important that the SDK can be imported within your Node.js environment. It is ideal to use the <code>.js</code> extension for this file. Using another extension will slow down your tests and may require providing additional Node.js arguments.</p>
+<p>If you want to provide a TypeScript file, make sure to familiarize yourself with <a href="https://nodejs.org/api/typescript.html#type-stripping">TypeScript</a> page in the Node.js documentation.</p>
+<h2 id="custom-traces"><a class="anchor" href="#custom-traces">#</a>Custom Traces</h2>
+<p>You can use the OpenTelemetry API yourself to track certain operations in your code. Custom traces automatically inherit the Vitest OpenTelemetry context:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { trace } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@opentelemetry/api&#x27;</span>
+<span class="hljs-keyword">import</span> { test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { db } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./src/db&#x27;</span>
+
+<span class="hljs-keyword">const</span> tracer = trace.<span class="hljs-title function_">getTracer</span>(<span class="hljs-string">&#x27;vitest&#x27;</span>)
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;db connects properly&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// this is shown inside `vitest.test.runner.test.callback` span</span>
+  <span class="hljs-keyword">await</span> tracer.<span class="hljs-title function_">startActiveSpan</span>(<span class="hljs-string">&#x27;db.connect&#x27;</span>, <span class="hljs-function">() =&gt;</span> db.<span class="hljs-title function_">connect</span>())
+})</code></pre></div>
+<h2 id="browser-mode"><a class="anchor" href="#browser-mode">#</a>Browser Mode</h2>
+<p>When running tests in <a href="browser/index.html">browser mode</a>, Vitest propagates trace context between Node.js and the browser. Node.js side traces (test orchestration, browser driver communication) are available without additional configuration.</p>
+<p>To capture traces from the browser runtime, provide a browser-compatible SDK via <code>browserSdkPath</code>:</p>
+<div class="code"><pre><code class="hljs lang-shell">npm i @opentelemetry/sdk-trace-web @opentelemetry/exporter-trace-otlp-proto</code></pre></div>
+<div class="code-group"><div class="code"><div class="code-title">otel-browser.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> {
+  <span class="hljs-title class_">BatchSpanProcessor</span>,
+  <span class="hljs-title class_">WebTracerProvider</span>,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@opentelemetry/sdk-trace-web&#x27;</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">OTLPTraceExporter</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@opentelemetry/exporter-trace-otlp-proto&#x27;</span>
+
+<span class="hljs-keyword">const</span> provider = <span class="hljs-keyword">new</span> <span class="hljs-title class_">WebTracerProvider</span>({
+  <span class="hljs-attr">spanProcessors</span>: [
+    <span class="hljs-keyword">new</span> <span class="hljs-title class_">BatchSpanProcessor</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">OTLPTraceExporter</span>()),
+  ],
+})
+
+provider.<span class="hljs-title function_">register</span>()
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> provider</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">provider</span>: <span class="hljs-string">&#x27;playwright&#x27;</span>,
+      <span class="hljs-attr">instances</span>: [{ <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> }],
+    },
+    <span class="hljs-attr">experimental</span>: {
+      <span class="hljs-attr">openTelemetry</span>: {
+        <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">sdkPath</span>: <span class="hljs-string">&#x27;./otel.js&#x27;</span>,
+        <span class="hljs-attr">browserSdkPath</span>: <span class="hljs-string">&#x27;./otel-browser.js&#x27;</span>,
+      },
+    },
+  },
+})</code></pre></div>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention : ASYNC CONTEXT</div><p>Unlike Node.js, browsers do not have automatic async context propagation. Vitest handles this internally for test execution, but custom spans in deeply nested async code may not propagate context automatically.</p>
+</div><h2 id="view-traces"><a class="anchor" href="#view-traces">#</a>View Traces</h2>
+<p>To generate traces, run Vitest as usual. You can run Vitest in either watch mode or run mode. Vitest will call <code>sdk.shutdown()</code> manually after everything is finished to make sure traces are handled properly.</p>
+<p>You can view traces using any of the open source or commercial products that support OpenTelemetry API. If you did not use OpenTelemetry before, we recommend starting with <a href="https://www.jaegertracing.io/docs/2.11/getting-started/#all-in-one">Jaeger</a> because it is really easy to setup.</p>
+<span class="img-missing">[image : an example of open telemetry result in jaeger]</span><h2 id="opentelemetry-api"><a class="anchor" href="#opentelemetry-api">#</a><code>@opentelemetry/api</code></h2>
+<p>Vitest declares <code>@opentelemetry/api</code> as an optional peer dependency, which it uses internally to generate spans. When trace collection is not enabled, Vitest will not attempt to use this dependency.</p>
+<p>When configuring Vitest to use OpenTelemetry, you will typically install <code>@opentelemetry/sdk-node</code>, which includes <code>@opentelemetry/api</code> as a transitive dependency, thereby satisfying Vitest&#39;s peer dependency requirement. If you encounter an error indicating that <code>@opentelemetry/api</code> cannot be found, this typically means trace collection has not been enabled. If the error persists after proper configuration, you may need to install <code>@opentelemetry/api</code> explicitly.</p>
+<h2 id="inter-process-context-propagation"><a class="anchor" href="#inter-process-context-propagation">#</a>Inter-Process Context Propagation</h2>
+<p>Vitest supports automatic context propagation from parent processes via the <code>TRACEPARENT</code> and <code>TRACESTATE</code> environment variables as defined in the <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/context/env-carriers.md">OpenTelemetry specification</a>. This is particularly useful when running Vitest as part of a larger distributed tracing system (e.g., CI/CD pipelines with OpenTelemetry instrumentation).</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#quickstart">Quickstart</a><a class="toc-2" href="#custom-traces">Custom Traces</a><a class="toc-2" href="#browser-mode">Browser Mode</a><a class="toc-2" href="#view-traces">View Traces</a><a class="toc-2" href="#opentelemetry-api">@opentelemetry/api</a><a class="toc-2" href="#inter-process-context-propagation">Inter-Process Context Propagation</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

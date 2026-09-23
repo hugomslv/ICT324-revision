@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setup and Teardown | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/learn/setup-teardown  <a class="ext small" href="https://vitest.dev/guide/learn/setup-teardown">version en ligne</a></div>
+<h1 id="setup-and-teardown"><a class="anchor" href="#setup-and-teardown">#</a>Setup and Teardown</h1>
+<p>Often while writing tests, you need to do some work before tests run (initialize data, connect to a database, start a server) and clean up afterwards. Rather than duplicating this code in every test, Vitest provides lifecycle hooks that run automatically at the right time.</p>
+<h2 id="repeating-setup-for-each-test"><a class="anchor" href="#repeating-setup-for-each-test">#</a>Repeating Setup for Each Test</h2>
+<p>The most common hooks are <a href="../../api/hooks.html#beforeeach"><code>beforeEach</code></a> and <a href="../../api/hooks.html#aftereach"><code>afterEach</code></a>. As the names suggest, <code>beforeEach</code> runs before every test in the file, and <code>afterEach</code> runs after every test, even if the test fails. This makes them perfect for ensuring each test starts with a known state.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { afterEach, beforeEach, expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">let</span> items
+
+<span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> {
+  items = [<span class="hljs-string">&#x27;apple&#x27;</span>, <span class="hljs-string">&#x27;banana&#x27;</span>, <span class="hljs-string">&#x27;cherry&#x27;</span>]
+})
+
+<span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> {
+  items = []
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;items starts with 3 fruits&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(items).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">3</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;can remove an item&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  items.<span class="hljs-title function_">pop</span>()
+  <span class="hljs-title function_">expect</span>(items).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">2</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;can add an item&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  items.<span class="hljs-title function_">push</span>(<span class="hljs-string">&#x27;date&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(items).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">4</span>)
+  <span class="hljs-comment">// beforeEach reset the array to 3 items before this test ran,</span>
+  <span class="hljs-comment">// proving that mutations from the previous test do not leak.</span>
+})</code></pre></div>
+<p>Without these hooks, mutations like <code>pop</code> or <code>push</code> from earlier tests would affect subsequent ones, which is a classic source of flaky tests, while the hooks guarantee clean state for every test.</p>
+<h2 id="one-time-setup"><a class="anchor" href="#one-time-setup">#</a>One-Time Setup</h2>
+<p>Some setup is too expensive to repeat for every test. If you need to connect to a database, start a server, or load a large file, doing that before every test would slow your suite down dramatically. That&#39;s what <a href="../../api/hooks.html#beforeall"><code>beforeAll</code></a> and <a href="../../api/hooks.html#afterall"><code>afterAll</code></a> are for. They run once for the entire file:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { afterAll, beforeAll, expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">let</span> db
+
+<span class="hljs-title function_">beforeAll</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  db = <span class="hljs-keyword">await</span> <span class="hljs-title function_">connectToDatabase</span>()
+})
+
+<span class="hljs-title function_">afterAll</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">close</span>()
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;can query users&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> users = <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">query</span>(<span class="hljs-string">&#x27;SELECT * FROM users&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(users.<span class="hljs-property">length</span>).<span class="hljs-title function_">toBeGreaterThan</span>(<span class="hljs-number">0</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;can query products&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> products = <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">query</span>(<span class="hljs-string">&#x27;SELECT * FROM products&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(products.<span class="hljs-property">length</span>).<span class="hljs-title function_">toBeGreaterThan</span>(<span class="hljs-number">0</span>)
+})</code></pre></div>
+<p>The database connection is created once, shared across all tests, and then closed when the file finishes running.</p>
+<h2 id="scoping-with-describe"><a class="anchor" href="#scoping-with-describe">#</a>Scoping with <code>describe</code></h2>
+<p>Hooks defined inside a <code>describe</code> block only apply to the tests within that block. Top-level hooks apply to every test in the file. This lets you set up different state for different groups of tests:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { beforeEach, describe, expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;math operations&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">let</span> value
+
+  <span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> {
+    value = <span class="hljs-number">0</span>
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;can add&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    value += <span class="hljs-number">5</span>
+    <span class="hljs-title function_">expect</span>(value).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">5</span>)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;can subtract&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    value -= <span class="hljs-number">3</span>
+    <span class="hljs-title function_">expect</span>(value).<span class="hljs-title function_">toBe</span>(-<span class="hljs-number">3</span>) <span class="hljs-comment">// value was reset to 0 by beforeEach</span>
+  })
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;string operations&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">let</span> text
+
+  <span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> {
+    text = <span class="hljs-string">&#x27;hello&#x27;</span>
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;can uppercase&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(text.<span class="hljs-title function_">toUpperCase</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;HELLO&#x27;</span>)
+  })
+})</code></pre></div>
+<p>Each <code>describe</code> block has its own <code>beforeEach</code> that only affects the tests inside it. The string tests don&#39;t know or care about the <code>value</code> variable, and vice versa.</p>
+<h2 id="execution-order"><a class="anchor" href="#execution-order">#</a>Execution Order</h2>
+<p>When you have hooks at multiple levels, it&#39;s helpful to understand the order they run in. Top-level hooks wrap around inner hooks, forming a nesting structure:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { afterAll, afterEach, beforeAll, beforeEach, describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;1 - beforeAll&#x27;</span>))
+<span class="hljs-title function_">afterAll</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;8 - afterAll&#x27;</span>))
+<span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;2 - beforeEach&#x27;</span>))
+<span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;5 - afterEach&#x27;</span>))
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;3 - inner beforeEach&#x27;</span>))
+  <span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;4 - inner afterEach&#x27;</span>))
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;first test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;  first test&#x27;</span>)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;second test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;  second test&#x27;</span>)
+  })
+})</code></pre></div>
+<p>This produces the following output:</p>
+<div class="code"><pre><code class="hljs lang-txt">1 - beforeAll
+2 - beforeEach
+3 - inner beforeEach
+  first test
+4 - inner afterEach
+5 - afterEach
+2 - beforeEach
+3 - inner beforeEach
+  second test
+4 - inner afterEach
+5 - afterEach
+8 - afterAll</code></pre></div>
+<p>Notice the pattern: <code>beforeAll</code> and <code>afterAll</code> run once for the entire suite, while <code>beforeEach</code> and <code>afterEach</code> repeat for every test. Within each test, outer <code>beforeEach</code> runs first (setting up the broadest context), then inner <code>beforeEach</code> runs (narrowing the context). After the test, the order reverses: inner <code>afterEach</code> cleans up the narrow context first, then outer <code>afterEach</code> handles the broader cleanup.</p>
+<h2 id="cleanup-with-ontestfinished"><a class="anchor" href="#cleanup-with-ontestfinished">#</a>Cleanup with <code>onTestFinished</code></h2>
+<p>Sometimes you create a resource inside a test that needs to be cleaned up afterwards. You could use <code>afterEach</code>, but that means the cleanup is separated from the setup, which can make the test harder to follow. <a href="../../api/hooks.html#ontestfinished"><code>onTestFinished</code></a> lets you register a cleanup function right where you create the resource:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { expect, onTestFinished, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;creates a temporary file&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> file = <span class="hljs-title function_">createTempFile</span>()
+  <span class="hljs-title function_">onTestFinished</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">deleteTempFile</span>(file)
+  })
+
+  <span class="hljs-title function_">expect</span>(file.<span class="hljs-title function_">exists</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">true</span>)
+})</code></pre></div>
+<p>A similar pattern works with <code>beforeEach</code>. You can return a cleanup function and Vitest will call it after each test. This is especially nice when the setup and teardown are closely related:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { beforeEach } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> server = <span class="hljs-title function_">startServer</span>()
+  <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {
+    server.<span class="hljs-title function_">close</span>()
+  }
+})</code></pre></div>
+<h2 id="fixtures-with-test-extend"><a class="anchor" href="#fixtures-with-test-extend">#</a>Fixtures with <code>test.extend</code></h2>
+<p>The examples above use <code>let</code> variables and <code>beforeEach</code> to set up shared state. This works, but it has some downsides: the variable declarations are separated from the initialization, the types require explicit annotation, and it&#39;s easy to forget to clean up.</p>
+<p>Vitest offers a better pattern for this with <a href="../test-context.html#extend-test-context"><code>test.extend</code></a>. You define reusable <strong>fixtures</strong> that are automatically created for each test and cleaned up afterwards:</p>
+<div class="code"><div class="code-title">my-test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { test <span class="hljs-keyword">as</span> baseTest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;db&#x27;</span>, <span class="hljs-title function_">async</span> ({}, { onCleanup }) =&gt; {
+    <span class="hljs-keyword">const</span> db = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createDatabase</span>()
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-function">() =&gt;</span> db.<span class="hljs-title function_">close</span>())
+    <span class="hljs-keyword">return</span> db
+  })
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;user&#x27;</span>, <span class="hljs-title function_">async</span> ({ db }) =&gt; {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">createUser</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span> })
+  })</code></pre></div>
+<div class="code"><div class="code-title">my-test.test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./my-test.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;user is created&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ db, user }</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(user.<span class="hljs-property">name</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)
+})</code></pre></div>
+<p>Fixtures are only initialized when a test actually uses them (by destructuring them from the context), and they can depend on each other. This makes them a great alternative to <code>beforeEach</code>/<code>afterEach</code> for most setup and teardown patterns.</p>
+<p>See the <a href="../test-context.html">Test Context</a> guide for the full details on fixtures, scoping, and overrides.</p>
+<h2 id="setup-files"><a class="anchor" href="#setup-files">#</a>Setup Files</h2>
+<p>If you have setup code that should run before every test file in your project (things like polyfills, global configuration, or custom matchers), you can put it in a setup file and point to it with the <a href="../../config/setupfiles.html"><code>setupFiles</code></a> config option:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">setupFiles</span>: [<span class="hljs-string">&#x27;./test/setup.js&#x27;</span>],
+  },
+})</code></pre></div>
+<div class="code"><div class="code-title">test/setup.js</div><pre><code class="hljs lang-js"><span class="hljs-comment">// This runs before every test file</span>
+<span class="hljs-keyword">import</span> { expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { customMatchers } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./custom-matchers.js&#x27;</span>
+
+expect.<span class="hljs-title function_">extend</span>(customMatchers)</code></pre></div>
+<p>Unlike <code>beforeAll</code>, which runs once per file, setup files run in a separate phase before the test file even starts being collected. This makes them the right place for things like extending the <code>expect</code> API or configuring global polyfills.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>For advanced cases where your test needs to run <em>inside</em> a wrapping context (like a database transaction or a tracing span), see the <a href="../../api/hooks.html#aroundeach"><code>aroundEach</code></a> and <a href="../../api/hooks.html#aroundall"><code>aroundAll</code></a> hooks. For the complete lifecycle picture, see <a href="../lifecycle.html">Test Run Lifecycle</a>.</p>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#repeating-setup-for-each-test">Repeating Setup for Each Test</a><a class="toc-2" href="#one-time-setup">One-Time Setup</a><a class="toc-2" href="#scoping-with-describe">Scoping with describe</a><a class="toc-2" href="#execution-order">Execution Order</a><a class="toc-2" href="#cleanup-with-ontestfinished">Cleanup with onTestFinished</a><a class="toc-2" href="#fixtures-with-test-extend">Fixtures with test.extend</a><a class="toc-2" href="#setup-files">Setup Files</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Type Narrowing in Tests | Recipes (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/recipes/type-narrowing  <a class="ext small" href="https://vitest.dev/guide/recipes/type-narrowing">version en ligne</a></div>
+<h1 id="type-narrowing-in-tests"><a class="anchor" href="#type-narrowing-in-tests">#</a>Type Narrowing in Tests</h1>
+<p>Tests deal with possibly-null values everywhere. <code>document.querySelector</code> returns <code>Element | null</code>, <code>Map.get(key)</code> returns <code>T | undefined</code>, and similar optional shapes show up throughout. The usual workarounds in test code are an unsafe cast with <code>as</code>, a non-null assertion with <code>!</code> on every access, or a runtime check like <code>expect(x).toBeTruthy()</code> that throws when the value is missing. All three add noise, and the runtime check is actively misleading because it doesn&#39;t narrow the type the way it looks like it should.</p>
+<p><a href="../../api/expect.html#assert"><code>expect.assert</code></a> <Version>4.0.0</Version> throws at runtime and narrows the TypeScript type. The same call replaces all three.</p>
+<h2 id="pattern"><a class="anchor" href="#pattern">#</a>Pattern</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;reads stored user&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> cache = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>&lt;<span class="hljs-built_in">string</span>, { <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span> }&gt;()
+  cache.<span class="hljs-title function_">set</span>(<span class="hljs-string">&#x27;alice&#x27;</span>, { <span class="hljs-attr">id</span>: <span class="hljs-string">&#x27;1&#x27;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span> })
+
+  <span class="hljs-keyword">const</span> user = cache.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;alice&#x27;</span>) <span class="hljs-comment">// typed as `{ id, name } | undefined`</span>
+  expect.<span class="hljs-title function_">assert</span>(user) <span class="hljs-comment">// throws if undefined, narrows below</span>
+  <span class="hljs-title function_">expect</span>(user.<span class="hljs-property">name</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>) <span class="hljs-comment">// no `!`, no `as`, type is `{ id, name }`</span>
+})</code></pre></div>
+<p>The same shape collapses any &quot;look up a value, check it exists, then use it&quot; sequence:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> job = queue.<span class="hljs-title function_">find</span>(<span class="hljs-function"><span class="hljs-params">j</span> =&gt;</span> j.<span class="hljs-property">id</span> === <span class="hljs-string">&#x27;build-42&#x27;</span>) <span class="hljs-comment">// Job | undefined</span>
+expect.<span class="hljs-title function_">assert</span>(job)
+job.<span class="hljs-title function_">cancel</span>() <span class="hljs-comment">// narrowed to Job</span></code></pre></div>
+<h2 id="why-tobetruthy-doesn-t-narrow"><a class="anchor" href="#why-tobetruthy-doesn-t-narrow">#</a>Why <code>toBeTruthy</code> doesn&#39;t narrow</h2>
+<p><code>expect(x).toBeTruthy()</code> and <code>expect(x).toBeDefined()</code> throw at runtime when the value is missing, so the test fails the way you want. They don&#39;t narrow the type, though, because their TypeScript signature returns <code>void</code> rather than the special <code>asserts</code> form.</p>
+<p><code>expect.assert</code> is typed as an assertion function, so the same call serves both jobs.</p>
+<h2 id="narrowing-beyond-null"><a class="anchor" href="#narrowing-beyond-null">#</a>Narrowing beyond null</h2>
+<p><code>expect.assert</code> accepts any boolean expression and applies the same narrowing TypeScript would do for an <code>if</code> branch. That covers <code>typeof</code> and <code>instanceof</code> checks:</p>
+<div class="code"><pre><code class="hljs lang-ts">expect.<span class="hljs-title function_">assert</span>(<span class="hljs-keyword">typeof</span> input === <span class="hljs-string">&#x27;string&#x27;</span>)
+input.<span class="hljs-title function_">toUpperCase</span>() <span class="hljs-comment">// input is `string`</span>
+
+expect.<span class="hljs-title function_">assert</span>(error <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">MyError</span>)
+<span class="hljs-title function_">expect</span>(error.<span class="hljs-property">code</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;E_FOO&#x27;</span>) <span class="hljs-comment">// error is `MyError`</span></code></pre></div>
+<p>For common shapes there are pre-built helpers from chai&#39;s <a href="../../api/assert.html"><code>assert</code> API</a>, reachable via the same <code>expect.assert</code> namespace:</p>
+<div class="code"><pre><code class="hljs lang-ts">expect.<span class="hljs-property">assert</span>.<span class="hljs-title function_">isDefined</span>(maybeUser) <span class="hljs-comment">// narrows away `undefined`</span>
+expect.<span class="hljs-property">assert</span>.<span class="hljs-title function_">isString</span>(input) <span class="hljs-comment">// narrows to string</span>
+expect.<span class="hljs-property">assert</span>.<span class="hljs-title function_">instanceOf</span>(error, <span class="hljs-title class_">MyError</span>) <span class="hljs-comment">// narrows to MyError</span></code></pre></div>
+<h2 id="see-also"><a class="anchor" href="#see-also">#</a>See also</h2>
+<ul>
+<li><a href="../../api/expect.html#assert"><code>expect.assert</code></a></li>
+<li><a href="../../api/assert.html">Chai <code>assert</code> API</a></li>
+<li><a href="wait-for.html">Waiting for Async Conditions</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#pattern">Pattern</a><a class="toc-2" href="#why-tobetruthy-doesn-t-narrow">Why toBeTruthy doesn't narrow</a><a class="toc-2" href="#narrowing-beyond-null">Narrowing beyond null</a><a class="toc-2" href="#see-also">See also</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

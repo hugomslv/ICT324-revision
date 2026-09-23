@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1. Vite · ICT-324 Révision</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/hljs.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../index.html">Accueil</a><a class="nav-link" href="../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link active" href="../pages/vite.html">1. Vite</a><a class="nav-link" href="../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../pages/projets.html">Projets du cours</a><a class="nav-link" href="../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../docs/index.html">Index des docs</a><a class="nav-link" href="../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../docs/vite/index.html">Vite</a><a class="nav-link" href="../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+
+<h1>1. Vite</h1><p class="lead">Vite est un outil de build pour le front-end : serveur de développement ultra rapide (npm run dev) et build optimisé pour la production (npm run build → dossier dist/).</p><p>Versions vérifiées pour ce site : <strong>Vite 8.3</strong>, create-vite 9.2, Node 24. Doc officielle hors-ligne : <a href="../docs/vite/index.html">docs/vite</a>.</p>
+<h2 id="creer-un-projet-avec-reseau"><a class="anchor" href="#creer-un-projet-avec-reseau">#</a>Créer un projet (avec réseau)</h2>
+<div class="code"><pre><code class="hljs lang-bash">npm create vite@latest mon-projet -- --template vanilla
+<span class="hljs-built_in">cd</span> mon-projet
+npm install
+npm run dev</code></pre></div>
+<ul>
+<li><code>--template vanilla</code> = JavaScript pur, sans framework (c&#39;est ce qu&#39;on utilise en cours). Autres : <code>vanilla-ts</code>, <code>react</code>, <code>vue</code>, <code>svelte</code>…</li>
+<li>Le <code>--</code> est obligatoire avec npm pour passer l&#39;option au script de création.</li>
+<li>Sans <code>--template</code>, un assistant interactif demande : nom du projet, <em>Framework</em> (<strong>Vanilla</strong>), <em>Variant</em> (<strong>JavaScript</strong>). Il peut aussi proposer d&#39;installer et de lancer tout de suite.</li>
+<li>Dans le dossier courant : <code>npm create vite@latest . -- --template vanilla</code></li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Nom du projet</div><p>Pas d&#39;espace, pas de majuscule, pas d&#39;accent : <code>mon-projet</code> ou <code>mon_projet</code>. Le nom devient le champ <code>&quot;name&quot;</code> du <code>package.json</code>.</p>
+</div><h2 id="structure-generee"><a class="anchor" href="#structure-generee">#</a>Structure générée</h2>
+<div class="code"><pre><code class="hljs lang-text">mon-projet/
+├── index.html          ← point d&#x27;entrée (à la RACINE, pas dans public/)
+├── package.json
+├── .gitignore
+├── public/             ← fichiers copiés TELS QUELS dans dist/ (favicon, robots.txt…)
+│   └── favicon.svg
+└── src/
+    ├── main.js         ← chargé par index.html : &lt;script type=&quot;module&quot; src=&quot;/src/main.js&quot;&gt;
+    ├── style.css       ← importé depuis main.js : import &quot;./style.css&quot;
+    ├── counter.js
+    └── assets/         ← images importées par le JS (renommées avec un hash au build)
+        └── vite.svg</code></pre></div>
+<p>Le <code>package.json</code> créé :</p>
+<div class="code"><div class="code-title">package.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;mon-projet&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;private&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;0.0.0&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;module&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;dev&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;build&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite build&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;preview&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite preview&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;devDependencies&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;vite&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^8.3.0&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce : type&quot;: &quot;module</div><p>Permet d&#39;utiliser <code>import</code> / <code>export</code> dans tous les <code>.js</code> du projet, y compris <code>eslint.config.js</code> et <code>vite.config.js</code>. Sans lui, il faut nommer les fichiers de config en <code>.mjs</code> (c&#39;est pour ça que le prof a parfois <code>eslint.config.mjs</code>).</p>
+</div><h2 id="les-commandes"><a class="anchor" href="#les-commandes">#</a>Les commandes</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Commande</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>npm run dev</code></td>
+<td>serveur de dev sur <code>http://localhost:5173/</code> avec rechargement à chaud (HMR)</td>
+</tr>
+<tr>
+<td><code>npm run build</code></td>
+<td>build de production dans <code>dist/</code></td>
+</tr>
+<tr>
+<td><code>npm run preview</code></td>
+<td>sert <code>dist/</code> sur <code>http://localhost:4173/</code> (<strong>respecte <code>base</code></strong> : idéal pour tester avant le FTP)</td>
+</tr>
+<tr>
+<td><code>npx vite --host</code></td>
+<td>rend le serveur accessible depuis le réseau local</td>
+</tr>
+<tr>
+<td><code>npx vite --port 3000</code></td>
+<td>change le port</td>
+</tr>
+<tr>
+<td><code>npx vite build --base=/dossier/</code></td>
+<td>surcharge <code>base</code> pour ce build</td>
+</tr>
+</tbody></table></div>
+<h2 id="ou-mettre-les-fichiers-public-ou-src-assets"><a class="anchor" href="#ou-mettre-les-fichiers-public-ou-src-assets">#</a>Où mettre les fichiers : <code>public/</code> ou <code>src/assets/</code> ?</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><code>public/</code></th>
+<th><code>src/assets/</code> (ou n&#39;importe où dans <code>src/</code>)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Au build</td>
+<td>copié tel quel à la racine de <code>dist/</code></td>
+<td>optimisé, renommé avec un hash (<code>logo-BF8QNONU.png</code>)</td>
+</tr>
+<tr>
+<td>Comment l&#39;utiliser</td>
+<td>chemin <strong>absolu</strong> : <code>/favicon.svg</code>, <code>/images/logo.png</code></td>
+<td><code>import logo from &quot;./assets/logo.png&quot;</code> puis <code>img.src = logo</code></td>
+</tr>
+<tr>
+<td>Usage typique</td>
+<td>favicon, <code>robots.txt</code>, fichiers dont le nom doit rester fixe</td>
+<td>images du contenu, icônes utilisées dans le JS</td>
+</tr>
+<tr>
+<td>Fichier introuvable</td>
+<td>404 silencieuse</td>
+<td><strong>erreur au build</strong> (plus sûr)</td>
+</tr>
+</tbody></table></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Piège n°1 du FTP</div><p>Dans le <strong>HTML</strong> et le <strong>CSS</strong>, Vite ajoute automatiquement <code>base</code> devant <code>/favicon.svg</code>. Dans une <strong>chaîne JavaScript</strong>, NON : <code>img.src = &quot;/images/logo.png&quot;</code> donnera une 404 une fois dans un sous-dossier. Utilise <code>`${import.meta.env.BASE_URL}images/logo.png`</code> ou un <code>import</code>. Détails et tests : <a href="build-ftp.html">6. Build &amp; FTP</a>.</p>
+</div><h2 id="index-html"><a class="anchor" href="#index-html">#</a><code>index.html</code></h2>
+<div class="code"><div class="code-title">index.html</div><pre><code class="hljs lang-html"><span class="hljs-meta">&lt;!doctype <span class="hljs-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;fr&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">&quot;UTF-8&quot;</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;icon&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;image/svg+xml&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/favicon.svg&quot;</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;viewport&quot;</span> <span class="hljs-attr">content</span>=<span class="hljs-string">&quot;width=device-width, initial-scale=1.0&quot;</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Mon projet<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;app&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/src/main.js&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></code></pre></div>
+<ul>
+<li><code>type=&quot;module&quot;</code> est obligatoire (Vite travaille en modules ES).</li>
+<li>Le CSS peut être importé dans le JS (<code>import &quot;./style.css&quot;</code>) ou lié dans le HTML (<code>&lt;link rel=&quot;stylesheet&quot; href=&quot;/src/style.css&quot;&gt;</code>).</li>
+</ul>
+<h2 id="vite-config-js"><a class="anchor" href="#vite-config-js">#</a><code>vite.config.js</code></h2>
+<p>Facultatif. À créer à la racine. On peut y mettre aussi la config de Vitest (bloc <code>test</code>), c&#39;est ce que fait le prof dans <code>currency-converter</code>.</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest/config&quot;</span> <span class="hljs-comment">// &quot;vite&quot; suffit si pas de bloc test</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">base</span>: <span class="hljs-string">&quot;/mon_dossier/&quot;</span>,     <span class="hljs-comment">// sous-dossier sur le serveur (défaut &quot;/&quot;)</span>
+  <span class="hljs-attr">publicDir</span>: <span class="hljs-string">&quot;public&quot;</span>,       <span class="hljs-comment">// défaut</span>
+  <span class="hljs-attr">build</span>: {
+    <span class="hljs-attr">outDir</span>: <span class="hljs-string">&quot;dist&quot;</span>,          <span class="hljs-comment">// défaut</span>
+    <span class="hljs-attr">assetsDir</span>: <span class="hljs-string">&quot;assets&quot;</span>,     <span class="hljs-comment">// défaut</span>
+    <span class="hljs-attr">target</span>: <span class="hljs-string">&quot;esnext&quot;</span>,        <span class="hljs-comment">// nécessaire si &quot;await&quot; au niveau racine du module</span>
+    <span class="hljs-attr">emptyOutDir</span>: <span class="hljs-literal">true</span>,       <span class="hljs-comment">// vide dist/ avant chaque build (défaut si dans le projet)</span>
+  },
+  <span class="hljs-attr">server</span>: {
+    <span class="hljs-attr">port</span>: <span class="hljs-number">5173</span>,
+    <span class="hljs-attr">open</span>: <span class="hljs-literal">true</span>,              <span class="hljs-comment">// ouvre le navigateur au lancement de npm run dev</span>
+  },
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-comment">// config Vitest (voir la page Vitest)</span>
+  },
+})</code></pre></div>
+<p>Doc : <a href="../docs/vite/config/shared-options.html">options partagées (base, publicDir…)</a>, <a href="../docs/vite/config/build-options.html">options de build</a>, <a href="../docs/vite/config/server-options.html">serveur</a>.</p>
+<div class="box box-info"><div class="box-title">ℹ️ Info : Top-level await</div><p><code>currency-converter/main.js</code> commence par <code>const x = await getSupportedCurrencies()</code> (un <code>await</code> hors fonction). Avec la cible par défaut, Vite 8 affiche <em>« Top-level await is not available in the configured target environment »</em>. D&#39;où le <code>build: { target: &quot;esnext&quot; }</code> du prof.</p>
+</div><h2 id="variables-d-environnement"><a class="anchor" href="#variables-d-environnement">#</a>Variables d&#39;environnement</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>import.meta.env.BASE_URL</code></td>
+<td>la valeur de <code>base</code> (ex : <code>/mon_dossier/</code>)</td>
+</tr>
+<tr>
+<td><code>import.meta.env.MODE</code></td>
+<td><code>development</code> ou <code>production</code></td>
+</tr>
+<tr>
+<td><code>import.meta.env.DEV</code> / <code>.PROD</code></td>
+<td>booléens</td>
+</tr>
+<tr>
+<td><code>import.meta.env.VITE_XXX</code></td>
+<td>variables définies dans <code>.env</code> et <strong>préfixées <code>VITE_</code></strong></td>
+</tr>
+</tbody></table></div>
+<div class="code"><div class="code-title">.env</div><pre><code class="hljs lang-ini"><span class="hljs-attr">VITE_API_URL</span>=https://api.exemple.ch
+<span class="hljs-attr">FTP_PASS</span>=secret        <span class="hljs-comment"># PAS exposé au navigateur (pas de préfixe VITE_)</span></code></pre></div>
+<p>Doc : <a href="../docs/vite/guide/env-and-mode.html">Env Variables and Modes</a>.</p>
+<h2 id="site-a-plusieurs-pages"><a class="anchor" href="#site-a-plusieurs-pages">#</a>Site à plusieurs pages</h2>
+<p>Chaque page HTML doit être déclarée comme entrée, sinon elle n&#39;est pas dans <code>dist/</code>. Avec Vite 8 :</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { resolve } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:path&quot;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vite&quot;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">input</span>: {
+    <span class="hljs-attr">main</span>: <span class="hljs-title function_">resolve</span>(<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">dirname</span>, <span class="hljs-string">&quot;index.html&quot;</span>),
+    <span class="hljs-attr">contact</span>: <span class="hljs-title function_">resolve</span>(<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">dirname</span>, <span class="hljs-string">&quot;contact.html&quot;</span>),
+  },
+})</code></pre></div>
+<p>(Avant Vite 8 : <code>build: { rollupOptions: { input: {...} } }</code>, encore accepté comme alias.) Doc : <a href="../docs/vite/guide/build.html#multi-page-app">Multi-Page App</a>.</p>
+<h2 id="ajouter-un-projet-existant-a-vite"><a class="anchor" href="#ajouter-un-projet-existant-a-vite">#</a>Ajouter un projet existant à Vite</h2>
+<p>Si on te donne juste un <code>index.html</code> et des <code>.js</code> :</p>
+<div class="code"><pre><code class="hljs lang-bash">npm init -y
+npm install -D vite</code></pre></div>
+<p>puis ajouter les scripts <code>dev</code>, <code>build</code>, <code>preview</code> et <code>&quot;type&quot;: &quot;module&quot;</code> dans <code>package.json</code>, et <code>type=&quot;module&quot;</code> sur la balise <code>&lt;script&gt;</code>.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#creer-un-projet-avec-reseau">Créer un projet (avec réseau)</a><a class="toc-2" href="#structure-generee">Structure générée</a><a class="toc-2" href="#les-commandes">Les commandes</a><a class="toc-2" href="#ou-mettre-les-fichiers-public-ou-src-assets">Où mettre les fichiers : public/ ou src/assets/ ?</a><a class="toc-2" href="#index-html">index.html</a><a class="toc-2" href="#vite-config-js">vite.config.js</a><a class="toc-2" href="#variables-d-environnement">Variables d'environnement</a><a class="toc-2" href="#site-a-plusieurs-pages">Site à plusieurs pages</a><a class="toc-2" href="#ajouter-un-projet-existant-a-vite">Ajouter un projet existant à Vite</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../assets/app.js"></script>
+</body>
+</html>

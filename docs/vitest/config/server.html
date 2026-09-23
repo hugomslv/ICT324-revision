@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>server | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/server  <a class="ext small" href="https://vitest.dev/config/server">version en ligne</a></div>
+<h1 id="server"><a class="anchor" href="#server">#</a>server <Deprecated /></h1>
+<p>Before Vitest 4, this option was used to define the configuration for the <code>vite-node</code> server.</p>
+<p>At the moment, this option allows you to configure the inlining and externalization mechanisms, along with the module runner debugging configuration.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>These options should be used only as the last resort to improve performance by externalizing auto-inlined dependencies or to fix issues by inlining invalid external dependencies.</p>
+<p>Normally, Vitest should do this automatically.</p>
+</div><h2 id="server-deps"><a class="anchor" href="#server-deps">#</a>server.deps</h2>
+<h3 id="server-deps-external"><a class="anchor" href="#server-deps-external">#</a>server.deps.external</h3>
+<ul>
+<li><strong>Type:</strong> <code>(string | RegExp)[]</code></li>
+<li><strong>Default:</strong> files inside <a href="deps.html#moduledirectories"><code>moduleDirectories</code></a></li>
+</ul>
+<p>Specifies modules that should not be transformed by Vite and should instead be processed directly by the engine. These modules are imported via native dynamic <code>import</code> and bypass both transformation and resolution phases.</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">server</span>: {
+      <span class="hljs-attr">deps</span>: {
+        <span class="hljs-attr">external</span>: [<span class="hljs-string">&#x27;react&#x27;</span>],
+      },
+    },
+  },
+})</code></pre></div>
+<p>External modules and their dependencies are not present in the module graph and will not trigger test restarts when they change.</p>
+<p>Typically, packages under <code>node_modules</code> are externalized.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If a string is provided, it is first normalized by prefixing the <code>/node_modules/</code> or other <a href="deps.html#moduledirectories"><code>moduleDirectories</code></a> segments (for example, <code>&#39;react&#39;</code> becomes <code>/node_modules/react/</code>), and the resulting string is then matched against the full file path. For example, package <code>@company/some-name</code> located inside <code>packages/some-name</code> should be specified as <code>some-name</code>, and <code>packages</code> should be included in <code>deps.moduleDirectories</code>.</p>
+<p>If a <code>RegExp</code> is provided, it is matched against the full file path.</p>
+</div><h3 id="server-deps-inline"><a class="anchor" href="#server-deps-inline">#</a>server.deps.inline</h3>
+<ul>
+<li><strong>Type:</strong> <code>(string | RegExp)[] | true</code></li>
+<li><strong>Default:</strong> everything that is not externalized</li>
+</ul>
+<p>Specifies modules that should be transformed and resolved by Vite. These modules are run by Vite&#39;s <a href="https://vite.dev/guide/api-environment-runtimes#modulerunner">module runner</a>.</p>
+<p>Typically, your source files are inlined.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If a string is provided, it is first normalized by prefixing the <code>/node_modules/</code> or other <a href="deps.html#moduledirectories"><code>moduleDirectories</code></a> segments (for example, <code>&#39;react&#39;</code> becomes <code>/node_modules/react/</code>), and the resulting string is then matched against the full file path. For example, package <code>@company/some-name</code> located inside <code>packages/some-name</code> should be specified as <code>some-name</code>, and <code>packages</code> should be included in <code>deps.moduleDirectories</code>.</p>
+<p>If a <code>RegExp</code> is provided, it is matched against the full file path.</p>
+</div><h3 id="server-deps-fallbackcjs"><a class="anchor" href="#server-deps-fallbackcjs">#</a>server.deps.fallbackCJS</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+</ul>
+<p>When enabled, Vitest will try to guess a CommonJS build for an ESM entry by checking a few common CJS/UMD file name and folder patterns (like <code>.mjs</code>, <code>.umd.js</code>, <code>.cjs.js</code>, <code>umd/</code>, <code>cjs/</code>, <code>lib/</code>).</p>
+<p>This is a best-effort heuristic to work around confusing or incorrect ESM/CJS packaging and may not work for all dependencies.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#server-deps">server.deps</a><a class="toc-3" href="#server-deps-external">server.deps.external</a><a class="toc-3" href="#server-deps-inline">server.deps.inline</a><a class="toc-3" href="#server-deps-fallbackcjs">server.deps.fallbackCJS</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

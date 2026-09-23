@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>init-declarations (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/init-declarations <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/init-declarations">version en ligne</a></div>
+<h1>init-declarations</h1><p>In JavaScript, variables can be assigned during declaration, or at any point afterwards using an assignment statement. For example, in the following code, <code>foo</code> is initialized during declaration, while <code>bar</code> is initialized later.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">let</span> foo = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">let</span> bar;
+
+<span class="hljs-keyword">if</span> (foo) {
+    bar = <span class="hljs-number">1</span>;
+} <span class="hljs-keyword">else</span> {
+    bar = <span class="hljs-number">2</span>;
+}</code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule is aimed at enforcing or eliminating variable initializations during declaration. For example, in the following code, <code>foo</code> is initialized during declaration, while <code>bar</code> is not.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">let</span> foo = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">let</span> bar;
+
+bar = <span class="hljs-number">2</span>;</code></pre></div>
+<p>This rule aims to bring consistency to variable initializations and declarations.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>The rule takes two options:</p>
+<ol>
+<li>A string which must be either <code>&quot;always&quot;</code> (the default), to enforce initialization at declaration, or <code>&quot;never&quot;</code> to disallow initialization during declaration. This rule applies to <code>var</code>, <code>let</code>, <code>const</code>, <code>using</code>, and <code>await using</code> variables, however <code>&quot;never&quot;</code> is ignored for <code>const</code>, <code>using</code>, and <code>await using</code> variables, as not initializing these variables would generate a parse error.</li>
+<li>An object that further controls the behavior of this rule. Currently, the only available parameter is <code>ignoreForLoopInit</code>, which indicates if initialization at declaration is allowed in <code>for</code> loops when <code>&quot;never&quot;</code> is set, since it is a very typical use case.</li>
+</ol>
+<p>You can configure the rule as follows:</p>
+<p>Variables must be initialized at declaration (default)</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;init-declarations&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;always&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Variables must not be initialized at declaration</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;init-declarations&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;never&quot;</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Variables must not be initialized at declaration, except in for loops, where it is allowed</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;init-declarations&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;never&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;ignoreForLoopInit&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<h3 id="always"><a class="anchor" href="#always">#</a>always</h3>
+<p>Examples of <strong>incorrect</strong> code for the default <code>&quot;always&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint init-declarations: [&quot;error&quot;, &quot;always&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">var</span> bar;
+    <span class="hljs-keyword">let</span> baz;
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the default <code>&quot;always&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint init-declarations: [&quot;error&quot;, &quot;always&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">var</span> bar = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">let</span> baz = <span class="hljs-number">2</span>;
+    <span class="hljs-keyword">const</span> qux = <span class="hljs-number">3</span>;
+	<span class="hljs-keyword">using</span> quux = <span class="hljs-title function_">getSomething</span>();
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foobar</span>(<span class="hljs-params"></span>) {
+	<span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> quux = <span class="hljs-title function_">getSomething</span>();
+}</code></pre></div>
+</div><h3 id="never"><a class="anchor" href="#never">#</a>never</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>&quot;never&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint init-declarations: [&quot;error&quot;, &quot;never&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">var</span> bar = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">let</span> baz = <span class="hljs-number">2</span>;
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">1</span>; i++) {}
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>&quot;never&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint init-declarations: [&quot;error&quot;, &quot;never&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">var</span> bar;
+    <span class="hljs-keyword">let</span> baz;
+    <span class="hljs-keyword">const</span> buzz = <span class="hljs-number">1</span>;
+	<span class="hljs-keyword">using</span> quux = <span class="hljs-title function_">getSomething</span>();
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foobar</span>(<span class="hljs-params"></span>) {
+	<span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> quux = <span class="hljs-title function_">getSomething</span>();
+}</code></pre></div>
+</div><p>The <code>&quot;never&quot;</code> option ignores <code>const</code>, <code>using</code>, and <code>await using</code> variable initializations.</p>
+<h3 id="ignoreforloopinit"><a class="anchor" href="#ignoreforloopinit">#</a>ignoreForLoopInit</h3>
+<p>Examples of <strong>correct</strong> code for the <code>&quot;never&quot;, { &quot;ignoreForLoopInit&quot;: true }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint init-declarations: [&quot;error&quot;, &quot;never&quot;, { &quot;ignoreForLoopInit&quot;: true }]*/</span>
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">1</span>; i++) {}</code></pre></div>
+</div><p>This rule additionally supports TypeScript type syntax.</p>
+<p>Examples of <strong>incorrect</strong> TypeScript code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/* eslint init-declarations: [&quot;error&quot;, &quot;never&quot;] */</span>
+
+<span class="hljs-keyword">let</span> <span class="hljs-attr">arr</span>: <span class="hljs-built_in">string</span>[] = [<span class="hljs-string">&#x27;arr&#x27;</span>, <span class="hljs-string">&#x27;ar&#x27;</span>];
+
+<span class="hljs-keyword">const</span> class1 = <span class="hljs-keyword">class</span> <span class="hljs-title class_">NAME</span> {
+	<span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span>) {
+	  <span class="hljs-keyword">var</span> <span class="hljs-attr">name1</span>: <span class="hljs-built_in">string</span> = <span class="hljs-string">&#x27;hello&#x27;</span>;
+	}
+};
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">myLib</span> {
+	<span class="hljs-keyword">let</span> <span class="hljs-attr">numberOfGreetings</span>: <span class="hljs-built_in">number</span> = <span class="hljs-number">2</span>;
+}
+</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/* eslint init-declarations: [&quot;error&quot;, &quot;always&quot;] */</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">myLib</span> {
+	<span class="hljs-keyword">let</span> <span class="hljs-attr">numberOfGreetings</span>: <span class="hljs-built_in">number</span>;
+}
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">myLib1</span> {
+	<span class="hljs-keyword">const</span> <span class="hljs-attr">foo</span>: <span class="hljs-built_in">number</span>;
+	<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">myLib2</span> {
+	  <span class="hljs-keyword">let</span> <span class="hljs-attr">bar</span>: <span class="hljs-built_in">string</span>;
+	  <span class="hljs-keyword">namespace</span> <span class="hljs-title class_">myLib3</span> {
+		<span class="hljs-keyword">let</span> <span class="hljs-attr">baz</span>: <span class="hljs-built_in">object</span>;
+	  }
+	}
+}
+</code></pre></div>
+</div><p>Examples of <strong>correct</strong> TypeScript code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/* eslint init-declarations: [&quot;error&quot;, &quot;never&quot;] */</span>
+
+<span class="hljs-keyword">declare</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">foo</span>: <span class="hljs-built_in">number</span>;
+
+<span class="hljs-keyword">declare</span> <span class="hljs-keyword">namespace</span> <span class="hljs-title class_">myLib</span> {
+	<span class="hljs-keyword">let</span> <span class="hljs-attr">numberOfGreetings</span>: <span class="hljs-built_in">number</span>;
+}
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">GreetingSettings</span> {
+	<span class="hljs-attr">greeting</span>: <span class="hljs-built_in">string</span>;
+	<span class="hljs-attr">duration</span>?: <span class="hljs-built_in">number</span>;
+	<span class="hljs-attr">color</span>?: <span class="hljs-built_in">string</span>;
+}</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/* eslint init-declarations: [&quot;error&quot;, &quot;always&quot;] */</span>
+
+<span class="hljs-keyword">declare</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">foo</span>: <span class="hljs-built_in">number</span>;
+
+<span class="hljs-keyword">declare</span> <span class="hljs-keyword">namespace</span> <span class="hljs-title class_">myLib</span> {
+	<span class="hljs-keyword">let</span> <span class="hljs-attr">numberOfGreetings</span>: <span class="hljs-built_in">number</span>;
+}
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">GreetingSettings</span> {
+	<span class="hljs-attr">greeting</span>: <span class="hljs-built_in">string</span>;
+	<span class="hljs-attr">duration</span>?: <span class="hljs-built_in">number</span>;
+	<span class="hljs-attr">color</span>?: <span class="hljs-built_in">string</span>;
+}
+</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>When you are indifferent as to how your variables are initialized.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="no-unassigned-vars.html"><code>no-unassigned-vars</code></a></p></div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#always">always</a><a class="toc-3" href="#never">never</a><a class="toc-3" href="#ignoreforloopinit">ignoreForLoopInit</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

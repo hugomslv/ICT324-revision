@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-await-in-loop (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-await-in-loop <span class="badge badge-problem">problème</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-await-in-loop">version en ligne</a></div>
+<h1>no-await-in-loop</h1><p>Performing an operation on each element of an iterable is a common task. However, performing an
+<code>await</code> as part of each operation may indicate that the program is not taking full advantage of
+the parallelization benefits of <code>async</code>/<code>await</code>.</p>
+<p>Often, the code can be refactored to create all the promises at once, then get access to the
+results using <code>Promise.all()</code> (or one of the other <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#promise_concurrency">promise concurrency methods</a>). Otherwise, each successive operation will not start until the
+previous one has completed.</p>
+<p>Concretely, the following function could be refactored as shown:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">things</span>) {
+  <span class="hljs-keyword">const</span> results = [];
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> thing <span class="hljs-keyword">of</span> things) {
+    <span class="hljs-comment">// Bad: each loop iteration is delayed until the entire asynchronous operation completes</span>
+    results.<span class="hljs-title function_">push</span>(<span class="hljs-keyword">await</span> <span class="hljs-title function_">doAsyncWork</span>(thing));
+  }
+  <span class="hljs-keyword">return</span> results;
+}</code></pre></div>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">things</span>) {
+  <span class="hljs-keyword">const</span> promises = [];
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> thing <span class="hljs-keyword">of</span> things) {
+    <span class="hljs-comment">// Good: all asynchronous operations are immediately started.</span>
+    promises.<span class="hljs-title function_">push</span>(<span class="hljs-title function_">doAsyncWork</span>(thing));
+  }
+  <span class="hljs-comment">// Now that all the asynchronous operations are running, here we wait until they all complete.</span>
+  <span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(promises);
+  <span class="hljs-keyword">return</span> results;
+}</code></pre></div>
+<p>This can be beneficial for subtle error-handling reasons as well. Given an array of promises that might reject,
+sequential awaiting puts the program at risk of unhandled promise rejections. The exact behavior of unhandled
+rejections depends on the environment running your code, but they are generally considered harmful regardless.
+In Node.js, for example, <a href="https://nodejs.org/api/cli.html#--unhandled-rejectionsmode">unhandled rejections cause a program to terminate</a> unless configured otherwise.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> arrayOfPromises = <span class="hljs-title function_">somethingThatCreatesAnArrayOfPromises</span>();
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> promise <span class="hljs-keyword">of</span> arrayOfPromises) {
+        <span class="hljs-comment">// Bad: if any of the promises reject, an exception is thrown, and</span>
+        <span class="hljs-comment">// subsequent loop iterations will not run. Therefore, rejections later</span>
+        <span class="hljs-comment">// in the array will become unhandled rejections that cannot be caught</span>
+        <span class="hljs-comment">// by a caller.</span>
+        <span class="hljs-keyword">const</span> value = <span class="hljs-keyword">await</span> promise;
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(value);
+    }
+}</code></pre></div>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> arrayOfPromises = <span class="hljs-title function_">somethingThatCreatesAnArrayOfPromises</span>();
+    <span class="hljs-comment">// Good: Any rejections will cause a single exception to be thrown here,</span>
+    <span class="hljs-comment">// which may be caught and handled by the caller.</span>
+    <span class="hljs-keyword">const</span> arrayOfValues = <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(arrayOfPromises);
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> value <span class="hljs-keyword">of</span> arrayOfValues) {
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(value);
+    }
+}</code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule disallows the use of <code>await</code> within loop bodies.</p>
+<p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-await-in-loop: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">things</span>) {
+  <span class="hljs-keyword">const</span> promises = [];
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> thing <span class="hljs-keyword">of</span> things) {
+    <span class="hljs-comment">// Good: all asynchronous operations are immediately started.</span>
+    promises.<span class="hljs-title function_">push</span>(<span class="hljs-title function_">doAsyncWork</span>(thing));
+  }
+  <span class="hljs-comment">// Now that all the asynchronous operations are running, here we wait until they all complete.</span>
+  <span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(promises);
+  <span class="hljs-keyword">return</span> results;
+}</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-await-in-loop: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">things</span>) {
+  <span class="hljs-keyword">const</span> results = [];
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> thing <span class="hljs-keyword">of</span> things) {
+    <span class="hljs-comment">// Bad: each loop iteration is delayed until the entire asynchronous operation completes</span>
+    results.<span class="hljs-title function_">push</span>(<span class="hljs-keyword">await</span> <span class="hljs-title function_">doAsyncWork</span>(thing));
+  }
+  <span class="hljs-keyword">return</span> results;
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params">things</span>) {
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> thing <span class="hljs-keyword">of</span> things) {
+    <span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> resource = <span class="hljs-title function_">getAsyncResource</span>(thing);
+  }
+}</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has no options.</p>
+<h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>In many cases the iterations of a loop are not actually independent of each other, and awaiting in
+the loop is correct. As a few examples:</p>
+<ul>
+<li><p>Any code that should run serially, such as implementing a countdown, or processing items sequentially (when each item is already processed in parallel), as in this example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">printCountdown</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; i++) {
+        <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> <span class="hljs-built_in">setTimeout</span>(resolve, <span class="hljs-number">1000</span>)); <span class="hljs-comment">// sleep 1 second</span>
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(i);
+    }
+}</code></pre></div>
+</li>
+<li><p>Using standard browser/OS APIs that are inherently serial (as controlled by the underlying operating system), such as <code>File</code> or directory contents reading, as in this example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">writeNumbersToFile</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">100</span>; i++) {
+        <span class="hljs-comment">// Doing this in parallel would interleave (garble) the resulting file contents.</span>
+        <span class="hljs-keyword">await</span> fileWriteStream.<span class="hljs-title function_">write</span>(i + <span class="hljs-string">&quot;\n&quot;</span>);
+    }
+}</code></pre></div>
+</li>
+<li><p>Any code where the creation of the Promise allocates a bounded resource (RAM, file descriptors, network bandwidth), as in this example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">streamingProcess</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; i++) {
+        <span class="hljs-keyword">await</span> <span class="hljs-title function_">ramIntensiveAction</span>(data[i]);
+    }
+}</code></pre></div>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">checkFiles</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10000</span>; i++) {
+        <span class="hljs-comment">// Here some concurrency may be desirable to reduce I/O bottlenecks,</span>
+        <span class="hljs-comment">// but not unbounded concurrency as that will fail,</span>
+        <span class="hljs-comment">// running out of file descriptors.</span>
+        <span class="hljs-keyword">await</span> <span class="hljs-title function_">openFileAndThrowIfContentsMeetCondition</span>(filenames[i]);
+    }
+}</code></pre></div>
+</li>
+<li><p>The output of one iteration might be used as the input to another.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">loopIterationsDependOnEachOther</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">let</span> previousResult = <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; i++) {
+        <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-title function_">doSomething</span>(i, previousResult);
+        <span class="hljs-keyword">if</span> (<span class="hljs-title function_">someCondition</span>(result, previousResult)) {
+            <span class="hljs-keyword">break</span>;
+        } <span class="hljs-keyword">else</span> {
+            previousResult = result;
+        }
+    }
+}</code></pre></div>
+<p>  The previous examples were all similar to this, but they relied on a <em>side effect</em> of one iteration being needed for the next, while this example has the dependency explicit via a result variable.</p>
+</li>
+<li><p>Loops may be used to retry asynchronous operations that were unsuccessful.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">retryUpTo10Times</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10</span>; i++) {
+        <span class="hljs-keyword">const</span> wasSuccessful = <span class="hljs-keyword">await</span> <span class="hljs-title function_">tryToDoSomething</span>();
+        <span class="hljs-keyword">if</span> (wasSuccessful)
+            <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;succeeded!&#x27;</span>;
+        <span class="hljs-comment">// wait to try again.</span>
+        <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> <span class="hljs-built_in">setTimeout</span>(resolve, <span class="hljs-number">1000</span>));
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;failed!&#x27;</span>;
+}</code></pre></div>
+</li>
+<li><p>Loops may be used to prevent your code from sending an excessive amount of requests in parallel.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">makeUpdatesToRateLimitedApi</span>(<span class="hljs-params">thingsToUpdate</span>) {
+    <span class="hljs-comment">// we&#x27;ll exceed our rate limit if we make all the network calls in parallel.</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> thing <span class="hljs-keyword">of</span> thingsToUpdate) {
+        <span class="hljs-keyword">await</span> <span class="hljs-title function_">updateThingWithRateLimitedApi</span>(thing);
+    }
+}</code></pre></div>
+</li>
+</ul>
+<p>In such cases it makes sense to use <code>await</code> within a
+loop and it is recommended to disable the rule via a standard ESLint disable comment.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

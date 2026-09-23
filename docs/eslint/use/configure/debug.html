@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Debug Your Configuration (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">ESLint</a> › use/configure/debug  <a class="ext small" href="https://eslint.org/docs/latest/use/configure/debug">version en ligne</a></div>
+<h1>Debug Your Configuration</h1><p>ESLint creates a configuration for each file that is linted based on your configuration file and command line options. The larger the configuration file, the more difficult it can be to determine why a file isn&#39;t linted as expected. To aid in debugging your configuration, ESLint provides several tools.</p>
+<h2 id="run-the-cli-in-debug-mode"><a class="anchor" href="#run-the-cli-in-debug-mode">#</a>Run the CLI in Debug Mode</h2>
+<p><strong>Use When:</strong> You aren&#39;t sure if the correct configuration file is being read. This may happen if you have multiple configuration files in the same project.</p>
+<p><strong>What To Do:</strong> Run ESLint with the <a href="../command-line-interface.html#--debug"><code>--debug</code></a> command line flag and pass the file to check, like this:</p>
+<div class="code"><pre><code class="hljs lang-bash">npx eslint --debug file.js</code></pre></div>
+<p>This outputs all of ESLint&#39;s debugging information onto the console. You should copy this output to a file and then search for <code>eslint.config.js</code> to see which file is loaded. Here&#39;s some example output:</p>
+<div class="code"><pre><code class="hljs lang-text">eslint:eslint Using file patterns: [ &#x27;bin/eslint.js&#x27; ] +0ms
+eslint:eslint Searching for eslint.config.js +0ms
+eslint:eslint Loading config from C:\Users\nzakas\projects\eslint\eslint\eslint.config.js +5ms
+eslint:eslint Config file URL is file:///C:/Users/nzakas/projects/eslint/eslint/eslint.config.js +0ms</code></pre></div>
+<h2 id="print-a-files-calculated-configuration"><a class="anchor" href="#print-a-files-calculated-configuration">#</a>Print a File&#39;s Calculated Configuration</h2>
+<p><strong>Use When:</strong> You aren&#39;t sure why linting isn&#39;t producing the expected results, either because it seems like your rule configuration isn&#39;t being honored or the wrong language options are being used.</p>
+<p><strong>What To Do:</strong> Run ESLint with the <a href="../command-line-interface.html#--print-config"><code>--print-config</code></a> command line flag and pass the file to check, like this:</p>
+<div class="code"><pre><code class="hljs lang-bash">npx eslint --print-config file.js</code></pre></div>
+<p>This outputs a JSON representation of the file&#39;s calculated config, such as:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;linterOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;reportUnusedDisableDirectives&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span>
+	<span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;language&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;@/js&quot;</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;languageOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;sourceType&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;module&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;ecmaVersion&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;latest&quot;</span>
+	<span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;plugins&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;@&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;rules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;prefer-const&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span>
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You won&#39;t see any entries for <code>files</code>, <code>ignores</code>, or <code>name</code>, because those are only used in calculating the final configuration and so do not appear in the result. You will see any default configuration applied by ESLint itself.</p>
+</div><h2 id="use-the-config-inspector"><a class="anchor" href="#use-the-config-inspector">#</a>Use the Config Inspector</h2>
+<p><strong>Use When:</strong> You aren&#39;t sure if certain configuration objects in your configuration file match a given filename.</p>
+<p><strong>What To Do:</strong> Run ESLint with the <a href="../command-line-interface.html#--inspect-config"><code>--inspect-config</code></a> command line flag and pass the file to check, like this:</p>
+<div class="code"><pre><code class="hljs lang-bash">npx eslint --inspect-config</code></pre></div>
+<p>This initiates the config inspector by installing and starting <a href="https://github.com/eslint/config-inspector"><code>@eslint/config-inspector</code></a>. You can then type in the filename in question to see which configuration objects will apply.</p>
+<p><span class="img-missing">[image : Config inspector screenshot showing which config objects match index.js]</span></p>
+<p>The config inspector also shows you when rules are deprecated, how many available rules you&#39;re using, and more.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#run-the-cli-in-debug-mode">Run the CLI in Debug Mode</a><a class="toc-2" href="#print-a-files-calculated-configuration">Print a File's Calculated Configuration</a><a class="toc-2" href="#use-the-config-inspector">Use the Config Inspector</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

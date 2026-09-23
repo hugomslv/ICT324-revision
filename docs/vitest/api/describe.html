@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>describe (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › api/describe  <a class="ext small" href="https://vitest.dev/api/describe">version en ligne</a></div>
+<h1 id="describe"><a class="anchor" href="#describe">#</a>describe</h1>
+<ul>
+<li><strong>Alias:</strong> <code>suite</code></li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">describe</span>(<span class="hljs-params">
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">Function</span>,
+  <span class="hljs-attr">body</span>?: () =&gt; <span class="hljs-built_in">unknown</span>,
+  <span class="hljs-attr">timeout</span>?: <span class="hljs-built_in">number</span>
+</span>): <span class="hljs-built_in">void</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">describe</span>(<span class="hljs-params">
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">Function</span>,
+  <span class="hljs-attr">options</span>: <span class="hljs-title class_">SuiteOptions</span>,
+  <span class="hljs-attr">body</span>?: () =&gt; <span class="hljs-built_in">unknown</span>,
+</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p><code>describe</code> is used to group related tests and benchmarks into a suite. Suites help organize your test files by creating logical blocks, making test output easier to read and enabling shared setup/teardown through <a href="hooks.html">lifecycle hooks</a>.</p>
+<p>When you use <code>test</code> in the top level of file, they are collected as part of the implicit suite for it. Using <code>describe</code> you can define a new suite in the current context, as a set of related tests or benchmarks and other nested suites.</p>
+<div class="code"><div class="code-title">basic.spec.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> person = {
+  <span class="hljs-attr">isActive</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">age</span>: <span class="hljs-number">32</span>,
+}
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;person&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;person is defined&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(person).<span class="hljs-title function_">toBeDefined</span>()
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;is active&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(person.<span class="hljs-property">isActive</span>).<span class="hljs-title function_">toBeTruthy</span>()
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;age limit&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(person.<span class="hljs-property">age</span>).<span class="hljs-title function_">toBeLessThanOrEqual</span>(<span class="hljs-number">32</span>)
+  })
+})</code></pre></div>
+<p>You can also nest <code>describe</code> blocks if you have a hierarchy of tests:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">numberToCurrency</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">number</span> | <span class="hljs-built_in">string</span></span>) {
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> value !== <span class="hljs-string">&#x27;number&#x27;</span>) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">TypeError</span>(<span class="hljs-string">&#x27;Value must be a number&#x27;</span>)
+  }
+
+  <span class="hljs-keyword">return</span> value.<span class="hljs-title function_">toFixed</span>(<span class="hljs-number">2</span>).<span class="hljs-title function_">toString</span>().<span class="hljs-title function_">replace</span>(<span class="hljs-regexp">/\B(?=(\d{3})+(?!\d))/g</span>, <span class="hljs-string">&#x27;,&#x27;</span>)
+}
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;numberToCurrency&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;given an invalid number&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;composed of non-numbers to throw error&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">numberToCurrency</span>(<span class="hljs-string">&#x27;abc&#x27;</span>)).<span class="hljs-title function_">toThrow</span>()
+    })
+  })
+
+  <span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;given a valid number&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;returns the correct currency format&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">numberToCurrency</span>(<span class="hljs-number">10000</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;10,000.00&#x27;</span>)
+    })
+  })
+})</code></pre></div>
+<h2 id="test-options"><a class="anchor" href="#test-options">#</a>Test Options</h2>
+<p>You can use <a href="test.html#test-options">test options</a> to apply configuration to every test inside a suite, including nested suites. This is useful when you want to set timeouts, retries, or other options for a group of related tests.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;slow tests&#x27;</span>, { <span class="hljs-attr">timeout</span>: <span class="hljs-number">10_000</span> }, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;test 1&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* ... */</span> })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;test 2&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* ... */</span> })
+
+  <span class="hljs-comment">// nested suites also inherit the timeout</span>
+  <span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;nested&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;test 3&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* ... */</span> })
+  })
+})</code></pre></div>
+<h3 id="shuffle"><a class="anchor" href="#shuffle">#</a><code>shuffle</code></h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code> (configured by <a href="../config/sequence.html#sequence-shuffle"><code>sequence.shuffle</code></a>)</li>
+<li><strong>Alias:</strong> <a href="#describe-shuffle"><code>describe.shuffle</code></a></li>
+</ul>
+<p>Run tests within the suite in random order. This option is inherited by nested suites.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;randomized tests&#x27;</span>, { <span class="hljs-attr">shuffle</span>: <span class="hljs-literal">true</span> }, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;test 1&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* ... */</span> })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;test 2&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* ... */</span> })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;test 3&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* ... */</span> })
+})</code></pre></div>
+<h2 id="describe-skip"><a class="anchor" href="#describe-skip">#</a>describe.skip</h2>
+<ul>
+<li><strong>Alias:</strong> <code>suite.skip</code></li>
+</ul>
+<p>Use <code>describe.skip</code> in a suite to avoid running a particular describe block.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+describe.<span class="hljs-title function_">skip</span>(<span class="hljs-string">&#x27;skipped suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;sqrt&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// Suite skipped, no error</span>
+    assert.<span class="hljs-title function_">equal</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>), <span class="hljs-number">3</span>)
+  })
+})</code></pre></div>
+<h2 id="describe-skipif"><a class="anchor" href="#describe-skipif">#</a>describe.skipIf</h2>
+<ul>
+<li><strong>Alias:</strong> <code>suite.skipIf</code></li>
+</ul>
+<p>In some cases, you might run suites multiple times with different environments, and some of the suites might be environment-specific. Instead of wrapping the suite with <code>if</code>, you can use <code>describe.skipIf</code> to skip the suite whenever the condition is truthy.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> isDev = process.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-string">&#x27;development&#x27;</span>
+
+describe.<span class="hljs-title function_">skipIf</span>(isDev)(<span class="hljs-string">&#x27;prod only test suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// this test suite only runs in production</span>
+})</code></pre></div>
+<h2 id="describe-runif"><a class="anchor" href="#describe-runif">#</a>describe.runIf</h2>
+<ul>
+<li><strong>Alias:</strong> <code>suite.runIf</code></li>
+</ul>
+<p>Opposite of <a href="#describe-skipif">describe.skipIf</a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> isDev = process.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-string">&#x27;development&#x27;</span>
+
+describe.<span class="hljs-title function_">runIf</span>(isDev)(<span class="hljs-string">&#x27;dev only test suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// this test suite only runs in development</span>
+})</code></pre></div>
+<h2 id="describe-only"><a class="anchor" href="#describe-only">#</a>describe.only</h2>
+<ul>
+<li><strong>Alias:</strong> <code>suite.only</code></li>
+</ul>
+<p>Use <code>describe.only</code> to only run certain suites</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// Only this suite (and others marked with only) are run</span>
+describe.<span class="hljs-title function_">only</span>(<span class="hljs-string">&#x27;suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;sqrt&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    assert.<span class="hljs-title function_">equal</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>), <span class="hljs-number">3</span>)
+  })
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;other suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// ... will be skipped</span>
+})</code></pre></div>
+<p>Sometimes it is very useful to run <code>only</code> tests in a certain file, ignoring all other tests from the whole test suite, which pollute the output.</p>
+<p>In order to do that, run <code>vitest</code> with specific file containing the tests in question:</p>
+<div class="code"><pre><code class="hljs lang-shell">vitest interesting.test.ts</code></pre></div>
+<h2 id="describe-concurrent"><a class="anchor" href="#describe-concurrent">#</a>describe.concurrent</h2>
+<ul>
+<li><strong>Alias:</strong> <code>suite.concurrent</code></li>
+</ul>
+<p><code>describe.concurrent</code> runs all inner suites and tests in parallel</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// All suites and tests within this suite will be run in parallel</span>
+describe.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;concurrent test 1&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+  <span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;concurrent suite 2&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;concurrent test inner 1&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+    <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;concurrent test inner 2&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+  })
+  test.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;concurrent test 3&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+})</code></pre></div>
+<p>Set <code>concurrent</code> to <code>false</code> to opt out of concurrency inherited from a parent suite or <a href="../config/sequence.html#sequence-concurrent"><code>sequence.concurrent</code></a>:</p>
+<div class="code"><pre><code class="hljs lang-ts">describe.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;concurrent test&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+
+  <span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;sequential suite&#x27;</span>, { <span class="hljs-attr">concurrent</span>: <span class="hljs-literal">false</span> }, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;sequential test 1&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+    <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;sequential test 2&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+  })
+})</code></pre></div>
+<p><code>.skip</code>, <code>.only</code>, and <code>.todo</code> works with concurrent suites. All the following combinations are valid:</p>
+<div class="code"><pre><code class="hljs lang-ts">describe.<span class="hljs-title function_">concurrent</span>(<span class="hljs-comment">/* ... */</span>)
+describe.<span class="hljs-property">skip</span>.<span class="hljs-title function_">concurrent</span>(<span class="hljs-comment">/* ... */</span>) <span class="hljs-comment">// or describe.concurrent.skip(/* ... */)</span>
+describe.<span class="hljs-property">only</span>.<span class="hljs-title function_">concurrent</span>(<span class="hljs-comment">/* ... */</span>) <span class="hljs-comment">// or describe.concurrent.only(/* ... */)</span>
+describe.<span class="hljs-property">todo</span>.<span class="hljs-title function_">concurrent</span>(<span class="hljs-comment">/* ... */</span>) <span class="hljs-comment">// or describe.concurrent.todo(/* ... */)</span></code></pre></div>
+<p>When running concurrent tests, Snapshots and Assertions must use <code>expect</code> from the local <a href="../guide/test-context.html">Test Context</a> to ensure the right test is detected.</p>
+<div class="code"><pre><code class="hljs lang-ts">describe.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;concurrent test 1&#x27;</span>, <span class="hljs-title function_">async</span> ({ expect }) =&gt; {
+    <span class="hljs-title function_">expect</span>(foo).<span class="hljs-title function_">toMatchSnapshot</span>()
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;concurrent test 2&#x27;</span>, <span class="hljs-title function_">async</span> ({ expect }) =&gt; {
+    <span class="hljs-title function_">expect</span>(foo).<span class="hljs-title function_">toMatchSnapshot</span>()
+  })
+})</code></pre></div>
+<h2 id="describe-shuffle"><a class="anchor" href="#describe-shuffle">#</a>describe.shuffle</h2>
+<ul>
+<li><strong>Alias:</strong> <code>suite.shuffle</code></li>
+</ul>
+<p>Vitest provides a way to run all tests in random order via CLI flag <a href="../guide/cli.html"><code>--sequence.shuffle</code></a> or config option <a href="../config/sequence.html#sequence-shuffle"><code>sequence.shuffle</code></a>, but if you want to have only part of your test suite to run tests in random order, you can mark it with this flag.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// or describe(&#x27;suite&#x27;, { shuffle: true }, ...)</span>
+describe.<span class="hljs-title function_">shuffle</span>(<span class="hljs-string">&#x27;suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;random test 1&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;random test 2&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;random test 3&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+
+  <span class="hljs-comment">// `shuffle` is inherited</span>
+  <span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;still random&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;random 4.1&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+    <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;random 4.2&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+  })
+
+  <span class="hljs-comment">// disable shuffle inside</span>
+  <span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;not random&#x27;</span>, { <span class="hljs-attr">shuffle</span>: <span class="hljs-literal">false</span> }, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;in order 5.1&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+    <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;in order 5.2&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-comment">/* ... */</span> })
+  })
+})
+<span class="hljs-comment">// order depends on sequence.seed option in config (Date.now() by default)</span></code></pre></div>
+<p><code>.skip</code>, <code>.only</code>, and <code>.todo</code> works with random suites.</p>
+<h2 id="describe-todo"><a class="anchor" href="#describe-todo">#</a>describe.todo</h2>
+<ul>
+<li><strong>Alias:</strong> <code>suite.todo</code></li>
+</ul>
+<p>Use <code>describe.todo</code> to stub suites to be implemented later. An entry will be shown in the report for the tests so you know how many tests you still need to implement.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// An entry will be shown in the report for this suite</span>
+describe.<span class="hljs-title function_">todo</span>(<span class="hljs-string">&#x27;unimplemented suite&#x27;</span>)</code></pre></div>
+<h2 id="describe-each"><a class="anchor" href="#describe-each">#</a>describe.each</h2>
+<ul>
+<li><strong>Alias:</strong> <code>suite.each</code></li>
+</ul>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>While <code>describe.each</code> is provided for Jest compatibility,
+Vitest also has <a href="#describe-for"><code>describe.for</code></a> which simplifies argument types and aligns with <a href="test.html#test-for"><code>test.for</code></a>.</p>
+</div><p>Use <code>describe.each</code> if you have more than one test that depends on the same data.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+describe.<span class="hljs-title function_">each</span>([
+  { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">expected</span>: <span class="hljs-number">2</span> },
+  { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">expected</span>: <span class="hljs-number">3</span> },
+  { <span class="hljs-attr">a</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">b</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">expected</span>: <span class="hljs-number">3</span> },
+])(<span class="hljs-string">&#x27;describe object add($a, $b)&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ a, b, expected }</span>) =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">`returns <span class="hljs-subst">${expected}</span>`</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(a + b).<span class="hljs-title function_">toBe</span>(expected)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">`returned value not be greater than <span class="hljs-subst">${expected}</span>`</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(a + b).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeGreaterThan</span>(expected)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">`returned value not be less than <span class="hljs-subst">${expected}</span>`</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(a + b).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeLessThan</span>(expected)
+  })
+})</code></pre></div>
+<ul>
+<li>First row should be column names, separated by <code>|</code>;</li>
+<li>One or more subsequent rows of data supplied as template literal expressions using <code>${value}</code> syntax.</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+describe.<span class="hljs-property">each</span><span class="hljs-string">`
+  a               | b      | expected
+  <span class="hljs-subst">${<span class="hljs-number">1</span>}</span>            | <span class="hljs-subst">${<span class="hljs-number">1</span>}</span>   | <span class="hljs-subst">${<span class="hljs-number">2</span>}</span>
+  <span class="hljs-subst">${<span class="hljs-string">&#x27;a&#x27;</span>}</span>          | <span class="hljs-subst">${<span class="hljs-string">&#x27;b&#x27;</span>}</span> | <span class="hljs-subst">${<span class="hljs-string">&#x27;ab&#x27;</span>}</span>
+  <span class="hljs-subst">${[]}</span>           | <span class="hljs-subst">${<span class="hljs-string">&#x27;b&#x27;</span>}</span> | <span class="hljs-subst">${<span class="hljs-string">&#x27;b&#x27;</span>}</span>
+  <span class="hljs-subst">${{}}</span>           | <span class="hljs-subst">${<span class="hljs-string">&#x27;b&#x27;</span>}</span> | <span class="hljs-subst">${<span class="hljs-string">&#x27;[object Object]b&#x27;</span>}</span>
+  <span class="hljs-subst">${{ asd: <span class="hljs-number">1</span> }}</span>   | <span class="hljs-subst">${<span class="hljs-string">&#x27;b&#x27;</span>}</span> | <span class="hljs-subst">${<span class="hljs-string">&#x27;[object Object]b&#x27;</span>}</span>
+`</span>(<span class="hljs-string">&#x27;describe template string add($a, $b)&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ a, b, expected }</span>) =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">`returns <span class="hljs-subst">${expected}</span>`</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(a + b).<span class="hljs-title function_">toBe</span>(expected)
+  })
+})</code></pre></div>
+<h2 id="describe-for"><a class="anchor" href="#describe-for">#</a>describe.for</h2>
+<ul>
+<li><strong>Alias:</strong> <code>suite.for</code></li>
+</ul>
+<p>The difference from <code>describe.each</code> is how array case is provided in the arguments.
+Other non array case (including template string usage) works exactly same.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// `each` spreads array case</span>
+describe.<span class="hljs-title function_">each</span>([
+  [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>],
+  [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
+  [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>],
+])(<span class="hljs-string">&#x27;add(%i, %i) -&gt; %i&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">a, b, expected</span>) =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(a + b).<span class="hljs-title function_">toBe</span>(expected)
+  })
+})
+
+<span class="hljs-comment">// `for` doesn&#x27;t spread array case</span>
+describe.<span class="hljs-title function_">for</span>([
+  [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>],
+  [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
+  [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>],
+])(<span class="hljs-string">&#x27;add(%i, %i) -&gt; %i&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">[a, b, expected]</span>) =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(a + b).<span class="hljs-title function_">toBe</span>(expected)
+  })
+})</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#test-options">Test Options</a><a class="toc-3" href="#shuffle">shuffle</a><a class="toc-2" href="#describe-skip">describe.skip</a><a class="toc-2" href="#describe-skipif">describe.skipIf</a><a class="toc-2" href="#describe-runif">describe.runIf</a><a class="toc-2" href="#describe-only">describe.only</a><a class="toc-2" href="#describe-concurrent">describe.concurrent</a><a class="toc-2" href="#describe-shuffle">describe.shuffle</a><a class="toc-2" href="#describe-todo">describe.todo</a><a class="toc-2" href="#describe-each">describe.each</a><a class="toc-2" href="#describe-for">describe.for</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

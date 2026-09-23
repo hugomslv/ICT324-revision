@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-useless-concat (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-useless-concat <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-useless-concat">version en ligne</a></div>
+<h1>no-useless-concat</h1><p>It&#39;s unnecessary to concatenate two strings together, such as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> foo = <span class="hljs-string">&quot;a&quot;</span> + <span class="hljs-string">&quot;b&quot;</span>;</code></pre></div>
+<p>This code is likely the result of refactoring where a variable was removed from the concatenation (such as <code>&quot;a&quot; + b + &quot;b&quot;</code>). In such a case, the concatenation isn&#39;t important and the code can be rewritten as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> foo = <span class="hljs-string">&quot;ab&quot;</span>;</code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule aims to flag the concatenation of 2 literals when they could be combined into a single literal. Literals can be strings or template literals.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-useless-concat: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> a = <span class="hljs-string">`some`</span> + <span class="hljs-string">`string`</span>;
+
+<span class="hljs-comment">// these are the same as &quot;10&quot;</span>
+<span class="hljs-keyword">const</span> b = <span class="hljs-string">&#x27;1&#x27;</span> + <span class="hljs-string">&#x27;0&#x27;</span>;
+<span class="hljs-keyword">const</span> c = <span class="hljs-string">&#x27;1&#x27;</span> + <span class="hljs-string">`0`</span>;
+<span class="hljs-keyword">const</span> d = <span class="hljs-string">`1`</span> + <span class="hljs-string">&#x27;0&#x27;</span>;
+<span class="hljs-keyword">const</span> e = <span class="hljs-string">`1`</span> + <span class="hljs-string">`0`</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-useless-concat: &quot;error&quot;*/</span>
+
+<span class="hljs-comment">// when a non string is included</span>
+<span class="hljs-keyword">const</span> a = a + b;
+<span class="hljs-keyword">const</span> b = <span class="hljs-string">&#x27;1&#x27;</span> + a;
+<span class="hljs-keyword">const</span> c = <span class="hljs-number">1</span> + <span class="hljs-string">&#x27;1&#x27;</span>;
+<span class="hljs-keyword">const</span> d = <span class="hljs-number">1</span> - <span class="hljs-number">2</span>;
+<span class="hljs-comment">// when the string concatenation is multiline</span>
+<span class="hljs-keyword">const</span> e = <span class="hljs-string">&quot;foo&quot;</span> +
+    <span class="hljs-string">&quot;bar&quot;</span>;</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has no options.</p>
+<h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you don&#39;t want to be notified about unnecessary string concatenation, you can safely disable this rule.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

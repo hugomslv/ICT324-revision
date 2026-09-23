@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configure Plugins (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">ESLint</a> › use/configure/plugins  <a class="ext small" href="https://eslint.org/docs/latest/use/configure/plugins">version en ligne</a></div>
+<h1>Configure Plugins</h1><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This page explains how to configure plugins using the flat config format.</p>
+</div><p>You can extend ESLint with plugins in a variety of different ways. Plugins can include:</p>
+<ul>
+<li>Custom rules to validate if your code meets a certain expectation, and what to do if it does not meet that expectation.</li>
+<li>Custom configurations. Please refer to the plugin&#39;s documentation for details on how to use these configurations.</li>
+<li>Custom processors to extract JavaScript code from other kinds of files or preprocess code before linting.</li>
+</ul>
+<h2 id="configure-plugins"><a class="anchor" href="#configure-plugins">#</a>Configure Plugins</h2>
+<p>ESLint supports the use of third-party plugins. Plugins are simply objects that conform to a specific interface that ESLint recognizes.</p>
+<p>To configure plugins inside of a <a href="configuration-files.html#configuration-file">configuration file</a>, use the <code>plugins</code> key, which contains an object with properties representing plugin namespaces and values equal to the plugin object.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> example <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint-plugin-example&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">plugins</span>: {
+			example,
+		},
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;example/rule1&quot;</span>: <span class="hljs-string">&quot;warn&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>When creating a namespace for a plugin, the convention is to use the npm package name without the <code>eslint-plugin-</code> prefix. In the preceding example, <code>eslint-plugin-example</code> is assigned a namespace of <code>example</code>.</p>
+</div><h3 id="configure-a-local-plugin"><a class="anchor" href="#configure-a-local-plugin">#</a>Configure a Local Plugin</h3>
+<p>Plugins don&#39;t need to be published to npm for use with ESLint. You can also load plugins directly from a file, as in this example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> local <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./my-local-plugin.js&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">plugins</span>: {
+			local,
+		},
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;local/rule1&quot;</span>: <span class="hljs-string">&quot;warn&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>Here, the namespace <code>local</code> is used, but you can also use any name you&#39;d like instead.</p>
+<h3 id="configure-a-virtual-plugin"><a class="anchor" href="#configure-a-virtual-plugin">#</a>Configure a Virtual Plugin</h3>
+<p>Plugin definitions can be created virtually directly in your config. For example, suppose you have a rule contained in a file called <code>my-rule.js</code> that you&#39;d like to enable in your config. You can define a virtual plugin to do so, as in this example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> myRule <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./rules/my-rule.js&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">plugins</span>: {
+			<span class="hljs-attr">local</span>: {
+				<span class="hljs-attr">rules</span>: {
+					<span class="hljs-string">&quot;my-rule&quot;</span>: myRule,
+				},
+			},
+		},
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;local/my-rule&quot;</span>: <span class="hljs-string">&quot;warn&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>Here, the namespace <code>local</code> is used to define a virtual plugin. The rule <code>myRule</code> is then assigned a name of <code>my-rule</code> inside of the virtual plugin&#39;s <code>rules</code> object. (See <a href="https://eslint.org/docs/latest/extend/plugins" class="ext" title="lien en ligne (non disponible hors-ligne)">Create Plugins</a> for the complete format of a plugin.) You can then reference the rule as <code>local/my-rule</code> to configure it.</p>
+<h2 id="use-plugin-rules"><a class="anchor" href="#use-plugin-rules">#</a>Use Plugin Rules</h2>
+<p>You can use specific rules included in a plugin. To do this, specify the plugin
+in a configuration object using the <code>plugins</code> key. The value for the <code>plugin</code> key
+is an object where the name of the plugin is the property name and the value is the plugin object itself. Here&#39;s an example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> jsdoc <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint-plugin-jsdoc&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>],
+		<span class="hljs-attr">plugins</span>: {
+			<span class="hljs-attr">jsdoc</span>: jsdoc,
+		},
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;jsdoc/require-description&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+			<span class="hljs-string">&quot;jsdoc/check-values&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>In this configuration, the JSDoc plugin is defined to have the name <code>jsdoc</code>. The prefix <code>jsdoc/</code> in each rule name indicates that the rule is coming from the plugin with that name rather than from ESLint itself.</p>
+<p>Because the name of the plugin and the plugin object are both <code>jsdoc</code>, you can also shorten the configuration to this:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> jsdoc <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint-plugin-jsdoc&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>],
+		<span class="hljs-attr">plugins</span>: {
+			jsdoc,
+		},
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;jsdoc/require-description&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+			<span class="hljs-string">&quot;jsdoc/check-values&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>While this is the most common convention, you don&#39;t need to use the same name that the plugin prescribes. You can specify any prefix that you&#39;d like, such as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> jsdoc <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint-plugin-jsdoc&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>],
+		<span class="hljs-attr">plugins</span>: {
+			<span class="hljs-attr">jsd</span>: jsdoc,
+		},
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;jsd/require-description&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+			<span class="hljs-string">&quot;jsd/check-values&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>This configuration object uses <code>jsd</code> as the prefix plugin instead of <code>jsdoc</code>.</p>
+<h2 id="specify-a-processor"><a class="anchor" href="#specify-a-processor">#</a>Specify a Processor</h2>
+<p>Plugins may provide processors. Processors can extract JavaScript code from other kinds of files, then let ESLint lint the JavaScript code. Alternatively, processors can convert JavaScript code during preprocessing.</p>
+<p>To specify processors in a <a href="configuration-files.html#configuration-file">configuration file</a>, use the <code>processor</code> key and assign the name of processor in the format <code>namespace/processor-name</code>. For example, the following uses the processor from <code>@eslint/markdown</code> for <code>*.md</code> files.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> markdown <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/markdown&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.md&quot;</span>],
+		<span class="hljs-attr">plugins</span>: {
+			markdown,
+		},
+		<span class="hljs-attr">processor</span>: <span class="hljs-string">&quot;markdown/markdown&quot;</span>,
+	},
+]);</code></pre></div>
+<p>Processors may make named code blocks such as <code>0.js</code> and <code>1.js</code>. ESLint handles such a named code block as a child file of the original file. You can specify additional configurations for named code blocks with additional config objects. For example, the following disables the <code>strict</code> rule for the named code blocks which end with <code>.js</code> in markdown files.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> markdown <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/markdown&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-comment">// applies to all JavaScript files</span>
+	{
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">strict</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		},
+	},
+
+	<span class="hljs-comment">// applies to Markdown files</span>
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.md&quot;</span>],
+		<span class="hljs-attr">plugins</span>: {
+			markdown,
+		},
+		<span class="hljs-attr">processor</span>: <span class="hljs-string">&quot;markdown/markdown&quot;</span>,
+	},
+
+	<span class="hljs-comment">// applies only to JavaScript blocks inside of Markdown files</span>
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.md/*.js&quot;</span>],
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">strict</span>: <span class="hljs-string">&quot;off&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>ESLint only lints named code blocks when they are JavaScript files or if they match a <code>files</code> entry in a config object. Be sure to add a config object with a matching <code>files</code> entry if you want to lint non-JavaScript named code blocks. Also note that <a href="ignore.html">global ignores</a> apply to named code blocks as well.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> markdown <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/markdown&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-comment">// applies to Markdown files</span>
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.md&quot;</span>],
+		<span class="hljs-attr">plugins</span>: {
+			markdown,
+		},
+		<span class="hljs-attr">processor</span>: <span class="hljs-string">&quot;markdown/markdown&quot;</span>,
+	},
+
+	<span class="hljs-comment">// applies to all .jsx files, including jsx blocks inside of Markdown files</span>
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.jsx&quot;</span>],
+		<span class="hljs-attr">languageOptions</span>: {
+			<span class="hljs-attr">parserOptions</span>: {
+				<span class="hljs-attr">ecmaFeatures</span>: {
+					<span class="hljs-attr">jsx</span>: <span class="hljs-literal">true</span>,
+				},
+			},
+		},
+	},
+
+	<span class="hljs-comment">// ignore jsx blocks inside of test.md files</span>
+	{
+		<span class="hljs-attr">ignores</span>: [<span class="hljs-string">&quot;**/test.md/*.jsx&quot;</span>],
+	},
+]);</code></pre></div>
+<h2 id="specify-a-language"><a class="anchor" href="#specify-a-language">#</a>Specify a Language</h2>
+<p>Plugins may provide languages. Languages allow ESLint to lint programming languages besides JavaScript. To specify a language in a <a href="configuration-files.html#configuration-file">configuration file</a>, use the <code>language</code> key and assign the name of language in the format <code>namespace/language-name</code>. For example, the following uses the <code>json/jsonc</code> language from <code>@eslint/json</code> for <code>*.json</code> files.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> json <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/json&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.json&quot;</span>],
+		<span class="hljs-attr">plugins</span>: {
+			json,
+		},
+		<span class="hljs-attr">language</span>: <span class="hljs-string">&quot;json/jsonc&quot;</span>,
+	},
+]);</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>When you specify a <code>language</code> in a config object, <code>languageOptions</code> becomes specific to that language. Each language defines its own <code>languageOptions</code>, so check the documentation of the plugin to determine which options are available.</p>
+</div><h2 id="common-problems"><a class="anchor" href="#common-problems">#</a>Common Problems</h2>
+<ul>
+<li><a href="../troubleshooting/v9-rule-api-changes.html">Plugin rules using the ESLint &lt; v9.0.0 API</a></li>
+<li><a href="migration-guide.html#use-eslintrc-configs-in-flat-config">Plugin configurations have not been upgraded to flat config</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#configure-plugins">Configure Plugins</a><a class="toc-3" href="#configure-a-local-plugin">Configure a Local Plugin</a><a class="toc-3" href="#configure-a-virtual-plugin">Configure a Virtual Plugin</a><a class="toc-2" href="#use-plugin-rules">Use Plugin Rules</a><a class="toc-2" href="#specify-a-processor">Specify a Processor</a><a class="toc-2" href="#specify-a-language">Specify a Language</a><a class="toc-2" href="#common-problems">Common Problems</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>object-shorthand (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/object-shorthand <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/object-shorthand">version en ligne</a></div>
+<h1>object-shorthand</h1><p>ECMAScript 6 provides a concise form for defining object literal methods and properties. This
+syntax can make defining complex object literals much cleaner.</p>
+<p>Here are a few common examples using the ES5 syntax:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// properties</span>
+<span class="hljs-keyword">const</span> foo = {
+    <span class="hljs-attr">x</span>: x,
+    <span class="hljs-attr">y</span>: y,
+    <span class="hljs-attr">z</span>: z,
+};
+
+<span class="hljs-comment">// methods</span>
+<span class="hljs-keyword">const</span> bar = {
+    <span class="hljs-attr">a</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {},
+    <span class="hljs-attr">b</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}
+};</code></pre></div>
+<p>Now here are ES6 equivalents:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// properties</span>
+<span class="hljs-keyword">const</span> foo = {x, y, z};
+
+<span class="hljs-comment">// methods</span>
+<span class="hljs-keyword">const</span> bar = {
+    <span class="hljs-title function_">a</span>(<span class="hljs-params"></span>) {},
+    <span class="hljs-title function_">b</span>(<span class="hljs-params"></span>) {}
+};</code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule enforces the use of the shorthand syntax. This applies
+to all methods (including generators) defined in object literals and any
+properties defined where the key name matches name of the assigned variable.</p>
+<p>Each of the following properties would warn:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint object-shorthand: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> foo = {
+    <span class="hljs-attr">w</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {},
+    <span class="hljs-attr">x</span>: <span class="hljs-keyword">function</span> *() {},
+    [y]: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {},
+    <span class="hljs-attr">z</span>: z
+};</code></pre></div>
+<p>In that case the expected syntax would have been:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint object-shorthand: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> foo = {
+    <span class="hljs-title function_">w</span>(<span class="hljs-params"></span>) {},
+    *<span class="hljs-title function_">x</span>(<span class="hljs-params"></span>) {},
+    [y]() {},
+    z
+};</code></pre></div>
+<p>This rule does not flag arrow functions inside of object literals.
+The following will <em>not</em> warn:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint object-shorthand: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> foo = {
+    <span class="hljs-attr">x</span>: <span class="hljs-function">(<span class="hljs-params">y</span>) =&gt;</span> y
+};</code></pre></div>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>The rule takes an option which specifies when it should be applied. It can be set to one of the following values:</p>
+<ul>
+<li><code>&quot;always&quot;</code> (default) expects that the shorthand will be used whenever possible.</li>
+<li><code>&quot;methods&quot;</code> ensures the method shorthand is used (also applies to generators).</li>
+<li><code>&quot;properties&quot;</code> ensures the property shorthand is used (where the key and variable name match).</li>
+<li><code>&quot;never&quot;</code> ensures that no property or method shorthand is used in any object literal.</li>
+<li><code>&quot;consistent&quot;</code> ensures that either all shorthand or all long-form will be used in an object literal.</li>
+<li><code>&quot;consistent-as-needed&quot;</code> ensures that either all shorthand or all long-form will be used in an object literal, but ensures all shorthand whenever possible.</li>
+</ul>
+<p>You can set the option in configuration like this:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;object-shorthand&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;always&quot;</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Additionally, the rule takes an optional object configuration:</p>
+<ul>
+<li><code>&quot;avoidQuotes&quot;: true</code> indicates that long-form syntax is preferred whenever the object key is a string literal (default: <code>false</code>). Note that this option can only be enabled when the string option is set to <code>&quot;always&quot;</code>, <code>&quot;methods&quot;</code>, or <code>&quot;properties&quot;</code>.</li>
+<li><code>&quot;ignoreConstructors&quot;: true</code> can be used to prevent the rule from reporting errors for constructor functions. (By default, the rule treats constructors the same way as other functions.) Note that this option can only be enabled when the string option is set to <code>&quot;always&quot;</code> or <code>&quot;methods&quot;</code>.</li>
+<li><code>&quot;methodsIgnorePattern&quot;</code> (<code>string</code>) for methods whose names match this regex pattern, the method shorthand will not be enforced. Note that this option can only be used when the string option is set to <code>&quot;always&quot;</code> or <code>&quot;methods&quot;</code>.</li>
+<li><code>&quot;avoidExplicitReturnArrows&quot;: true</code> indicates that methods are preferred over explicit-return arrow functions for function properties. (By default, the rule allows either of these.) Note that this option can only be enabled when the string option is set to <code>&quot;always&quot;</code> or <code>&quot;methods&quot;</code>.</li>
+</ul>
+<h3 id="avoidquotes"><a class="anchor" href="#avoidquotes">#</a>avoidQuotes</h3>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;object-shorthand&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;always&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;avoidQuotes&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Example of <strong>incorrect</strong> code for this rule with the <code>&quot;always&quot;, { &quot;avoidQuotes&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint object-shorthand: [&quot;error&quot;, &quot;always&quot;, { &quot;avoidQuotes&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = {
+    <span class="hljs-string">&quot;bar-baz&quot;</span>() {}
+};</code></pre></div>
+</div><p>Example of <strong>correct</strong> code for this rule with the <code>&quot;always&quot;, { &quot;avoidQuotes&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint object-shorthand: [&quot;error&quot;, &quot;always&quot;, { &quot;avoidQuotes&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = {
+    <span class="hljs-string">&quot;bar-baz&quot;</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {},
+    <span class="hljs-string">&quot;qux&quot;</span>: qux
+};</code></pre></div>
+</div><h3 id="ignoreconstructors"><a class="anchor" href="#ignoreconstructors">#</a>ignoreConstructors</h3>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;object-shorthand&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;always&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;ignoreConstructors&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Example of <strong>correct</strong> code for this rule with the <code>&quot;always&quot;, { &quot;ignoreConstructors&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint object-shorthand: [&quot;error&quot;, &quot;always&quot;, { &quot;ignoreConstructors&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = {
+    <span class="hljs-title class_">ConstructorFunction</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}
+};</code></pre></div>
+</div><div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;object-shorthand&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;methods&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;ignoreConstructors&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Example of <strong>incorrect</strong> code for this rule with the <code>&quot;methods&quot;, { &quot;ignoreConstructors&quot;: false }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint object-shorthand: [&quot;error&quot;, &quot;methods&quot;, { &quot;ignoreConstructors&quot;: false }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = {
+	<span class="hljs-string">&quot;ConstructorFunction&quot;</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}
+};</code></pre></div>
+</div><p>Example of <strong>correct</strong> code for this rule with the <code>&quot;methods&quot;, { &quot;ignoreConstructors&quot;: false }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint object-shorthand: [&quot;error&quot;, &quot;methods&quot;, { &quot;ignoreConstructors&quot;: false }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = {
+	<span class="hljs-string">&quot;ConstructorFunction&quot;</span>() {}
+};</code></pre></div>
+</div><h3 id="methodsignorepattern"><a class="anchor" href="#methodsignorepattern">#</a>methodsIgnorePattern</h3>
+<p>Example of <strong>correct</strong> code for this rule with the <code>&quot;always&quot;, { &quot;methodsIgnorePattern&quot;: &quot;^bar$&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint object-shorthand: [&quot;error&quot;, &quot;always&quot;, { &quot;methodsIgnorePattern&quot;: &quot;^bar$&quot; }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = {
+    <span class="hljs-attr">bar</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}
+};</code></pre></div>
+</div><h3 id="avoidexplicitreturnarrows"><a class="anchor" href="#avoidexplicitreturnarrows">#</a>avoidExplicitReturnArrows</h3>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;object-shorthand&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;always&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;avoidExplicitReturnArrows&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Example of <strong>incorrect</strong> code for this rule with the <code>&quot;always&quot;, { &quot;avoidExplicitReturnArrows&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint object-shorthand: [&quot;error&quot;, &quot;always&quot;, { &quot;avoidExplicitReturnArrows&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = {
+  <span class="hljs-attr">foo</span>: <span class="hljs-function">(<span class="hljs-params">bar, baz</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> bar + baz;
+  },
+
+  <span class="hljs-attr">qux</span>: <span class="hljs-function">(<span class="hljs-params">foobar</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> foobar * <span class="hljs-number">2</span>;
+  }
+};</code></pre></div>
+</div><p>Example of <strong>correct</strong> code for this rule with the <code>&quot;always&quot;, { &quot;avoidExplicitReturnArrows&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint object-shorthand: [&quot;error&quot;, &quot;always&quot;, { &quot;avoidExplicitReturnArrows&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = {
+  <span class="hljs-title function_">foo</span>(<span class="hljs-params">bar, baz</span>) {
+    <span class="hljs-keyword">return</span> bar + baz;
+  },
+
+  <span class="hljs-attr">qux</span>: <span class="hljs-function"><span class="hljs-params">foobar</span> =&gt;</span> foobar * <span class="hljs-number">2</span>
+};</code></pre></div>
+</div><p>Example of <strong>incorrect</strong> code for this rule with the <code>&quot;consistent&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint object-shorthand: [2, &quot;consistent&quot;]*/</span>
+
+<span class="hljs-keyword">const</span> foo = {
+    a,
+    <span class="hljs-attr">b</span>: <span class="hljs-string">&quot;foo&quot;</span>,
+};</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;consistent&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint object-shorthand: [2, &quot;consistent&quot;]*/</span>
+
+<span class="hljs-keyword">const</span> foo = {
+    <span class="hljs-attr">a</span>: a,
+    <span class="hljs-attr">b</span>: <span class="hljs-string">&quot;foo&quot;</span>
+};
+
+<span class="hljs-keyword">const</span> bar = {
+    a,
+    b,
+};</code></pre></div>
+</div><p>Example of <strong>incorrect</strong> code with the <code>&quot;consistent-as-needed&quot;</code> option, which is very similar to <code>&quot;consistent&quot;</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint object-shorthand: [2, &quot;consistent-as-needed&quot;]*/</span>
+
+<span class="hljs-keyword">const</span> foo = {
+    <span class="hljs-attr">a</span>: a,
+    <span class="hljs-attr">b</span>: b,
+};</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>Anyone not yet in an ES6 environment would not want to apply this rule. Others may find the terseness of the shorthand
+syntax harder to read and may not want to encourage it with this rule.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="no-useless-rename.html"><code>no-useless-rename</code></a></p></div><h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#avoidquotes">avoidQuotes</a><a class="toc-3" href="#ignoreconstructors">ignoreConstructors</a><a class="toc-3" href="#methodsignorepattern">methodsIgnorePattern</a><a class="toc-3" href="#avoidexplicitreturnarrows">avoidExplicitReturnArrows</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

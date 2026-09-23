@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>func-names (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/func-names <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/func-names">version en ligne</a></div>
+<h1>func-names</h1><p>A pattern that&#39;s becoming more common is to give function expressions names to aid in debugging. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title class_">Foo</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">bar</span> = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};</code></pre></div>
+<p>Adding the second <code>bar</code> in the above example is optional.  If you leave off the function name then when the function throws an exception you are likely to get something similar to <code>anonymous function</code> in the stack trace.  If you provide the optional name for a function expression then you will get the name of the function expression in the stack trace.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule can enforce or disallow the use of named function expressions.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has a string option:</p>
+<ul>
+<li><code>&quot;always&quot;</code> (default) requires function expressions to have a name.</li>
+<li><code>&quot;as-needed&quot;</code> requires function expressions to have a name, if the name isn&#39;t assigned automatically per the ECMAScript specification.</li>
+<li><code>&quot;never&quot;</code> disallows named function expressions, except in recursive functions, where a name is needed.</li>
+</ul>
+<p>This rule has an object option:</p>
+<ul>
+<li><code>&quot;generators&quot;: &quot;always&quot; | &quot;as-needed&quot; | &quot;never&quot;</code><ul>
+<li><code>&quot;always&quot;</code> require named generators.</li>
+<li><code>&quot;as-needed&quot;</code> require named generators if the name isn&#39;t assigned automatically per the ECMAScript specification.</li>
+<li><code>&quot;never&quot;</code> disallow named generators where possible.</li>
+</ul>
+</li>
+</ul>
+<p>When a value for <code>generators</code> is not provided the behavior for generator functions falls back to the base option.</p>
+<p>Please note that <code>&quot;always&quot;</code> and <code>&quot;as-needed&quot;</code> require function expressions and function declarations in <code>export default</code> declarations to have a name.</p>
+<h3 id="always"><a class="anchor" href="#always">#</a>always</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the default <code>&quot;always&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-names: [&quot;error&quot;, &quot;always&quot;]*/</span>
+
+<span class="hljs-title class_">Foo</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">bar</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+
+<span class="hljs-keyword">const</span> cat = {
+  <span class="hljs-attr">meow</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}
+}
+
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}())
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the default <code>&quot;always&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-names: [&quot;error&quot;, &quot;always&quot;]*/</span>
+
+<span class="hljs-title class_">Foo</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">bar</span> = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};
+
+<span class="hljs-keyword">const</span> cat = {
+  <span class="hljs-title function_">meow</span>(<span class="hljs-params"></span>) {}
+}
+
+(<span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}())
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}</code></pre></div>
+</div><h3 id="as-needed"><a class="anchor" href="#as-needed">#</a>as-needed</h3>
+<p>ECMAScript 6 introduced a <code>name</code> property on all functions. The value of <code>name</code> is determined by evaluating the code around the function to see if a name can be inferred. For example, a function assigned to a variable will automatically have a <code>name</code> property equal to the name of the variable. The value of <code>name</code> is then used in stack traces for easier debugging.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;as-needed&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-names: [&quot;error&quot;, &quot;as-needed&quot;]*/</span>
+
+<span class="hljs-title class_">Foo</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">bar</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}())
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;as-needed&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-names: [&quot;error&quot;, &quot;as-needed&quot;]*/</span>
+
+<span class="hljs-keyword">const</span> bar = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+
+<span class="hljs-keyword">const</span> cat = {
+  <span class="hljs-attr">meow</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+    #bar = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+    baz = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+}
+
+quux ??= <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+
+(<span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}())
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}</code></pre></div>
+</div><h3 id="never"><a class="anchor" href="#never">#</a>never</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;never&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-names: [&quot;error&quot;, &quot;never&quot;]*/</span>
+
+<span class="hljs-title class_">Foo</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">bar</span> = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};
+
+(<span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}())</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;never&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-names: [&quot;error&quot;, &quot;never&quot;]*/</span>
+
+<span class="hljs-title class_">Foo</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">bar</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}())</code></pre></div>
+</div><h3 id="generators"><a class="anchor" href="#generators">#</a>generators</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;always&quot;, { &quot;generators&quot;: &quot;as-needed&quot; }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-names: [&quot;error&quot;, &quot;always&quot;, { &quot;generators&quot;: &quot;as-needed&quot; }]*/</span>
+
+(<span class="hljs-keyword">function</span>*() {
+    <span class="hljs-comment">// ...</span>
+}())</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;always&quot;, { &quot;generators&quot;: &quot;as-needed&quot; }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-names: [&quot;error&quot;, &quot;always&quot;, { &quot;generators&quot;: &quot;as-needed&quot; }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span>*() {};</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;always&quot;, { &quot;generators&quot;: &quot;never&quot; }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-names: [&quot;error&quot;, &quot;always&quot;, { &quot;generators&quot;: &quot;never&quot; }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-title function_">bar</span>(<span class="hljs-keyword">function</span> *<span class="hljs-title function_">baz</span>(<span class="hljs-params"></span>) {});</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;always&quot;, { &quot;generators&quot;: &quot;never&quot; }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-names: [&quot;error&quot;, &quot;always&quot;, { &quot;generators&quot;: &quot;never&quot; }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-title function_">bar</span>(<span class="hljs-keyword">function</span> *() {});</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;as-needed&quot;, { &quot;generators&quot;: &quot;never&quot; }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-names: [&quot;error&quot;, &quot;as-needed&quot;, { &quot;generators&quot;: &quot;never&quot; }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-title function_">bar</span>(<span class="hljs-keyword">function</span> *<span class="hljs-title function_">baz</span>(<span class="hljs-params"></span>) {});</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;as-needed&quot;, { &quot;generators&quot;: &quot;never&quot; }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-names: [&quot;error&quot;, &quot;as-needed&quot;, { &quot;generators&quot;: &quot;never&quot; }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-title function_">bar</span>(<span class="hljs-keyword">function</span> *() {});</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for this rule with the <code>&quot;never&quot;, { &quot;generators&quot;: &quot;always&quot; }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-names: [&quot;error&quot;, &quot;never&quot;, { &quot;generators&quot;: &quot;always&quot; }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-title function_">bar</span>(<span class="hljs-keyword">function</span> *() {});</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>&quot;never&quot;, { &quot;generators&quot;: &quot;always&quot; }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-names: [&quot;error&quot;, &quot;never&quot;, { &quot;generators&quot;: &quot;always&quot; }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-title function_">bar</span>(<span class="hljs-keyword">function</span> *<span class="hljs-title function_">baz</span>(<span class="hljs-params"></span>) {});</code></pre></div>
+</div><h2 id="compatibility"><a class="anchor" href="#compatibility">#</a>Compatibility</h2>
+<ul>
+<li><strong>JSCS</strong>: <a href="https://jscs-dev.github.io/rule/requireAnonymousFunctions">requireAnonymousFunctions</a></li>
+<li><strong>JSCS</strong>: <a href="https://jscs-dev.github.io/rule/disallowAnonymousFunctions">disallowAnonymousFunctions</a></li>
+</ul>
+<h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://web.archive.org/web/20201112040809/http://markdaggett.com/blog/2013/02/15/functions-explained/">https://web.archive.org/web/20201112040809/http://markdaggett.com/blog/2013/02/15/functions-explained/</a></li><li><a class="ext" href="https://2ality.com/2015/09/function-names-es6.html">https://2ality.com/2015/09/function-names-es6.html</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#always">always</a><a class="toc-3" href="#as-needed">as-needed</a><a class="toc-3" href="#never">never</a><a class="toc-3" href="#generators">generators</a><a class="toc-2" href="#compatibility">Compatibility</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

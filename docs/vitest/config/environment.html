@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>environment | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/environment  <a class="ext small" href="https://vitest.dev/config/environment">version en ligne</a></div>
+<h1 id="environment"><a class="anchor" href="#environment">#</a>environment</h1>
+<ul>
+<li><strong>Type:</strong> <code>&#39;node&#39; | &#39;jsdom&#39; | &#39;happy-dom&#39; | &#39;edge-runtime&#39; | string</code></li>
+<li><strong>Default:</strong> <code>&#39;node&#39;</code></li>
+<li><strong>CLI:</strong> <code>--environment=&lt;env&gt;</code></li>
+</ul>
+<p>The environment that will be used for testing. The default environment in Vitest
+is a Node.js environment. If you are building a web application, you can use
+browser-like environment through either <a href="https://github.com/jsdom/jsdom"><code>jsdom</code></a>
+or <a href="https://github.com/capricorn86/happy-dom"><code>happy-dom</code></a> instead.
+If you are building edge functions, you can use <a href="https://edge-runtime.vercel.app/packages/vm"><code>edge-runtime</code></a> environment</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You can also use <a href="../guide/browser/index.html">Browser Mode</a> to run integration or unit tests in the browser without mocking the environment.</p>
+</div><p>To define custom options for your environment, use <a href="environmentoptions.html"><code>environmentOptions</code></a>.</p>
+<p>By adding a <code>@vitest-environment</code> docblock or comment at the top of the file,
+you can specify another environment to be used for all tests in that file:</p>
+<p>Docblock style:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@vitest</span>-environment jsdom
+ */</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;use jsdom in this test file&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> element = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;div&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(element).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeNull</span>()
+})</code></pre></div>
+<p>Comment style:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// @vitest-environment happy-dom</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;use happy-dom in this test file&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> element = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;div&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(element).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeNull</span>()
+})</code></pre></div>
+<p>For compatibility with Jest, there is also a <code>@jest-environment</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@jest</span>-environment jsdom
+ */</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;use jsdom in this test file&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> element = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;div&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(element).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeNull</span>()
+})</code></pre></div>
+<p>You can also define a custom environment. When non-builtin environment is used, Vitest will try to load the file if it&#39;s relative or absolute, or a package <code>vitest-environment-${name}</code>, if the name is a bare specifier.</p>
+<p>The custom environment file should export an object with the shape of <code>Environment</code>:</p>
+<div class="code"><div class="code-title">environment.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">Environment</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> &lt;<span class="hljs-title class_">Environment</span>&gt;{
+  <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;custom&#x27;</span>,
+  <span class="hljs-attr">viteEnvironment</span>: <span class="hljs-string">&#x27;ssr&#x27;</span>,
+  <span class="hljs-title function_">setup</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// custom setup</span>
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-title function_">teardown</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// called after all tests with this env have been run</span>
+      }
+    }
+  }
+}</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>The <code>viteEnvironment</code> field corresponds to the environment defined by the <a href="https://vite.dev/guide/api-environment#environment-api">Vite Environment API</a>. By default, Vite exposes <code>client</code> (for the browser) and <code>ssr</code> (for the server) environments.</p>
+</div><p>Vitest also exposes <code>builtinEnvironments</code> through <code>vitest/environments</code> entry, in case you just want to extend it. You can read more about extending environments in <a href="../guide/environment.html">our guide</a>.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>jsdom environment exposes <code>jsdom</code> global variable equal to the current <a href="https://github.com/jsdom/jsdom">JSDOM</a> instance. If you want TypeScript to recognize it, you can add <code>vitest/jsdom</code> to your <code>tsconfig.json</code> when you use this environment:</p>
+<div class="code"><div class="code-title">tsconfig.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;compilerOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;types&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;vitest/jsdom&quot;</span><span class="hljs-punctuation">]</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+</div>
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Common Errors | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/common-errors  <a class="ext small" href="https://vitest.dev/guide/common-errors">version en ligne</a></div>
+<h1 id="common-errors"><a class="anchor" href="#common-errors">#</a>Common Errors</h1>
+<h2 id="cannot-find-module-relative-path"><a class="anchor" href="#cannot-find-module-relative-path">#</a>Cannot find module &#39;./relative-path&#39;</h2>
+<p>If you receive an error that module cannot be found, it might mean several different things:</p>
+<ol>
+<li><p>You misspelled the path. Make sure the path is correct.</p>
+</li>
+<li><p>It&#39;s possible that you rely on <code>baseUrl</code> in your <code>tsconfig.json</code>. Vite doesn&#39;t take into account <code>tsconfig.json</code> by default, so you might need to install <a href="https://npmx.dev/package/vite-tsconfig-paths"><code>vite-tsconfig-paths</code></a> yourself, if you rely on this behavior.</p>
+</li>
+</ol>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> tsconfigPaths <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite-tsconfig-paths&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [<span class="hljs-title function_">tsconfigPaths</span>()]
+})</code></pre></div>
+<p>Or rewrite your path to not be relative to root:</p>
+<div class="code"><pre><code class="hljs lang-diff"><span class="hljs-deletion">- import helpers from &#x27;src/helpers&#x27;</span>
+<span class="hljs-addition">+ import helpers from &#x27;../src/helpers&#x27;</span></code></pre></div>
+<ol start="3">
+<li>Make sure you don&#39;t have relative <a href="../config/alias.html">aliases</a>. Vite treats them as relative to the file where the import is instead of the root.</li>
+</ol>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">alias</span>: {
+      <span class="hljs-string">&#x27;@/&#x27;</span>: <span class="hljs-string">&#x27;./src/&#x27;</span>,
+      <span class="hljs-string">&#x27;@/&#x27;</span>: <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(<span class="hljs-string">&#x27;./src/&#x27;</span>, <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">url</span>).<span class="hljs-property">pathname</span>,
+    }
+  }
+})</code></pre></div>
+<h2 id="failed-to-terminate-worker"><a class="anchor" href="#failed-to-terminate-worker">#</a>Failed to Terminate Worker</h2>
+<p>This error can happen when NodeJS&#39;s <code>fetch</code> is used with <a href="../config/pool.html#threads"><code>pool: &#39;threads&#39;</code></a>. See <a href="https://github.com/vitest-dev/vitest/issues/3077">#3077</a> for details.</p>
+<p>The default <a href="../config/pool.html#forks"><code>pool: &#39;forks&#39;</code></a> does not have this issue. If you&#39;ve explicitly set <code>pool: &#39;threads&#39;</code>, switching back to <code>&#39;forks&#39;</code> or using <a href="../config/pool.html#vmforks"><code>&#39;vmForks&#39;</code></a> will resolve it.</p>
+<h2 id="custom-package-conditions-are-not-resolved"><a class="anchor" href="#custom-package-conditions-are-not-resolved">#</a>Custom package conditions are not resolved</h2>
+<p>If you are using custom conditions in your <code>package.json</code> <a href="https://nodejs.org/api/packages.html#package-entry-points">exports</a> or <a href="https://nodejs.org/api/packages.html#subpath-imports">subpath imports</a>, you may find that Vitest does not respect these conditions by default.</p>
+<p>For example, if you have the following in your <code>package.json</code>:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;exports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;.&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;custom&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./lib/custom.js&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;import&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./lib/index.js&quot;</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;#internal&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;custom&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./src/internal.js&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;default&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./lib/internal.js&quot;</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>By default, Vitest will only use the <code>import</code> and <code>default</code> conditions. To make Vitest respect custom conditions, you need to configure <a href="https://vite.dev/config/ssr-options#ssr-resolve-conditions"><code>ssr.resolve.conditions</code></a> in your Vitest config:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">ssr</span>: {
+    <span class="hljs-attr">resolve</span>: {
+      <span class="hljs-attr">conditions</span>: [<span class="hljs-string">&#x27;custom&#x27;</span>, <span class="hljs-string">&#x27;import&#x27;</span>, <span class="hljs-string">&#x27;default&#x27;</span>],
+    },
+  },
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Why <code>ssr.resolve.conditions</code> and not <code>resolve.conditions</code>?</div><p>Vitest follows Vite&#39;s configuration convention:</p>
+<ul>
+<li><a href="https://vite.dev/config/shared-options#resolve-conditions"><code>resolve.conditions</code></a> applies to Vite&#39;s <code>client</code> environment, which corresponds to Vitest&#39;s browser mode, jsdom, happy-dom, or custom environments with <code>viteEnvironment: &#39;client&#39;</code>.</li>
+<li><a href="https://vite.dev/config/ssr-options#ssr-resolve-conditions"><code>ssr.resolve.conditions</code></a> applies to Vite&#39;s <code>ssr</code> environment, which corresponds to Vitest&#39;s node environment or custom environments with <code>viteEnvironment: &#39;ssr&#39;</code>.</li>
+</ul>
+<p>Since Vitest defaults to the <code>node</code> environment (which uses <code>viteEnvironment: &#39;ssr&#39;</code>), module resolution uses <code>ssr.resolve.conditions</code>. This applies to both package exports and subpath imports.</p>
+<p>You can learn more about Vite environments and Vitest environments in <a href="../config/environment.html"><code>environment</code></a>.</p>
+</div><h2 id="segfaults-and-native-code-errors"><a class="anchor" href="#segfaults-and-native-code-errors">#</a>Segfaults and Native Code Errors</h2>
+<p>Running <a href="https://nodejs.org/api/addons.html">native NodeJS modules</a> in <code>pool: &#39;threads&#39;</code> can run into cryptic errors coming from the native code.</p>
+<ul>
+<li><code>Segmentation fault (core dumped)</code></li>
+<li><code>thread &#39;&lt;unnamed&gt;&#39; panicked at &#39;assertion failed</code></li>
+<li><code>Abort trap: 6</code></li>
+<li><code>internal error: entered unreachable code</code></li>
+</ul>
+<p>In these cases the native module is likely not built to be multi-thread safe. As a workaround, you can switch to <code>pool: &#39;forks&#39;</code> which runs the test cases in multiple <code>node:child_process</code> instead of multiple <code>node:worker_threads</code>.</p>
+<div class="code-group"><div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">pool</span>: <span class="hljs-string">&#x27;forks&#x27;</span>,
+  },
+})</code></pre></div>
+<div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">vitest --pool=forks</code></pre></div>
+</div><h2 id="time-zone-does-not-change-in-worker-threads"><a class="anchor" href="#time-zone-does-not-change-in-worker-threads">#</a>Time Zone Does Not Change in Worker Threads</h2>
+<p>Setting <code>process.env.TZ</code> in a setup file or in a test, or setting <code>TZ</code> via <a href="../config/env.html"><code>env</code></a>, has no effect on <code>Date</code> in <code>pool: &#39;threads&#39;</code> and <code>pool: &#39;vmThreads&#39;</code>. Node.js applies <code>TZ</code> only when the main thread sets it. A worker thread sees the new value on <code>process.env</code>, but keeps the time zone of the main process.</p>
+<div class="code"><pre><code class="hljs lang-ts">process.<span class="hljs-property">env</span>.<span class="hljs-property">TZ</span> = <span class="hljs-string">&#x27;Asia/Tokyo&#x27;</span>
+<span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-string">&#x27;2026-01-01T00:00:00Z&#x27;</span>).<span class="hljs-title function_">getHours</span>() <span class="hljs-comment">// 9 in forks, unchanged in threads</span></code></pre></div>
+<p>Set the time zone before workers start. Use the shell, the config file, or <a href="../config/globalsetup.html"><code>globalSetup</code></a>; all of them run in the main process and work in every pool.</p>
+<div class="code-group"><div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">TZ=Asia/Tokyo vitest</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+process.<span class="hljs-property">env</span>.<span class="hljs-property">TZ</span> = <span class="hljs-string">&#x27;Asia/Tokyo&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({})</code></pre></div>
+<div class="code"><div class="code-title">globalSetup.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+  process.<span class="hljs-property">env</span>.<span class="hljs-property">TZ</span> = <span class="hljs-string">&#x27;Asia/Tokyo&#x27;</span>
+}</code></pre></div>
+</div><p>If tests need different time zones at runtime, use <code>pool: &#39;forks&#39;</code> or <code>pool: &#39;vmForks&#39;</code>, where each worker is a separate process, or pass the <code>timeZone</code> option to <code>Intl.DateTimeFormat</code> instead of changing <code>TZ</code>.</p>
+<h2 id="unhandled-promise-rejection"><a class="anchor" href="#unhandled-promise-rejection">#</a>Unhandled Promise Rejection</h2>
+<p>This error happens when a Promise rejects but no <code>.catch()</code> handler or <code>await</code> is attached to it before the microtask queue flushes. This behavior comes from JavaScript itself and is not specific to Vitest. Learn more in the <a href="https://nodejs.org/api/process.html#event-unhandledrejection">Node.js documentation</a>.</p>
+<p>A common cause is calling an async function without <code>await</code>ing it:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">fetchUser</span>(<span class="hljs-params">id</span>) {
+  <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`/api/users/<span class="hljs-subst">${id}</span>`</span>)
+  <span class="hljs-keyword">if</span> (!res.<span class="hljs-property">ok</span>) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`User <span class="hljs-subst">${id}</span> not found`</span>)
+  }
+  <span class="hljs-keyword">return</span> res.<span class="hljs-title function_">json</span>()
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;fetches user&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-title function_">fetchUser</span>(<span class="hljs-number">123</span>)
+})</code></pre></div>
+<p>Because <code>fetchUser()</code> is not <code>await</code>ed, its rejection has no handler and Vitest reports:</p>
+<div class="code"><pre><code class="hljs lang-txt">Unhandled Rejection: Error: User 123 not found</code></pre></div>
+<h3 id="fix"><a class="anchor" href="#fix">#</a>Fix</h3>
+<p><code>await</code> the promise so Vitest can catch the error:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;fetches user&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetchUser</span>(<span class="hljs-number">123</span>)
+})</code></pre></div>
+<p>If you expect the call to throw, use <a href="../api/expect.html#rejects"><code>expect().rejects</code></a>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;rejects for missing user&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">fetchUser</span>(<span class="hljs-number">123</span>)).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;User 123 not found&#x27;</span>)
+})</code></pre></div>
+<h2 id="package-fails-to-load-in-vitest-but-works-in-your-app"><a class="anchor" href="#package-fails-to-load-in-vitest-but-works-in-your-app">#</a>Package fails to load in Vitest but works in your app</h2>
+<p>Some packages work in an app build but fail in Vitest because they are only valid after a bundler has rewritten or resolved them. When Vitest externalizes a dependency, Node.js loads it directly, so Node&#39;s ESM and package rules apply. See Node.js documentation on <a href="https://nodejs.org/docs/latest/api/esm.html">ECMAScript modules</a> and <a href="https://nodejs.org/docs/latest/api/packages.html">packages</a> for the precise rules.</p>
+<p>Common examples include packages that:</p>
+<ul>
+<li>ship ESM syntax in <code>.js</code> files without <code>&quot;type&quot;: &quot;module&quot;</code></li>
+<li>use extensionless relative imports in ESM files</li>
+<li>have incorrect <code>exports</code>, <code>imports</code>, <code>main</code>, or <code>module</code> entries</li>
+<li>mix CommonJS and ESM entry points in a way that only works after bundling</li>
+<li>import CSS or other non-JavaScript files that are expected to be handled by a bundler</li>
+</ul>
+<p>You might see errors such as:</p>
+<ul>
+<li><code>Cannot find module &#39;./relative-path&#39; imported from ...</code></li>
+<li><code>Unexpected token &#39;export&#39;</code></li>
+<li><code>Cannot use import statement outside a module</code></li>
+<li><code>Module ... seems to be an ES Module but shipped in a CommonJS package.</code></li>
+<li><code>Unknown file extension &quot;.css&quot;</code></li>
+</ul>
+<p>When possible, fix the package so Node.js can load it directly: add <code>&quot;type&quot;: &quot;module&quot;</code> for ESM <code>.js</code> files, use <code>.mjs</code>, include explicit file extensions in ESM imports, and make sure <code>exports</code> points to files Node.js can load.</p>
+<p>If you cannot fix the package itself, inline it so Vite handles it instead of passing it to Node.js as an external dependency. Inline the whole dependency chain that leads to the invalid package. If your source imports <code>wrapper-package</code>, and <code>wrapper-package</code> imports <code>broken-package</code>, inline both packages:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">server</span>: {
+      <span class="hljs-attr">deps</span>: {
+        <span class="hljs-attr">inline</span>: [<span class="hljs-string">&#x27;wrapper-package&#x27;</span>, <span class="hljs-string">&#x27;broken-package&#x27;</span>],
+      },
+    },
+  },
+})</code></pre></div>
+<p>You can also use Vite&#39;s <a href="https://vite.dev/config/ssr-options#ssr-resolve-noexternal"><code>ssr.resolve.noExternal</code></a> for the same purpose. Vitest merges <code>ssr.resolve.noExternal</code> into <a href="../config/server.html#server-deps-inline"><code>server.deps.inline</code></a>, so this is useful when the dependency also needs to be bundled by Vite in SSR builds:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">ssr</span>: {
+    <span class="hljs-attr">resolve</span>: {
+      <span class="hljs-attr">noExternal</span>: [<span class="hljs-string">&#x27;wrapper-package&#x27;</span>, <span class="hljs-string">&#x27;broken-package&#x27;</span>],
+    },
+  },
+})</code></pre></div>
+<h2 id="commonjs-source-code-is-not-fully-supported"><a class="anchor" href="#commonjs-source-code-is-not-fully-supported">#</a>CommonJS source code is not fully supported</h2>
+<p>Vitest is ESM-first. By default, source files run in Vite&#39;s <a href="../config/experimental.html#experimental-vitemodulerunner">module runner</a>, which provides CommonJS variables such as <code>require</code>, <code>module</code>, and <code>exports</code> for compatibility but does not reproduce Node.js CommonJS semantics completely.</p>
+<p>Calls to <code>require()</code> always use Node.js directly and leave the module runner. As a result:</p>
+<ul>
+<li>Vite plugins, aliases, transforms, and module mocks do not apply to required files</li>
+<li>requiring TypeScript or other files that Node.js cannot execute is not supported</li>
+<li>importing and requiring the same file can evaluate it twice, which can break singleton state, object identity, or <code>instanceof</code> checks</li>
+</ul>
+<p>If your project uses CommonJS and doesn&#39;t need Vite transforms, set <a href="../config/experimental.html#experimental-vitemodulerunner"><code>experimental.viteModuleRunner</code></a> to <code>false</code> so the whole module graph is loaded by the native runtime:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">experimental</span>: {
+      <span class="hljs-attr">viteModuleRunner</span>: <span class="hljs-literal">false</span>,
+    },
+  },
+})</code></pre></div>
+<p>If the application uses ESM source but imports a CommonJS package from the same monorepo, you can instead use <a href="../config/server.html#server-deps-external"><code>server.deps.external</code></a> to externalize the complete CommonJS package. This keeps its entry points and internal <code>require()</code> calls in the same native module cache. For example:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">server</span>: {
+      <span class="hljs-attr">deps</span>: {
+        <span class="hljs-attr">external</span>: [<span class="hljs-regexp">/\/packages\/legacy-cjs\//</span>],
+      },
+    },
+  },
+})</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#cannot-find-module-relative-path">Cannot find module './relative-path'</a><a class="toc-2" href="#failed-to-terminate-worker">Failed to Terminate Worker</a><a class="toc-2" href="#custom-package-conditions-are-not-resolved">Custom package conditions are not resolved</a><a class="toc-2" href="#segfaults-and-native-code-errors">Segfaults and Native Code Errors</a><a class="toc-2" href="#time-zone-does-not-change-in-worker-threads">Time Zone Does Not Change in Worker Threads</a><a class="toc-2" href="#unhandled-promise-rejection">Unhandled Promise Rejection</a><a class="toc-3" href="#fix">Fix</a><a class="toc-2" href="#package-fails-to-load-in-vitest-but-works-in-your-app">Package fails to load in Vitest but works in your app</a><a class="toc-2" href="#commonjs-source-code-is-not-fully-supported">CommonJS source code is not fully supported</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

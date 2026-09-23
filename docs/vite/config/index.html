@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuring Vite (Vite) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link active" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vite</a> › config/index  <a class="ext small" href="https://vite.dev/config/">version en ligne</a></div>
+<h1 id="configuring-vite"><a class="anchor" href="#configuring-vite">#</a>Configuring Vite</h1>
+<p>When running <code>vite</code> from the command line, Vite will automatically try to resolve a config file named <code>vite.config.js</code> inside <a href="../guide/index.html#index-html-and-project-root">project root</a> (other JS and TS extensions are also supported).</p>
+<p>The most basic config file looks like this:</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+  <span class="hljs-comment">// config options</span>
+}</code></pre></div>
+<p>Note that to use ES modules syntax in the config file, it should be in a file detected as ESM by Node.js, e.g. <code>.mjs</code> or <code>.js</code> with <code>&quot;type&quot;: &quot;module&quot;</code> in closest <code>package.json</code>.</p>
+<p>You can also explicitly specify a config file to use with the <code>--config</code> CLI option (resolved relative to <code>cwd</code>):</p>
+<div class="code"><pre><code class="hljs lang-bash">vite --config my-config.js</code></pre></div>
+<p><ScrimbaLink href="https://scrimba.com/intro-to-vite-c03p6pbbdq/~05jg?via=vite" title="Configuring Vite">Watch an interactive lesson on Scrimba</ScrimbaLink></p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : CONFIG LOADING</div><p>By default, Vite uses <a href="https://rolldown.rs/">Rolldown</a> to bundle the config into a temporary file and load it. If you&#39;re using an environment that supports TypeScript (e.g. Node 22.18+), or if you&#39;re only writing plain JavaScript, you can specify <code>--configLoader native</code> to use the environment&#39;s native runtime to load the config file. <code>configLoader: &#39;native&#39;</code> is planned to become the default in a future major version.</p>
+</div><h2 id="config-intellisense"><a class="anchor" href="#config-intellisense">#</a>Config Intellisense</h2>
+<p>Since Vite ships with TypeScript typings, you can leverage your IDE&#39;s intellisense with JSDoc type hints:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/** <span class="hljs-doctag">@type</span> {<span class="hljs-type">import(&#x27;vite&#x27;).UserConfig</span>} */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+  <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+<p>Alternatively, you can use the <code>defineConfig</code> helper which should provide intellisense without the need for JSDoc annotations:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-comment">// ...</span>
+})</code></pre></div>
+<p>Vite also supports TypeScript config files. You can use <code>vite.config.ts</code> with the <code>defineConfig</code> helper function above, or with the <code>satisfies</code> operator:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">UserConfig</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+  <span class="hljs-comment">// ...</span>
+} <span class="hljs-keyword">satisfies</span> <span class="hljs-title class_">UserConfig</span></code></pre></div>
+<h2 id="conditional-config"><a class="anchor" href="#conditional-config">#</a>Conditional Config</h2>
+<p>If the config needs to conditionally determine options based on the command (<code>serve</code> or <code>build</code>), the <a href="../guide/env-and-mode.html#modes">mode</a> being used, if it&#39;s an SSR build (<code>isSsrBuild</code>), or is previewing the build (<code>isPreview</code>), it can export a function instead:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>(<span class="hljs-function">(<span class="hljs-params">{ command, mode, isSsrBuild, isPreview }</span>) =&gt;</span> {
+  <span class="hljs-keyword">if</span> (command === <span class="hljs-string">&#x27;serve&#x27;</span>) {
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-comment">// dev specific config</span>
+    }
+  } <span class="hljs-keyword">else</span> {
+    <span class="hljs-comment">// command === &#x27;build&#x27;</span>
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-comment">// build specific config</span>
+    }
+  }
+})</code></pre></div>
+<p>It is important to note that in Vite&#39;s API the <code>command</code> value is <code>serve</code> during dev (in the cli <a href="../guide/cli.html#vite"><code>vite</code></a>, <code>vite dev</code>, and <code>vite serve</code> are aliases), and <code>build</code> when building for production (<a href="../guide/cli.html#vite-build"><code>vite build</code></a>).</p>
+<p><code>isSsrBuild</code> and <code>isPreview</code> are additional optional flags to differentiate the kind of <code>build</code> and <code>serve</code> commands respectively. Some tools that load the Vite config may not support these flags and will pass <code>undefined</code> instead. Hence, it&#39;s recommended to use explicit comparison against <code>true</code> and <code>false</code>.</p>
+<h2 id="async-config"><a class="anchor" href="#async-config">#</a>Async Config</h2>
+<p>If the config needs to call async functions, it can export an async function instead. And this async function can also be passed through <code>defineConfig</code> for improved intellisense support:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>(<span class="hljs-title function_">async</span> ({ command, mode }) =&gt; {
+  <span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> <span class="hljs-title function_">asyncFunction</span>()
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-comment">// vite config</span>
+  }
+})</code></pre></div>
+<h2 id="using-environment-variables-in-config"><a class="anchor" href="#using-environment-variables-in-config">#</a>Using Environment Variables in Config</h2>
+<p>Environment variables available while the config itself is being evaluated are only those that already exist in the current process environment (<code>process.env</code>). Vite deliberately defers loading any <code>.env*</code> files until <em>after</em> the user config has been resolved because the set of files to load depends on config options like <a href="../guide/index.html#index-html-and-project-root"><code>root</code></a> and <a href="shared-options.html#envdir"><code>envDir</code></a>, and also on the final <code>mode</code>.</p>
+<p>This means: variables defined in <code>.env</code>, <code>.env.local</code>, <code>.env.[mode]</code>, or <code>.env.[mode].local</code> are <strong>not</strong> automatically injected into <code>process.env</code> while your <code>vite.config.*</code> is running. They <em>are</em> automatically loaded later and exposed to application code via <code>import.meta.env</code> (with the default <code>VITE_</code> prefix filter) exactly as documented in <a href="../guide/env-and-mode.html">Env Variables and Modes</a>. So if you only need to pass values from <code>.env*</code> files to the app, you don&#39;t need to call anything in the config.</p>
+<p>If, however, values from <code>.env*</code> files must influence the config itself (for example to set <code>server.port</code>, conditionally enable plugins, or compute <code>define</code> replacements), you can load them manually using the exported <a href="../guide/api-javascript.html#loadenv"><code>loadEnv</code></a> helper.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig, loadEnv } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>(<span class="hljs-function">(<span class="hljs-params">{ mode }</span>) =&gt;</span> {
+  <span class="hljs-comment">// Load env file based on `mode` in the current working directory.</span>
+  <span class="hljs-comment">// Set the third parameter to &#x27;&#x27; to load all env regardless of the</span>
+  <span class="hljs-comment">// `VITE_` prefix.</span>
+  <span class="hljs-keyword">const</span> env = <span class="hljs-title function_">loadEnv</span>(mode, process.<span class="hljs-title function_">cwd</span>(), <span class="hljs-string">&#x27;&#x27;</span>)
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">define</span>: {
+      <span class="hljs-comment">// Provide an explicit app-level constant derived from an env var.</span>
+      <span class="hljs-attr">__APP_ENV__</span>: <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(env.<span class="hljs-property">APP_ENV</span>),
+    },
+    <span class="hljs-comment">// Example: use an env var to set the dev server port conditionally.</span>
+    <span class="hljs-attr">server</span>: {
+      <span class="hljs-attr">port</span>: env.<span class="hljs-property">APP_PORT</span> ? <span class="hljs-title class_">Number</span>(env.<span class="hljs-property">APP_PORT</span>) : <span class="hljs-number">5173</span>,
+    },
+  }
+})</code></pre></div>
+<h2 id="debugging-the-config-file-in-vs-code"><a class="anchor" href="#debugging-the-config-file-in-vs-code">#</a>Debugging the Config File in VS Code</h2>
+<p>For the most reliable debugging experience, use the native config loader when starting Vite:</p>
+<div class="code"><pre><code class="hljs lang-bash">vite --configLoader native</code></pre></div>
+<p>The native loader executes the original config file directly, so breakpoints in the config file and in plugin hooks such as <code>transform</code> map to the original source. It requires a runtime that supports the syntax used by your config file, such as Node.js 22.18+ for TypeScript files.</p>
+<p>When using <code>--configLoader bundle</code> (the current default, though <code>native</code> is planned to become the default in a future major version), Vite generates an inline source map and writes the bundled config to <code>node_modules/.vite-temp</code> before loading it. If you need to use the bundle loader, add the temporary directory for the JavaScript Debug Terminal in <code>.vscode/settings.json</code>:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;debug.javascript.terminalOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;resolveSourceMapLocations&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+      <span class="hljs-string">&quot;${workspaceFolder}/**&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-string">&quot;!**/node_modules/**&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-string">&quot;**/node_modules/.vite-temp/**&quot;</span>
+    <span class="hljs-punctuation">]</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>This setting only applies to the JavaScript Debug Terminal, it does not affect launch configurations started from the Run and Debug view. To support this for the Run and Debug view, add the temporary directory in <code>.vscode/launch.json</code>:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;0.2.0&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;configurations&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;node&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;request&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;launch&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Vite&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;runtimeExecutable&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;npm&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;runtimeArgs&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;exec&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;vite&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;--configLoader&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;bundle&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;console&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integratedTerminal&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;sourceMaps&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;resolveSourceMapLocations&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-string">&quot;${workspaceFolder}/**&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-string">&quot;!**/node_modules/**&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-string">&quot;**/node_modules/.vite-temp/**&quot;</span>
+      <span class="hljs-punctuation">]</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#config-intellisense">Config Intellisense</a><a class="toc-2" href="#conditional-config">Conditional Config</a><a class="toc-2" href="#async-config">Async Config</a><a class="toc-2" href="#using-environment-variables-in-config">Using Environment Variables in Config</a><a class="toc-2" href="#debugging-the-config-file-in-vs-code">Debugging the Config File in VS Code</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

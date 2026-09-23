@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-implicit-globals (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-implicit-globals <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-implicit-globals">version en ligne</a></div>
+<h1>no-implicit-globals</h1><p>It is the best practice to avoid &#39;polluting&#39; the global scope with variables that are intended to be local to the script.</p>
+<p>Global variables created from a script can produce name collisions with global variables created from another script, which will
+usually lead to runtime errors or unexpected behavior.</p>
+<p>This rule disallows the following:</p>
+<ul>
+<li>Declarations that create one or more variables in the global scope.</li>
+<li>Global variable leaks.</li>
+<li>Redeclarations of read-only global variables and assignments to read-only global variables.</li>
+</ul>
+<p>There is an explicit way to create a global variable when needed, by assigning to a property of the global object.</p>
+<p>This rule is mostly useful for browser scripts. Top-level declarations in ES modules and CommonJS modules create module-scoped
+variables. ES modules also have implicit <code>strict</code> mode, which prevents global variable leaks.</p>
+<p>By default, this rule does not check <code>const</code>, <code>let</code> and <code>class</code> declarations.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<h3 id="var-and-function-declarations"><a class="anchor" href="#var-and-function-declarations">#</a><code>var</code> and <code>function</code> declarations</h3>
+<p>When working with browser scripts, developers often forget that variable and function declarations at the top-level scope become global variables on the <code>window</code> object. As opposed to modules which have their own scope. Globals should be explicitly assigned to <code>window</code> or <code>self</code> if that is the intent. Otherwise variables intended to be local to the script should be wrapped in an IIFE.</p>
+<p>This rule disallows <code>var</code> and <code>function</code> declarations at the top-level script scope. This does not apply to ES and CommonJS modules since they have a module scope.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-implicit-globals: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">var</span> foo = <span class="hljs-number">1</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-implicit-globals: &quot;error&quot;*/</span>
+
+<span class="hljs-comment">// explicitly set on window</span>
+<span class="hljs-variable language_">window</span>.<span class="hljs-property">foo</span> = <span class="hljs-number">1</span>;
+<span class="hljs-variable language_">window</span>.<span class="hljs-property">bar</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+
+<span class="hljs-comment">// intended to be scope to this file</span>
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">var</span> foo = <span class="hljs-number">1</span>;
+
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {}
+})();</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with <code>&quot;languageOptions&quot;: { &quot;sourceType&quot;: &quot;module&quot; }</code> in the ESLint configuration:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-implicit-globals: &quot;error&quot;*/</span>
+
+<span class="hljs-comment">// foo and bar are local to module</span>
+<span class="hljs-keyword">var</span> foo = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {}</code></pre></div>
+</div><h3 id="global-variable-leaks"><a class="anchor" href="#global-variable-leaks">#</a>Global variable leaks</h3>
+<p>When the code is not in <code>strict</code> mode, an assignment to an undeclared variable creates
+a new global variable. This will happen even if the code is in a function.</p>
+<p>This does not apply to ES modules since the module code is implicitly in <code>strict</code> mode.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-implicit-globals: &quot;error&quot;*/</span>
+
+foo = <span class="hljs-number">1</span>;
+
+<span class="hljs-title class_">Bar</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">baz</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+    a = <span class="hljs-number">1</span>; <span class="hljs-comment">// Intended to be this.a = 1;</span>
+};</code></pre></div>
+</div><h3 id="read-only-global-variables"><a class="anchor" href="#read-only-global-variables">#</a>Read-only global variables</h3>
+<p>This rule also disallows redeclarations of read-only global variables and assignments to read-only global variables.</p>
+<p>A read-only global variable can be a built-in ES global (e.g. <code>Array</code>), or a global variable defined as <code>readonly</code> in the configuration file or in a <code>/*global */</code> comment.</p>
+<p>See also: <a href="../use/configure/language-options.html#specify-globals">Specify Globals</a></p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-implicit-globals: &quot;error&quot;*/</span>
+
+<span class="hljs-comment">/*global foo:readonly*/</span>
+
+foo = <span class="hljs-number">1</span>;
+
+<span class="hljs-title class_">Array</span> = [];
+<span class="hljs-keyword">var</span> <span class="hljs-title class_">Object</span>;</code></pre></div>
+</div><h3 id="exported"><a class="anchor" href="#exported">#</a>exported</h3>
+<p>You can use <code>/* exported variableName */</code> block comments in the same way as in <a href="no-unused-vars.html"><code>no-unused-vars</code></a>. See the <a href="no-unused-vars.html#exported"><code>no-unused-vars</code> exported section</a> for details.</p>
+<p>Examples of <strong>correct</strong> code for <code>/* exported variableName */</code> operation:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint no-implicit-globals: error */</span>
+<span class="hljs-comment">/* exported global_var */</span>
+
+<span class="hljs-keyword">var</span> global_var = <span class="hljs-number">42</span>;</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has an object option with one option:</p>
+<ul>
+<li>Set <code>&quot;lexicalBindings&quot;</code> to <code>true</code> if you want this rule to check <code>const</code>, <code>let</code> and <code>class</code> declarations as well.</li>
+</ul>
+<h3 id="const--let-and-class-declarations"><a class="anchor" href="#const--let-and-class-declarations">#</a><code>const</code>, <code>let</code> and <code>class</code> declarations</h3>
+<p>Lexical declarations <code>const</code> and <code>let</code>, as well as <code>class</code> declarations, create variables that are block-scoped.</p>
+<p>However, when declared in the top-level of a browser script these variables are not &#39;script-scoped&#39;.
+They are actually created in the global scope and could produce name collisions with
+<code>var</code>, <code>const</code> and <code>let</code> variables and <code>function</code> and <code>class</code> declarations from other scripts.
+This does not apply to ES and CommonJS  modules.</p>
+<p>If the variable is intended to be local to the script, wrap the code with a block or with an immediately-invoked function expression (IIFE).</p>
+<p>Examples of <strong>correct</strong> code for this rule with <code>&quot;lexicalBindings&quot;</code> option set to <code>false</code> (default):</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-implicit-globals: [&quot;error&quot;, {&quot;lexicalBindings&quot;: false}]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-number">1</span>;
+
+<span class="hljs-keyword">let</span> baz;
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Bar</span> {}</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for this rule with <code>&quot;lexicalBindings&quot;</code> option set to <code>true</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-implicit-globals: [&quot;error&quot;, {&quot;lexicalBindings&quot;: true}]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-number">1</span>;
+
+<span class="hljs-keyword">let</span> baz;
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Bar</span> {}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with <code>&quot;lexicalBindings&quot;</code> option set to <code>true</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-implicit-globals: [&quot;error&quot;, {&quot;lexicalBindings&quot;: true}]*/</span>
+
+{
+    <span class="hljs-keyword">const</span> foo = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">let</span> baz;
+    <span class="hljs-keyword">class</span> <span class="hljs-title class_">Bar</span> {}
+}
+
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> foo = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">let</span> baz;
+    <span class="hljs-keyword">class</span> <span class="hljs-title class_">Bar</span> {}
+}());</code></pre></div>
+</div><p>If you intend to create a global <code>const</code> or <code>let</code> variable or a global <code>class</code> declaration, to be used from other scripts,
+be aware that there are certain differences when compared to the traditional methods, which are <code>var</code> declarations and assigning to a property of the global <code>window</code> object:</p>
+<ul>
+<li>Lexically declared variables cannot be conditionally created. A script cannot check for the existence of
+a variable and then create a new one. <code>var</code> variables are also always created, but redeclarations do not
+cause runtime exceptions.</li>
+<li>Lexically declared variables do not create properties on the global object, which is what a consuming script might expect.</li>
+<li>Lexically declared variables are shadowing properties of the global object, which might produce errors if a
+consuming script is using both the variable and the property.</li>
+<li>Lexically declared variables can produce a permanent Temporal Dead Zone (TDZ) if the initialization throws an exception.
+Even the <code>typeof</code> check is not safe from TDZ reference exceptions.</li>
+</ul>
+<p>Examples of <strong>incorrect</strong> code for this rule with <code>&quot;lexicalBindings&quot;</code> option set to <code>true</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-implicit-globals: [&quot;error&quot;, {&quot;lexicalBindings&quot;: true}]*/</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">MyGlobalFunction</span> = (<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> a = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">let</span> b = <span class="hljs-number">2</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> a + b;
+    }
+}());</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with <code>&quot;lexicalBindings&quot;</code> option set to <code>true</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-implicit-globals: [&quot;error&quot;, {&quot;lexicalBindings&quot;: true}]*/</span>
+
+<span class="hljs-variable language_">window</span>.<span class="hljs-property">MyGlobalFunction</span> = (<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> a = <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">let</span> b = <span class="hljs-number">2</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> a + b;
+    }
+}());</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>In the case of a browser script, if you want to be able to explicitly declare variables and functions in the global scope,
+and your code is in strict mode or you don&#39;t want this rule to warn you about undeclared variables,
+and you also don&#39;t want this rule to warn you about read-only globals, you can disable this rule.</p>
+<p>In the case of a CommonJS module, if your code is in strict mode or you don&#39;t want this rule to warn you about undeclared variables,
+and you also don&#39;t want this rule to warn you about the read-only globals, you can disable this rule.</p>
+<p>In the case of an ES module, if you don&#39;t want this rule to warn you about the read-only globals you can disable this rule.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="no-undef.html"><code>no-undef</code></a>, <a href="no-global-assign.html"><code>no-global-assign</code></a>, <a href="no-unused-vars.html"><code>no-unused-vars</code></a></p></div><h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://benalman.com/news/2010/11/immediately-invoked-function-expression/">https://benalman.com/news/2010/11/immediately-invoked-function-expression/</a></li><li><a class="ext" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Undeclared_var">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Undeclared_var</a></li><li><a class="ext" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let#Temporal_dead_zone">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let#Temporal_dead_zone</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-3" href="#var-and-function-declarations">var and function declarations</a><a class="toc-3" href="#global-variable-leaks">Global variable leaks</a><a class="toc-3" href="#read-only-global-variables">Read-only global variables</a><a class="toc-3" href="#exported">exported</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#const--let-and-class-declarations">const , let and class declarations</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

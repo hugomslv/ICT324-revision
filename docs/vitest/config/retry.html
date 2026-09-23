@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>retry | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/retry  <a class="ext small" href="https://vitest.dev/config/retry">version en ligne</a></div>
+<h1 id="retry"><a class="anchor" href="#retry">#</a>retry</h1>
+<p>Retry the test specific number of times if it fails.</p>
+<ul>
+<li><strong>Type:</strong> <code>number | { count?: number, delay?: number, condition?: RegExp }</code></li>
+<li><strong>Default:</strong> <code>0</code></li>
+<li><strong>CLI:</strong> <code>--retry &lt;times&gt;</code>, <code>--retry.count &lt;times&gt;</code>, <code>--retry.delay &lt;ms&gt;</code>, <code>--retry.condition &lt;pattern&gt;</code></li>
+</ul>
+<h2 id="basic-usage"><a class="anchor" href="#basic-usage">#</a>Basic Usage</h2>
+<p>Specify a number to retry failed tests:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">retry</span>: <span class="hljs-number">3</span>,
+  },
+})</code></pre></div>
+<h2 id="cli-usage"><a class="anchor" href="#cli-usage">#</a>CLI Usage</h2>
+<p>You can also configure retry options from the command line:</p>
+<div class="code"><pre><code class="hljs lang-bash"><span class="hljs-comment"># Simple retry count</span>
+vitest --retry 3
+
+<span class="hljs-comment"># Advanced options using dot notation</span>
+vitest --retry.count 3 --retry.delay 500 --retry.condition <span class="hljs-string">&#x27;ECONNREFUSED|timeout&#x27;</span></code></pre></div>
+<h2 id="advanced-options"><a class="anchor" href="#advanced-options">#</a>Advanced Options <Version>4.1.0</Version></h2>
+<p>Use an object to configure retry behavior:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">retry</span>: {
+      <span class="hljs-attr">count</span>: <span class="hljs-number">3</span>, <span class="hljs-comment">// Number of times to retry</span>
+      <span class="hljs-attr">delay</span>: <span class="hljs-number">1000</span>, <span class="hljs-comment">// Delay in milliseconds between retries</span>
+      <span class="hljs-attr">condition</span>: <span class="hljs-regexp">/ECONNREFUSED|timeout/i</span>, <span class="hljs-comment">// RegExp to match errors that should trigger retry</span>
+    },
+  },
+})</code></pre></div>
+<h3 id="count"><a class="anchor" href="#count">#</a>count</h3>
+<p>Number of times to retry a test if it fails. Default is <code>0</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">retry</span>: {
+      <span class="hljs-attr">count</span>: <span class="hljs-number">2</span>,
+    },
+  },
+})</code></pre></div>
+<h3 id="delay"><a class="anchor" href="#delay">#</a>delay</h3>
+<p>Delay in milliseconds between retry attempts. Useful for tests that interact with rate-limited APIs or need time to recover. Default is <code>0</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">retry</span>: {
+      <span class="hljs-attr">count</span>: <span class="hljs-number">3</span>,
+      <span class="hljs-attr">delay</span>: <span class="hljs-number">500</span>, <span class="hljs-comment">// Wait 500ms between retries</span>
+    },
+  },
+})</code></pre></div>
+<h3 id="condition"><a class="anchor" href="#condition">#</a>condition</h3>
+<p>A RegExp pattern or a function to determine if a test should be retried based on the error.</p>
+<ul>
+<li>When a <strong>RegExp</strong>, it&#39;s tested against the error message</li>
+<li>When a <strong>function</strong>, it receives the error and returns a boolean</li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>When defining <code>condition</code> as a function, it must be done in a test file directly, not in a configuration file (configurations are serialized for worker threads).</p>
+</div><h4 id="regexp-condition-in-config-file"><a class="anchor" href="#regexp-condition-in-config-file">#</a>RegExp condition (in config file):</h4>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">retry</span>: {
+      <span class="hljs-attr">count</span>: <span class="hljs-number">2</span>,
+      <span class="hljs-attr">condition</span>: <span class="hljs-regexp">/ECONNREFUSED|ETIMEDOUT/i</span>, <span class="hljs-comment">// Retry on connection/timeout errors</span>
+    },
+  },
+})</code></pre></div>
+<h4 id="function-condition-in-test-file"><a class="anchor" href="#function-condition-in-test-file">#</a>Function condition (in test file):</h4>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;tests with advanced retry condition&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;with function condition&#x27;</span>, { <span class="hljs-attr">retry</span>: { <span class="hljs-attr">count</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">condition</span>: <span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> error.<span class="hljs-property">message</span>.<span class="hljs-title function_">includes</span>(<span class="hljs-string">&#x27;Network&#x27;</span>) } }, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// test code</span>
+  })
+})</code></pre></div>
+<h2 id="test-file-override"><a class="anchor" href="#test-file-override">#</a>Test File Override</h2>
+<p>You can also define retry options per test or suite in test files:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;flaky tests&#x27;</span>, {
+  <span class="hljs-attr">retry</span>: {
+    <span class="hljs-attr">count</span>: <span class="hljs-number">2</span>,
+    <span class="hljs-attr">delay</span>: <span class="hljs-number">100</span>,
+  },
+}, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;network request&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// test code</span>
+  })
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;another test&#x27;</span>, {
+  <span class="hljs-attr">retry</span>: {
+    <span class="hljs-attr">count</span>: <span class="hljs-number">3</span>,
+    <span class="hljs-attr">condition</span>: <span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> error.<span class="hljs-property">message</span>.<span class="hljs-title function_">includes</span>(<span class="hljs-string">&#x27;timeout&#x27;</span>),
+  },
+}, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// test code</span>
+})</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#basic-usage">Basic Usage</a><a class="toc-2" href="#cli-usage">CLI Usage</a><a class="toc-2" href="#advanced-options">Advanced Options 4.1.0</a><a class="toc-3" href="#count">count</a><a class="toc-3" href="#delay">delay</a><a class="toc-3" href="#condition">condition</a><a class="toc-2" href="#test-file-override">Test File Override</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

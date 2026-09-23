@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coverage | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/coverage  <a class="ext small" href="https://vitest.dev/guide/coverage">version en ligne</a></div>
+<h1 id="coverage"><a class="anchor" href="#coverage">#</a>Coverage</h1>
+<p>Vitest supports Native code coverage via <a href="https://v8.dev/blog/javascript-code-coverage"><code>v8</code></a> and instrumented code coverage via <a href="https://istanbul.js.org/"><code>istanbul</code></a>.</p>
+<h2 id="coverage-providers"><a class="anchor" href="#coverage-providers">#</a>Coverage Providers</h2>
+<p>Both <code>v8</code> and <code>istanbul</code> support are optional. By default, <code>v8</code> will be used.</p>
+<p>You can select the coverage tool by setting <code>test.coverage.provider</code> to <code>v8</code> or <code>istanbul</code>:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">coverage</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-string">&#x27;v8&#x27;</span> <span class="hljs-comment">// or &#x27;istanbul&#x27;</span>
+    },
+  },
+})</code></pre></div>
+<p>When you start the Vitest process, it will prompt you to install the corresponding support package automatically.</p>
+<p>Or if you prefer to install them manually:</p>
+<div class="code-group"><div class="code"><div class="code-title">v8</div><pre><code class="hljs lang-bash">npm i -D @vitest/coverage-v8</code></pre></div>
+<div class="code"><div class="code-title">istanbul</div><pre><code class="hljs lang-bash">npm i -D @vitest/coverage-istanbul</code></pre></div>
+</div><h2 id="v8-provider"><a class="anchor" href="#v8-provider">#</a>V8 Provider</h2>
+<div class="box box-info"><div class="box-title">ℹ️ Info</div><p>The description of V8 coverage below is Vitest specific and does not apply to other test runners.
+Since <code>v3.2.0</code> Vitest has used <a href="https://vitest.dev/blog/vitest-3-2#coverage-v8-ast-aware-remapping" class="ext" title="lien en ligne (non disponible hors-ligne)">AST based coverage remapping</a> for V8 coverage, which produces identical coverage reports to Istanbul.</p>
+<p>This allows users to have the speed of V8 coverage with accuracy of Istanbul coverage.</p>
+</div><p>By default Vitest uses <code>&#39;v8&#39;</code> coverage provider.
+This provider requires Javascript runtime that&#39;s implemented on top of <a href="https://v8.dev/">V8 engine</a>, such as NodeJS, Deno or any Chromium based browsers such as Google Chrome.</p>
+<p>Coverage collection is performed during runtime by instructing V8 using <a href="https://nodejs.org/api/inspector.html"><code>node:inspector</code></a> and <a href="https://chromedevtools.github.io/devtools-protocol/tot/Profiler/">Chrome DevTools Protocol</a> in browsers. User&#39;s source files can be executed as-is without any pre-instrumentation steps.</p>
+<ul>
+<li>✅ Recommended option to use</li>
+<li>✅ No pre-transpile step. Test files can be executed as-is.</li>
+<li>✅ Faster execute times than Istanbul.</li>
+<li>✅ Lower memory usage than Istanbul.</li>
+<li>✅ Coverage report accuracy is as good as with Istanbul (<a href="https://vitest.dev/blog/vitest-3-2#coverage-v8-ast-aware-remapping" class="ext" title="lien en ligne (non disponible hors-ligne)">since Vitest <code>v3.2.0</code></a>).</li>
+<li>⚠️ In some cases can be slower than Istanbul, e.g. when loading lots of different modules. V8 does not support limiting coverage collection to specific modules.</li>
+<li>⚠️ There are some minor limitations set by V8 engine. See <a href="https://github.com/AriPerkkio/ast-v8-to-istanbul?tab=readme-ov-file#limitations"><code>ast-v8-to-istanbul</code> | Limitations</a>.</li>
+<li>❌ Does not work on environments that don&#39;t use V8, such as Firefox or Bun. Or on environments that don&#39;t expose V8 coverage via profiler, such as Cloudflare Workers.</li>
+</ul>
+<div style="display: flex; flex-direction: column; align-items: center; padding: 2rem 0; max-width: 20rem;">
+  <Box>Test file</Box>
+  <ArrowDown />
+  <Box>Enable V8 runtime coverage collection</Box>
+  <ArrowDown />
+  <Box>Run file</Box>
+  <ArrowDown />
+  <Box>Collect coverage results from V8</Box>
+  <ArrowDown />
+  <Box>Remap coverage results to source files</Box>
+  <ArrowDown />
+  <Box>Coverage report</Box>
+</div><h2 id="istanbul-provider"><a class="anchor" href="#istanbul-provider">#</a>Istanbul Provider</h2>
+<p><a href="https://istanbul.js.org/">Istanbul code coverage tooling</a> has existed since 2012 and is very well battle-tested. This provider works on any JavaScript runtime as coverage tracking works by transforming your source code to add instrumentation logic. In practice, the code Vitest will end up running looks something like this:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// Simplified example of branch and function coverage counters</span>
+<span class="hljs-keyword">const</span> coverage = {
+  <span class="hljs-attr">branches</span>: { <span class="hljs-number">1</span>: [<span class="hljs-number">0</span>, <span class="hljs-number">0</span>] },
+  <span class="hljs-attr">functions</span>: { <span class="hljs-number">1</span>: <span class="hljs-number">0</span> },
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">getUsername</span>(<span class="hljs-params">id</span>) {
+  <span class="hljs-comment">// Function coverage increased when this is invoked</span>
+  coverage.<span class="hljs-property">functions</span>[<span class="hljs-string">&#x27;1&#x27;</span>]++
+
+  <span class="hljs-keyword">if</span> (id == <span class="hljs-literal">null</span>) {
+    <span class="hljs-comment">// Branch coverage increased when this is invoked</span>
+    coverage.<span class="hljs-property">branches</span>[<span class="hljs-string">&#x27;1&#x27;</span>][<span class="hljs-number">0</span>]++
+
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;User ID is required&#x27;</span>)
+  }
+  <span class="hljs-comment">// Implicit else coverage increased when if-statement condition not met</span>
+  coverage.<span class="hljs-property">branches</span>[<span class="hljs-string">&#x27;1&#x27;</span>][<span class="hljs-number">1</span>]++
+
+  <span class="hljs-keyword">return</span> database.<span class="hljs-title function_">getUser</span>(id)
+}
+
+globalThis.<span class="hljs-property">__VITEST_COVERAGE__</span> ||= {}
+globalThis.<span class="hljs-property">__VITEST_COVERAGE__</span>[filename] = coverage</code></pre></div>
+<ul>
+<li>✅ Works on any Javascript runtime</li>
+<li>✅ Widely used and battle-tested for over 13 years.</li>
+<li>✅ In some cases faster than V8. Coverage instrumentation can be limited to specific files, as opposed to V8 where all modules are instrumented.</li>
+<li>❌ Source code is transformed to add instrumentation before running</li>
+<li>❌ Execution speed is slower than V8 due to instrumentation overhead</li>
+<li>❌ Memory usage is higher than V8</li>
+</ul>
+<div style="display: flex; flex-direction: column; align-items: center; padding: 2rem 0; max-width: 20rem;">
+  <Box>Test file</Box>
+  <ArrowDown />
+  <Box>Pre‑instrumentation with Babel</Box>
+  <ArrowDown />
+  <Box>Run file</Box>
+  <ArrowDown />
+  <Box>Collect coverage results from Javascript scope</Box>
+  <ArrowDown />
+  <Box>Remap coverage results to source files</Box>
+  <ArrowDown />
+  <Box>Coverage report</Box>
+</div><h2 id="coverage-setup"><a class="anchor" href="#coverage-setup">#</a>Coverage Setup</h2>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>All coverage options are listed in <a href="../config/coverage.html">Coverage Config Reference</a>.</p>
+</div><p>To test with coverage enabled, you can pass the <code>--coverage</code> flag in CLI or set <code>coverage.enabled</code> in <code>vitest.config.ts</code>:</p>
+<div class="code-group"><div class="code"><div class="code-title">package.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;test&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;coverage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest run --coverage&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">coverage</span>: {
+      <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>
+    },
+  },
+})</code></pre></div>
+</div><h2 id="including-and-excluding-files-from-coverage-report"><a class="anchor" href="#including-and-excluding-files-from-coverage-report">#</a>Including and Excluding Files from Coverage Report</h2>
+<p>You can define what files are shown in coverage report by configuring <a href="../config/coverage.html#coverage-include"><code>coverage.include</code></a> and <a href="../config/coverage.html#coverage-exclude"><code>coverage.exclude</code></a>.</p>
+<p>By default Vitest will show only files that were imported during test run.
+To include uncovered files in the report, you&#39;ll need to configure <a href="../config/coverage.html#coverage-include"><code>coverage.include</code></a> with a pattern that will pick your source files:</p>
+<div class="code-group"><div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">coverage</span>: {
+      <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;src/**/*.{ts,tsx}&#x27;</span>]
+    },
+  },
+})</code></pre></div>
+<div class="code"><div class="code-title">Covered Files</div><pre><code class="hljs lang-sh">├── src
+│   ├── components
+│   │   └── counter.tsx   <span class="hljs-comment"># [!code ++]</span>
+│   ├── mock-data
+│   │   ├── products.json <span class="hljs-comment"># [!code error]</span>
+│   │   └── users.json    <span class="hljs-comment"># [!code error]</span>
+│   └── utils
+│       ├── formatters.ts <span class="hljs-comment"># [!code ++]</span>
+│       ├── time.ts       <span class="hljs-comment"># [!code ++]</span>
+│       └── users.ts      <span class="hljs-comment"># [!code ++]</span>
+├── <span class="hljs-built_in">test</span>
+│   └── utils.test.ts     <span class="hljs-comment"># [!code error]</span>
+│
+├── package.json          <span class="hljs-comment"># [!code error]</span>
+├── tsup.config.ts        <span class="hljs-comment"># [!code error]</span>
+└── vitest.config.ts      <span class="hljs-comment"># [!code error]</span></code></pre></div>
+</div><p>To exclude files that are matching <code>coverage.include</code>, you can define an additional <a href="../config/coverage.html#coverage-exclude"><code>coverage.exclude</code></a>:</p>
+<div class="code-group"><div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">coverage</span>: {
+      <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;src/**/*.{ts,tsx}&#x27;</span>],
+      <span class="hljs-attr">exclude</span>: [<span class="hljs-string">&#x27;**/utils/users.ts&#x27;</span>]
+    },
+  },
+})</code></pre></div>
+<div class="code"><div class="code-title">Covered Files</div><pre><code class="hljs lang-sh">├── src
+│   ├── components
+│   │   └── counter.tsx   <span class="hljs-comment"># [!code ++]</span>
+│   ├── mock-data
+│   │   ├── products.json <span class="hljs-comment"># [!code error]</span>
+│   │   └── users.json    <span class="hljs-comment"># [!code error]</span>
+│   └── utils
+│       ├── formatters.ts <span class="hljs-comment"># [!code ++]</span>
+│       ├── time.ts       <span class="hljs-comment"># [!code ++]</span>
+│       └── users.ts      <span class="hljs-comment"># [!code error]</span>
+├── <span class="hljs-built_in">test</span>
+│   └── utils.test.ts     <span class="hljs-comment"># [!code error]</span>
+│
+├── package.json          <span class="hljs-comment"># [!code error]</span>
+├── tsup.config.ts        <span class="hljs-comment"># [!code error]</span>
+└── vitest.config.ts      <span class="hljs-comment"># [!code error]</span></code></pre></div>
+</div><h2 id="custom-coverage-reporter"><a class="anchor" href="#custom-coverage-reporter">#</a>Custom Coverage Reporter</h2>
+<p>You can use custom coverage reporters by passing either the name of the package or absolute path in <code>test.coverage.reporter</code>:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">coverage</span>: {
+      <span class="hljs-attr">reporter</span>: [
+        <span class="hljs-comment">// Specify reporter using name of the NPM package</span>
+        [<span class="hljs-string">&#x27;@vitest/custom-coverage-reporter&#x27;</span>, { <span class="hljs-attr">someOption</span>: <span class="hljs-literal">true</span> }],
+
+        <span class="hljs-comment">// Specify reporter using local path</span>
+        <span class="hljs-string">&#x27;/absolute/path/to/custom-reporter.cjs&#x27;</span>,
+      ],
+    },
+  },
+})</code></pre></div>
+<p>Custom reporters are loaded by <code>@vitest/istanbul-lib-report</code> and must match its reporter interface. See <a href="https://github.com/vitest-dev/istanbuljs/tree/main/packages/istanbul-lib-report/src/reports">built-in reporters&#39; implementation</a> for reference.</p>
+<div class="code-group"><div class="code"><div class="code-title">custom-reporter.mjs</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">ReportBase</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/istanbul-lib-report&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">CustomReporter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">ReportBase</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params">opts</span>) {
+    <span class="hljs-variable language_">super</span>()
+
+    <span class="hljs-keyword">if</span> (!opts.<span class="hljs-property">file</span>) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;File is required as custom reporter parameter&#x27;</span>)
+    }
+
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">file</span> = opts.<span class="hljs-property">file</span>
+  }
+
+  <span class="hljs-title function_">onStart</span>(<span class="hljs-params">root, context</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">contentWriter</span> = context.<span class="hljs-property">writer</span>.<span class="hljs-title function_">writeFile</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">file</span>)
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">contentWriter</span>.<span class="hljs-title function_">println</span>(<span class="hljs-string">&#x27;Start of custom coverage report ESM&#x27;</span>)
+  }
+
+  <span class="hljs-title function_">onEnd</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">contentWriter</span>.<span class="hljs-title function_">println</span>(<span class="hljs-string">&#x27;End of custom coverage report ESM&#x27;</span>)
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">contentWriter</span>.<span class="hljs-title function_">close</span>()
+  }
+}</code></pre></div>
+<div class="code"><div class="code-title">custom-reporter.cjs</div><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> { <span class="hljs-title class_">ReportBase</span> } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;@vitest/istanbul-lib-report&#x27;</span>)
+
+<span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = <span class="hljs-keyword">class</span> <span class="hljs-title class_">CustomReporter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">ReportBase</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params">opts</span>) {
+    <span class="hljs-variable language_">super</span>()
+
+    <span class="hljs-comment">// Options passed from configuration are available here</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">file</span> = opts.<span class="hljs-property">file</span>
+  }
+
+  <span class="hljs-title function_">onStart</span>(<span class="hljs-params">root, context</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">contentWriter</span> = context.<span class="hljs-property">writer</span>.<span class="hljs-title function_">writeFile</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">file</span>)
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">contentWriter</span>.<span class="hljs-title function_">println</span>(<span class="hljs-string">&#x27;Start of custom coverage report&#x27;</span>)
+  }
+
+  <span class="hljs-title function_">onEnd</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">contentWriter</span>.<span class="hljs-title function_">println</span>(<span class="hljs-string">&#x27;End of custom coverage report&#x27;</span>)
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">contentWriter</span>.<span class="hljs-title function_">close</span>()
+  }
+}</code></pre></div>
+</div><h2 id="custom-coverage-provider"><a class="anchor" href="#custom-coverage-provider">#</a>Custom Coverage Provider</h2>
+<p>It&#39;s also possible to provide your custom coverage provider by passing <code>&#39;custom&#39;</code> in <code>test.coverage.provider</code>:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">coverage</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-string">&#x27;custom&#x27;</span>,
+      <span class="hljs-attr">customProviderModule</span>: <span class="hljs-string">&#x27;my-custom-coverage-provider&#x27;</span>
+    },
+  },
+})</code></pre></div>
+<p>The custom providers require a <code>customProviderModule</code> option which is a module name or path where to load the <code>CoverageProviderModule</code> from. It must export an object that implements <code>CoverageProviderModule</code> as default export:</p>
+<div class="code"><div class="code-title">my-custom-coverage-provider.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> {
+  <span class="hljs-title class_">CoverageProvider</span>,
+  <span class="hljs-title class_">CoverageProviderModule</span>,
+  <span class="hljs-title class_">ResolvedCoverageOptions</span>,
+  <span class="hljs-title class_">Vitest</span>
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">CustomCoverageProviderModule</span>: <span class="hljs-title class_">CoverageProviderModule</span> = {
+  <span class="hljs-title function_">getProvider</span>(): <span class="hljs-title class_">CoverageProvider</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">CustomCoverageProvider</span>()
+  },
+
+  <span class="hljs-comment">// Implements rest of the CoverageProviderModule ...</span>
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">CustomCoverageProvider</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">CoverageProvider</span> {
+  name = <span class="hljs-string">&#x27;custom-coverage-provider&#x27;</span>
+  options!: <span class="hljs-title class_">ResolvedCoverageOptions</span>
+
+  <span class="hljs-title function_">initialize</span>(<span class="hljs-params"><span class="hljs-attr">ctx</span>: <span class="hljs-title class_">Vitest</span></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span> = ctx.<span class="hljs-property">config</span>.<span class="hljs-property">coverage</span>
+  }
+
+  <span class="hljs-comment">// Implements rest of the CoverageProvider ...</span>
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title class_">CustomCoverageProviderModule</span></code></pre></div>
+<p>Please refer to the type definition for more details.</p>
+<h2 id="ignoring-code"><a class="anchor" href="#ignoring-code">#</a>Ignoring Code</h2>
+<p>Both coverage providers have their own ways how to ignore code from coverage reports:</p>
+<ul>
+<li><a href="https://github.com/AriPerkkio/ast-v8-to-istanbul?tab=readme-ov-file#ignoring-code"><code>v8</code></a></li>
+<li><a href="https://github.com/istanbuljs/nyc#parsing-hints-ignoring-lines"><code>istanbul</code></a></li>
+</ul>
+<p>When using TypeScript the source codes are transpiled using <code>esbuild</code>, which strips all comments from the source codes (<a href="https://github.com/evanw/esbuild/issues/516">esbuild#516</a>).
+Comments which are considered as <a href="https://esbuild.github.io/api/#legal-comments">legal comments</a> are preserved.</p>
+<p>You can include a <code>@preserve</code> keyword in the ignore hint.
+Beware that these ignore hints may now be included in final production build as well.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Follow <a href="https://github.com/vitest-dev/vitest/issues/2021">https://github.com/vitest-dev/vitest/issues/2021</a> for updates about <code>@preserve</code> usage.</p>
+</div><div class="code"><pre><code class="hljs lang-diff"><span class="hljs-deletion">-/* istanbul ignore if */</span>
+<span class="hljs-addition">+/* istanbul ignore if -- @preserve */</span>
+if (condition) {
+
+<span class="hljs-deletion">-/* v8 ignore if */</span>
+<span class="hljs-addition">+/* v8 ignore if -- @preserve */</span>
+if (condition) {</code></pre></div>
+<h3 id="examples"><a class="anchor" href="#examples">#</a>Examples</h3>
+<div class="code-group"><div class="code"><div class="code-title">lines: start/stop</div><pre><code class="hljs lang-ts"><span class="hljs-comment">/* istanbul ignore start -- @preserve */</span>
+<span class="hljs-keyword">if</span> (parameter) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Ignored&#x27;</span>)
+}
+<span class="hljs-keyword">else</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Ignored&#x27;</span>)
+}
+<span class="hljs-comment">/* istanbul ignore stop -- @preserve */</span>
+
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Included&#x27;</span>)
+
+<span class="hljs-comment">/* v8 ignore start -- @preserve */</span>
+<span class="hljs-keyword">if</span> (parameter) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Ignored&#x27;</span>)
+}
+<span class="hljs-keyword">else</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Ignored&#x27;</span>)
+}
+<span class="hljs-comment">/* v8 ignore stop -- @preserve */</span>
+
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Included&#x27;</span>)</code></pre></div>
+<div class="code"><div class="code-title">if else</div><pre><code class="hljs lang-ts"><span class="hljs-comment">/* v8 ignore if -- @preserve */</span>
+<span class="hljs-keyword">if</span> (parameter) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Ignored&#x27;</span>)
+}
+<span class="hljs-keyword">else</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Included&#x27;</span>)
+}
+
+<span class="hljs-comment">/* v8 ignore else -- @preserve */</span>
+<span class="hljs-keyword">if</span> (parameter) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Included&#x27;</span>)
+}
+<span class="hljs-keyword">else</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Ignored&#x27;</span>)
+}</code></pre></div>
+<div class="code"><div class="code-title">next node</div><pre><code class="hljs lang-ts"><span class="hljs-comment">/* v8 ignore next -- @preserve */</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Ignored&#x27;</span>)
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Included&#x27;</span>)
+
+<span class="hljs-comment">/* v8 ignore next -- @preserve */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">ignored</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;all&#x27;</span>)
+
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;lines&#x27;</span>)
+
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;are&#x27;</span>)
+
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;ignored&#x27;</span>)
+}
+
+<span class="hljs-comment">/* v8 ignore next -- @preserve */</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Ignored</span> {
+  <span class="hljs-title function_">ignored</span>(<span class="hljs-params"></span>) {}
+  <span class="hljs-title function_">alsoIgnored</span>(<span class="hljs-params"></span>) {}
+}
+
+<span class="hljs-comment">/* v8 ignore next -- @preserve */</span>
+condition
+  ? <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;ignored&#x27;</span>)
+  : <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;also ignored&#x27;</span>)</code></pre></div>
+<div class="code"><div class="code-title">try catch</div><pre><code class="hljs lang-ts"><span class="hljs-comment">/* v8 ignore next -- @preserve */</span>
+<span class="hljs-keyword">try</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Ignored&#x27;</span>)
+}
+<span class="hljs-keyword">catch</span> (error) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Ignored&#x27;</span>)
+}
+
+<span class="hljs-keyword">try</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Included&#x27;</span>)
+}
+<span class="hljs-keyword">catch</span> (error) {
+  <span class="hljs-comment">/* v8 ignore next -- @preserve */</span>
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Ignored&#x27;</span>)
+  <span class="hljs-comment">/* v8 ignore next -- @preserve */</span>
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Ignored&#x27;</span>)
+}
+
+<span class="hljs-comment">// Requires rolldown-vite due to esbuild&#x27;s lack of support.</span>
+<span class="hljs-comment">// See https://vite.dev/guide/rolldown.html#how-to-try-rolldown</span>
+<span class="hljs-keyword">try</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Included&#x27;</span>)
+}
+<span class="hljs-keyword">catch</span> (error) <span class="hljs-comment">/* v8 ignore next */</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Ignored&#x27;</span>)
+}</code></pre></div>
+<div class="code"><div class="code-title">switch case</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">switch</span> (<span class="hljs-keyword">type</span>) {
+  <span class="hljs-keyword">case</span> <span class="hljs-number">1</span>:
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;Included&#x27;</span>
+
+  <span class="hljs-comment">/* v8 ignore next -- @preserve */</span>
+  <span class="hljs-keyword">case</span> <span class="hljs-number">2</span>:
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;Ignored&#x27;</span>
+
+  <span class="hljs-keyword">case</span> <span class="hljs-number">3</span>:
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;Included&#x27;</span>
+
+  <span class="hljs-comment">/* v8 ignore next -- @preserve */</span>
+  <span class="hljs-attr">default</span>:
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;Ignored&#x27;</span>
+}</code></pre></div>
+<div class="code"><div class="code-title">whole file</div><pre><code class="hljs lang-ts"><span class="hljs-comment">/* v8 ignore file -- @preserve */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">ignored</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;Whole file is ignored&#x27;</span>
+}</code></pre></div>
+</div><h2 id="coverage-performance"><a class="anchor" href="#coverage-performance">#</a>Coverage Performance</h2>
+<p>If code coverage generation is slow on your project, see <a href="profiling-test-performance.html#code-coverage">Profiling Test Performance | Code coverage</a>.</p>
+<h2 id="vitest-ui"><a class="anchor" href="#vitest-ui">#</a>Vitest UI</h2>
+<p>You can check your coverage report in <a href="ui.html">Vitest UI</a> and <a href="reporters.html#html-reporter">HTML reporter</a>.</p>
+<p>This is integrated with builtin coverage reporters with HTML output (<code>html</code>, <code>html-spa</code>, and <code>lcov</code> reporters). <code>html</code> reporter is enabled by default and this works out of the box. To integrate with custom reporters, you can configure <a href="../config/coverage.html#coverage-htmldir"><code>coverage.htmlDir</code></a>.</p>
+<span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span><span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span><h2 id="coverage-in-agent-environments"><a class="anchor" href="#coverage-in-agent-environments">#</a>Coverage in Agent Environments</h2>
+<p>When Vitest detects it is running inside an AI coding agent, it automatically adjusts the default <code>text</code> reporter to reduce output and minimize token usage:</p>
+<ul>
+<li><code>skipFull: true</code> is set on the <code>text</code> reporter, so files with 100% coverage are omitted from the terminal output.</li>
+<li>The <a href="../config/coverage.html#coverage-reporter"><code>text-summary</code></a> reporter is added automatically, so the agent always sees a concise totals table even when <code>skipFull</code> hides all individual files.</li>
+</ul>
+<p>These adjustments only apply when the <code>text</code> reporter is already part of the active reporter list (it is included in the default). Explicitly configured reporters are never removed.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#coverage-providers">Coverage Providers</a><a class="toc-2" href="#v8-provider">V8 Provider</a><a class="toc-2" href="#istanbul-provider">Istanbul Provider</a><a class="toc-2" href="#coverage-setup">Coverage Setup</a><a class="toc-2" href="#including-and-excluding-files-from-coverage-report">Including and Excluding Files from Coverage Report</a><a class="toc-2" href="#custom-coverage-reporter">Custom Coverage Reporter</a><a class="toc-2" href="#custom-coverage-provider">Custom Coverage Provider</a><a class="toc-2" href="#ignoring-code">Ignoring Code</a><a class="toc-3" href="#examples">Examples</a><a class="toc-2" href="#coverage-performance">Coverage Performance</a><a class="toc-2" href="#vitest-ui">Vitest UI</a><a class="toc-2" href="#coverage-in-agent-environments">Coverage in Agent Environments</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

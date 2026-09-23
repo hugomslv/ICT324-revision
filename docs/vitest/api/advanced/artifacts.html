@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test Artifacts (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/advanced/artifacts  <a class="ext small" href="https://vitest.dev/api/advanced/artifacts">version en ligne</a></div>
+<h1 id="test-artifacts-4-0-11"><a class="anchor" href="#test-artifacts-4-0-11">#</a>Test Artifacts <Advanced /> <Version type="experimental">4.0.11</Version> <Experimental /></h1>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This is an advanced API. As a user, you most likely want to use <a href="../../guide/test-annotations.html">test annotations</a> to add notes or context to your tests instead. This is primarily used internally and by library authors.</p>
+</div><p>Test artifacts allow attaching or recording structured data, files, or metadata during test execution. This is a low-level feature primarily designed for:</p>
+<ul>
+<li>Internal use (<a href="../../guide/test-annotations.html"><code>annotate</code></a> is built on top of the artifact system)</li>
+<li>Framework authors creating custom testing tools on top of Vitest</li>
+</ul>
+<p>Each artifact includes:</p>
+<ul>
+<li>A type discriminator which is a unique identifier for the artifact type</li>
+<li>Custom data, can be any relevant information</li>
+<li>Optional attachments, either files or inline content associated with the artifact</li>
+<li>A source code location indicating where the artifact was created</li>
+</ul>
+<p>Vitest automatically manages attachment serialization (files are copied to <a href="../../config/attachmentsdir.html"><code>attachmentsDir</code></a>) and injects source location metadata, so you can focus on the data you want to record. All artifacts <strong>must</strong> extend from <a href="#testartifactbase"><code>TestArtifactBase</code></a> and all attachments from <a href="#testattachment"><code>TestAttachment</code></a> to be correctly handled internally.</p>
+<h2 id="api"><a class="anchor" href="#api">#</a>API</h2>
+<h3 id="recordartifact"><a class="anchor" href="#recordartifact">#</a><code>recordArtifact</code> <Experimental /></h3>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p><code>recordArtifact</code> is an experimental API. Breaking changes might not follow SemVer, please pin Vitest&#39;s version when using it.</p>
+<p>The API surface may change based on feedback. We encourage you to try it out and share your experience with the team.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> recordArtifact&lt;<span class="hljs-title class_">Artifact</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">TestArtifact</span>&gt;(<span class="hljs-attr">task</span>: <span class="hljs-title class_">Test</span>, <span class="hljs-attr">artifact</span>: <span class="hljs-title class_">Artifact</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Artifact</span>&gt;</code></pre></div>
+<p>The <code>recordArtifact</code> function records an artifact during test execution and returns it. It expects a <a href="runner.html#tasks">task</a> as the first parameter and an object assignable to <a href="#testartifact"><code>TestArtifact</code></a> as the second.</p>
+<div class="box box-info"><div class="box-title">ℹ️ Info</div><p>Artifacts must be recorded before the task is reported. Any artifacts recorded after that will not be included in the task.</p>
+</div><p>When an artifact is recorded on a test, it emits an <code>onTestArtifactRecord</code> runner event and a <a href="reporters.html#ontestcaseartifactrecord"><code>onTestCaseArtifactRecord</code> reporter event</a>. To retrieve recorded artifacts from a test case, use the <a href="test-case.html#artifacts"><code>artifacts()</code></a> method.</p>
+<p>Note: annotations, <a href="#relationship-with-annotations">even though they&#39;re built on top of this feature</a>, won&#39;t appear in the <code>task.artifacts</code> array for backwards compatibility reasons until the next major version.</p>
+<h3 id="testartifact"><a class="anchor" href="#testartifact">#</a><code>TestArtifact</code></h3>
+<p>The <code>TestArtifact</code> type is a union containing all artifacts Vitest can produce, including custom ones. All artifacts extend from <a href="#testartifactbase"><code>TestArtifactBase</code></a></p>
+<h3 id="testartifactbase"><a class="anchor" href="#testartifactbase">#</a><code>TestArtifactBase</code> <Experimental /></h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">TestArtifactBase</span> {
+  <span class="hljs-comment">/** File or data attachments associated with this artifact */</span>
+  <span class="hljs-attr">attachments</span>?: <span class="hljs-title class_">TestAttachment</span>[]
+  <span class="hljs-comment">/** Source location where this artifact was created */</span>
+  <span class="hljs-attr">location</span>?: <span class="hljs-title class_">TestArtifactLocation</span>
+}</code></pre></div>
+<p>The <code>TestArtifactBase</code> interface is the base for all test artifacts.</p>
+<p>Extend this interface when creating custom test artifacts. Vitest automatically manages the <code>attachments</code> array and injects the <code>location</code> property to indicate where the artifact was created in your test code.</p>
+<div class="box box-danger"><div class="box-title">🛑 Danger</div><p>When running with <a href="../../config/api.html#api-allowwrite"><code>api.allowWrite</code></a> disabled, Vitest empties the <code>attachments</code> array on every artifact before reporting it.</p>
+<p>If your custom artifact narrows the <code>attachments</code> type (e.g. to a tuple), include <code>| []</code> in the union so the type reflects what actually happens at runtime.</p>
+</div><h3 id="testattachment"><a class="anchor" href="#testattachment">#</a><code>TestAttachment</code></h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">TestAttachment</span> {
+  <span class="hljs-comment">/** MIME type of the attachment (e.g., &#x27;image/png&#x27;, &#x27;text/plain&#x27;) */</span>
+  <span class="hljs-attr">contentType</span>?: <span class="hljs-built_in">string</span>
+  <span class="hljs-comment">/** Local file path or external HTTP(S) URL to the attachment. Relative paths are resolved from the project root. */</span>
+  <span class="hljs-attr">path</span>?: <span class="hljs-built_in">string</span>
+  <span class="hljs-comment">/** Inline attachment content as a string or raw binary data */</span>
+  <span class="hljs-attr">body</span>?: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">Uint8Array</span>
+  <span class="hljs-comment">/**
+   * <span class="hljs-doctag">@experimental</span>
+   * How the string `body` is encoded.
+   * - `&#x27;base64&#x27;` (default): body is already base64-encoded
+   * - `&#x27;utf-8&#x27;`: body is a utf8 string
+   */</span>
+  <span class="hljs-attr">bodyEncoding</span>?: <span class="hljs-string">&#x27;base64&#x27;</span> | <span class="hljs-string">&#x27;utf-8&#x27;</span>
+}</code></pre></div>
+<p>The <code>TestAttachment</code> interface represents a file or data attachment associated with a test artifact.</p>
+<p>Attachments can be either path-based (via <code>path</code>) or inline content (via <code>body</code>). The <code>contentType</code> helps consumers understand how to interpret the attachment data.</p>
+<p>Attachment <code>path</code> can point to a local file or an external <code>http</code>/<code>https</code> URL. Relative local paths are resolved from the project root. Local files are copied into Vitest&#39;s attachments directory before reporters receive them. External URLs are preserved as-is.</p>
+<p>If you pass a string <code>body</code>, Vitest assumes it is already base64-encoded unless you set <code>bodyEncoding: &#39;utf-8&#39;</code>. When you pass <code>body</code> as a <code>Uint8Array</code>, Vitest automatically encodes it as base64. The <code>bodyEncoding</code> option only applies to inline <code>body</code> attachments, not <code>path</code> attachments.</p>
+<h3 id="testartifactlocation"><a class="anchor" href="#testartifactlocation">#</a><code>TestArtifactLocation</code></h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">TestArtifactLocation</span> {
+  <span class="hljs-comment">/** Line number in the source file (1-indexed) */</span>
+  <span class="hljs-attr">line</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/** Column number in the line (1-indexed) */</span>
+  <span class="hljs-attr">column</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/** Path to the source file */</span>
+  <span class="hljs-attr">file</span>: <span class="hljs-built_in">string</span>
+}</code></pre></div>
+<p>The <code>TestArtifactLocation</code> interface represents the source code location information for a test artifact. It indicates where in the source code the artifact originated from.</p>
+<h3 id="testartifactregistry"><a class="anchor" href="#testartifactregistry">#</a><code>TestArtifactRegistry</code></h3>
+<p>The <code>TestArtifactRegistry</code> interface is a registry for custom test artifact types.</p>
+<p>Augmenting this interface using <a href="https://typescriptlang.org/docs/handbook/declaration-merging#module-augmentation">TypeScript&#39;s module augmentation feature</a> allows registering custom artifact types that tests can produce.</p>
+<p>Each custom artifact should extend <a href="#testartifactbase"><code>TestArtifactBase</code></a> and include a unique <code>type</code> discriminator property.</p>
+<p>Here are a few guidelines or best practices to follow:</p>
+<ul>
+<li>Try using a <code>Symbol</code> as the <strong>registry key</strong> to guarantee uniqueness</li>
+<li>The <code>type</code> property should follow the pattern <code>&#39;package-name:artifact-name&#39;</code>, <strong><code>&#39;internal:&#39;</code> is a reserved prefix</strong></li>
+<li>Use <code>attachments</code> to include files or data; extend <a href="#testattachment"><code>TestAttachment</code></a> for custom metadata</li>
+<li>If you narrow the <code>attachments</code> type (e.g. to a tuple), include <code>| []</code> in the union since Vitest may empty the array at runtime (see <a href="#testartifactbase"><code>TestArtifactBase</code></a>)</li>
+<li><code>location</code> property is automatically injected</li>
+</ul>
+<h2 id="custom-artifacts"><a class="anchor" href="#custom-artifacts">#</a>Custom Artifacts</h2>
+<p>To use and manage artifacts in a type-safe manner, you need to create its type and register it:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">TestArtifactBase</span>, <span class="hljs-title class_">TestAttachment</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">interface</span> A11yReportAttachment <span class="hljs-keyword">extends</span> <span class="hljs-title class_">TestAttachment</span> {
+  <span class="hljs-attr">contentType</span>: <span class="hljs-string">&#x27;text/html&#x27;</span>
+  <span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span>
+}
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">AccessibilityArtifact</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">TestArtifactBase</span> {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;a11y:report&#x27;</span>
+  <span class="hljs-attr">passed</span>: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-attr">wcagLevel</span>: <span class="hljs-string">&#x27;A&#x27;</span> | <span class="hljs-string">&#x27;AA&#x27;</span> | <span class="hljs-string">&#x27;AAA&#x27;</span>
+  <span class="hljs-attr">attachments</span>: [A11yReportAttachment] | []
+}
+
+<span class="hljs-keyword">const</span> a11yReportKey = <span class="hljs-title class_">Symbol</span>(<span class="hljs-string">&#x27;report&#x27;</span>)
+
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">TestArtifactRegistry</span> {
+    [a11yReportKey]: <span class="hljs-title class_">AccessibilityArtifact</span>
+  }
+}</code></pre></div>
+<p>As long as the types are assignable to their bases and don&#39;t have errors, everything should work fine and you should be able to record artifacts using <a href="#recordartifact"><code>recordArtifact</code></a>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">toBeAccessible</span>(<span class="hljs-params">
+  <span class="hljs-attr">this</span>: <span class="hljs-title class_">MatcherState</span>,
+  <span class="hljs-attr">actual</span>: <span class="hljs-title class_">Element</span>,
+  <span class="hljs-attr">wcagLevel</span>: <span class="hljs-string">&#x27;A&#x27;</span> | <span class="hljs-string">&#x27;AA&#x27;</span> | <span class="hljs-string">&#x27;AAA&#x27;</span> = <span class="hljs-string">&#x27;AA&#x27;</span>
+</span>): <span class="hljs-title class_">AsyncExpectationResult</span> {
+  <span class="hljs-keyword">const</span> report = <span class="hljs-keyword">await</span> <span class="hljs-title function_">runAccessibilityAudit</span>(actual, wcagLevel)
+
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">recordArtifact</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">task</span>, {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;a11y:report&#x27;</span>,
+    <span class="hljs-attr">passed</span>: report.<span class="hljs-property">violations</span>.<span class="hljs-property">length</span> === <span class="hljs-number">0</span>,
+    wcagLevel,
+    <span class="hljs-attr">attachments</span>: [{
+      <span class="hljs-attr">contentType</span>: <span class="hljs-string">&#x27;text/html&#x27;</span>,
+      <span class="hljs-attr">path</span>: report.<span class="hljs-property">path</span>,
+    }],
+  })
+
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">pass</span>: violations.<span class="hljs-property">length</span> === <span class="hljs-number">0</span>,
+    <span class="hljs-attr">message</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-string">`Found <span class="hljs-subst">${report.violations.length}</span> accessibility violation(s)`</span>
+  }
+}</code></pre></div>
+<h2 id="relationship-with-annotations"><a class="anchor" href="#relationship-with-annotations">#</a>Relationship with Annotations</h2>
+<p>Test annotations are built on top of the artifact system. When using annotations in tests, they create <code>internal:annotation</code> artifacts under the hood. However, annotations are:</p>
+<ul>
+<li>Simpler to use</li>
+<li>Designed for end-users, not developers</li>
+</ul>
+<p>Use annotations if you just want to add notes to your tests. Use artifacts if you need custom data.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#api">API</a><a class="toc-3" href="#recordartifact">recordArtifact</a><a class="toc-3" href="#testartifact">TestArtifact</a><a class="toc-3" href="#testartifactbase">TestArtifactBase</a><a class="toc-3" href="#testattachment">TestAttachment</a><a class="toc-3" href="#testartifactlocation">TestArtifactLocation</a><a class="toc-3" href="#testartifactregistry">TestArtifactRegistry</a><a class="toc-2" href="#custom-artifacts">Custom Artifacts</a><a class="toc-2" href="#relationship-with-annotations">Relationship with Annotations</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

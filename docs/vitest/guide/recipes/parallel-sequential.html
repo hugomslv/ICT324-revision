@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parallel and Sequential Test Files | Recipes (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/recipes/parallel-sequential  <a class="ext small" href="https://vitest.dev/guide/recipes/parallel-sequential">version en ligne</a></div>
+<h1 id="parallel-and-sequential-test-files"><a class="anchor" href="#parallel-and-sequential-test-files">#</a>Parallel and Sequential Test Files</h1>
+<p>Most test files are independent and run faster in parallel. The exception is the handful that share an exclusive resource, like a fixed port, a writable temp directory, or a database without per-test isolation. Those files flake when other tests run concurrently with them.</p>
+<p>Disabling parallelism globally would slow down every test in the suite. Splitting the suite into two <a href="../projects.html"><code>projects</code></a>, one parallel and one sequential, lets only the affected files pay the cost.</p>
+<h2 id="pattern"><a class="anchor" href="#pattern">#</a>Pattern</h2>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Parallel&#x27;</span>,
+          <span class="hljs-attr">exclude</span>: [<span class="hljs-string">&#x27;**.sequential.test.ts&#x27;</span>],
+        },
+      },
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Sequential&#x27;</span>,
+          <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;**.sequential.test.ts&#x27;</span>],
+          <span class="hljs-attr">fileParallelism</span>: <span class="hljs-literal">false</span>,
+        },
+      },
+    ],
+  },
+})</code></pre></div>
+<p><a href="../../config/fileparallelism.html"><code>fileParallelism: false</code></a> at the project level keeps the rest of your suite running concurrently while the matched files run one at a time. It&#39;s a shorthand for <a href="../../config/maxworkers.html"><code>maxWorkers: 1</code></a>; the two settings are equivalent.</p>
+<h2 id="run-sequential-after-parallel"><a class="anchor" href="#run-sequential-after-parallel">#</a>Run sequential after parallel</h2>
+<p>By default, projects run in parallel with each other, so the sequential project&#39;s first file may overlap with parallel files that still hold the same resource. Use <a href="../../config/sequence.html#sequence-grouporder"><code>sequence.groupOrder</code></a> <Version>3.2.0</Version> to force the parallel batch to finish first:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Parallel&#x27;</span>,
+          <span class="hljs-attr">exclude</span>: [<span class="hljs-string">&#x27;**.sequential.test.ts&#x27;</span>],
+          <span class="hljs-attr">sequence</span>: { <span class="hljs-attr">groupOrder</span>: <span class="hljs-number">0</span> },
+        },
+      },
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Sequential&#x27;</span>,
+          <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;**.sequential.test.ts&#x27;</span>],
+          <span class="hljs-attr">fileParallelism</span>: <span class="hljs-literal">false</span>,
+          <span class="hljs-attr">sequence</span>: { <span class="hljs-attr">groupOrder</span>: <span class="hljs-number">1</span> },
+        },
+      },
+    ],
+  },
+})</code></pre></div>
+<p>The parallel batch finishes, <em>then</em> the sequential batch starts. Total wall clock stays close to the parallel time plus sum of the sequential test run time.</p>
+<h2 id="file-scope-vs-test-scope"><a class="anchor" href="#file-scope-vs-test-scope">#</a>File scope vs. test scope</h2>
+<p>There are two different &quot;parallel&quot; knobs in Vitest. Don&#39;t confuse them:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Knob</th>
+<th>Controls</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Across files</td>
+<td><a href="../../config/fileparallelism.html"><code>fileParallelism</code></a></td>
+<td>Whether two test <em>files</em> run in parallel workers</td>
+</tr>
+<tr>
+<td>Within a file</td>
+<td><code>describe.concurrent</code> / <code>test.concurrent</code></td>
+<td>Whether tests <em>inside one file</em> run concurrently</td>
+</tr>
+</tbody></table></div>
+<p><code>fileParallelism: false</code> doesn&#39;t make tests inside a file concurrent; tests inside a file are sequential by default. And <code>concurrent</code> on a <code>describe</code> or <code>test</code> doesn&#39;t affect how files are scheduled.</p>
+<h2 id="see-also"><a class="anchor" href="#see-also">#</a>See also</h2>
+<ul>
+<li><a href="../../config/fileparallelism.html"><code>fileParallelism</code></a></li>
+<li><a href="../../config/maxworkers.html"><code>maxWorkers</code></a></li>
+<li><a href="../../config/sequence.html#sequence-grouporder"><code>sequence.groupOrder</code></a></li>
+<li><a href="../parallelism.html">Parallelism</a></li>
+<li><a href="../projects.html">Test Projects</a></li>
+<li><a href="disable-isolation.html">Per-File Isolation Settings</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#pattern">Pattern</a><a class="toc-2" href="#run-sequential-after-parallel">Run sequential after parallel</a><a class="toc-2" href="#file-scope-vs-test-scope">File scope vs. test scope</a><a class="toc-2" href="#see-also">See also</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

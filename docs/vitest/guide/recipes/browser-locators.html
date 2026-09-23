@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Extending Browser Locators | Recipes (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/recipes/browser-locators  <a class="ext small" href="https://vitest.dev/guide/recipes/browser-locators">version en ligne</a></div>
+<h1 id="domain-locators"><a class="anchor" href="#domain-locators">#</a>Domain Locators</h1>
+<p>Built-in <a href="../../api/browser/locators.html">locators</a> like <code>getByRole</code> and <code>getByText</code> cover queries that map onto accessibility attributes. They run out when an app has shapes that don&#39;t fit ARIA, like a &quot;comment with N replies&quot; or a row in a custom table component.</p>
+<p>The fallback is to use <code>querySelector</code>. That works, but the result is a plain query rather than a locator, so you lose auto-retry and strict-mode protection.</p>
+<p><a href="../../api/browser/locators.html#custom-locators"><code>locators.extend</code></a> <Version>3.2.0</Version> adds a domain-specific locator without giving up the locator API. The value the method returns is still a locator, so auto-retry, strict-mode protection, and chaining all carry through to your custom methods. The names you give those methods become part of the team&#39;s test vocabulary: <code>page.getByCard({ id: &#39;product-1&#39; })</code> reads like the product instead of the DOM, and the same name shows up consistently across the suite.</p>
+<h2 id="returning-a-playwright-string"><a class="anchor" href="#returning-a-playwright-string">#</a>Returning a Playwright string</h2>
+<p>The simplest form returns a <a href="https://playwright.dev/docs/other-locators">Playwright locator string</a>. Vitest treats the returned string as a child query of whatever locator the method was called on: when called on <code>page</code>, the string runs against the entire page; when called on a parent locator, it runs scoped to that parent&#39;s subtree.</p>
+<p>Reach for this form when the new query has no good expression in built-in locators, like a CSS-with-text selector for a widget that doesn&#39;t map onto a built-in role, or an XPath for a legacy component you don&#39;t control.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { locators } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+locators.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-title function_">getByCommentsCount</span>(<span class="hljs-params"><span class="hljs-attr">count</span>: <span class="hljs-built_in">number</span></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`.comments :text(&quot;<span class="hljs-subst">${count}</span> comments&quot;)`</span>
+  },
+})</code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;article shows comment count&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByCommentsCount</span>(<span class="hljs-number">1</span>)).<span class="hljs-title function_">toBeVisible</span>()
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(
+    page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;article&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Hello World&#x27;</span> })
+      .<span class="hljs-title function_">getByCommentsCount</span>(<span class="hljs-number">1</span>)
+  ).<span class="hljs-title function_">toBeVisible</span>()
+})</code></pre></div>
+<h2 id="composing-existing-locators"><a class="anchor" href="#composing-existing-locators">#</a>Composing existing locators</h2>
+<p>When you return a locator instead of a string, Vitest uses that locator directly. Inside the extension, <code>this</code> is bound to the locator the method was called on (or to <code>page</code> for top-level calls), so you can chain existing locators or apply <code>filter</code> to express relationships between elements that no single built-in option captures.</p>
+<p>The example below uses <code>filter({ has })</code> to narrow a row locator to those that contain a button with a given name, encoding a common per-row-actions pattern as a single named lookup:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { locators } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">Locator</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+locators.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-title function_">getRowWithAction</span>(<span class="hljs-params"><span class="hljs-attr">this</span>: <span class="hljs-title class_">Locator</span>, <span class="hljs-attr">action</span>: <span class="hljs-built_in">string</span></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;row&#x27;</span>).<span class="hljs-title function_">filter</span>({
+      <span class="hljs-attr">has</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: action }),
+    })
+  },
+})</code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getRowWithAction</span>(<span class="hljs-string">&#x27;Delete&#x27;</span>).<span class="hljs-title function_">first</span>().<span class="hljs-title function_">click</span>()</code></pre></div>
+<p>Prefer this over the raw-string form when both options can express the query. Built-in locators encode accessibility-aware lookups, and chaining or filtering them preserves those guarantees. Reach for the raw-string form only when no chain of built-ins covers the query, since the string runs whatever selector you wrote and bypasses the locator mechanism you&#39;re trying to keep.</p>
+<h2 id="custom-interactions"><a class="anchor" href="#custom-interactions">#</a>Custom interactions</h2>
+<p>Methods that perform an interaction instead of returning a locator also work. This is the same mechanism used for shaping your own DSL of user actions, defined alongside your queries so the test vocabulary stays consistent.</p>
+<p><code>locators.extend</code> types <code>this</code> as <code>BrowserPage | Locator</code>, since custom methods are reachable from both. For query helpers that&#39;s fine, since <code>getByRole</code> and other query methods exist on both. For interaction helpers it isn&#39;t: <code>page</code> has no <code>click</code> or <code>fill</code>, so calling <code>page.clickAndFill(&#39;x&#39;)</code> would fail at runtime. Guard against that by comparing <code>this</code> against the <code>page</code> singleton, which lets TypeScript narrow <code>this</code> to <code>Locator</code> after the throw:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { locators, page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">BrowserPage</span>, <span class="hljs-title class_">Locator</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+locators.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">clickAndFill</span>(<span class="hljs-params"><span class="hljs-attr">this</span>: <span class="hljs-title class_">BrowserPage</span> | <span class="hljs-title class_">Locator</span>, <span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span></span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span> === page) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">TypeError</span>(
+        <span class="hljs-string">&#x27;clickAndFill must be called on a locator, like page.getByRole(\&#x27;textbox\&#x27;).clickAndFill(...)&#x27;</span>,
+      )
+    }
+    <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">click</span>()
+    <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">fill</span>(text)
+  },
+})
+
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>).<span class="hljs-title function_">clickAndFill</span>(<span class="hljs-string">&#x27;Hello World&#x27;</span>)</code></pre></div>
+<p>Interaction methods don&#39;t compose into selectors. <code>page.getByRole(&#39;textbox&#39;).clickAndFill(&#39;Hello&#39;)</code> works because <code>getByRole</code> returns a locator; <code>page.clickAndFill(&#39;Hello&#39;)</code> would hit the guard. Reach for this form for action helpers, not for query helpers.</p>
+<h2 id="augmenting-locator-types"><a class="anchor" href="#augmenting-locator-types">#</a>Augmenting locator types</h2>
+<p><code>locators.extend</code> is a runtime registration. TypeScript doesn&#39;t know about the new methods until you augment the <a href="../../api/browser/locators.html"><code>LocatorSelectors</code></a> interface, usually in a shared <code>.d.ts</code> file:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">LocatorSelectors</span> {
+    <span class="hljs-attr">getByCommentsCount</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">count</span>: <span class="hljs-built_in">number</span></span>) =&gt;</span> <span class="hljs-title class_">Locator</span>
+    <span class="hljs-attr">getRowWithAction</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">action</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-title class_">Locator</span>
+    <span class="hljs-attr">clickAndFill</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  }
+}</code></pre></div>
+<p><code>LocatorSelectors</code> is the interface that both <code>Locator</code> and <code>BrowserPage</code> extend, so any method declared on it shows up on both. That matches what <code>locators.extend</code> does at runtime, and it&#39;s why interaction helpers like <code>clickAndFill</code> need the guard above: TypeScript will let <code>page.clickAndFill(&#39;x&#39;)</code> type-check, but the guard catches the misuse before it hits a missing method.</p>
+<h2 id="see-also"><a class="anchor" href="#see-also">#</a>See also</h2>
+<ul>
+<li><a href="../../api/browser/locators.html#custom-locators">Custom Locators API</a></li>
+<li><a href="../../api/browser/locators.html">Built-in Locators</a></li>
+<li><a href="https://playwright.dev/docs/other-locators">Playwright &quot;other locators&quot;</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#returning-a-playwright-string">Returning a Playwright string</a><a class="toc-2" href="#composing-existing-locators">Composing existing locators</a><a class="toc-2" href="#custom-interactions">Custom interactions</a><a class="toc-2" href="#augmenting-locator-types">Augmenting locator types</a><a class="toc-2" href="#see-also">See also</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

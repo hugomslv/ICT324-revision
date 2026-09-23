@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>experimental | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/experimental  <a class="ext small" href="https://vitest.dev/config/experimental">version en ligne</a></div>
+<h1 id="experimental"><a class="anchor" href="#experimental">#</a>experimental</h1>
+<h2 id="experimental-opentelemetry"><a class="anchor" href="#experimental-opentelemetry">#</a>experimental.openTelemetry <Version type="experimental">4.0.11</Version></h2>
+<div class="box box-tip"><div class="box-title">💡 Astuce : FEEDBACK</div><p>Please leave feedback regarding this feature in a <a href="https://github.com/vitest-dev/vitest/discussions/9222">GitHub Discussion</a>.</p>
+</div><ul>
+<li><strong>Type:</strong></li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">OpenTelemetryOptions</span> {
+  <span class="hljs-attr">enabled</span>: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-comment">/**
+   * A path to a file that exposes an OpenTelemetry SDK for Node.js.
+   */</span>
+  <span class="hljs-attr">sdkPath</span>?: <span class="hljs-built_in">string</span>
+  <span class="hljs-comment">/**
+   * A path to a file that exposes an OpenTelemetry SDK for the browser.
+   */</span>
+  <span class="hljs-attr">browserSdkPath</span>?: <span class="hljs-built_in">string</span>
+}</code></pre></div>
+<ul>
+<li><strong>Default:</strong> <code>{ enabled: false }</code></li>
+</ul>
+<p>This option controls <a href="https://opentelemetry.io/">OpenTelemetry</a> support. Vitest imports the SDK file in the main thread and before every test file, if <code>enabled</code> is set to <code>true</code>.</p>
+<div class="box box-danger"><div class="box-title">🛑 Danger : PERFORMANCE CONCERNS</div><p>OpenTelemetry may significantly impact Vitest performance; enable it only for local debugging.</p>
+</div><p>You can use a <a href="../guide/open-telemetry.html">custom service</a> together with Vitest to pinpoint which tests or files are slowing down your test suite.</p>
+<p>For browser mode, see the <a href="../guide/open-telemetry.html#browser-mode">Browser Mode</a> section of the OpenTelemetry guide.</p>
+<p>An <code>sdkPath</code> is resolved relative to the <a href="root.html"><code>root</code></a> of the project and should point to a module that exposes a started SDK instance as a default export. For example:</p>
+<div class="code-group"><div class="code"><div class="code-title">otel.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { getNodeAutoInstrumentations } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@opentelemetry/auto-instrumentations-node&#x27;</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">OTLPTraceExporter</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@opentelemetry/exporter-trace-otlp-proto&#x27;</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">NodeSDK</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@opentelemetry/sdk-node&#x27;</span>
+
+<span class="hljs-keyword">const</span> sdk = <span class="hljs-keyword">new</span> <span class="hljs-title class_">NodeSDK</span>({
+  <span class="hljs-attr">serviceName</span>: <span class="hljs-string">&#x27;vitest&#x27;</span>,
+  <span class="hljs-attr">traceExporter</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">OTLPTraceExporter</span>(),
+  <span class="hljs-attr">instrumentations</span>: [<span class="hljs-title function_">getNodeAutoInstrumentations</span>()],
+})
+
+sdk.<span class="hljs-title function_">start</span>()
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> sdk</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">experimental</span>: {
+      <span class="hljs-attr">openTelemetry</span>: {
+        <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">sdkPath</span>: <span class="hljs-string">&#x27;./otel.js&#x27;</span>,
+      },
+    },
+  },
+})</code></pre></div>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>It&#39;s important that Node can process <code>sdkPath</code> content because it is not transformed by Vitest. See <a href="../guide/open-telemetry.html">the guide</a> on how to work with OpenTelemetry inside of Vitest.</p>
+</div><h2 id="experimental-importdurations"><a class="anchor" href="#experimental-importdurations">#</a>experimental.importDurations <Version type="experimental">4.1.0</Version></h2>
+<div class="box box-tip"><div class="box-title">💡 Astuce : FEEDBACK</div><p>Please leave feedback regarding this feature in a <a href="https://github.com/vitest-dev/vitest/discussions/9224">GitHub Discussion</a>.</p>
+</div><ul>
+<li><strong>Type:</strong></li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">ImportDurationsOptions</span> {
+  <span class="hljs-comment">/**
+   * When to print import breakdown to CLI terminal.
+   * - false: Never print (default)
+   * - true: Always print
+   * - &#x27;on-warn&#x27;: Print only when any import exceeds warn threshold
+   */</span>
+  <span class="hljs-attr">print</span>?: <span class="hljs-built_in">boolean</span> | <span class="hljs-string">&#x27;on-warn&#x27;</span>
+  <span class="hljs-comment">/**
+   * Fail the test run if any import exceeds the danger threshold.
+   * When enabled and threshold exceeded, breakdown is always printed.
+   * <span class="hljs-doctag">@default</span> <span class="hljs-variable">false</span>
+   */</span>
+  <span class="hljs-attr">failOnDanger</span>?: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-comment">/**
+   * Maximum number of imports to collect and display.
+   */</span>
+  <span class="hljs-attr">limit</span>?: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * Duration thresholds in milliseconds for coloring and warnings.
+   */</span>
+  <span class="hljs-attr">thresholds</span>?: {
+    <span class="hljs-comment">/** Threshold for yellow/warning color. <span class="hljs-doctag">@default</span> 100 */</span>
+    <span class="hljs-attr">warn</span>?: <span class="hljs-built_in">number</span>
+    <span class="hljs-comment">/** Threshold for red/danger color and failOnDanger. <span class="hljs-doctag">@default</span> 500 */</span>
+    <span class="hljs-attr">danger</span>?: <span class="hljs-built_in">number</span>
+  }
+}</code></pre></div>
+<ul>
+<li><strong>Default:</strong> <code>{ print: false, failOnDanger: false, limit: 0, thresholds: { warn: 100, danger: 500 } }</code> (<code>limit</code> is 10 if <code>print</code> or UI is enabled)</li>
+</ul>
+<p>Configure import duration collection and display.</p>
+<p>The <code>print</code> option controls CLI terminal output. The <code>limit</code> option controls how many imports to collect and display. <a href="../guide/ui.html#import-breakdown">Vitest UI</a> can always toggle the breakdown display regardless of the <code>print</code> setting.</p>
+<ul>
+<li>Self: the time it took to import the module, excluding static imports;</li>
+<li>Total: the time it took to import the module, including static imports. Note that this does not include <code>transform</code> time of the current module.</li>
+</ul>
+<span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span><p>Note that if the file path is too long, Vitest will truncate it at the start until it fits 45 character limit.</p>
+<h3 id="experimental-importdurationsprint"><a class="anchor" href="#experimental-importdurationsprint">#</a>experimental.importDurations.print</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean | &#39;on-warn&#39;</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+</ul>
+<p>Controls when to print import breakdown to CLI terminal after tests finish. This only works with <a href="../guide/reporters.html#default"><code>default</code></a>, <a href="../guide/reporters.html#verbose"><code>verbose</code></a>, or <a href="../guide/reporters.html#tree"><code>tree</code></a> reporters.</p>
+<ul>
+<li><code>false</code>: Never print breakdown</li>
+<li><code>true</code>: Always print breakdown</li>
+<li><code>&#39;on-warn&#39;</code>: Print only when any import exceeds the <code>thresholds.warn</code> value</li>
+</ul>
+<h3 id="experimental-importdurationsfailondanger"><a class="anchor" href="#experimental-importdurationsfailondanger">#</a>experimental.importDurations.failOnDanger</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+</ul>
+<p>Fail the test run if any import exceeds the <code>thresholds.danger</code> value. When enabled and the threshold is exceeded, the breakdown is always printed regardless of the <code>print</code> setting.</p>
+<p>This is useful for enforcing import performance budgets in CI:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest --experimental.importDurations.failOnDanger</code></pre></div>
+<h3 id="experimental-importdurationslimit"><a class="anchor" href="#experimental-importdurationslimit">#</a>experimental.importDurations.limit</h3>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Default:</strong> <code>0</code> (or <code>10</code> if <code>print</code>, <code>failOnDanger</code>, or UI is enabled)</li>
+</ul>
+<p>Maximum number of imports to collect and display in CLI output, <a href="../guide/ui.html#import-breakdown">Vitest UI</a>, and third-party reporters.</p>
+<h3 id="experimental-importdurationsthresholds"><a class="anchor" href="#experimental-importdurationsthresholds">#</a>experimental.importDurations.thresholds</h3>
+<ul>
+<li><strong>Type:</strong> <code>{ warn?: number; danger?: number }</code></li>
+<li><strong>Default:</strong> <code>{ warn: 100, danger: 500 }</code></li>
+</ul>
+<p>Duration thresholds in milliseconds for coloring and warnings:</p>
+<ul>
+<li><code>warn</code>: Threshold for yellow/warning color (default: 100ms)</li>
+<li><code>danger</code>: Threshold for red/danger color and <code>failOnDanger</code> (default: 500ms)</li>
+</ul>
+<div class="box box-info"><div class="box-title">ℹ️ Info</div><p><a href="../guide/ui.html#import-breakdown">Vitest UI</a> shows a breakdown of imports automatically if at least one file took longer than the <code>danger</code> threshold to load.</p>
+</div><h2 id="experimental-vitemodulerunner"><a class="anchor" href="#experimental-vitemodulerunner">#</a>experimental.viteModuleRunner <Version type="experimental">4.1.0</Version></h2>
+<div class="box box-tip"><div class="box-title">💡 Astuce : FEEDBACK</div><p>Please leave feedback regarding this feature in a <a href="https://github.com/vitest-dev/vitest/discussions/9501">GitHub Discussion</a>.</p>
+</div><ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+</ul>
+<p>Controls whether Vitest uses Vite&#39;s <a href="https://vite.dev/guide/api-environment-runtimes#modulerunner">module runner</a> to run the code or fallback to the native <code>import</code>.</p>
+<p>If this option is defined in the root config, all <a href="../guide/projects.html">projects</a> will inherit it automatically.</p>
+<p>Consider disabling the module runner if you are running tests in the same environment as your code (server backend or simple scripts, for example). However, we still recommend running <code>jsdom</code>/<code>happy-dom</code> tests with Vite&#39;s module runner or in <a href="../guide/browser/index.html">the browser</a> since it doesn&#39;t require any additional configuration.</p>
+<p>Disabling this flag will disable <em>all</em> file transforms:</p>
+<ul>
+<li>test files and your source code are not processed by Vite</li>
+<li>your global setup files are not processed</li>
+<li>your custom runner/pool/environment files are not processed</li>
+<li>your config file is still processed by Vite (this happens before Vitest knows the <code>viteModuleRunner</code> flag)</li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>At the moment, Vitest still requires Vite for certain functionality like the module graph or watch mode.</p>
+<p>Also note that this option only works with <code>forks</code> or <code>threads</code> <a href="pool.html">pools</a>.</p>
+</div><h3 id="module-runner"><a class="anchor" href="#module-runner">#</a>Module Runner</h3>
+<p>By default, Vitest runs tests in a very permissive module runner sandbox powered by Vite&#39;s <a href="https://vite.dev/guide/api-environment.html#environment-api">Environment API</a>. Every file is categorized as either an &quot;inline&quot; module or an &quot;external&quot; module.</p>
+<p>Module runner runs all &quot;inlined&quot; modules. It provides <code>import.meta.env</code>, <code>require</code>, <code>__dirname</code>, <code>__filename</code>, static <code>import</code>, and has its own module resolution mechanism. This makes it very easy to run code when you don&#39;t want to configure the environment and just need to test that the bare JavaScript logic you wrote works as intended.</p>
+<p>All &quot;external&quot; modules run in native mode, meaning they are executed outside of the module runner sandbox. If you are running tests in Node.js, these files are imported with the native <code>import</code> keyword and processed by Node.js directly.</p>
+<p>While running JSDOM/happy-dom tests in a permissive fake environment might be justified, running Node.js tests in a non-Node.js environment can hide and silence potential errors you may encounter in production, especially if your code doesn&#39;t require any additional transformations provided by Vite plugins.</p>
+<h3 id="known-limitations"><a class="anchor" href="#known-limitations">#</a>Known Limitations</h3>
+<p>Some Vitest features rely on files being transformed. Vitest uses synchronous <a href="https://nodejs.org/api/module.html#customization-hooks">Node.js Loaders API</a> to transform test files and setup files to support these features:</p>
+<ul>
+<li><a href="../guide/in-source.html"><code>import.meta.vitest</code></a></li>
+<li><a href="../api/vi.html#vi-mock"><code>vi.mock</code></a></li>
+<li><a href="../api/vi.html#vi-hoisted"><code>vi.hoisted</code></a></li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This means that Vitest requires at least Node 22.15 for those features to work. At the moment, they also do not work in Deno or Bun.</p>
+<p>Vitest will only detect <code>vi.mock</code> and <code>vi.hoisted</code> inside of test files, they will not be hoisted inside imported modules.</p>
+</div><p>This could affect performance because Vitest needs to read the file and process it. If you do not use these features, you can disable the transforms by setting <code>experimental.nodeLoader</code> to <code>false</code>. Vitest only reads test files and setup files while looking for <code>vi.mock</code> or <code>vi.hoisted</code>. Using these in other files won&#39;t hoist them to the top of the file and can lead to unexpected behavior.</p>
+<p>Some features will not work due to the nature of <code>viteModuleRunner</code>, including:</p>
+<ul>
+<li>no <code>import.meta.env</code>: <code>import.meta.env</code> is a Vite feature, use <code>process.env</code> instead</li>
+<li>no <code>plugins</code>: plugins are not applied because there is no transformation phase, use <a href="https://nodejs.org/api/module.html#customization-hooks">customization hooks</a> via <a href="execargv.html"><code>execArgv</code></a> instead</li>
+<li>no <code>alias</code>: aliases are not applied because there is no transformation phase</li>
+<li><code>istanbul</code> coverage provider doesn&#39;t work because there is no transformation phase, use <code>v8</code> instead</li>
+<li><code>vi.resetModules()</code>: there is no API to invalidate ES modules from the module cache</li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Coverage Support</div><p>At the moment Vitest supports coverage via <code>v8</code> provider as long as files can be transformed into JavaScript. To transform TypeScript, Vitest uses <a href="https://nodejs.org/api/module.html#modulestriptypescripttypescode-options"><code>module.stripTypeScriptTypes</code></a> which is available in Node.js since v22.13. If you are using a custom <a href="https://nodejs.org/api/module.html#customization-hooks">module loader</a>, Vitest is not able to reuse it to transform files for analysis.</p>
+</div><p>With regards to mocking, it is also important to point out that ES modules do not support property override. This means that code like this won&#39;t work anymore:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> fs <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:fs&#x27;</span>
+<span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+vi.<span class="hljs-title function_">spyOn</span>(fs, <span class="hljs-string">&#x27;readFileSync&#x27;</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;42&#x27;</span>) <span class="hljs-comment">// ❌</span></code></pre></div>
+<p>However, Vitest supports auto-spying on modules without overriding their implementation. When <code>vi.mock</code> is called with a <code>spy: true</code> argument, the module is mocked in a way that preserves original implementations, but all exported functions are wrapped in a <code>vi.fn()</code> spy:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> fs <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;node:fs&#x27;</span>
+<span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;node:fs&#x27;</span>, { <span class="hljs-attr">spy</span>: <span class="hljs-literal">true</span> })
+
+fs.<span class="hljs-property">readFileSync</span>.<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;42&#x27;</span>) <span class="hljs-comment">// ✅</span></code></pre></div>
+<p>Factory mocking is implemented using a top-level await. This means that mocked modules cannot be loaded with <code>require()</code> in your source code:</p>
+<div class="code"><pre><code class="hljs lang-ts">vi.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;node:fs&#x27;</span>, <span class="hljs-title function_">async</span> (importOriginal) =&gt; {
+  <span class="hljs-keyword">return</span> {
+    ...<span class="hljs-keyword">await</span> <span class="hljs-title function_">importOriginal</span>(),
+    <span class="hljs-attr">readFileSync</span>: vi.<span class="hljs-title function_">fn</span>(),
+  }
+})
+
+<span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;node:fs&#x27;</span>) <span class="hljs-comment">// throws an error</span></code></pre></div>
+<p>This limitation exists because factories can be asynchronous. This should not be a problem because Vitest doesn&#39;t mock builtin modules inside <code>node_modules</code>, which is similar to how Vitest works by default.</p>
+<h3 id="typescript"><a class="anchor" href="#typescript">#</a>TypeScript</h3>
+<p>If you are using Node.js 22.18/23.6 or higher, TypeScript will be <a href="https://nodejs.org/en/learn/typescript/run-natively">transformed natively</a> by Node.js.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : TypeScript with Node.js 22.6-22.18</div><p>If you are using Node.js version between 22.6 and 22.18, you can also enable native TypeScript support via <code>--experimental-strip-types</code> flag:</p>
+<div class="code"><pre><code class="hljs lang-shell">NODE_OPTIONS=<span class="hljs-string">&quot;--experimental-strip-types&quot;</span> vitest</code></pre></div>
+<p>If you are using TypeScript and Node.js version lower than 22.6, then you will need to either:</p>
+<ul>
+<li>build your test files and source code and run those files directly</li>
+<li>import a <a href="https://nodejs.org/api/module.html#customization-hooks">custom loader</a> via <code>execArgv</code> flag</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">const</span> tsxApi = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-title function_">resolve</span>(<span class="hljs-string">&#x27;tsx/esm/api&#x27;</span>)
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">execArgv</span>: [
+      <span class="hljs-string">`--import=data:text/javascript,import * as tsx from &quot;<span class="hljs-subst">${tsxApi}</span>&quot;;tsx.register()`</span>,
+    ],
+    <span class="hljs-attr">experimental</span>: {
+      <span class="hljs-attr">viteModuleRunner</span>: <span class="hljs-literal">false</span>,
+    },
+  },
+})</code></pre></div>
+<p>If you are running tests in Deno, TypeScript files are processed by the runtime without any additional configurations.</p>
+</div><h2 id="experimental-vcsprovider"><a class="anchor" href="#experimental-vcsprovider">#</a>experimental.vcsProvider <Version type="experimental">4.1.1</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>VCSProvider | string</code></li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">VCSProvider</span> {
+  <span class="hljs-title function_">findChangedFiles</span>(<span class="hljs-attr">options</span>: <span class="hljs-title class_">VCSProviderOptions</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">string</span>[]&gt;
+}
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">VCSProviderOptions</span> {
+  <span class="hljs-attr">root</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">changedSince</span>?: <span class="hljs-built_in">string</span> | <span class="hljs-built_in">boolean</span>
+}</code></pre></div>
+<ul>
+<li><strong>Default:</strong> <code>&#39;git&#39;</code></li>
+</ul>
+<p>Custom provider for detecting changed files. Used with the <a href="../guide/cli.html#changed"><code>--changed</code></a> flag to determine which files have been modified.</p>
+<p>By default, Vitest uses Git to detect changed files. You can provide a custom implementation of the <code>VCSProvider</code> interface to use a different version control system:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">experimental</span>: {
+      <span class="hljs-attr">vcsProvider</span>: {
+        <span class="hljs-keyword">async</span> <span class="hljs-title function_">findChangedFiles</span>(<span class="hljs-params">{ root, changedSince }</span>) {
+          <span class="hljs-comment">// return paths of changed files</span>
+          <span class="hljs-keyword">return</span> []
+        },
+      },
+    },
+  },
+})</code></pre></div>
+<p>You can also pass a string path to a module with a default export that implements the <code>VCSProvider</code> interface:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">experimental</span>: {
+      <span class="hljs-attr">vcsProvider</span>: <span class="hljs-string">&#x27;./my-vcs-provider.js&#x27;</span>,
+    },
+  },
+})</code></pre></div>
+<div class="code"><div class="code-title">my-vcs-provider.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">findChangedFiles</span>(<span class="hljs-params">{ root, changedSince }</span>) {
+    <span class="hljs-comment">// return paths of changed files</span>
+    <span class="hljs-keyword">return</span> []
+  },
+}</code></pre></div>
+<h2 id="experimental-nodeloader"><a class="anchor" href="#experimental-nodeloader">#</a>experimental.nodeLoader <Version type="experimental">4.1.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+</ul>
+<p>If module runner is disabled, Vitest uses a native <a href="https://nodejs.org/api/module.html#customization-hooks">Node.js module loader</a> to transform files to support <code>import.meta.vitest</code>, <code>vi.mock</code> and <code>vi.hoisted</code>.</p>
+<p>If you don&#39;t use these features, you can disable this to improve performance.</p>
+<h2 id="experimental-preparse"><a class="anchor" href="#experimental-preparse">#</a>experimental.preParse <Version type="experimental">4.1.3</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+</ul>
+<p>Parses test specifications before running them. This applies the <a href="../api/test.html#test-only"><code>.only</code></a> modifier, the <a href="testnamepattern.html"><code>-t</code></a> test name pattern, <a href="../guide/test-tags.html#syntax"><code>--tags-filter</code></a>, <a href="../api/advanced/test-specification.html#testlines">test lines</a>, and <a href="../api/advanced/test-specification.html#testids">test IDs</a> across all files without executing them. For example, if only a single test is marked with <code>.only</code>, Vitest will skip all other tests in all files.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This option is recommended when using <a href="../api/test.html#test-only"><code>.only</code></a>, the <a href="testnamepattern.html"><code>-t</code></a> flag, or <a href="../guide/test-tags.html#syntax"><code>--tags-filter</code></a>.</p>
+<p>Enabling it unconditionally may slow down your test runs due to the additional parsing step.</p>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Pre-parsing uses static analysis (AST parsing) instead of executing your test files. This means that test names, tags, and modifiers (<code>.only</code>, <code>.skip</code>, <code>.todo</code>) must be statically analyzable. Dynamic test names (e.g., names stored in variables or returned from function calls) and non-literal tags will not be resolved correctly.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// ✅ works — static string literal</span>
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;adds numbers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {})
+
+<span class="hljs-comment">// ✅ works — static tags</span>
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;my test&#x27;</span>, { <span class="hljs-attr">tags</span>: [<span class="hljs-string">&#x27;unit&#x27;</span>] }, <span class="hljs-function">() =&gt;</span> {})
+
+<span class="hljs-comment">// ❌ won&#x27;t match correctly — dynamic name</span>
+<span class="hljs-keyword">const</span> name = <span class="hljs-title function_">getName</span>()
+<span class="hljs-title function_">test</span>(name, <span class="hljs-function">() =&gt;</span> {})
+
+<span class="hljs-comment">// ❌ won&#x27;t match correctly — dynamic tags</span>
+<span class="hljs-keyword">const</span> tags = <span class="hljs-title function_">getTags</span>()
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;my test&#x27;</span>, { tags }, <span class="hljs-function">() =&gt;</span> {})</code></pre></div>
+</div><h2 id="experimental-diagnostics"><a class="anchor" href="#experimental-diagnostics">#</a>experimental.diagnostics <Version type="experimental">5.0.0</Version></h2>
+<ul>
+<li><strong>Type:</strong></li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">DiagnosticsOptions</span> {
+  <span class="hljs-comment">/**
+   * Hint when `isolate: true` spends a significant amount of time spawning
+   * a fresh worker (and re-creating the environment) for every test file,
+   * estimating how much `isolate: false` could save.
+   * <span class="hljs-doctag">@default</span> <span class="hljs-variable">true</span>
+   */</span>
+  <span class="hljs-attr">isolate</span>?: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-comment">/**
+   * Hint when re-creating a DOM environment for every test file dominates
+   * the run and a `vm` pool would set it up once per worker.
+   * <span class="hljs-doctag">@default</span> <span class="hljs-variable">true</span>
+   */</span>
+  <span class="hljs-attr">environment</span>?: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-comment">/**
+   * Hint when test files repeatedly evaluate the same module graph
+   * (typical for barrel-file imports) and `isolate: false` would
+   * evaluate it once per worker.
+   * <span class="hljs-doctag">@default</span> <span class="hljs-variable">true</span>
+   */</span>
+  <span class="hljs-attr">import</span>?: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-comment">/**
+   * Hint when transforming modules dominates the run and
+   * `fsModuleCache` would persist the results across runs.
+   * <span class="hljs-doctag">@default</span> <span class="hljs-variable">true</span>
+   */</span>
+  <span class="hljs-attr">transform</span>?: <span class="hljs-built_in">boolean</span>
+}</code></pre></div>
+<ul>
+<li><strong>Default:</strong> <code>true</code></li>
+</ul>
+<p>Print performance hints after the run when the collected timings show that a configuration change would make the run significantly faster:</p>
+<div class="code"><pre><code class="hljs lang-txt">Environment  jsdom was created 40 times · 23.80s total, 79% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments</code></pre></div>
+<p>Hints never suggest changing an option that was set explicitly: if the config defines <code>pool</code>, other pools are not suggested, and an explicitly configured <code>isolate</code> is never suggested to be disabled. Hints are also printed in CI. Set the option to <code>false</code> to disable all hints, or disable them individually.</p>
+<p>To measure the impact of a configuration change instead of estimating it, run <a href="../guide/cli.html#vitest-doctor"><code>vitest doctor</code></a>.</p>
+<h3 id="experimental-diagnostics-isolate"><a class="anchor" href="#experimental-diagnostics-isolate">#</a>experimental.diagnostics.isolate</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+</ul>
+<p>Hint when <code>isolate: true</code> spends a significant amount of time spawning a fresh worker (and re-creating the environment) for every test file, estimating how much <code>isolate: false</code> could save. Reused workers also keep evaluated modules alive, so files stop re-evaluating the module graph they share. Per-module evaluation times are only collected when <a href="#experimental-importdurations"><code>experimental.importDurations</code></a> is enabled; without it the estimate counts the worker startups alone and is reported as a lower bound (&quot;at least&quot;).</p>
+<h3 id="experimental-diagnostics-environment"><a class="anchor" href="#experimental-diagnostics-environment">#</a>experimental.diagnostics.environment</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+</ul>
+<p>Hint when re-creating a DOM environment for every test file dominates the run and a <code>vm</code> pool would set it up once per worker.</p>
+<h3 id="experimental-diagnostics-import"><a class="anchor" href="#experimental-diagnostics-import">#</a>experimental.diagnostics.import</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+</ul>
+<p>Hint when test files repeatedly evaluate the same module graph and <code>isolate: false</code> would evaluate it once per worker. This is typical for barrel-file imports: every test file imports a few symbols through an index file and evaluates the whole graph behind it. The duplication is measured from how often each module was served to the workers, so suites whose test files import mostly disjoint modules stay quiet: reusing workers would not reduce their import work.</p>
+<div class="code"><pre><code class="hljs lang-txt">Import  837 modules were evaluated 16740 times · 15.69s total, 64% of tracked time
+        ~850ms faster with isolate: false — shared modules are evaluated once per worker instead of once per file
+        learn more: https://vitest.dev/guide/improving-performance#test-isolation</code></pre></div>
+<h3 id="experimental-diagnostics-transform"><a class="anchor" href="#experimental-diagnostics-transform">#</a>experimental.diagnostics.transform</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+</ul>
+<p>Hint when transforming modules dominates the run. Without a persistent cache every <code>vitest run</code> transforms the whole module graph from scratch; <a href="fsmodulecache.html"><code>fsModuleCache</code></a> stores the results on disk so repeated runs skip them. The hint estimates the time the next run would save. On CI the hint includes a note that the cache directory must be persisted between runs for the cache to take effect.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#experimental-opentelemetry">experimental.openTelemetry 4.0.11</a><a class="toc-2" href="#experimental-importdurations">experimental.importDurations 4.1.0</a><a class="toc-3" href="#experimental-importdurationsprint">experimental.importDurations.print</a><a class="toc-3" href="#experimental-importdurationsfailondanger">experimental.importDurations.failOnDanger</a><a class="toc-3" href="#experimental-importdurationslimit">experimental.importDurations.limit</a><a class="toc-3" href="#experimental-importdurationsthresholds">experimental.importDurations.thresholds</a><a class="toc-2" href="#experimental-vitemodulerunner">experimental.viteModuleRunner 4.1.0</a><a class="toc-3" href="#module-runner">Module Runner</a><a class="toc-3" href="#known-limitations">Known Limitations</a><a class="toc-3" href="#typescript">TypeScript</a><a class="toc-2" href="#experimental-vcsprovider">experimental.vcsProvider 4.1.1</a><a class="toc-2" href="#experimental-nodeloader">experimental.nodeLoader 4.1.0</a><a class="toc-2" href="#experimental-preparse">experimental.preParse 4.1.3</a><a class="toc-2" href="#experimental-diagnostics">experimental.diagnostics 5.0.0</a><a class="toc-3" href="#experimental-diagnostics-isolate">experimental.diagnostics.isolate</a><a class="toc-3" href="#experimental-diagnostics-environment">experimental.diagnostics.environment</a><a class="toc-3" href="#experimental-diagnostics-import">experimental.diagnostics.import</a><a class="toc-3" href="#experimental-diagnostics-transform">experimental.diagnostics.transform</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

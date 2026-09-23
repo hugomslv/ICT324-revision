@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multiple Setups (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/browser/multiple-setups  <a class="ext small" href="https://vitest.dev/guide/browser/multiple-setups">version en ligne</a></div>
+<h1 id="multiple-setups"><a class="anchor" href="#multiple-setups">#</a>Multiple Setups</h1>
+<p>You can specify several different browser setups using the <a href="../../config/browser/instances.html"><code>browser.instances</code></a> option.</p>
+<p>The main advantage of using the <code>browser.instances</code> over the <a href="../projects.html">test projects</a> is improved caching. Every project will use the same Vite server meaning the file transform and <a href="https://vite.dev/guide/dep-pre-bundling.html">dependency pre-bundling</a> has to happen only once.</p>
+<h2 id="several-browsers"><a class="anchor" href="#several-browsers">#</a>Several Browsers</h2>
+<p>You can use the <code>browser.instances</code> field to specify options for different browsers. For example, if you want to run the same tests in different browsers, the minimal configuration will look like this:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>(),
+      <span class="hljs-attr">headless</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">instances</span>: [
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> },
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;firefox&#x27;</span> },
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;webkit&#x27;</span> },
+      ],
+    },
+  },
+})</code></pre></div>
+<h2 id="different-setups"><a class="anchor" href="#different-setups">#</a>Different Setups</h2>
+<p>You can also specify different config options independently from the browser (although, the instances <em>can</em> also have <code>browser</code> fields):</p>
+<div class="code-group"><div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> { playwright } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser-playwright&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">provider</span>: <span class="hljs-title function_">playwright</span>(),
+      <span class="hljs-attr">headless</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">instances</span>: [
+        {
+          <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span>,
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;chromium-1&#x27;</span>,
+          <span class="hljs-attr">setupFiles</span>: [<span class="hljs-string">&#x27;./ratio-setup.ts&#x27;</span>],
+          <span class="hljs-attr">provide</span>: {
+            <span class="hljs-attr">ratio</span>: <span class="hljs-number">1</span>,
+          },
+        },
+        {
+          <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span>,
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;chromium-2&#x27;</span>,
+          <span class="hljs-attr">provide</span>: {
+            <span class="hljs-attr">ratio</span>: <span class="hljs-number">2</span>,
+          },
+        },
+      ],
+    },
+  },
+})</code></pre></div>
+<div class="code"><div class="code-title">example.test.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, inject, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { globalSetupModifier } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;ratio works&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">inject</span>(<span class="hljs-string">&#x27;ratio&#x27;</span>) * globalSetupModifier).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">14</span>)
+})</code></pre></div>
+</div><p>In this example Vitest will run all tests in <code>chromium</code> browser, but execute a <code>&#39;./ratio-setup.ts&#39;</code> file only in the first configuration and inject a different <code>ratio</code> value depending on the <a href="../../config/provide.html"><code>provide</code> field</a>.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that you need to define the custom <code>name</code> value if you are using the same browser name because Vitest will assign the <code>browser</code> as the project name otherwise.</p>
+</div><h2 id="filtering"><a class="anchor" href="#filtering">#</a>Filtering</h2>
+<p>You can filter what projects to run with the <a href="../cli.html#project"><code>--project</code> flag</a>. Vitest will automatically assign the browser name as a project name if it is not assigned manually. If the root config already has a name, Vitest will merge them: <code>custom</code> -&gt; <code>custom (browser)</code>.</p>
+<div class="code"><pre><code class="hljs lang-shell">$ vitest --project=chromium</code></pre></div>
+<div class="code-group"><div class="code"><div class="code-title">default</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">instances</span>: [
+        <span class="hljs-comment">// name: chromium</span>
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> },
+        <span class="hljs-comment">// name: custom</span>
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;firefox&#x27;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;custom&#x27;</span> },
+      ]
+    }
+  }
+})</code></pre></div>
+<div class="code"><div class="code-title">custom</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;custom&#x27;</span>,
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">instances</span>: [
+        <span class="hljs-comment">// name: custom (chromium)</span>
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;chromium&#x27;</span> },
+        <span class="hljs-comment">// name: manual</span>
+        { <span class="hljs-attr">browser</span>: <span class="hljs-string">&#x27;firefox&#x27;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;manual&#x27;</span> },
+      ]
+    }
+  }
+})</code></pre></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#several-browsers">Several Browsers</a><a class="toc-2" href="#different-setups">Different Setups</a><a class="toc-2" href="#filtering">Filtering</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

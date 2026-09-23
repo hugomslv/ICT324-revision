@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vitest-browser-react (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/browser/react  <a class="ext small" href="https://vitest.dev/api/browser/react">version en ligne</a></div>
+<h1 id="vitest-browser-react"><a class="anchor" href="#vitest-browser-react">#</a>vitest-browser-react</h1>
+<p>The community <a href="https://npmx.dev/package/vitest-browser-react"><code>vitest-browser-react</code></a> package renders <a href="https://react.dev/">React</a> components in <a href="../../guide/browser/index.html">Browser Mode</a>.</p>
+<div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-react&#x27;</span>
+<span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Component</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./Component.jsx&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;counter button increments the count&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Component</span> <span class="hljs-attr">count</span>=<span class="hljs-string">{1}</span> /&gt;</span></span>)
+
+  <span class="hljs-keyword">await</span> screen.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Increment&#x27;</span> }).<span class="hljs-title function_">click</span>()
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(screen.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Count is 2&#x27;</span>)).<span class="hljs-title function_">toBeVisible</span>()
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This library takes inspiration from <a href="https://github.com/testing-library/react-testing-library"><code>@testing-library/react</code></a>.</p>
+<p>If you have used <code>@testing-library/react</code> in your tests before, you can keep using it, however the <code>vitest-browser-react</code> package provides certain benefits unique to the Browser Mode that <code>@testing-library/react</code> lacks:</p>
+<p><code>vitest-browser-react</code> returns APIs that interact well with built-in <a href="locators.html">locators</a>, <a href="interactivity.html">user events</a> and <a href="assertions.html">assertions</a>: for example, Vitest will automatically retry the element until the assertion is successful, even if it was rerendered between the assertions.</p>
+</div><p>The package exposes two entry points: <code>vitest-browser-react</code> and <code>vitest-browser-react/pure</code>. They expose almost identical API (<code>pure</code> also exposes <code>configure</code>), but the <code>pure</code> entry point doesn&#39;t add a handler to remove the component before the next test has started.</p>
+<h2 id="render"><a class="anchor" href="#render">#</a>render</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">render</span>(<span class="hljs-params">
+  <span class="hljs-attr">ui</span>: <span class="hljs-title class_">React</span>.<span class="hljs-title class_">ReactNode</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">ComponentRenderOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">RenderResult</span>&gt;</code></pre></div>
+<p>The <code>render</code> function records a <code>react.render</code> trace mark, visible in the <a href="../../guide/browser/trace-view.html">Trace View</a>.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that <code>render</code> is asynchronous, unlike in other packages. This is to support <a href="https://react.dev/reference/react/Suspense"><code>Suspense</code></a> correctly.</p>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-react&#x27;</span>
+<span class="hljs-keyword">const</span> screen = <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Component</span> /&gt;</span></span>)
+<span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Component</span> /&gt;</span></span>)</code></pre></div>
+</div><h3 id="options"><a class="anchor" href="#options">#</a>Options</h3>
+<h4 id="container"><a class="anchor" href="#container">#</a>container</h4>
+<p>By default, Vitest will create a <code>div</code>, append it to <code>document.body</code>, and render your component there. If you provide your own <code>HTMLElement</code> container, it will not be appended automatically — you&#39;ll need to call <code>document.body.appendChild(container)</code> before <code>render</code>.</p>
+<p>For example, if you are unit testing a <code>tbody</code> element, it cannot be a child of a <code>div</code>. In this case, you can specify a <code>table</code> as the render container.</p>
+<div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-keyword">const</span> table = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;table&#x27;</span>)
+
+<span class="hljs-keyword">const</span> { container } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">TableBody</span> {<span class="hljs-attr">...props</span>} /&gt;</span></span>, {
+  <span class="hljs-comment">// ⚠️ appending the element to `body` manually before rendering</span>
+  <span class="hljs-attr">container</span>: <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-title function_">appendChild</span>(table),
+})</code></pre></div>
+<h4 id="baseelement"><a class="anchor" href="#baseelement">#</a>baseElement</h4>
+<p>If the <code>container</code> is specified, then this defaults to that, otherwise this defaults to <code>document.body</code>. This is used as the base element for the queries as well as what is printed when you use <code>debug()</code>.</p>
+<h4 id="wrapper"><a class="anchor" href="#wrapper">#</a>wrapper</h4>
+<p>Pass a React Component as the <code>wrapper</code> option to have it rendered around the inner element. This is most useful for creating reusable custom render functions for common data providers. For example:</p>
+<div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-keyword">import</span> <span class="hljs-title class_">React</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;react&#x27;</span>
+<span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-react&#x27;</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">ThemeProvider</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;my-ui-lib&#x27;</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">TranslationProvider</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;my-i18n-lib&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">AllTheProviders</span>(<span class="hljs-params">{ children }</span>) {
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">ThemeProvider</span> <span class="hljs-attr">theme</span>=<span class="hljs-string">&quot;light&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">TranslationProvider</span>&gt;</span>
+        {children}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">TranslationProvider</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ThemeProvider</span>&gt;</span></span>
+  )
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">customRender</span>(<span class="hljs-params">ui, options</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">render</span>(ui, { <span class="hljs-attr">wrapper</span>: <span class="hljs-title class_">AllTheProviders</span>, ...options })
+}</code></pre></div>
+<h3 id="render-result"><a class="anchor" href="#render-result">#</a>Render Result</h3>
+<p>In addition to documented return value, the <code>render</code> function also returns all available <a href="locators.html">locators</a> relative to the <a href="#baseelement"><code>baseElement</code></a>, including <a href="locators.html#custom-locators">custom ones</a>.</p>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">TableBody</span> {<span class="hljs-attr">...props</span>} /&gt;</span></span>)
+
+<span class="hljs-keyword">await</span> screen.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;link&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Expand&#x27;</span> }).<span class="hljs-title function_">click</span>()</code></pre></div>
+<h4 id="container-2"><a class="anchor" href="#container-2">#</a>container</h4>
+<p>The containing <code>div</code> DOM node of your rendered React Element (rendered using <code>ReactDOM.render</code>). This is a regular DOM node, so you technically could call <code>container.querySelector</code> etc. to inspect the children.</p>
+<div class="box box-danger"><div class="box-title">🛑 Danger</div><p>If you find yourself using <code>container</code> to query for rendered elements then you should reconsider! The <a href="locators.html">locators</a> are designed to be more resilient to changes that will be made to the component you&#39;re testing. Avoid using <code>container</code> to query for elements!</p>
+</div><h4 id="baseelement-2"><a class="anchor" href="#baseelement-2">#</a>baseElement</h4>
+<p>The containing DOM node where your React Element is rendered in the <code>container</code>. If you don&#39;t specify the <code>baseElement</code> in the options of render, it will default to <code>document.body</code>.</p>
+<p>This is useful when the component you want to test renders something outside the container <code>div</code>, e.g. when you want to snapshot test your portal component which renders its HTML directly in the body.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>The queries returned by the <code>render</code> looks into <code>baseElement</code>, so you can use queries to test your portal component without the <code>baseElement</code>.</p>
+</div><h4 id="locator"><a class="anchor" href="#locator">#</a>locator</h4>
+<p>The <a href="locators.html">locator</a> of your <code>container</code>. It is useful to use queries scoped only to your component, or pass it down to other assertions:</p>
+<div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-react&#x27;</span>
+
+<span class="hljs-keyword">const</span> { locator } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">NumberDisplay</span> <span class="hljs-attr">number</span>=<span class="hljs-string">{1}</span> /&gt;</span></span>)
+
+<span class="hljs-keyword">await</span> locator.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>).<span class="hljs-title function_">click</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(locator).<span class="hljs-title function_">toHaveTextContent</span>(<span class="hljs-string">&#x27;Hello World&#x27;</span>)</code></pre></div>
+<h4 id="debug"><a class="anchor" href="#debug">#</a>debug</h4>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">debug</span>(<span class="hljs-params">
+  <span class="hljs-attr">el</span>?: <span class="hljs-title class_">HTMLElement</span> | <span class="hljs-title class_">HTMLElement</span>[] | <span class="hljs-title class_">Locator</span> | <span class="hljs-title class_">Locator</span>[],
+  <span class="hljs-attr">maxLength</span>?: <span class="hljs-built_in">number</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">PrettyDOMOptions</span>,
+</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>This method is a shortcut for <code>console.log(prettyDOM(baseElement))</code>. It will print the DOM content of the container or specified elements to the console.</p>
+<h4 id="rerender"><a class="anchor" href="#rerender">#</a>rerender</h4>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">rerender</span>(<span class="hljs-params"><span class="hljs-attr">ui</span>: <span class="hljs-title class_">React</span>.<span class="hljs-title class_">ReactNode</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Also records a <code>react.rerender</code> trace mark in the <a href="../../guide/browser/trace-view.html">Trace View</a>.</p>
+<p>It is better if you test the component that&#39;s doing the prop updating to ensure that the props are being updated correctly to avoid relying on implementation details in your tests. That said, if you&#39;d prefer to update the props of a rendered component in your test, this function can be used to update props of the rendered component.</p>
+<div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-react&#x27;</span>
+
+<span class="hljs-keyword">const</span> { rerender } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">NumberDisplay</span> <span class="hljs-attr">number</span>=<span class="hljs-string">{1}</span> /&gt;</span></span>)
+
+<span class="hljs-comment">// re-render the same component with different props</span>
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">rerender</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">NumberDisplay</span> <span class="hljs-attr">number</span>=<span class="hljs-string">{2}</span> /&gt;</span></span>)</code></pre></div>
+<h4 id="unmount"><a class="anchor" href="#unmount">#</a>unmount</h4>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">unmount</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Also records a <code>react.unmount</code> trace mark in the <a href="../../guide/browser/trace-view.html">Trace View</a>.</p>
+<p>This will cause the rendered component to be unmounted. This is useful for testing what happens when your component is removed from the page (like testing that you don&#39;t leave event handlers hanging around causing memory leaks).</p>
+<div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-react&#x27;</span>
+
+<span class="hljs-keyword">const</span> { container, unmount } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Login</span> /&gt;</span></span>)
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">unmount</span>()
+<span class="hljs-comment">// your component has been unmounted and now: container.innerHTML === &#x27;&#x27;</span></code></pre></div>
+<h4 id="asfragment"><a class="anchor" href="#asfragment">#</a>asFragment</h4>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">asFragment</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">DocumentFragment</span></code></pre></div>
+<p>Returns a <code>DocumentFragment</code> of your rendered component. This can be useful if you need to avoid live bindings and see how your component reacts to events.</p>
+<h2 id="cleanup"><a class="anchor" href="#cleanup">#</a>cleanup</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">cleanup</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Remove all components rendered with <a href="#render"><code>render</code></a>.</p>
+<h2 id="renderhook"><a class="anchor" href="#renderhook">#</a>renderHook</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> renderHook&lt;<span class="hljs-title class_">Props</span>, <span class="hljs-title class_">Result</span>&gt;(
+  <span class="hljs-attr">renderCallback</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">initialProps</span>?: <span class="hljs-title class_">Props</span></span>) =&gt;</span> <span class="hljs-title class_">Result</span>,
+  <span class="hljs-attr">options</span>: <span class="hljs-title class_">RenderHookOptions</span>&lt;<span class="hljs-title class_">Props</span>&gt;,
+): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">RenderHookResult</span>&lt;<span class="hljs-title class_">Result</span>, <span class="hljs-title class_">Props</span>&gt;&gt;</code></pre></div>
+<p>This is a convenience wrapper around <code>render</code> with a custom test component. The API emerged from a popular testing pattern and is mostly interesting for libraries publishing hooks. You should prefer <code>render</code> since a custom test component results in more readable and robust tests since the thing you want to test is not hidden behind an abstraction.</p>
+<div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-keyword">import</span> { renderHook } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-react&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;returns logged in user&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> { result } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">renderHook</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">useLoggedInUser</span>())
+  <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">current</span>).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span> })
+})</code></pre></div>
+<h3 id="options-2"><a class="anchor" href="#options-2">#</a>Options</h3>
+<p><code>renderHook</code> accepts the same options as <a href="#render"><code>render</code></a> with an addition to <code>initialProps</code>:</p>
+<p>It declares the props that are passed to the render-callback when first invoked. These will not be passed if you call <code>rerender</code> without props.</p>
+<div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-keyword">import</span> { renderHook } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-react&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;returns logged in user&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> { result, rerender } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">renderHook</span>(<span class="hljs-function">(<span class="hljs-params">props = {}</span>) =&gt;</span> props, {
+    <span class="hljs-attr">initialProps</span>: { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span> },
+  })
+  <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">current</span>).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span> })
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">rerender</span>()
+  <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">current</span>).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">name</span>: <span class="hljs-literal">undefined</span> })
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>When using <code>renderHook</code> in conjunction with the <code>wrapper</code> and <code>initialProps</code> options, the <code>initialProps</code> are not passed to the <code>wrapper</code> component. To provide props to the <code>wrapper</code> component, consider a solution like this:</p>
+<div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createWrapper</span>(<span class="hljs-params">Wrapper, props</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">CreatedWrapper</span>(<span class="hljs-params">{ children }</span>) {
+    <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Wrapper</span> {<span class="hljs-attr">...props</span>}&gt;</span>{children}<span class="hljs-tag">&lt;/<span class="hljs-name">Wrapper</span>&gt;</span></span>
+  }
+}
+
+<span class="hljs-comment">// ...</span>
+
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">renderHook</span>(<span class="hljs-function">() =&gt;</span> {}, {
+  <span class="hljs-attr">wrapper</span>: <span class="hljs-title function_">createWrapper</span>(<span class="hljs-title class_">Wrapper</span>, { <span class="hljs-attr">value</span>: <span class="hljs-string">&#x27;foo&#x27;</span> }),
+})</code></pre></div>
+</div><p><code>renderHook</code> returns a few useful methods and properties:</p>
+<h3 id="render-hook-result"><a class="anchor" href="#render-hook-result">#</a>Render Hook Result</h3>
+<h4 id="result"><a class="anchor" href="#result">#</a>result</h4>
+<p>Holds the value of the most recently committed return value of the render-callback:</p>
+<div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-keyword">import</span> { useState } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;react&#x27;</span>
+<span class="hljs-keyword">import</span> { renderHook } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-react&#x27;</span>
+<span class="hljs-keyword">import</span> { expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> { result } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">renderHook</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> [name, setName] = <span class="hljs-title function_">useState</span>(<span class="hljs-string">&#x27;&#x27;</span>)
+  <span class="hljs-title class_">React</span>.<span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">setName</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)
+  }, [])
+
+  <span class="hljs-keyword">return</span> name
+})
+
+<span class="hljs-title function_">expect</span>(result.<span class="hljs-property">current</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)</code></pre></div>
+<p>Note that the value is held in <code>result.current</code>. Think of result as a <a href="https://react.dev/learn/referencing-values-with-refs">ref</a> for the most recently committed value.</p>
+<h4 id="renderhooks-rerender"><a class="anchor" href="#renderhooks-rerender">#</a>rerender</h4>
+<p>Renders the previously rendered render-callback with the new props:</p>
+<div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-keyword">import</span> { renderHook } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-react&#x27;</span>
+
+<span class="hljs-keyword">const</span> { rerender } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">renderHook</span>(<span class="hljs-function">(<span class="hljs-params">{ name = <span class="hljs-string">&#x27;Alice&#x27;</span> } = {}</span>) =&gt;</span> name)
+
+<span class="hljs-comment">// re-render the same hook with different props</span>
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">rerender</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Bob&#x27;</span> })</code></pre></div>
+<h4 id="renderhooks-unmount"><a class="anchor" href="#renderhooks-unmount">#</a>unmount</h4>
+<p>Unmounts the test hook.</p>
+<div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-keyword">import</span> { renderHook } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-react&#x27;</span>
+
+<span class="hljs-keyword">const</span> { unmount } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">renderHook</span>(<span class="hljs-function">(<span class="hljs-params">{ name = <span class="hljs-string">&#x27;Alice&#x27;</span> } = {}</span>) =&gt;</span> name)
+
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">unmount</span>()</code></pre></div>
+<h2 id="extend-queries"><a class="anchor" href="#extend-queries">#</a>Extend Queries</h2>
+<p>To extend locator queries, see <a href="locators.html#custom-locators"><code>&quot;Custom Locators&quot;</code></a>. For example, to make <code>render</code> return a new custom locator, define it using the <code>locators.extend</code> API:</p>
+<div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-keyword">import</span> { locators } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+<span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-react&#x27;</span>
+
+locators.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-title function_">getByArticleTitle</span>(<span class="hljs-params">title</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`[data-title=&quot;<span class="hljs-subst">${title}</span>&quot;]`</span>
+  },
+})
+
+<span class="hljs-keyword">const</span> screen = <span class="hljs-keyword">await</span> <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Component</span> /&gt;</span></span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(
+  screen.<span class="hljs-title function_">getByArticleTitle</span>(<span class="hljs-string">&#x27;Hello World&#x27;</span>)
+).<span class="hljs-title function_">toBeVisible</span>()</code></pre></div>
+<h2 id="configuration"><a class="anchor" href="#configuration">#</a>Configuration</h2>
+<p>You can configure if the component should be rendered in Strict Mode with configure method from <code>vitest-browser-react/pure</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { configure } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-react/pure&#x27;</span>
+
+<span class="hljs-title function_">configure</span>({
+  <span class="hljs-comment">// disabled by default</span>
+  <span class="hljs-attr">reactStrictMode</span>: <span class="hljs-literal">true</span>,
+})</code></pre></div>
+<h2 id="see-also"><a class="anchor" href="#see-also">#</a>See also</h2>
+<ul>
+<li><a href="https://testing-library.com/docs/react-testing-library/intro">React Testing Library documentation</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#render">render</a><a class="toc-3" href="#options">Options</a><a class="toc-3" href="#render-result">Render Result</a><a class="toc-2" href="#cleanup">cleanup</a><a class="toc-2" href="#renderhook">renderHook</a><a class="toc-3" href="#options-2">Options</a><a class="toc-3" href="#render-hook-result">Render Hook Result</a><a class="toc-2" href="#extend-queries">Extend Queries</a><a class="toc-2" href="#configuration">Configuration</a><a class="toc-2" href="#see-also">See also</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

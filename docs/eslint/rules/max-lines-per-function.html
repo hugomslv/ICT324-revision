@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>max-lines-per-function (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/max-lines-per-function <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/max-lines-per-function">version en ligne</a></div>
+<h1>max-lines-per-function</h1><p>Some people consider large functions a code smell. Large functions tend to do a lot of things and can make it hard following what&#39;s going on. Many coding style guides dictate a limit of the number of lines that a function can comprise of. This rule can help enforce that style.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule enforces a maximum number of lines per function, in order to aid in maintainability and reduce complexity.</p>
+<h3 id="why-not-use-max-statements-or-other-complexity-measurement-rules-instead"><a class="anchor" href="#why-not-use-max-statements-or-other-complexity-measurement-rules-instead">#</a>Why not use <code>max-statements</code> or other complexity measurement rules instead?</h3>
+<p>Nested long method chains like the below example are often broken onto separate lines for readability:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title function_">m</span>(<span class="hljs-string">&quot;div&quot;</span>, [
+        <span class="hljs-title function_">m</span>(<span class="hljs-string">&quot;table&quot;</span>, {<span class="hljs-attr">className</span>: <span class="hljs-string">&quot;table table-striped latest-data&quot;</span>}, [
+            <span class="hljs-title function_">m</span>(<span class="hljs-string">&quot;tbody&quot;</span>,
+                data.<span class="hljs-title function_">map</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params">db</span>) {
+                    <span class="hljs-keyword">return</span> <span class="hljs-title function_">m</span>(<span class="hljs-string">&quot;tr&quot;</span>, {<span class="hljs-attr">key</span>: db.<span class="hljs-property">dbname</span>}, [
+                        <span class="hljs-title function_">m</span>(<span class="hljs-string">&quot;td&quot;</span>, {<span class="hljs-attr">className</span>: <span class="hljs-string">&quot;dbname&quot;</span>}, db.<span class="hljs-property">dbname</span>),
+                        <span class="hljs-title function_">m</span>(<span class="hljs-string">&quot;td&quot;</span>, {<span class="hljs-attr">className</span>: <span class="hljs-string">&quot;query-count&quot;</span>},  [
+                            <span class="hljs-title function_">m</span>(<span class="hljs-string">&quot;span&quot;</span>, {<span class="hljs-attr">className</span>: db.<span class="hljs-property">lastSample</span>.<span class="hljs-property">countClassName</span>}, db.<span class="hljs-property">lastSample</span>.<span class="hljs-property">nbQueries</span>)
+                        ])
+                    ])
+                })
+            )
+        ])
+    ])
+}</code></pre></div>
+<ul>
+<li><code>max-statements</code> will only report this as 1 statement, despite being 16 lines of code.</li>
+<li><code>complexity</code> will only report a complexity of 1</li>
+<li><code>max-nested-callbacks</code> will only report 1</li>
+<li><code>max-depth</code> will report a depth of 0</li>
+</ul>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has the following options that can be specified using an object:</p>
+<ul>
+<li><p><code>&quot;max&quot;</code> (default <code>50</code>) enforces a maximum number of lines in a function.</p>
+</li>
+<li><p><code>&quot;skipBlankLines&quot;</code> (default <code>false</code>) ignore lines made up purely of whitespace.</p>
+</li>
+<li><p><code>&quot;skipComments&quot;</code> (default <code>false</code>) ignore lines containing just comments.</p>
+</li>
+<li><p><code>&quot;IIFEs&quot;</code> (default <code>false</code>) include any code included in IIFEs.</p>
+</li>
+</ul>
+<p>Alternatively, you may specify a single integer for the <code>max</code> option:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;max-lines-per-function&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-number">20</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>is equivalent to</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;max-lines-per-function&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;max&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">20</span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<h3 id="code"><a class="anchor" href="#code">#</a>code</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with a particular max value:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint max-lines-per-function: [&quot;error&quot;, 2]*/</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> x = <span class="hljs-number">0</span>;
+}</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint max-lines-per-function: [&quot;error&quot;, 3]*/</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// a comment</span>
+    <span class="hljs-keyword">const</span> x = <span class="hljs-number">0</span>;
+}</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint max-lines-per-function: [&quot;error&quot;, 4]*/</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// a comment followed by a blank line</span>
+
+    <span class="hljs-keyword">const</span> x = <span class="hljs-number">0</span>;
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with a particular max value:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint max-lines-per-function: [&quot;error&quot;, 3]*/</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> x = <span class="hljs-number">0</span>;
+}</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint max-lines-per-function: [&quot;error&quot;, 4]*/</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// a comment</span>
+    <span class="hljs-keyword">const</span> x = <span class="hljs-number">0</span>;
+}</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint max-lines-per-function: [&quot;error&quot;, 5]*/</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// a comment followed by a blank line</span>
+
+    <span class="hljs-keyword">const</span> x = <span class="hljs-number">0</span>;
+}</code></pre></div>
+</div><h3 id="skipblanklines"><a class="anchor" href="#skipblanklines">#</a>skipBlankLines</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>{ &quot;skipBlankLines&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint max-lines-per-function: [&quot;error&quot;, {&quot;max&quot;: 2, &quot;skipBlankLines&quot;: true}]*/</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+
+    <span class="hljs-keyword">const</span> x = <span class="hljs-number">0</span>;
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;skipBlankLines&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint max-lines-per-function: [&quot;error&quot;, {&quot;max&quot;: 3, &quot;skipBlankLines&quot;: true}]*/</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+
+    <span class="hljs-keyword">const</span> x = <span class="hljs-number">0</span>;
+}</code></pre></div>
+</div><h3 id="skipcomments"><a class="anchor" href="#skipcomments">#</a>skipComments</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>{ &quot;skipComments&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint max-lines-per-function: [&quot;error&quot;, {&quot;max&quot;: 2, &quot;skipComments&quot;: true}]*/</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// a comment</span>
+    <span class="hljs-keyword">const</span> x = <span class="hljs-number">0</span>;
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;skipComments&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint max-lines-per-function: [&quot;error&quot;, {&quot;max&quot;: 3, &quot;skipComments&quot;: true}]*/</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// a comment</span>
+    <span class="hljs-keyword">const</span> x = <span class="hljs-number">0</span>;
+}</code></pre></div>
+</div><h3 id="iifes"><a class="anchor" href="#iifes">#</a>IIFEs</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>{ &quot;IIFEs&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint max-lines-per-function: [&quot;error&quot;, {&quot;max&quot;: 2, &quot;IIFEs&quot;: true}]*/</span>
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>){
+    <span class="hljs-keyword">const</span> x = <span class="hljs-number">0</span>;
+}());
+
+(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> x = <span class="hljs-number">0</span>;
+})();</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;IIFEs&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint max-lines-per-function: [&quot;error&quot;, {&quot;max&quot;: 3, &quot;IIFEs&quot;: true}]*/</span>
+(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>){
+    <span class="hljs-keyword">const</span> x = <span class="hljs-number">0</span>;
+}());
+
+(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> x = <span class="hljs-number">0</span>;
+})();</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>You can turn this rule off if you are not concerned with the number of lines in your functions.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="complexity.html"><code>complexity</code></a>, <a href="max-depth.html"><code>max-depth</code></a>, <a href="max-lines.html"><code>max-lines</code></a>, <a href="max-nested-callbacks.html"><code>max-nested-callbacks</code></a>, <a href="max-params.html"><code>max-params</code></a>, <a href="max-statements.html"><code>max-statements</code></a></p></div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-3" href="#why-not-use-max-statements-or-other-complexity-measurement-rules-instead">Why not use max-statements or other complexity measurement rules instead?</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#code">code</a><a class="toc-3" href="#skipblanklines">skipBlankLines</a><a class="toc-3" href="#skipcomments">skipComments</a><a class="toc-3" href="#iifes">IIFEs</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

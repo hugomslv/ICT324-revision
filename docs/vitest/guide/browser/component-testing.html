@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Component Testing | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/browser/component-testing  <a class="ext small" href="https://vitest.dev/guide/browser/component-testing">version en ligne</a></div>
+<h1 id="component-testing"><a class="anchor" href="#component-testing">#</a>Component Testing</h1>
+<p>Component testing is a testing strategy that focuses on testing individual UI components in isolation. Unlike end-to-end tests that test entire user flows, component tests verify that each component works correctly on its own, making them faster to run and easier to debug.</p>
+<p>Vitest provides comprehensive support for component testing across multiple frameworks including Vue, React, Svelte, Lit, Preact, Qwik, Solid, Marko, and more. This guide covers the specific patterns, tools, and best practices for testing components effectively with Vitest.</p>
+<h2 id="why-component-testing"><a class="anchor" href="#why-component-testing">#</a>Why Component Testing?</h2>
+<p>Component testing sits between unit tests and end-to-end tests, offering several advantages:</p>
+<ul>
+<li><strong>Faster feedback</strong> - Test individual components without loading entire applications</li>
+<li><strong>Isolated testing</strong> - Focus on component behavior without external dependencies</li>
+<li><strong>Better debugging</strong> - Easier to pinpoint issues in specific components</li>
+<li><strong>Comprehensive coverage</strong> - Test edge cases and error states more easily</li>
+</ul>
+<h2 id="browser-mode-for-component-testing"><a class="anchor" href="#browser-mode-for-component-testing">#</a>Browser Mode for Component Testing</h2>
+<p>Component testing in Vitest uses <strong>Browser Mode</strong> to run tests in real browser environments using Playwright, WebdriverIO, or preview mode. This provides the most accurate testing environment as your components run in real browsers with actual DOM implementations, CSS rendering, and browser APIs.</p>
+<h3 id="why-browser-mode"><a class="anchor" href="#why-browser-mode">#</a>Why Browser Mode?</h3>
+<p>Browser Mode is the recommended approach for component testing because it provides the most accurate testing environment. Unlike DOM simulation libraries, Browser Mode catches real-world issues that can affect your users.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Browser Mode catches issues that DOM simulation libraries might miss, including:</p>
+<ul>
+<li>CSS layout and styling problems</li>
+<li>Real browser API behavior</li>
+<li>Accurate event handling and propagation</li>
+<li>Proper focus management and accessibility features</li>
+</ul>
+</div><h3 id="purpose-of-this-guide"><a class="anchor" href="#purpose-of-this-guide">#</a>Purpose of This Guide</h3>
+<p>This guide focuses specifically on <strong>component testing patterns and best practices</strong> using Vitest&#39;s capabilities. While many examples use Browser Mode (as it&#39;s the recommended approach), the focus here is on component-specific testing strategies rather than browser configuration details.</p>
+<p>For detailed browser setup, configuration options, and advanced browser features, refer to the <a href="index.html">Browser Mode documentation</a>.</p>
+<h2 id="what-makes-a-good-component-test"><a class="anchor" href="#what-makes-a-good-component-test">#</a>What Makes a Good Component Test</h2>
+<p>Good component tests focus on <strong>behavior and user experience</strong> rather than implementation details:</p>
+<ul>
+<li><strong>Test the contract</strong> - How components receive inputs (props) and produce outputs (events, renders)</li>
+<li><strong>Test user interactions</strong> - Clicks, form submissions, keyboard navigation</li>
+<li><strong>Test edge cases</strong> - Error states, loading states, empty states</li>
+<li><strong>Avoid testing internals</strong> - State variables, private methods, CSS classes</li>
+</ul>
+<h3 id="component-testing-hierarchy"><a class="anchor" href="#component-testing-hierarchy">#</a>Component Testing Hierarchy</h3>
+<div class="code"><pre><code class="hljs lang-txt">1. Critical User Paths → Always test these
+2. Error Handling      → Test failure scenarios
+3. Edge Cases          → Empty data, extreme values
+4. Accessibility       → Screen readers, keyboard nav
+5. Performance         → Large datasets, animations</code></pre></div>
+<h2 id="component-testing-strategies"><a class="anchor" href="#component-testing-strategies">#</a>Component Testing Strategies</h2>
+<h3 id="isolation-strategy"><a class="anchor" href="#isolation-strategy">#</a>Isolation Strategy</h3>
+<p>Test components in isolation by mocking dependencies:</p>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-comment">// For API requests, we recommend MSW (Mock Service Worker)</span>
+<span class="hljs-comment">// See: https://vitest.dev/guide/mocking/requests</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// vi.mock(import(&#x27;../api/userService&#x27;), () =&gt; ({</span>
+<span class="hljs-comment">//   fetchUser: vi.fn().mockResolvedValue({ name: &#x27;John&#x27; })</span>
+<span class="hljs-comment">// }))</span>
+
+<span class="hljs-comment">// Mock child components to focus on parent logic</span>
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;../components/UserCard&#x27;</span>), <span class="hljs-function">() =&gt;</span> ({
+  <span class="hljs-attr">default</span>: vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">(<span class="hljs-params">{ user }</span>) =&gt;</span> <span class="hljs-string">`&lt;div&gt;User: <span class="hljs-subst">${user.name}</span>&lt;/div&gt;`</span>)
+}))
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;UserProfile handles loading and data states&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> { getByText } = <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">UserProfile</span> <span class="hljs-attr">userId</span>=<span class="hljs-string">&quot;123&quot;</span> /&gt;</span></span>)
+
+  <span class="hljs-comment">// Test loading state</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Loading...&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+
+  <span class="hljs-comment">// Test for data to load (expect.element auto-retries)</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;User: John&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<h3 id="integration-strategy"><a class="anchor" href="#integration-strategy">#</a>Integration Strategy</h3>
+<p>Test component collaboration and data flow:</p>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;ProductList filters and displays products correctly&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> mockProducts = [
+    { <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Laptop&#x27;</span>, <span class="hljs-attr">category</span>: <span class="hljs-string">&#x27;Electronics&#x27;</span>, <span class="hljs-attr">price</span>: <span class="hljs-number">999</span> },
+    { <span class="hljs-attr">id</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Book&#x27;</span>, <span class="hljs-attr">category</span>: <span class="hljs-string">&#x27;Education&#x27;</span>, <span class="hljs-attr">price</span>: <span class="hljs-number">29</span> }
+  ]
+
+  <span class="hljs-keyword">const</span> { getByLabelText, getByText } = <span class="hljs-title function_">render</span>(
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">ProductList</span> <span class="hljs-attr">products</span>=<span class="hljs-string">{mockProducts}</span> /&gt;</span></span>
+  )
+
+  <span class="hljs-comment">// Initially shows all products</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Laptop&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Book&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+
+  <span class="hljs-comment">// Filter by category</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">selectOptions</span>(
+    <span class="hljs-title function_">getByLabelText</span>(<span class="hljs-regexp">/category/i</span>),
+    <span class="hljs-string">&#x27;Electronics&#x27;</span>
+  )
+
+  <span class="hljs-comment">// Only electronics should remain</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Laptop&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">queryByText</span>(<span class="hljs-string">&#x27;Book&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<h2 id="testing-library-integration"><a class="anchor" href="#testing-library-integration">#</a>Testing Library Integration</h2>
+<p>While Vitest provides official packages for popular frameworks (<a href="https://npmx.dev/package/vitest-browser-vue"><code>vitest-browser-vue</code></a>, <a href="https://npmx.dev/package/vitest-browser-react"><code>vitest-browser-react</code></a>, <a href="https://npmx.dev/package/vitest-browser-svelte"><code>vitest-browser-svelte</code></a>), you can integrate with <a href="https://testing-library.com/">Testing Library</a> for frameworks not yet officially supported.</p>
+<h3 id="when-to-use-testing-library"><a class="anchor" href="#when-to-use-testing-library">#</a>When to Use Testing Library</h3>
+<ul>
+<li>Your framework doesn&#39;t have an official Vitest browser package yet</li>
+<li>You&#39;re migrating existing tests that use Testing Library</li>
+<li>You prefer Testing Library&#39;s API for specific testing scenarios</li>
+</ul>
+<h3 id="integration-pattern"><a class="anchor" href="#integration-pattern">#</a>Integration Pattern</h3>
+<p>The key is using <code>page.elementLocator()</code> to bridge Testing Library&#39;s DOM output with Vitest&#39;s browser mode APIs:</p>
+<div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-comment">// For Solid.js components</span>
+<span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@testing-library/solid&#x27;</span>
+<span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;Solid component handles user interaction&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// Use Testing Library to render the component</span>
+  <span class="hljs-keyword">const</span> { baseElement, getByRole } = <span class="hljs-title function_">render</span>(<span class="hljs-function">() =&gt;</span>
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Counter</span> <span class="hljs-attr">initialValue</span>=<span class="hljs-string">{0}</span> /&gt;</span></span>
+  )
+
+  <span class="hljs-comment">// Bridge to Vitest&#x27;s browser mode for interactions and assertions</span>
+  <span class="hljs-keyword">const</span> screen = page.<span class="hljs-title function_">elementLocator</span>(baseElement)
+
+  <span class="hljs-comment">// Use Vitest&#x27;s page queries for finding elements</span>
+  <span class="hljs-keyword">const</span> incrementButton = screen.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/increment/i</span> })
+
+  <span class="hljs-comment">// Use Vitest&#x27;s assertions and interactions</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(screen.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Count: 0&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+
+  <span class="hljs-comment">// Trigger user interaction using Vitest&#x27;s page API</span>
+  <span class="hljs-keyword">await</span> incrementButton.<span class="hljs-title function_">click</span>()
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(screen.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Count: 1&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<h3 id="available-testing-library-packages"><a class="anchor" href="#available-testing-library-packages">#</a>Available Testing Library Packages</h3>
+<p>Popular Testing Library packages that work well with Vitest:</p>
+<ul>
+<li><a href="https://github.com/solidjs/solid-testing-library"><code>@testing-library/solid</code></a> - For Solid.js</li>
+<li><a href="https://testing-library.com/docs/marko-testing-library/intro"><code>@marko/testing-library</code></a> - For Marko</li>
+<li><a href="https://testing-library.com/docs/svelte-testing-library/intro"><code>@testing-library/svelte</code></a> - Alternative to <a href="https://npmx.dev/package/vitest-browser-svelte"><code>vitest-browser-svelte</code></a></li>
+<li><a href="https://testing-library.com/docs/vue-testing-library/intro"><code>@testing-library/vue</code></a> - Alternative to <a href="https://npmx.dev/package/vitest-browser-vue"><code>vitest-browser-vue</code></a></li>
+</ul>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Migration Path</div><p>If your framework gets official Vitest support later, you can gradually migrate by replacing Testing Library&#39;s <code>render</code> function while keeping most of your test logic intact.</p>
+</div><h2 id="best-practices"><a class="anchor" href="#best-practices">#</a>Best Practices</h2>
+<h3 id="1-use-browser-mode-for-ci-cd"><a class="anchor" href="#1-use-browser-mode-for-ci-cd">#</a>1. Use Browser Mode for CI/CD</h3>
+<p>Ensure tests run in real browser environments for the most accurate testing. Browser Mode provides accurate CSS rendering, real browser APIs, and proper event handling.</p>
+<h3 id="2-test-user-interactions"><a class="anchor" href="#2-test-user-interactions">#</a>2. Test User Interactions</h3>
+<p>Simulate real user behavior using Vitest&#39;s <a href="../../api/browser/interactivity.html">Interactivity API</a>. Use <code>page.getByRole()</code> and <code>userEvent</code> methods as shown in our <a href="#advanced-testing-patterns">Advanced Testing Patterns</a>:</p>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-comment">// Good: Test actual user interactions</span>
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/submit/i</span> }).<span class="hljs-title function_">click</span>()
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByLabelText</span>(<span class="hljs-regexp">/email/i</span>).<span class="hljs-title function_">fill</span>(<span class="hljs-string">&#x27;user@example.com&#x27;</span>)
+
+<span class="hljs-comment">// Avoid: Testing implementation details</span>
+<span class="hljs-comment">// component.setState({ email: &#x27;user@example.com&#x27; })</span></code></pre></div>
+<h3 id="3-test-accessibility"><a class="anchor" href="#3-test-accessibility">#</a>3. Test Accessibility</h3>
+<p>Ensure components work for all users by testing keyboard navigation, focus management, and ARIA attributes. See our <a href="#testing-accessibility">Testing Accessibility</a> example for practical patterns:</p>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-comment">// Test keyboard navigation</span>
+<span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;{Tab}&#x27;</span>)
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-variable language_">document</span>.<span class="hljs-property">activeElement</span>).<span class="hljs-title function_">toHaveFocus</span>()
+
+<span class="hljs-comment">// Test ARIA attributes</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(modal).<span class="hljs-title function_">toHaveAttribute</span>(<span class="hljs-string">&#x27;aria-modal&#x27;</span>, <span class="hljs-string">&#x27;true&#x27;</span>)</code></pre></div>
+<h3 id="4-mock-external-dependencies"><a class="anchor" href="#4-mock-external-dependencies">#</a>4. Mock External Dependencies</h3>
+<p>Focus tests on component logic by mocking APIs and external services. This makes tests faster and more reliable. See our <a href="#isolation-strategy">Isolation Strategy</a> for examples:</p>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-comment">// For API requests, we recommend using MSW (Mock Service Worker)</span>
+<span class="hljs-comment">// See: https://vitest.dev/guide/mocking/requests</span>
+<span class="hljs-comment">// This provides more realistic request/response mocking</span>
+
+<span class="hljs-comment">// For module mocking, use the import() syntax</span>
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;../components/UserCard&#x27;</span>), <span class="hljs-function">() =&gt;</span> ({
+  <span class="hljs-attr">default</span>: vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">() =&gt;</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Mocked UserCard<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>)
+}))</code></pre></div>
+<h3 id="5-use-meaningful-test-descriptions"><a class="anchor" href="#5-use-meaningful-test-descriptions">#</a>5. Use Meaningful Test Descriptions</h3>
+<p>Write test descriptions that explain the expected behavior, not implementation details:</p>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-comment">// Good: Describes user-facing behavior</span>
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;shows error message when email format is invalid&#x27;</span>)
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;disables submit button while form is submitting&#x27;</span>)
+
+<span class="hljs-comment">// Avoid: Implementation-focused descriptions</span>
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;calls validateEmail function&#x27;</span>)
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;sets isSubmitting state to true&#x27;</span>)</code></pre></div>
+<h2 id="advanced-testing-patterns"><a class="anchor" href="#advanced-testing-patterns">#</a>Advanced Testing Patterns</h2>
+<h3 id="testing-component-state-management"><a class="anchor" href="#testing-component-state-management">#</a>Testing Component State Management</h3>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-comment">// Testing stateful components and state transitions</span>
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;ShoppingCart manages items correctly&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> { getByText, getByTestId } = <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">ShoppingCart</span> /&gt;</span></span>)
+
+  <span class="hljs-comment">// Initially empty</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Your cart is empty&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+
+  <span class="hljs-comment">// Add item</span>
+  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/add laptop/i</span> }).<span class="hljs-title function_">click</span>()
+
+  <span class="hljs-comment">// Verify state change</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;1 item&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Laptop - $999&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+
+  <span class="hljs-comment">// Test quantity updates</span>
+  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/increase quantity/i</span> }).<span class="hljs-title function_">click</span>()
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;2 items&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<h3 id="testing-async-components-with-data-fetching"><a class="anchor" href="#testing-async-components-with-data-fetching">#</a>Testing Async Components with Data Fetching</h3>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-comment">// Option 1: Recommended - Use MSW (Mock Service Worker) for API mocking</span>
+<span class="hljs-keyword">import</span> { http, <span class="hljs-title class_">HttpResponse</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;msw&#x27;</span>
+<span class="hljs-keyword">import</span> { setupWorker } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;msw/browser&#x27;</span>
+
+<span class="hljs-comment">// Set up MSW worker with API handlers</span>
+<span class="hljs-keyword">const</span> worker = <span class="hljs-title function_">setupWorker</span>(
+  http.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;/api/users/:id&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ params }</span>) =&gt;</span> {
+    <span class="hljs-comment">// Describe the happy path</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">HttpResponse</span>.<span class="hljs-title function_">json</span>({ <span class="hljs-attr">id</span>: params.<span class="hljs-property">id</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;John Doe&#x27;</span>, <span class="hljs-attr">email</span>: <span class="hljs-string">&#x27;john@example.com&#x27;</span> })
+  })
+)
+
+<span class="hljs-comment">// Start the worker before all tests</span>
+<span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">() =&gt;</span> worker.<span class="hljs-title function_">start</span>())
+<span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> worker.<span class="hljs-title function_">resetHandlers</span>())
+<span class="hljs-title function_">afterAll</span>(<span class="hljs-function">() =&gt;</span> worker.<span class="hljs-title function_">stop</span>())
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;UserProfile handles loading, success, and error states&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// Test success state</span>
+  <span class="hljs-keyword">const</span> { getByText } = <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">UserProfile</span> <span class="hljs-attr">userId</span>=<span class="hljs-string">&quot;123&quot;</span> /&gt;</span></span>)
+  <span class="hljs-comment">// expect.element auto-retries until elements are found</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;John Doe&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;john@example.com&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+
+  <span class="hljs-comment">// Test error state by overriding the handler for this test</span>
+  worker.<span class="hljs-title function_">use</span>(
+    http.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;/api/users/:id&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-keyword">return</span> <span class="hljs-title class_">HttpResponse</span>.<span class="hljs-title function_">json</span>({ <span class="hljs-attr">error</span>: <span class="hljs-string">&#x27;User not found&#x27;</span> }, { <span class="hljs-attr">status</span>: <span class="hljs-number">404</span> })
+    })
+  )
+
+  <span class="hljs-keyword">const</span> { <span class="hljs-attr">getByText</span>: getErrorText } = <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">UserProfile</span> <span class="hljs-attr">userId</span>=<span class="hljs-string">&quot;999&quot;</span> /&gt;</span></span>)
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getErrorText</span>(<span class="hljs-string">&#x27;Error: User not found&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>See more details on <a href="https://mswjs.io/docs/integrations/browser">using MSW in the browser</a>.</p>
+</div><h3 id="testing-component-communication"><a class="anchor" href="#testing-component-communication">#</a>Testing Component Communication</h3>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-comment">// Test parent-child component interaction</span>
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;parent and child components communicate correctly&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> mockOnSelectionChange = vi.<span class="hljs-title function_">fn</span>()
+
+  <span class="hljs-keyword">const</span> { getByText } = <span class="hljs-title function_">render</span>(
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">ProductCatalog</span> <span class="hljs-attr">onSelectionChange</span>=<span class="hljs-string">{mockOnSelectionChange}</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">ProductFilter</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">ProductGrid</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ProductCatalog</span>&gt;</span></span>
+  )
+
+  <span class="hljs-comment">// Interact with child component</span>
+  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;checkbox&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/electronics/i</span> }).<span class="hljs-title function_">click</span>()
+
+  <span class="hljs-comment">// Verify parent receives the communication</span>
+  <span class="hljs-title function_">expect</span>(mockOnSelectionChange).<span class="hljs-title function_">toHaveBeenCalledWith</span>({
+    <span class="hljs-attr">category</span>: <span class="hljs-string">&#x27;electronics&#x27;</span>,
+    <span class="hljs-attr">filters</span>: [<span class="hljs-string">&#x27;electronics&#x27;</span>]
+  })
+
+  <span class="hljs-comment">// Verify other child component updates (expect.element auto-retries)</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Showing Electronics products&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<h3 id="testing-complex-forms-with-validation"><a class="anchor" href="#testing-complex-forms-with-validation">#</a>Testing Complex Forms with Validation</h3>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;ContactForm handles complex validation scenarios&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> mockSubmit = vi.<span class="hljs-title function_">fn</span>()
+  <span class="hljs-keyword">const</span> { getByLabelText, getByText } = <span class="hljs-title function_">render</span>(
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">ContactForm</span> <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{mockSubmit}</span> /&gt;</span></span>
+  )
+
+  <span class="hljs-keyword">const</span> nameInput = page.<span class="hljs-title function_">getByLabelText</span>(<span class="hljs-regexp">/full name/i</span>)
+  <span class="hljs-keyword">const</span> emailInput = page.<span class="hljs-title function_">getByLabelText</span>(<span class="hljs-regexp">/email/i</span>)
+  <span class="hljs-keyword">const</span> messageInput = page.<span class="hljs-title function_">getByLabelText</span>(<span class="hljs-regexp">/message/i</span>)
+  <span class="hljs-keyword">const</span> submitButton = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/send message/i</span> })
+
+  <span class="hljs-comment">// Test validation triggers</span>
+  <span class="hljs-keyword">await</span> submitButton.<span class="hljs-title function_">click</span>()
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Name is required&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Email is required&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Message is required&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+
+  <span class="hljs-comment">// Test partial validation</span>
+  <span class="hljs-keyword">await</span> nameInput.<span class="hljs-title function_">fill</span>(<span class="hljs-string">&#x27;John Doe&#x27;</span>)
+  <span class="hljs-keyword">await</span> submitButton.<span class="hljs-title function_">click</span>()
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Name is required&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeInTheDocument</span>()
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Email is required&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+
+  <span class="hljs-comment">// Test email format validation</span>
+  <span class="hljs-keyword">await</span> emailInput.<span class="hljs-title function_">fill</span>(<span class="hljs-string">&#x27;invalid-email&#x27;</span>)
+  <span class="hljs-keyword">await</span> submitButton.<span class="hljs-title function_">click</span>()
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Please enter a valid email&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+
+  <span class="hljs-comment">// Test successful submission</span>
+  <span class="hljs-keyword">await</span> emailInput.<span class="hljs-title function_">fill</span>(<span class="hljs-string">&#x27;john@example.com&#x27;</span>)
+  <span class="hljs-keyword">await</span> messageInput.<span class="hljs-title function_">fill</span>(<span class="hljs-string">&#x27;Hello, this is a test message.&#x27;</span>)
+  <span class="hljs-keyword">await</span> submitButton.<span class="hljs-title function_">click</span>()
+
+  <span class="hljs-title function_">expect</span>(mockSubmit).<span class="hljs-title function_">toHaveBeenCalledWith</span>({
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;John Doe&#x27;</span>,
+    <span class="hljs-attr">email</span>: <span class="hljs-string">&#x27;john@example.com&#x27;</span>,
+    <span class="hljs-attr">message</span>: <span class="hljs-string">&#x27;Hello, this is a test message.&#x27;</span>
+  })
+})</code></pre></div>
+<h3 id="testing-error-boundaries"><a class="anchor" href="#testing-error-boundaries">#</a>Testing Error Boundaries</h3>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-comment">// Test how components handle and recover from errors</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">ThrowError</span>(<span class="hljs-params">{ shouldThrow }: { shouldThrow: <span class="hljs-built_in">boolean</span> }</span>) {
+  <span class="hljs-keyword">if</span> (shouldThrow) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;Component error!&#x27;</span>)
+  }
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Component working fine<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;ErrorBoundary catches and displays errors gracefully&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> { getByText, rerender } = <span class="hljs-title function_">render</span>(
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">ErrorBoundary</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">div</span>&gt;</span>Something went wrong<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>}&gt;
+      <span class="hljs-tag">&lt;<span class="hljs-name">ThrowError</span> <span class="hljs-attr">shouldThrow</span>=<span class="hljs-string">{false}</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ErrorBoundary</span>&gt;</span></span>
+  )
+
+  <span class="hljs-comment">// Initially working</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Component working fine&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+
+  <span class="hljs-comment">// Trigger error</span>
+  <span class="hljs-title function_">rerender</span>(
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">ErrorBoundary</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">div</span>&gt;</span>Something went wrong<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>}&gt;
+      <span class="hljs-tag">&lt;<span class="hljs-name">ThrowError</span> <span class="hljs-attr">shouldThrow</span>=<span class="hljs-string">{true}</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ErrorBoundary</span>&gt;</span></span>
+  )
+
+  <span class="hljs-comment">// Error boundary should catch it</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Something went wrong&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<h3 id="testing-accessibility"><a class="anchor" href="#testing-accessibility">#</a>Testing Accessibility</h3>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;Modal component is accessible&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> { getByRole, getByLabelText } = <span class="hljs-title function_">render</span>(
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Modal</span> <span class="hljs-attr">isOpen</span>=<span class="hljs-string">{true}</span> <span class="hljs-attr">title</span>=<span class="hljs-string">&quot;Settings&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">SettingsForm</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Modal</span>&gt;</span></span>
+  )
+
+  <span class="hljs-comment">// Test focus management - modal should receive focus when opened</span>
+  <span class="hljs-comment">// This is crucial for screen reader users to know a modal opened</span>
+  <span class="hljs-keyword">const</span> modal = <span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;dialog&#x27;</span>)
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(modal).<span class="hljs-title function_">toHaveFocus</span>()
+
+  <span class="hljs-comment">// Test ARIA attributes - these provide semantic information to screen readers</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(modal).<span class="hljs-title function_">toHaveAttribute</span>(<span class="hljs-string">&#x27;aria-labelledby&#x27;</span>) <span class="hljs-comment">// Links to title element</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(modal).<span class="hljs-title function_">toHaveAttribute</span>(<span class="hljs-string">&#x27;aria-modal&#x27;</span>, <span class="hljs-string">&#x27;true&#x27;</span>) <span class="hljs-comment">// Indicates modal behavior</span>
+
+  <span class="hljs-comment">// Test keyboard navigation - Escape key should close modal</span>
+  <span class="hljs-comment">// This is required by ARIA authoring practices</span>
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;{Escape}&#x27;</span>)
+  <span class="hljs-comment">// expect.element auto-retries until modal is removed</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(modal).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeInTheDocument</span>()
+
+  <span class="hljs-comment">// Test focus trap - tab navigation should cycle within modal</span>
+  <span class="hljs-comment">// This prevents users from tabbing to content behind the modal</span>
+  <span class="hljs-keyword">const</span> firstInput = <span class="hljs-title function_">getByLabelText</span>(<span class="hljs-regexp">/username/i</span>)
+  <span class="hljs-keyword">const</span> lastButton = <span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/save/i</span> })
+
+  <span class="hljs-comment">// Use click to focus on the first input, then test tab navigation</span>
+  <span class="hljs-keyword">await</span> firstInput.<span class="hljs-title function_">click</span>()
+  <span class="hljs-keyword">await</span> userEvent.<span class="hljs-title function_">keyboard</span>(<span class="hljs-string">&#x27;{Shift&gt;}{Tab}{/Shift}&#x27;</span>) <span class="hljs-comment">// Shift+Tab goes backwards</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(lastButton).<span class="hljs-title function_">toHaveFocus</span>() <span class="hljs-comment">// Should wrap to last element</span>
+})</code></pre></div>
+<h2 id="debugging-component-tests"><a class="anchor" href="#debugging-component-tests">#</a>Debugging Component Tests</h2>
+<h3 id="1-use-browser-dev-tools"><a class="anchor" href="#1-use-browser-dev-tools">#</a>1. Use Browser Dev Tools</h3>
+<p>Browser Mode runs tests in real browsers, giving you access to full developer tools. When tests fail, you can:</p>
+<ul>
+<li><strong>Open browser dev tools</strong> during test execution (F12 or right-click → Inspect)</li>
+<li><strong>Set breakpoints</strong> in your test code or component code</li>
+<li><strong>Inspect the DOM</strong> to see the actual rendered output</li>
+<li><strong>Check console errors</strong> for JavaScript errors or warnings</li>
+<li><strong>Monitor network requests</strong> to debug API calls</li>
+</ul>
+<p>For headful mode debugging, add <code>headless: false</code> to your browser config temporarily.</p>
+<h3 id="2-add-debug-statements"><a class="anchor" href="#2-add-debug-statements">#</a>2. Add Debug Statements</h3>
+<p>Use strategic logging to understand test failures:</p>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;debug form validation&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">ContactForm</span> /&gt;</span></span>)
+
+  <span class="hljs-keyword">const</span> submitButton = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/submit/i</span> })
+  <span class="hljs-keyword">await</span> submitButton.<span class="hljs-title function_">click</span>()
+
+  <span class="hljs-comment">// Debug: Check if element exists with different query</span>
+  <span class="hljs-keyword">const</span> errorElement = page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Email is required&#x27;</span>)
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Error element found:&#x27;</span>, errorElement.<span class="hljs-property">length</span>)
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(errorElement).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<h3 id="3-inspect-rendered-output"><a class="anchor" href="#3-inspect-rendered-output">#</a>3. Inspect Rendered Output</h3>
+<p>When components don&#39;t render as expected, investigate systematically:</p>
+<p><strong>Use Vitest&#39;s browser UI:</strong></p>
+<ul>
+<li>Run tests with browser mode enabled</li>
+<li>Open the browser URL shown in the terminal to see tests running</li>
+<li>Visual inspection helps identify CSS issues, layout problems, or missing elements</li>
+</ul>
+<p><strong>Test element queries:</strong></p>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-comment">// Debug why elements can&#x27;t be found</span>
+<span class="hljs-keyword">const</span> button = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/submit/i</span> })
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Button count:&#x27;</span>, button.<span class="hljs-property">length</span>) <span class="hljs-comment">// Should be 1</span>
+
+<span class="hljs-comment">// Try alternative queries if the first one fails</span>
+<span class="hljs-keyword">if</span> (button.<span class="hljs-property">length</span> === <span class="hljs-number">0</span>) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;All buttons:&#x27;</span>, page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>).<span class="hljs-property">length</span>)
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;By test ID:&#x27;</span>, page.<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;submit-btn&#x27;</span>).<span class="hljs-property">length</span>)
+}</code></pre></div>
+<h3 id="4-verify-selectors"><a class="anchor" href="#4-verify-selectors">#</a>4. Verify Selectors</h3>
+<p>Selector issues are common causes of test failures. Debug them systematically:</p>
+<p><strong>Check accessible names:</strong></p>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-comment">// If getByRole fails, check what roles/names are available</span>
+<span class="hljs-keyword">const</span> buttons = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>).<span class="hljs-title function_">all</span>()
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> button <span class="hljs-keyword">of</span> buttons) {
+  <span class="hljs-comment">// Use element() to get the DOM element and access native properties</span>
+  <span class="hljs-keyword">const</span> element = button.<span class="hljs-title function_">element</span>()
+  <span class="hljs-keyword">const</span> accessibleName = element.<span class="hljs-title function_">getAttribute</span>(<span class="hljs-string">&#x27;aria-label&#x27;</span>) || element.<span class="hljs-property">textContent</span>
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`Button: &quot;<span class="hljs-subst">${accessibleName}</span>&quot;`</span>)
+}</code></pre></div>
+<p><strong>Test different query strategies:</strong></p>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-comment">// Multiple ways to find the same element using .or for auto-retrying</span>
+<span class="hljs-keyword">const</span> submitButton = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/submit/i</span> }) <span class="hljs-comment">// By accessible name</span>
+  .<span class="hljs-title function_">or</span>(page.<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;submit-button&#x27;</span>)) <span class="hljs-comment">// By test ID</span>
+  .<span class="hljs-title function_">or</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Submit&#x27;</span>)) <span class="hljs-comment">// By exact text</span>
+<span class="hljs-comment">// Note: Vitest doesn&#x27;t have page.locator(), use specific getBy* methods instead</span></code></pre></div>
+<p><strong>Common selector debugging patterns:</strong></p>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;debug element queries&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">LoginForm</span> /&gt;</span></span>)
+
+  <span class="hljs-comment">// Check if element is visible and enabled</span>
+  <span class="hljs-keyword">const</span> emailInput = page.<span class="hljs-title function_">getByLabelText</span>(<span class="hljs-regexp">/email/i</span>)
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(emailInput).<span class="hljs-title function_">toBeVisible</span>() <span class="hljs-comment">// Will show if element is visible and print DOM if not</span>
+})</code></pre></div>
+<h3 id="5-debugging-async-issues"><a class="anchor" href="#5-debugging-async-issues">#</a>5. Debugging Async Issues</h3>
+<p>Component tests often involve timing issues:</p>
+<div class="code"><pre><code class="hljs lang-tsx"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;debug async component behavior&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-title function_">render</span>(<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">AsyncUserProfile</span> <span class="hljs-attr">userId</span>=<span class="hljs-string">&quot;123&quot;</span> /&gt;</span></span>)
+
+  <span class="hljs-comment">// expect.element will automatically retry and show helpful error messages</span>
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;John Doe&#x27;</span>)).<span class="hljs-title function_">toBeInTheDocument</span>()
+})</code></pre></div>
+<h2 id="migration-from-other-testing-frameworks"><a class="anchor" href="#migration-from-other-testing-frameworks">#</a>Migration from Other Testing Frameworks</h2>
+<h3 id="from-jest-testing-library"><a class="anchor" href="#from-jest-testing-library">#</a>From Jest + Testing Library</h3>
+<p>Most Jest + Testing Library tests work with minimal changes:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// Before (Jest)</span>
+<span class="hljs-keyword">import</span> { render, screen } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@testing-library/react&#x27;</span>
+
+<span class="hljs-comment">// After (Vitest)</span>
+<span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest-browser-react&#x27;</span></code></pre></div>
+<h3 id="key-differences"><a class="anchor" href="#key-differences">#</a>Key Differences</h3>
+<ul>
+<li>Use <code>await expect.element()</code> instead of <code>expect()</code> for DOM assertions</li>
+<li>Use <code>vitest/browser</code> for user interactions instead of <code>@testing-library/user-event</code></li>
+<li>Browser Mode provides real browser environment for accurate testing</li>
+</ul>
+<h2 id="learn-more"><a class="anchor" href="#learn-more">#</a>Learn More</h2>
+<ul>
+<li><a href="index.html">Browser Mode Documentation</a></li>
+<li><a href="../../api/browser/assertions.html">Assertion API</a></li>
+<li><a href="../../api/browser/interactivity.html">Interactivity API</a></li>
+<li><a href="https://github.com/vitest-tests/browser-examples">Example Repository</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#why-component-testing">Why Component Testing?</a><a class="toc-2" href="#browser-mode-for-component-testing">Browser Mode for Component Testing</a><a class="toc-3" href="#why-browser-mode">Why Browser Mode?</a><a class="toc-3" href="#purpose-of-this-guide">Purpose of This Guide</a><a class="toc-2" href="#what-makes-a-good-component-test">What Makes a Good Component Test</a><a class="toc-3" href="#component-testing-hierarchy">Component Testing Hierarchy</a><a class="toc-2" href="#component-testing-strategies">Component Testing Strategies</a><a class="toc-3" href="#isolation-strategy">Isolation Strategy</a><a class="toc-3" href="#integration-strategy">Integration Strategy</a><a class="toc-2" href="#testing-library-integration">Testing Library Integration</a><a class="toc-3" href="#when-to-use-testing-library">When to Use Testing Library</a><a class="toc-3" href="#integration-pattern">Integration Pattern</a><a class="toc-3" href="#available-testing-library-packages">Available Testing Library Packages</a><a class="toc-2" href="#best-practices">Best Practices</a><a class="toc-3" href="#1-use-browser-mode-for-ci-cd">1. Use Browser Mode for CI/CD</a><a class="toc-3" href="#2-test-user-interactions">2. Test User Interactions</a><a class="toc-3" href="#3-test-accessibility">3. Test Accessibility</a><a class="toc-3" href="#4-mock-external-dependencies">4. Mock External Dependencies</a><a class="toc-3" href="#5-use-meaningful-test-descriptions">5. Use Meaningful Test Descriptions</a><a class="toc-2" href="#advanced-testing-patterns">Advanced Testing Patterns</a><a class="toc-3" href="#testing-component-state-management">Testing Component State Management</a><a class="toc-3" href="#testing-async-components-with-data-fetching">Testing Async Components with Data Fetching</a><a class="toc-3" href="#testing-component-communication">Testing Component Communication</a><a class="toc-3" href="#testing-complex-forms-with-validation">Testing Complex Forms with Validation</a><a class="toc-3" href="#testing-error-boundaries">Testing Error Boundaries</a><a class="toc-3" href="#testing-accessibility">Testing Accessibility</a><a class="toc-2" href="#debugging-component-tests">Debugging Component Tests</a><a class="toc-3" href="#1-use-browser-dev-tools">1. Use Browser Dev Tools</a><a class="toc-3" href="#2-add-debug-statements">2. Add Debug Statements</a><a class="toc-3" href="#3-inspect-rendered-output">3. Inspect Rendered Output</a><a class="toc-3" href="#4-verify-selectors">4. Verify Selectors</a><a class="toc-3" href="#5-debugging-async-issues">5. Debugging Async Issues</a><a class="toc-2" href="#migration-from-other-testing-frameworks">Migration from Other Testing Frameworks</a><a class="toc-3" href="#from-jest-testing-library">From Jest + Testing Library</a><a class="toc-3" href="#key-differences">Key Differences</a><a class="toc-2" href="#learn-more">Learn More</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

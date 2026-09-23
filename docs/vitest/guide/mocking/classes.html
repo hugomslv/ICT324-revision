@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mocking Classes (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/mocking/classes  <a class="ext small" href="https://vitest.dev/guide/mocking/classes">version en ligne</a></div>
+<h1 id="mocking-classes"><a class="anchor" href="#mocking-classes">#</a>Mocking Classes</h1>
+<p>You can mock an entire class with a single <a href="../../api/vi.html#fn"><code>vi.fn</code></a> call.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Dog</span> {
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>
+
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = name
+  }
+
+  <span class="hljs-keyword">static</span> <span class="hljs-title function_">getType</span>(): <span class="hljs-built_in">string</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;animal&#x27;</span>
+  }
+
+  greet = (): <span class="hljs-function"><span class="hljs-params">string</span> =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`Hi! My name is <span class="hljs-subst">${<span class="hljs-variable language_">this</span>.name}</span>!`</span>
+  }
+
+  <span class="hljs-title function_">speak</span>(): <span class="hljs-built_in">string</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;bark!&#x27;</span>
+  }
+
+  <span class="hljs-title function_">isHungry</span>(<span class="hljs-params"></span>) {}
+  <span class="hljs-title function_">feed</span>(<span class="hljs-params"></span>) {}
+}</code></pre></div>
+<p>Notice that this class defines its members in two different ways, and the difference matters for mocking:</p>
+<ul>
+<li><code>greet</code> is a class field. The assignment runs during construction, so every instance gets its own copy of the function as its own property.</li>
+<li><code>speak</code>, <code>isHungry</code>, and <code>feed</code> are prototype methods. They are created once and stored on <code>Dog.prototype</code>, an object that all instances share. An instance doesn&#39;t have a <code>speak</code> property of its own: when you call <code>dog.speak()</code>, JavaScript doesn&#39;t find <code>speak</code> on the instance and continues looking on <code>Dog.prototype</code>. Every instance finds the same function there, so <code>dog.speak === Dog.prototype.speak</code> is <code>true</code>.</li>
+</ul>
+<p>We can re-create this class with <code>vi.fn</code> (or <code>vi.spyOn().mockImplementation()</code>). By defining every method as a class field, each instance gets its own separate mock, which allows checking calls on a single instance:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> <span class="hljs-title class_">Dog</span> = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-keyword">class</span> {
+  <span class="hljs-keyword">static</span> getType = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;mocked animal&#x27;</span>)
+
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params">name</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = name
+  }
+
+  greet = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">`Hi! My name is <span class="hljs-subst">${<span class="hljs-variable language_">this</span>.name}</span>!`</span>)
+  speak = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;loud bark!&#x27;</span>)
+  feed = vi.<span class="hljs-title function_">fn</span>()
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If a non-primitive is returned from the constructor function, that value will become the result of the new expression. In this case the <code>[[Prototype]]</code> may not be correctly bound:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> <span class="hljs-title class_">CorrectDogClass</span> = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params">name</span>) {
+  <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = name
+})
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">IncorrectDogClass</span> = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function"><span class="hljs-params">name</span> =&gt;</span> ({
+  name
+}))
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Marti</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">CorrectDogClass</span>(<span class="hljs-string">&#x27;Marti&#x27;</span>)
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Newt</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">IncorrectDogClass</span>(<span class="hljs-string">&#x27;Newt&#x27;</span>)
+
+<span class="hljs-title class_">Marti</span> <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">CorrectDogClass</span> <span class="hljs-comment">// ✅ true</span>
+<span class="hljs-title class_">Newt</span> <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">IncorrectDogClass</span> <span class="hljs-comment">// ❌ false!</span></code></pre></div>
+<p>If you are mocking classes, prefer the class syntax over the function.</p>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce : WHEN TO USE?</div><p>Generally speaking, you would re-create a class like this inside the module factory if the class is re-exported from another module:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">Dog</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./dog.js&#x27;</span>
+
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./dog.js&#x27;</span>), <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> <span class="hljs-title class_">Dog</span> = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-keyword">class</span> {
+    feed = vi.<span class="hljs-title function_">fn</span>()
+    <span class="hljs-comment">// ... other mocks</span>
+  })
+  <span class="hljs-keyword">return</span> { <span class="hljs-title class_">Dog</span> }
+})</code></pre></div>
+<p>This method can also be used to pass an instance of a class to a function that accepts the same interface:</p>
+<div class="code"><div class="code-title">src/feed.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">feed</span>(<span class="hljs-params"><span class="hljs-attr">dog</span>: <span class="hljs-title class_">Dog</span></span>) {
+  <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+<div class="code"><div class="code-title">tests/dog.test.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { feed } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;../src/feed.js&#x27;</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Dog</span> = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-keyword">class</span> {
+  feed = vi.<span class="hljs-title function_">fn</span>()
+  isHungry = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-literal">false</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;can feed dogs&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> dogMax = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dog</span>(<span class="hljs-string">&#x27;Max&#x27;</span>)
+
+  <span class="hljs-title function_">feed</span>(dogMax)
+
+  <span class="hljs-title function_">expect</span>(dogMax.<span class="hljs-property">feed</span>).<span class="hljs-title function_">toHaveBeenCalled</span>()
+  <span class="hljs-title function_">expect</span>(dogMax.<span class="hljs-title function_">isHungry</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">false</span>)
+})</code></pre></div>
+</div><p>Now, when we create a new instance of the <code>Dog</code> class its <code>speak</code> method (alongside <code>feed</code> and <code>greet</code>) is already mocked:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> <span class="hljs-title class_">Cooper</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dog</span>(<span class="hljs-string">&#x27;Cooper&#x27;</span>)
+<span class="hljs-title class_">Cooper</span>.<span class="hljs-title function_">speak</span>() <span class="hljs-comment">// loud bark!</span>
+<span class="hljs-title class_">Cooper</span>.<span class="hljs-title function_">greet</span>() <span class="hljs-comment">// Hi! My name is Cooper!</span>
+
+<span class="hljs-comment">// you can use built-in assertions to check the validity of the call</span>
+<span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Cooper</span>.<span class="hljs-property">speak</span>).<span class="hljs-title function_">toHaveBeenCalled</span>()
+<span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Cooper</span>.<span class="hljs-property">greet</span>).<span class="hljs-title function_">toHaveBeenCalled</span>()
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Max</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dog</span>(<span class="hljs-string">&#x27;Max&#x27;</span>)
+
+<span class="hljs-comment">// methods are not shared between instances if you assigned them directly</span>
+<span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Max</span>.<span class="hljs-property">speak</span>).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveBeenCalled</span>()
+<span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Max</span>.<span class="hljs-property">greet</span>).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveBeenCalled</span>()</code></pre></div>
+<p>You don&#39;t have to redefine every method as a class field. Instances keep the prototype chain of the class you pass to <code>vi.fn</code>, so prototype methods stay available on instances, both during and after construction, and instances pass <code>instanceof</code> checks against that class:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">class</span> <span class="hljs-title class_">OriginalDog</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params">name</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = name
+  }
+
+  <span class="hljs-title function_">speak</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;bark!&#x27;</span>
+  }
+}
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">MockedDog</span> = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-title class_">OriginalDog</span>)
+<span class="hljs-keyword">const</span> dog = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MockedDog</span>(<span class="hljs-string">&#x27;Cooper&#x27;</span>)
+
+dog.<span class="hljs-title function_">speak</span>() <span class="hljs-comment">// bark!</span>
+dog <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">MockedDog</span> <span class="hljs-comment">// true</span>
+dog <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">OriginalDog</span> <span class="hljs-comment">// true</span></code></pre></div>
+<p>Note that nothing is mocked in this example. Unlike the <code>speak = vi.fn()</code> field in the <code>Dog</code> example above, the instance doesn&#39;t receive its own mock function. <code>dog.speak</code> is found through the prototype chain and refers to the original class method (<code>dog.speak === MockedDog.prototype.speak</code>), so call assertions throw:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">expect</span>(dog.<span class="hljs-property">speak</span>).<span class="hljs-title function_">toHaveBeenCalled</span>()
+<span class="hljs-comment">// TypeError: [Function speak] is not a spy or a call to a spy!</span></code></pre></div>
+<p>Since every instance finds <code>speak</code> on the prototype, you can mock it for all of them at once by assigning a mock there:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title class_">MockedDog</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">speak</span> = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;woof!&#x27;</span>)
+
+<span class="hljs-keyword">const</span> cooper = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MockedDog</span>(<span class="hljs-string">&#x27;Cooper&#x27;</span>)
+<span class="hljs-keyword">const</span> max = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MockedDog</span>(<span class="hljs-string">&#x27;Max&#x27;</span>)
+
+cooper.<span class="hljs-title function_">speak</span>() <span class="hljs-comment">// woof!</span>
+max.<span class="hljs-title function_">speak</span>() <span class="hljs-comment">// woof!</span>
+
+<span class="hljs-comment">// calls from both instances are recorded by the same mock</span>
+<span class="hljs-title function_">expect</span>(<span class="hljs-title class_">MockedDog</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">speak</span>).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(<span class="hljs-number">2</span>)
+<span class="hljs-comment">// `mock.contexts` keeps the instance of every call</span>
+<span class="hljs-title function_">expect</span>(vi.<span class="hljs-title function_">mocked</span>(<span class="hljs-title class_">MockedDog</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">speak</span>).<span class="hljs-property">mock</span>.<span class="hljs-property">contexts</span>).<span class="hljs-title function_">toEqual</span>([cooper, max])</code></pre></div>
+<p>Assigning on <code>MockedDog.prototype</code> instead of <code>OriginalDog.prototype</code> keeps the original class untouched: the lookup order is <code>instance</code> → <code>MockedDog.prototype</code> → <code>OriginalDog.prototype</code>, so the assigned function shadows the original method. Because instances look the method up on every call rather than keeping a copy, the mock is visible to all of them, even those created before the assignment. The trade-off is that they also share a single call history, unlike class fields, which give every instance its own mock.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>The mock&#39;s <code>prototype</code> always follows the current implementation: it is re-pointed when you set a new implementation, when a queued <code>mockImplementationOnce</code> class is constructed, and when the mock is reset. If a single mock uses different class implementations, instances created by earlier implementations lose access to their prototype methods once a newer implementation takes over. Own properties assigned in the constructor or via class fields are not affected.</p>
+</div><p>If you want to mock the method of one instance only, use <a href="../../api/vi.html#vi-spyon"><code>vi.spyOn</code></a>. It defines the mock directly on that instance, shadowing the prototype method just for it:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> cooper = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MockedDog</span>(<span class="hljs-string">&#x27;Cooper&#x27;</span>)
+<span class="hljs-keyword">const</span> max = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MockedDog</span>(<span class="hljs-string">&#x27;Max&#x27;</span>)
+
+vi.<span class="hljs-title function_">spyOn</span>(cooper, <span class="hljs-string">&#x27;speak&#x27;</span>).<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-string">&#x27;meow!&#x27;</span>)
+
+cooper.<span class="hljs-title function_">speak</span>() <span class="hljs-comment">// meow!</span>
+max.<span class="hljs-title function_">speak</span>() <span class="hljs-comment">// bark!, still the original method</span>
+
+<span class="hljs-title function_">expect</span>(cooper.<span class="hljs-property">speak</span>).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(<span class="hljs-number">1</span>)</code></pre></div>
+<p>When methods are defined as class fields, like in the mocked <code>Dog</code> class at the top of this page, every instance already has its own mock, so you can reassign the return value for a specific instance directly:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> dog = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dog</span>(<span class="hljs-string">&#x27;Cooper&#x27;</span>)
+
+<span class="hljs-comment">// &quot;vi.mocked&quot; is a type helper, since</span>
+<span class="hljs-comment">// TypeScript doesn&#x27;t know that Dog is a mocked class,</span>
+<span class="hljs-comment">// it wraps any function in a Mock&lt;T&gt; type</span>
+<span class="hljs-comment">// without validating if the function is a mock</span>
+vi.<span class="hljs-title function_">mocked</span>(dog.<span class="hljs-property">speak</span>).<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-string">&#x27;woof woof&#x27;</span>)
+
+dog.<span class="hljs-title function_">speak</span>() <span class="hljs-comment">// woof woof</span></code></pre></div>
+<p>To mock a non-function property, like <code>name</code>, we can use the <code>vi.spyOn(dog, &#39;name&#39;, &#39;get&#39;)</code> method. This makes it possible to use spy assertions on the mocked property:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> dog = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dog</span>(<span class="hljs-string">&#x27;Cooper&#x27;</span>)
+
+<span class="hljs-keyword">const</span> nameSpy = vi.<span class="hljs-title function_">spyOn</span>(dog, <span class="hljs-string">&#x27;name&#x27;</span>, <span class="hljs-string">&#x27;get&#x27;</span>).<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-string">&#x27;Max&#x27;</span>)
+
+<span class="hljs-title function_">expect</span>(dog.<span class="hljs-property">name</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Max&#x27;</span>)
+<span class="hljs-title function_">expect</span>(nameSpy).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(<span class="hljs-number">1</span>)</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You can also spy on getters and setters using the same method.</p>
+</div><div class="box box-danger"><div class="box-title">🛑 Danger</div><p>Using classes with <code>vi.fn()</code> was introduced in Vitest 4. Previously, you had to use <code>function</code> and <code>prototype</code> inheritance directly. See <a href="https://v3.vitest.dev/guide/mocking.html#classes">v3 guide</a>.</p>
+</div>
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

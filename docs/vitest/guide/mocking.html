@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mocking | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/mocking  <a class="ext small" href="https://vitest.dev/guide/mocking">version en ligne</a></div>
+<h1 id="mocking"><a class="anchor" href="#mocking">#</a>Mocking</h1>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>New to mocking? Start with the <a href="learn/mock-functions.html">Mock Functions</a> tutorial for a hands-on introduction to <code>vi.fn</code>, <code>vi.spyOn</code>, and <code>vi.mock</code>.</p>
+</div><p>When writing tests it&#39;s only a matter of time before you need to create a &quot;fake&quot; version of an internal — or external — service. This is commonly referred to as <strong>mocking</strong>. Vitest provides utility functions to help you out through its <code>vi</code> helper. You can import it from <code>vitest</code> or access it globally if <a href="../config/globals.html"><code>global</code> configuration</a> is enabled.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Always remember to clear or restore mocks before or after each test run to undo mock state changes between runs! See <a href="../api/mock.html#mockreset"><code>mockReset</code></a> docs for more info.</p>
+</div><p>If you are not familiar with <code>vi.fn</code>, <code>vi.mock</code> or <code>vi.spyOn</code> methods, check the <a href="../api/vi.html">API section</a> first.</p>
+<p>Vitest has a comprehensive list of guides regarding mocking:</p>
+<ul>
+<li><a href="mocking/classes.html">Mocking Classes</a></li>
+<li><a href="mocking/dates.html">Mocking Dates</a></li>
+<li><a href="mocking/file-system.html">Mocking the File System</a></li>
+<li><a href="mocking/functions.html">Mocking Functions</a></li>
+<li><a href="mocking/globals.html">Mocking Globals</a></li>
+<li><a href="mocking/modules.html">Mocking Modules</a></li>
+<li><a href="mocking/requests.html">Mocking Requests</a></li>
+<li><a href="mocking/timers.html">Mocking Timers</a></li>
+</ul>
+<p>For a simpler and quicker way to get started with mocking, you can check the Cheat Sheet below.</p>
+<h2 id="cheat-sheet"><a class="anchor" href="#cheat-sheet">#</a>Cheat Sheet</h2>
+<p>I want to…</p>
+<h3 id="mock-exported-variables"><a class="anchor" href="#mock-exported-variables">#</a>Mock exported variables</h3>
+<div class="code"><div class="code-title">example.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> getter = <span class="hljs-string">&#x27;variable&#x27;</span></code></pre></div>
+<div class="code"><div class="code-title">example.test.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> <span class="hljs-built_in">exports</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.js&#x27;</span>
+
+vi.<span class="hljs-title function_">spyOn</span>(<span class="hljs-built_in">exports</span>, <span class="hljs-string">&#x27;getter&#x27;</span>, <span class="hljs-string">&#x27;get&#x27;</span>).<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-string">&#x27;mocked&#x27;</span>)</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This will not work in the Browser Mode. For a workaround, see <a href="browser/index.html#spying-on-module-exports">Limitations</a>.</p>
+</div><h3 id="mock-an-exported-function"><a class="anchor" href="#mock-an-exported-function">#</a>Mock an exported function</h3>
+<ol>
+<li>Example with <code>vi.mock</code>:</li>
+</ol>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Don&#39;t forget that a <code>vi.mock</code> call is hoisted to top of the file. It will always be executed before all imports.</p>
+</div><div class="code"><div class="code-title">example.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">method</span>(<span class="hljs-params"></span>) {}</code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { method } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.js&#x27;</span>
+
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;./example.js&#x27;</span>, <span class="hljs-function">() =&gt;</span> ({
+  <span class="hljs-attr">method</span>: vi.<span class="hljs-title function_">fn</span>()
+}))</code></pre></div>
+<ol start="2">
+<li>Example with <code>vi.spyOn</code>:</li>
+</ol>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> <span class="hljs-built_in">exports</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.js&#x27;</span>
+
+vi.<span class="hljs-title function_">spyOn</span>(<span class="hljs-built_in">exports</span>, <span class="hljs-string">&#x27;method&#x27;</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> {})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p><code>vi.spyOn</code> example will not work in the Browser Mode. For a workaround, see <a href="browser/index.html#spying-on-module-exports">Limitations</a>.</p>
+</div><h3 id="mock-an-exported-class-implementation"><a class="anchor" href="#mock-an-exported-class-implementation">#</a>Mock an exported class implementation</h3>
+<ol>
+<li>Example with a fake <code>class</code>:</li>
+</ol>
+<div class="code"><div class="code-title">example.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SomeClass</span> {}</code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">SomeClass</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.js&#x27;</span>
+
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./example.js&#x27;</span>), <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> <span class="hljs-title class_">SomeClass</span> = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-keyword">class</span> <span class="hljs-title class_">FakeClass</span> {
+    someMethod = vi.<span class="hljs-title function_">fn</span>()
+  })
+  <span class="hljs-keyword">return</span> { <span class="hljs-title class_">SomeClass</span> }
+})</code></pre></div>
+<ol start="2">
+<li>Example with <code>vi.spyOn</code>:</li>
+</ol>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> mod <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.js&#x27;</span>
+
+vi.<span class="hljs-title function_">spyOn</span>(mod, <span class="hljs-string">&#x27;SomeClass&#x27;</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-keyword">class</span> <span class="hljs-title class_">FakeClass</span> {
+  someMethod = vi.<span class="hljs-title function_">fn</span>()
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p><code>vi.spyOn</code> example will not work in the Browser Mode. For a workaround, see <a href="browser/index.html#spying-on-module-exports">Limitations</a>.</p>
+</div><h3 id="spy-on-an-object-returned-from-a-function"><a class="anchor" href="#spy-on-an-object-returned-from-a-function">#</a>Spy on an object returned from a function</h3>
+<ol>
+<li>Example using cache:</li>
+</ol>
+<div class="code"><div class="code-title">example.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">useObject</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> { <span class="hljs-attr">method</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-literal">true</span> }
+}</code></pre></div>
+<div class="code"><div class="code-title">useObject.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { useObject } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.js&#x27;</span>
+
+<span class="hljs-keyword">const</span> obj = <span class="hljs-title function_">useObject</span>()
+obj.<span class="hljs-title function_">method</span>()</code></pre></div>
+<div class="code"><div class="code-title">useObject.test.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { useObject } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.js&#x27;</span>
+
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./example.js&#x27;</span>), <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">let</span> _cache
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">useObject</span> = (<span class="hljs-params"></span>) =&gt; {
+    <span class="hljs-keyword">if</span> (!_cache) {
+      _cache = {
+        <span class="hljs-attr">method</span>: vi.<span class="hljs-title function_">fn</span>(),
+      }
+    }
+    <span class="hljs-comment">// now every time that useObject() is called it will</span>
+    <span class="hljs-comment">// return the same object reference</span>
+    <span class="hljs-keyword">return</span> _cache
+  }
+  <span class="hljs-keyword">return</span> { useObject }
+})
+
+<span class="hljs-keyword">const</span> obj = <span class="hljs-title function_">useObject</span>()
+<span class="hljs-comment">// obj.method was called inside some-path</span>
+<span class="hljs-title function_">expect</span>(obj.<span class="hljs-property">method</span>).<span class="hljs-title function_">toHaveBeenCalled</span>()</code></pre></div>
+<h3 id="mock-part-of-a-module"><a class="anchor" href="#mock-part-of-a-module">#</a>Mock part of a module</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { mocked, original } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./some-path.js&#x27;</span>
+
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./some-path.js&#x27;</span>), <span class="hljs-title function_">async</span> (importOriginal) =&gt; {
+  <span class="hljs-keyword">const</span> mod = <span class="hljs-keyword">await</span> <span class="hljs-title function_">importOriginal</span>()
+  <span class="hljs-keyword">return</span> {
+    ...mod,
+    <span class="hljs-attr">mocked</span>: vi.<span class="hljs-title function_">fn</span>()
+  }
+})
+<span class="hljs-title function_">original</span>() <span class="hljs-comment">// has original behaviour</span>
+<span class="hljs-title function_">mocked</span>() <span class="hljs-comment">// is a spy function</span></code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Don&#39;t forget that this only <a href="mocking/modules.html#mocking-modules-pitfalls">mocks <em>external</em> access</a>. In this example, if <code>original</code> calls <code>mocked</code> internally, it will always call the function defined in the module, not in the mock factory.</p>
+</div><h3 id="mock-the-current-date"><a class="anchor" href="#mock-the-current-date">#</a>Mock the current date</h3>
+<p>To mock <code>Date</code> and <code>Temporal</code>&#39;s time, you can use <code>vi.setSystemTime</code> helper function. This value will <strong>not</strong> automatically reset between different tests.</p>
+<p>Beware that using <code>vi.useFakeTimers</code> also changes the <code>Date</code>&#39;s time.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> mockDate = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-number">2022</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>)
+vi.<span class="hljs-title function_">setSystemTime</span>(mockDate)
+<span class="hljs-keyword">const</span> now = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>()
+<span class="hljs-title function_">expect</span>(now.<span class="hljs-title function_">valueOf</span>()).<span class="hljs-title function_">toBe</span>(mockDate.<span class="hljs-title function_">valueOf</span>())
+<span class="hljs-keyword">const</span> nowInstant = <span class="hljs-title class_">Temporal</span>.<span class="hljs-property">Now</span>.<span class="hljs-title function_">instant</span>()
+<span class="hljs-title function_">expect</span>(nowInstant.<span class="hljs-property">epochMilliseconds</span>).<span class="hljs-title function_">toBe</span>(mockDate.<span class="hljs-title function_">valueOf</span>())
+<span class="hljs-comment">// reset mocked time</span>
+vi.<span class="hljs-title function_">useRealTimers</span>()</code></pre></div>
+<h3 id="mock-a-global-variable"><a class="anchor" href="#mock-a-global-variable">#</a>Mock a global variable</h3>
+<p>You can set global variable by assigning a value to <code>globalThis</code> or using <a href="../api/vi.html#vi-stubglobal"><code>vi.stubGlobal</code></a> helper. When using <code>vi.stubGlobal</code>, it will <strong>not</strong> automatically reset between different tests, unless you enable <a href="../config/unstubglobals.html"><code>unstubGlobals</code></a> config option or call <a href="../api/vi.html#vi-unstuballglobals"><code>vi.unstubAllGlobals</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-ts">vi.<span class="hljs-title function_">stubGlobal</span>(<span class="hljs-string">&#x27;__VERSION__&#x27;</span>, <span class="hljs-string">&#x27;1.0.0&#x27;</span>)
+<span class="hljs-title function_">expect</span>(__VERSION__).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;1.0.0&#x27;</span>)</code></pre></div>
+<h3 id="mock-import-meta-env"><a class="anchor" href="#mock-import-meta-env">#</a>Mock <code>import.meta.env</code></h3>
+<ol>
+<li>To change environmental variable, you can just assign a new value to it.</li>
+</ol>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>The environmental variable value will <strong><em>not</em></strong> automatically reset between different tests.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { beforeEach, expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// you can reset it in beforeEach hook manually</span>
+<span class="hljs-keyword">const</span> originalViteEnv = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_ENV</span>
+
+<span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_ENV</span> = originalViteEnv
+})
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;changes value&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_ENV</span> = <span class="hljs-string">&#x27;staging&#x27;</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_ENV</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;staging&#x27;</span>)
+})</code></pre></div>
+<ol start="2">
+<li>If you want to automatically reset the value(s), you can use the <code>vi.stubEnv</code> helper with the <a href="../config/unstubenvs.html"><code>unstubEnvs</code></a> config option enabled (or call <a href="../api/vi.html#vi-unstuballenvs"><code>vi.unstubAllEnvs</code></a> manually in a <code>beforeEach</code> hook):</li>
+</ol>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, it, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// before running tests &quot;VITE_ENV&quot; is &quot;test&quot;</span>
+<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_ENV</span> === <span class="hljs-string">&#x27;test&#x27;</span>
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;changes value&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  vi.<span class="hljs-title function_">stubEnv</span>(<span class="hljs-string">&#x27;VITE_ENV&#x27;</span>, <span class="hljs-string">&#x27;staging&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_ENV</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;staging&#x27;</span>)
+})
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;the value is restored before running an other test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_ENV</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;test&#x27;</span>)
+})</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">unstubEnvs</span>: <span class="hljs-literal">true</span>,
+  },
+})</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#cheat-sheet">Cheat Sheet</a><a class="toc-3" href="#mock-exported-variables">Mock exported variables</a><a class="toc-3" href="#mock-an-exported-function">Mock an exported function</a><a class="toc-3" href="#mock-an-exported-class-implementation">Mock an exported class implementation</a><a class="toc-3" href="#spy-on-an-object-returned-from-a-function">Spy on an object returned from a function</a><a class="toc-3" href="#mock-part-of-a-module">Mock part of a module</a><a class="toc-3" href="#mock-the-current-date">Mock the current date</a><a class="toc-3" href="#mock-a-global-variable">Mock a global variable</a><a class="toc-3" href="#mock-import-meta-env">Mock import.meta.env</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

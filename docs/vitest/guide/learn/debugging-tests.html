@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Debugging Failing Tests | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/learn/debugging-tests  <a class="ext small" href="https://vitest.dev/guide/learn/debugging-tests">version en ligne</a></div>
+<h1 id="debugging-failing-tests"><a class="anchor" href="#debugging-failing-tests">#</a>Debugging Failing Tests</h1>
+<p>This page covers how to investigate test failures in Vitest: reading error output, isolating problems, identifying common causes, and using the available debugging tools.</p>
+<h2 id="reading-the-error"><a class="anchor" href="#reading-the-error">#</a>Reading the Error</h2>
+<p>When a test fails, Vitest gives you several pieces of information. Let&#39;s look at a real failure and break it down:</p>
+<blockquote>
+<p><em>(extrait de code externe non inclus)</em></p>
+</blockquote>
+<p>There&#39;s a lot here, but each part tells you something:</p>
+<p><strong>The header</strong> (<code>FAIL src/user.test.js &gt; createUser &gt; sets the default role</code>) tells you which file, describe block, and test failed. This is the full path in the test tree.</p>
+<p><strong>The assertion message</strong> (<code>expected { ... } to deeply equal { ... }</code>) tells you what kind of check failed and shows the two values being compared.</p>
+<p><strong>The diff</strong> shows exactly what&#39;s different. Lines starting with <code class="diff-add">+</code> are what you actually got, and lines starting with <code class="diff-remove">-</code> are what you expected. In this case, the role was <code class="diff-add">"viewer"</code> but the test expected <code class="diff-remove">"member"</code>.</p>
+<p><strong>The code snippet</strong> shows the exact line and a few surrounding lines, with a caret (<code>^</code>) pointing to the failing assertion. You can click the file path in most terminals and IDEs to jump directly there.</p>
+<p>At this point, the question is: did the code change (maybe the default role was intentionally updated to <code>&quot;viewer&quot;</code>), or is the test wrong? Check the source code for <code>createUser</code> to find out. If the default was intentionally changed, update the test. If not, you&#39;ve found a bug.</p>
+<h2 id="isolating-the-problem"><a class="anchor" href="#isolating-the-problem">#</a>Isolating the Problem</h2>
+<p>When a test fails and the cause isn&#39;t immediately clear, the first step is to isolate it. Run just that one test, without the rest of your suite:</p>
+<div class="code"><pre><code class="hljs lang-bash"><span class="hljs-comment"># Run only the failing test file</span>
+vitest src/user.test.js
+
+<span class="hljs-comment"># Run only tests matching a name pattern</span>
+vitest -t <span class="hljs-string">&quot;sets the default role&quot;</span>
+
+<span class="hljs-comment"># Combine both for maximum precision</span>
+vitest src/user.test.js -t <span class="hljs-string">&quot;sets the default role&quot;</span></code></pre></div>
+<p>You can also add <a href="../../api/test.html#only"><code>.only</code></a> to the test itself:</p>
+<div class="code"><pre><code class="hljs lang-js">test.<span class="hljs-title function_">only</span>(<span class="hljs-string">&#x27;sets the default role&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// only this test runs in the file</span>
+})</code></pre></div>
+<p>If you have many failures and want to focus on the first one, use <a href="../../config/bail.html"><code>--bail</code></a> to stop after a set number of failures:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest --bail 1</code></pre></div>
+<p>If the test passes when run alone but fails when run with others, you have a test isolation problem (more on that below). If it fails even when run alone, the issue is in the test itself or the code it&#39;s testing.</p>
+<h2 id="common-causes-of-failures"><a class="anchor" href="#common-causes-of-failures">#</a>Common Causes of Failures</h2>
+<h3 id="shared-state-between-tests"><a class="anchor" href="#shared-state-between-tests">#</a>Shared State Between Tests</h3>
+<p>This is one of the most common and frustrating issues. A test passes when you run it alone, but fails when the full suite runs. The usual cause is that some other test modifies shared state (a global variable, a module-level cache, a database) and doesn&#39;t clean up after itself.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// This is a problem: `users` is shared between tests</span>
+<span class="hljs-keyword">const</span> users = []
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;adds a user&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  users.<span class="hljs-title function_">push</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(users).<span class="hljs-title function_">toEqual</span>([<span class="hljs-string">&#x27;Alice&#x27;</span>])
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;starts empty&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// This fails because &#x27;Alice&#x27; is still in the array!</span>
+  <span class="hljs-title function_">expect</span>(users).<span class="hljs-title function_">toEqual</span>([])
+})</code></pre></div>
+<p>The fix is to reset the state before each test with <a href="../../api/hooks.html#beforeeach"><code>beforeEach</code></a>, or better yet, use <a href="../test-context.html#extend-test-context"><code>test.extend</code></a> to create fresh state for each test automatically:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> test = baseTest.<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;users&#x27;</span>, <span class="hljs-function">() =&gt;</span> [])
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;adds a user&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ users }</span>) =&gt;</span> {
+  users.<span class="hljs-title function_">push</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(users).<span class="hljs-title function_">toEqual</span>([<span class="hljs-string">&#x27;Alice&#x27;</span>])
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;starts empty&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ users }</span>) =&gt;</span> {
+  <span class="hljs-comment">// Passes: each test gets its own array</span>
+  <span class="hljs-title function_">expect</span>(users).<span class="hljs-title function_">toEqual</span>([])
+})</code></pre></div>
+<h3 id="async-issues"><a class="anchor" href="#async-issues">#</a>Async Issues</h3>
+<p>Tests that involve promises can fail intermittently or in confusing ways if the async flow isn&#39;t handled correctly. The most common mistake is forgetting an <code>await</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// This test always passes, even if fetchUser rejects!</span>
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;fetches user&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// Missing await: the test finishes before the promise settles</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">fetchUser</span>(<span class="hljs-number">1</span>)).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toMatchObject</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span> })
+})</code></pre></div>
+<p>Vitest will usually warn you about unawaited assertions at the end of the test. If you see that warning, add the missing <code>await</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;fetches user&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">fetchUser</span>(<span class="hljs-number">1</span>)).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toMatchObject</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Alice&#x27;</span> })
+})</code></pre></div>
+<p>If a test hangs and eventually times out, it usually means a promise never resolves. Check for missing callbacks, unresolved conditions, or deadlocks in the code you&#39;re testing.</p>
+<h3 id="stale-snapshots"><a class="anchor" href="#stale-snapshots">#</a>Stale Snapshots</h3>
+<p>If you&#39;re using <a href="snapshots.html">snapshot tests</a> and you intentionally changed the output of your code, the existing snapshots will be outdated. The test fails and shows a diff between the old snapshot and the new output.</p>
+<p>This is expected. Review the diff to confirm the changes are correct, then update the snapshots by pressing <code>u</code> in watch mode or running <code>vitest -u</code>.</p>
+<h3 id="wrong-test-environment"><a class="anchor" href="#wrong-test-environment">#</a>Wrong Test Environment</h3>
+<p>If your code accesses browser APIs like <code>document</code> or <code>window</code> and you see errors like &quot;document is not defined&quot;, your test is running in the Node environment (the default). You can switch to a browser-like environment with the <a href="../../config/environment.html"><code>environment</code></a> config option, or better yet, use <a href="../browser/index.html">Browser Mode</a> which runs tests in a real browser.</p>
+<h3 id="mocks-not-cleaned-up"><a class="anchor" href="#mocks-not-cleaned-up">#</a>Mocks Not Cleaned Up</h3>
+<p>If a mock from one test leaks into another, you&#39;ll get unexpected behavior. For example, a <code>vi.spyOn</code> that overrides a method&#39;s return value will persist into the next test unless it&#39;s restored.</p>
+<p>The easiest fix is to enable automatic mock restoration in your config:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">restoreMocks</span>: <span class="hljs-literal">true</span>,
+  },
+})</code></pre></div>
+<p>This calls <a href="../../api/mock.html#mockrestore"><code>mockRestore()</code></a> on every mock after each test. See the <a href="mock-functions.html#resetting-mocks">Mock Functions</a> tutorial for more details.</p>
+<h2 id="debugging-tools"><a class="anchor" href="#debugging-tools">#</a>Debugging Tools</h2>
+<h3 id="console-logging"><a class="anchor" href="#console-logging">#</a>Console Logging</h3>
+<p>There&#39;s nothing wrong with adding <code>console.log</code> to your tests. It&#39;s the fastest way to inspect values and understand what&#39;s happening:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;transforms data correctly&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> input = <span class="hljs-title function_">getData</span>()
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;input:&#x27;</span>, input)
+
+  <span class="hljs-keyword">const</span> result = <span class="hljs-title function_">transform</span>(input)
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;result:&#x27;</span>, result)
+
+  <span class="hljs-title function_">expect</span>(result).<span class="hljs-title function_">toMatchObject</span>({ <span class="hljs-attr">status</span>: <span class="hljs-string">&#x27;ok&#x27;</span> })
+})</code></pre></div>
+<p>Vitest displays console output inline with the test results, so you can see which test produced which log.</p>
+<h3 id="vitest-ui"><a class="anchor" href="#vitest-ui">#</a>Vitest UI</h3>
+<p>For a visual overview of your test suite, run Vitest with the <code>--ui</code> flag:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest --ui</code></pre></div>
+<p>This opens a browser-based dashboard where you can see all your tests, their status, and their output. It also includes a module graph that shows how your files are connected, which can help you understand why a change in one file causes failures in another. See the <a href="../ui.html">Vitest UI</a> guide for more details.</p>
+<h3 id="vs-code-extension"><a class="anchor" href="#vs-code-extension">#</a>VS Code Extension</h3>
+<p>The <a href="https://vitest.dev/vscode">Vitest VS Code extension</a> lets you run and debug individual tests directly from your editor. You can click a &quot;play&quot; button next to any test, set breakpoints, and step through code in the VS Code debugger. This is often faster than switching between the terminal and your editor.</p>
+<h3 id="verbose-output"><a class="anchor" href="#verbose-output">#</a>Verbose Output</h3>
+<p>If the default output isn&#39;t showing enough detail, use the verbose reporter:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest --reporter=verbose</code></pre></div>
+<p>This shows every test individually (not just the files), which can help spot patterns in which tests pass and which fail.</p>
+<h3 id="attaching-a-debugger"><a class="anchor" href="#attaching-a-debugger">#</a>Attaching a Debugger</h3>
+<p>For more complex issues where you need to step through code line by line, you can run Vitest with the <code>--inspect-brk</code> flag and attach a debugger. The <code>--no-file-parallelism</code> flag ensures tests run in the main thread so breakpoints work reliably:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest --inspect-brk --no-file-parallelism</code></pre></div>
+<p>Then attach from VS Code, IntelliJ, or Chrome DevTools (<code>chrome://inspect</code>). See the <a href="../debugging.html">Debugging</a> guide for detailed setup instructions for each editor.</p>
+<h2 id="getting-help"><a class="anchor" href="#getting-help">#</a>Getting Help</h2>
+<p>If you&#39;re stuck, these resources can help:</p>
+<ul>
+<li>The <a href="../common-errors.html">Common Errors</a> page covers specific error messages and their solutions</li>
+<li><a href="https://github.com/vitest-dev/vitest/issues">GitHub Issues</a> for searching known bugs and workarounds</li>
+<li>The <a href="https://chat.vitest.dev">Discord community</a> for real-time help from other Vitest users and maintainers</li>
+</ul>
+<style>
+.vp-doc code.diff-add {
+  color: var(--vp-c-green-2) !important;
+}
+.vp-doc code.diff-remove {
+  color: var(--vp-c-red-2) !important;
+}
+</style>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#reading-the-error">Reading the Error</a><a class="toc-2" href="#isolating-the-problem">Isolating the Problem</a><a class="toc-2" href="#common-causes-of-failures">Common Causes of Failures</a><a class="toc-3" href="#shared-state-between-tests">Shared State Between Tests</a><a class="toc-3" href="#async-issues">Async Issues</a><a class="toc-3" href="#stale-snapshots">Stale Snapshots</a><a class="toc-3" href="#wrong-test-environment">Wrong Test Environment</a><a class="toc-3" href="#mocks-not-cleaned-up">Mocks Not Cleaned Up</a><a class="toc-2" href="#debugging-tools">Debugging Tools</a><a class="toc-3" href="#console-logging">Console Logging</a><a class="toc-3" href="#vitest-ui">Vitest UI</a><a class="toc-3" href="#vs-code-extension">VS Code Extension</a><a class="toc-3" href="#verbose-output">Verbose Output</a><a class="toc-3" href="#attaching-a-debugger">Attaching a Debugger</a><a class="toc-2" href="#getting-help">Getting Help</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

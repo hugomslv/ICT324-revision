@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sequence | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/sequence  <a class="ext small" href="https://vitest.dev/config/sequence">version en ligne</a></div>
+<h1 id="sequence"><a class="anchor" href="#sequence">#</a>sequence</h1>
+<ul>
+<li><strong>Type:</strong> <code>{ sequencer?, shuffle?, seed?, hooks?, setupFiles?, groupOrder }</code></li>
+</ul>
+<p>Options for how tests should be sorted.</p>
+<p>You can provide sequence options to CLI with dot notation:</p>
+<div class="code"><pre><code class="hljs lang-sh">npx vitest --sequence.shuffle --sequence.seed=1000</code></pre></div>
+<h2 id="sequence-sequencer"><a class="anchor" href="#sequence-sequencer">#</a>sequence.sequencer <CRoot /></h2>
+<ul>
+<li><strong>Type:</strong> <code>TestSequencerConstructor</code></li>
+<li><strong>Default:</strong> <code>BaseSequencer</code></li>
+</ul>
+<p>A custom class that defines methods for sharding and sorting. You can extend <code>BaseSequencer</code> from <code>vitest/node</code>, if you only need to redefine one of the <code>sort</code> and <code>shard</code> methods, but both should exist.</p>
+<p>Sharding is happening before sorting, and only if <code>--shard</code> option is provided.</p>
+<p>If <a href="#sequence-grouporder"><code>sequence.groupOrder</code></a> is specified, the sequencer will be called once for each group and pool.</p>
+<h2 id="sequence-grouporder"><a class="anchor" href="#sequence-grouporder">#</a>sequence.groupOrder</h2>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Default:</strong> <code>0</code></li>
+</ul>
+<p>Controls the order in which this project runs its tests when using multiple <a href="../guide/projects.html">projects</a>.</p>
+<ul>
+<li>Projects with the same group order number will run together, and groups are run from lowest to highest.</li>
+<li>If you don&#39;t set this option, all projects run in parallel.</li>
+<li>If several projects use the same group order, they will run at the same time.</li>
+</ul>
+<p>This setting only affects the order in which projects run, not the order of tests within a project.
+To control test isolation or the order of tests inside a project, use the <a href="isolate.html"><code>isolate</code></a> and <a href="sequence.html#sequence-sequencer"><code>sequence.sequencer</code></a> options.</p>
+<details class="box"><summary>Example</summary><p>Consider this example:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;slow&#x27;</span>,
+          <span class="hljs-attr">sequence</span>: {
+            <span class="hljs-attr">groupOrder</span>: <span class="hljs-number">0</span>,
+          },
+        },
+      },
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;fast&#x27;</span>,
+          <span class="hljs-attr">sequence</span>: {
+            <span class="hljs-attr">groupOrder</span>: <span class="hljs-number">0</span>,
+          },
+        },
+      },
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;flaky&#x27;</span>,
+          <span class="hljs-attr">sequence</span>: {
+            <span class="hljs-attr">groupOrder</span>: <span class="hljs-number">1</span>,
+          },
+        },
+      },
+    ],
+  },
+})</code></pre></div>
+<p>Tests in these projects will run in this order:</p>
+<div class="code"><pre><code class="hljs lang-txt"> 0. slow  |
+          |&gt; running together
+ 0. fast  |
+
+ 1. flaky |&gt; runs after slow and fast alone</code></pre></div>
+</details><h2 id="sequence-shuffle"><a class="anchor" href="#sequence-shuffle">#</a>sequence.shuffle</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean | { files?, tests? }</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>CLI:</strong> <code>--sequence.shuffle</code>, <code>--sequence.shuffle=false</code></li>
+</ul>
+<p>If you want files and tests to run randomly, you can enable it with this option, or CLI argument <a href="../guide/cli.html"><code>--sequence.shuffle</code></a>.</p>
+<p>Vitest usually uses cache to sort tests, so long-running tests start earlier, which makes tests run faster. If your files and tests run in random order, you will lose this performance improvement, but it may be useful to track tests that accidentally depend on another test run previously.</p>
+<h3 id="sequence-shuffle-files"><a class="anchor" href="#sequence-shuffle-files">#</a>sequence.shuffle.files <CRoot /></h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>CLI:</strong> <code>--sequence.shuffle.files</code>, <code>--sequence.shuffle.files=false</code></li>
+</ul>
+<p>Whether to randomize files, be aware that long running tests will not start earlier if you enable this option.</p>
+<p>Because file ordering is shared across <a href="../guide/projects.html">projects</a>, this option is resolved from the root config only. A project can still randomize its own tests with <a href="#sequence-shuffle-tests"><code>sequence.shuffle.tests</code></a>.</p>
+<h3 id="sequence-shuffle-tests"><a class="anchor" href="#sequence-shuffle-tests">#</a>sequence.shuffle.tests</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>CLI:</strong> <code>--sequence.shuffle.tests</code>, <code>--sequence.shuffle.tests=false</code></li>
+</ul>
+<p>Whether to randomize tests.</p>
+<h2 id="sequence-concurrent"><a class="anchor" href="#sequence-concurrent">#</a>sequence.concurrent</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+<li><strong>CLI:</strong> <code>--sequence.concurrent</code>, <code>--sequence.concurrent=false</code></li>
+</ul>
+<p>If you want tests to run in parallel, you can enable it with this option, or CLI argument <a href="../guide/cli.html"><code>--sequence.concurrent</code></a>.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>When you run tests with <code>sequence.concurrent</code> and <code>expect.requireAssertions</code> set to <code>true</code>, you should use <a href="../guide/test-context.html#expect">local expect</a> instead of the global one. Otherwise, this may cause false negatives in <a href="https://github.com/vitest-dev/vitest/issues/8469">some situations (#8469)</a>.</p>
+</div><h2 id="sequence-seed"><a class="anchor" href="#sequence-seed">#</a>sequence.seed <CRoot /></h2>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Default:</strong> <code>Date.now()</code></li>
+<li><strong>CLI:</strong> <code>--sequence.seed=1000</code></li>
+</ul>
+<p>Sets the randomization seed, if tests are running in random order.</p>
+<h2 id="sequence-hooks"><a class="anchor" href="#sequence-hooks">#</a>sequence.hooks</h2>
+<ul>
+<li><strong>Type:</strong> <code>&#39;stack&#39; | &#39;list&#39; | &#39;parallel&#39;</code></li>
+<li><strong>Default:</strong> <code>&#39;stack&#39;</code></li>
+<li><strong>CLI:</strong> <code>--sequence.hooks=&lt;value&gt;</code></li>
+</ul>
+<p>Changes the order in which hooks are executed.</p>
+<ul>
+<li><code>stack</code> will order &quot;after&quot; hooks in reverse order, &quot;before&quot; hooks will run in the order they were defined</li>
+<li><code>list</code> will order all hooks in the order they are defined</li>
+<li><code>parallel</code> runs hooks in a single group in parallel (hooks in parent suites still run before the current suite&#39;s hooks). The actual number of simultaneously running hooks is limited by <a href="maxconcurrency.html"><code>maxConcurrency</code></a>.</li>
+</ul>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This option doesn&#39;t affect <a href="../api/hooks.html#ontestfinished"><code>onTestFinished</code></a>. It is always called in reverse order.</p>
+</div><h2 id="sequence-setupfiles"><a class="anchor" href="#sequence-setupfiles">#</a>sequence.setupFiles</h2>
+<ul>
+<li><strong>Type:</strong> <code>&#39;list&#39; | &#39;parallel&#39;</code></li>
+<li><strong>Default:</strong> <code>&#39;parallel&#39;</code></li>
+<li><strong>CLI:</strong> <code>--sequence.setupFiles=&lt;value&gt;</code></li>
+</ul>
+<p>Changes the order in which setup files are executed.</p>
+<ul>
+<li><code>list</code> will run setup files in the order they are defined</li>
+<li><code>parallel</code> will run setup files in parallel</li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#sequence-sequencer">sequence.sequencer</a><a class="toc-2" href="#sequence-grouporder">sequence.groupOrder</a><a class="toc-2" href="#sequence-shuffle">sequence.shuffle</a><a class="toc-3" href="#sequence-shuffle-files">sequence.shuffle.files</a><a class="toc-3" href="#sequence-shuffle-tests">sequence.shuffle.tests</a><a class="toc-2" href="#sequence-concurrent">sequence.concurrent</a><a class="toc-2" href="#sequence-seed">sequence.seed</a><a class="toc-2" href="#sequence-hooks">sequence.hooks</a><a class="toc-2" href="#sequence-setupfiles">sequence.setupFiles</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

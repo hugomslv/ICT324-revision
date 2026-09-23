@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test Environment | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/environment  <a class="ext small" href="https://vitest.dev/guide/environment">version en ligne</a></div>
+<h1 id="test-environment"><a class="anchor" href="#test-environment">#</a>Test Environment</h1>
+<p>Vitest provides <a href="../config/environment.html"><code>environment</code></a> option to run code inside a specific environment. You can modify how environment behaves with <a href="../config/environmentoptions.html"><code>environmentOptions</code></a> option.</p>
+<p>By default, you can use these environments:</p>
+<ul>
+<li><code>node</code> is default environment</li>
+<li><code>jsdom</code> emulates browser environment by providing Browser API, uses <a href="https://github.com/jsdom/jsdom"><code>jsdom</code></a> package</li>
+<li><code>happy-dom</code> emulates browser environment by providing Browser API, and considered to be faster than jsdom, but lacks some API, uses <a href="https://github.com/capricorn86/happy-dom"><code>happy-dom</code></a> package</li>
+<li><code>edge-runtime</code> emulates Vercel&#39;s <a href="https://edge-runtime.vercel.app/">edge-runtime</a>, uses <a href="https://npmx.dev/package/@edge-runtime/vm"><code>@edge-runtime/vm</code></a> package</li>
+</ul>
+<div class="box box-info"><div class="box-title">ℹ️ Info</div><p>When using <code>jsdom</code> or <code>happy-dom</code> environments, Vitest follows the same rules that Vite does when importing <a href="https://vitejs.dev/guide/features.html#css">CSS</a> and <a href="https://vitejs.dev/guide/features.html#static-assets">assets</a>. If importing external dependency fails with <code>unknown extension .css</code> error, you need to inline the whole import chain manually by adding all packages to <a href="../config/server.html#inline"><code>server.deps.inline</code></a>. For example, if the error happens in <code>package-3</code> in this import chain: <code>source code -&gt; package-1 -&gt; package-2 -&gt; package-3</code>, you need to add all three packages to <code>server.deps.inline</code>.</p>
+<p>The <code>require</code> of CSS and assets inside the external dependencies are resolved automatically.</p>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>&quot;Environments&quot; exist only when running tests in Node.js.</p>
+<p><code>browser</code> is not considered an environment in Vitest. If you wish to run part of your tests using <a href="browser/index.html">Browser Mode</a>, you can create a <a href="browser/index.html#projects-config">test project</a>.</p>
+</div><h2 id="environments-for-specific-files"><a class="anchor" href="#environments-for-specific-files">#</a>Environments for Specific Files</h2>
+<p>When setting <code>environment</code> option in your config, it will apply to all the test files in your project. To have more fine-grained control, you can use control comments to specify environment for specific files. Control comments are comments that start with <code>@vitest-environment</code> and are followed by the environment name:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// @vitest-environment jsdom</span>
+
+<span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">typeof</span> <span class="hljs-variable language_">window</span>).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;undefined&#x27;</span>)
+})</code></pre></div>
+<h2 id="custom-environment"><a class="anchor" href="#custom-environment">#</a>Custom Environment</h2>
+<p>You can create your own package to extend Vitest environment. To do so, create package with the name <code>vitest-environment-${name}</code> or specify a path to a valid JS/TS file. That package should export an object with the shape of <code>Environment</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">Environment</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/runtime&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> &lt;<span class="hljs-title class_">Environment</span>&gt;{
+  <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;custom&#x27;</span>,
+  <span class="hljs-attr">viteEnvironment</span>: <span class="hljs-string">&#x27;ssr&#x27;</span>,
+  <span class="hljs-comment">// optional - set to false when &quot;setupVM&quot; is fast, so vm pools</span>
+  <span class="hljs-comment">// do not transform the import graph while it runs</span>
+  <span class="hljs-attr">prewarmModules</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-comment">// optional - only if you support &quot;vmForks&quot; or &quot;vmThreads&quot; pools</span>
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">setupVM</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> vm = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;node:vm&#x27;</span>)
+    <span class="hljs-keyword">const</span> context = vm.<span class="hljs-title function_">createContext</span>()
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-title function_">getVmContext</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> context
+      },
+      <span class="hljs-title function_">teardown</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// called after all tests with this env have been run</span>
+      }
+    }
+  },
+  <span class="hljs-title function_">setup</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// custom setup</span>
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-title function_">teardown</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-comment">// called after all tests with this env have been run</span>
+      }
+    }
+  }
+}</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Vitest requires <code>viteEnvironment</code> option on environment object (fallbacks to the Vitest environment name by default). It should be equal to <code>ssr</code>, <code>client</code> or any custom <a href="https://vite.dev/guide/api-environment">Vite environment</a> name. This value determines which environment is used to process file.</p>
+</div><p>You also have access to default Vitest environments through <code>vitest/runtime</code> entry:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { builtinEnvironments, populateGlobal } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/runtime&#x27;</span>
+
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(builtinEnvironments) <span class="hljs-comment">// { jsdom, happy-dom, node, edge-runtime }</span></code></pre></div>
+<p>Vitest also provides <code>populateGlobal</code> utility function, which can be used to move properties from object into the global namespace:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">PopulateOptions</span> {
+  <span class="hljs-comment">// should non-class functions be bind to the global namespace</span>
+  <span class="hljs-attr">bindFunctions</span>?: <span class="hljs-built_in">boolean</span>
+}
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">PopulateResult</span> {
+  <span class="hljs-comment">// a list of all keys that were copied, even if value doesn&#x27;t exist on original object</span>
+  <span class="hljs-attr">keys</span>: <span class="hljs-title class_">Set</span>&lt;<span class="hljs-built_in">string</span>&gt;
+  <span class="hljs-comment">// a map of property descriptors for keys that might have been overridden</span>
+  <span class="hljs-comment">// you can restore them with `Object.defineProperty` inside `teardown`</span>
+  <span class="hljs-attr">originals</span>: <span class="hljs-title class_">Map</span>&lt;<span class="hljs-built_in">string</span> | <span class="hljs-built_in">symbol</span>, <span class="hljs-title class_">PropertyDescriptor</span>&gt;
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">populateGlobal</span>(<span class="hljs-params"><span class="hljs-attr">global</span>: <span class="hljs-built_in">any</span>, <span class="hljs-attr">original</span>: <span class="hljs-built_in">any</span>, <span class="hljs-attr">options</span>: <span class="hljs-title class_">PopulateOptions</span></span>): <span class="hljs-title class_">PopulateResult</span></code></pre></div>
+
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

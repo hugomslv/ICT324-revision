@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sort-imports (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/sort-imports <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/sort-imports">version en ligne</a></div>
+<h1>sort-imports</h1><p>The <code>import</code> statement is used to import members (functions, objects or primitives) that have been exported from an external module. Using a specific member syntax:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// single - Import single member.</span>
+<span class="hljs-keyword">import</span> myMember <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;my-module.js&quot;</span>;
+<span class="hljs-keyword">import</span> {myOtherMember} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;my-other-module.js&quot;</span>;
+
+<span class="hljs-comment">// multiple - Import multiple members.</span>
+<span class="hljs-keyword">import</span> {foo, bar} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;my-module.js&quot;</span>;
+
+<span class="hljs-comment">// all - Import all members, where myModule contains all the exported bindings.</span>
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> myModule <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;my-module.js&quot;</span>;</code></pre></div>
+<p>The <code>import</code> statement can also import a module without exported bindings. Used when the module does not export anything, but runs it own code or changes the global context object.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// none - Import module without exported bindings.</span>
+<span class="hljs-keyword">import</span> <span class="hljs-string">&quot;my-module.js&quot;</span></code></pre></div>
+<p>When declaring multiple imports, a sorted list of <code>import</code> declarations make it easier for developers to read the code and find necessary imports later. This rule is purely a matter of style.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule checks all <code>import</code> declarations and verifies that all imports are first sorted by the used member syntax and then alphabetically by the first member or alias name.</p>
+<p>The <code>--fix</code> option on the command line automatically fixes some problems reported by this rule: multiple members on a single line are automatically sorted (e.g. <code>import { b, a } from &#39;foo.js&#39;</code> is corrected to <code>import { a, b } from &#39;foo.js&#39;</code>), but multiple lines are not reordered.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule accepts an object with its properties as</p>
+<ul>
+<li><code>ignoreCase</code> (default: <code>false</code>)</li>
+<li><code>ignoreDeclarationSort</code> (default: <code>false</code>)</li>
+<li><code>ignoreMemberSort</code> (default: <code>false</code>)</li>
+<li><code>memberSyntaxSortOrder</code> (default: <code>[&quot;none&quot;, &quot;all&quot;, &quot;multiple&quot;, &quot;single&quot;]</code>); all 4 items must be present in the array, but you can change the order:<ul>
+<li><code>none</code> = import module without exported bindings.</li>
+<li><code>all</code> = import all members provided by exported bindings.</li>
+<li><code>multiple</code> = import multiple members.</li>
+<li><code>single</code> = import single member.</li>
+</ul>
+</li>
+<li><code>allowSeparatedGroups</code> (default: <code>false</code>)</li>
+</ul>
+<p>Default option settings are:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;sort-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;ignoreCase&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;ignoreDeclarationSort&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;ignoreMemberSort&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;memberSyntaxSortOrder&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;none&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;all&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;multiple&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;single&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;allowSeparatedGroups&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<h3 id="default-settings"><a class="anchor" href="#default-settings">#</a>Default settings</h3>
+<p>Examples of <strong>correct</strong> code for this rule when using default options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: &quot;error&quot;*/</span>
+<span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;module-without-export.js&#x27;</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> bar <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> foo <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> {alpha, beta} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;alpha.js&#x27;</span>;
+<span class="hljs-keyword">import</span> {delta, gamma} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;delta.js&#x27;</span>;
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;baz.js&#x27;</span>;
+<span class="hljs-keyword">import</span> {b} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;qux.js&#x27;</span>;</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: &quot;error&quot;*/</span>
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> b <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;
+<span class="hljs-keyword">import</span> c <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;baz.js&#x27;</span>;</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: &quot;error&quot;*/</span>
+<span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> bar <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;
+<span class="hljs-keyword">import</span> {a, b} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;baz.js&#x27;</span>;
+<span class="hljs-keyword">import</span> c <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;qux.js&#x27;</span>;
+<span class="hljs-keyword">import</span> {d} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;quux.js&#x27;</span>;</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: &quot;error&quot;*/</span>
+<span class="hljs-keyword">import</span> {a, b, c} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span></code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for this rule when using default options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: &quot;error&quot;*/</span>
+<span class="hljs-keyword">import</span> b <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: &quot;error&quot;*/</span>
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> A <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: &quot;error&quot;*/</span>
+<span class="hljs-keyword">import</span> {c, d} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> {a, b} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: &quot;error&quot;*/</span>
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> {b, c} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: &quot;error&quot;*/</span>
+<span class="hljs-keyword">import</span> {a} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> {b, c} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: &quot;error&quot;*/</span>
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> b <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: &quot;error&quot;*/</span>
+<span class="hljs-keyword">import</span> {b, a, c} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span></code></pre></div>
+</div><h3 id="ignorecase"><a class="anchor" href="#ignorecase">#</a><code>ignoreCase</code></h3>
+<p>When <code>false</code> (default), uppercase letters of the alphabet must always precede lowercase letters.</p>
+<p>When <code>true</code>, the rule ignores the case-sensitivity of the imports local name.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with the default <code>{ &quot;ignoreCase&quot;: false }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;ignoreCase&quot;: false }]*/</span>
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;
+<span class="hljs-keyword">import</span> B <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> c <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;baz.js&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the default <code>{ &quot;ignoreCase&quot;: false }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;ignoreCase&quot;: false }]*/</span>
+<span class="hljs-keyword">import</span> B <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> c <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;baz.js&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with <code>{ &quot;ignoreCase&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;ignoreCase&quot;: true }]*/</span>
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;
+<span class="hljs-keyword">import</span> B <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> c <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;baz.js&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for this rule with the <code>{ &quot;ignoreCase&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;ignoreCase&quot;: true }]*/</span>
+<span class="hljs-keyword">import</span> B <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;</code></pre></div>
+</div><h3 id="ignoredeclarationsort"><a class="anchor" href="#ignoredeclarationsort">#</a><code>ignoreDeclarationSort</code></h3>
+<p>When <code>true</code>, the rule ignores the sorting of import declaration statements. Default is <code>false</code>.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with the default <code>{ &quot;ignoreDeclarationSort&quot;: false }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;ignoreDeclarationSort&quot;: false }]*/</span>
+<span class="hljs-keyword">import</span> b <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span></code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the default <code>{ &quot;ignoreDeclarationSort&quot;: false }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;ignoreDeclarationSort&quot;: false }]*/</span>
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;
+<span class="hljs-keyword">import</span> b <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;ignoreDeclarationSort&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;ignoreDeclarationSort&quot;: true }]*/</span>
+<span class="hljs-keyword">import</span> b <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span></code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for this rule with the <code>{ &quot;ignoreDeclarationSort&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;ignoreDeclarationSort&quot;: true }]*/</span>
+<span class="hljs-keyword">import</span> {b, a, c} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;</code></pre></div>
+</div><h3 id="ignoremembersort"><a class="anchor" href="#ignoremembersort">#</a><code>ignoreMemberSort</code></h3>
+<p>When <code>true</code>, the rule ignores the member sorting within a <code>multiple</code> member import declaration. Default is <code>false</code>.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with the default <code>{ &quot;ignoreMemberSort&quot;: false }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;ignoreMemberSort&quot;: false }]*/</span>
+<span class="hljs-keyword">import</span> {b, a, c} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span></code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the default <code>{ &quot;ignoreMemberSort&quot;: false }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;ignoreMemberSort&quot;: false }]*/</span>
+<span class="hljs-keyword">import</span> {a, b, c} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;ignoreMemberSort&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;ignoreMemberSort&quot;: true }]*/</span>
+<span class="hljs-keyword">import</span> {b, a, c} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span></code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for this rule with the <code>{ &quot;ignoreMemberSort&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;ignoreMemberSort&quot;: true }]*/</span>
+<span class="hljs-keyword">import</span> b <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;</code></pre></div>
+</div><h3 id="membersyntaxsortorder"><a class="anchor" href="#membersyntaxsortorder">#</a><code>memberSyntaxSortOrder</code></h3>
+<p>This option takes an array with four predefined elements, the order of elements specifies the order of import styles.</p>
+<p>Default order is <code>[&quot;none&quot;, &quot;all&quot;, &quot;multiple&quot;, &quot;single&quot;]</code>.</p>
+<p>There are four different styles and the default member syntax sort order is:</p>
+<ul>
+<li><code>none</code> - import module without exported bindings.</li>
+<li><code>all</code> - import all members provided by exported bindings.</li>
+<li><code>multiple</code> - import multiple members.</li>
+<li><code>single</code> - import single member.</li>
+</ul>
+<p>All four options must be specified in the array, but you can customize their order.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with the default <code>{ &quot;memberSyntaxSortOrder&quot;: [&quot;none&quot;, &quot;all&quot;, &quot;multiple&quot;, &quot;single&quot;] }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: &quot;error&quot;*/</span>
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> b <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;memberSyntaxSortOrder&quot;: [&#39;single&#39;, &#39;all&#39;, &#39;multiple&#39;, &#39;none&#39;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;memberSyntaxSortOrder&quot;: [&#x27;single&#x27;, &#x27;all&#x27;, &#x27;multiple&#x27;, &#x27;none&#x27;] }]*/</span>
+
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> b <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;memberSyntaxSortOrder&quot;: [&#39;all&#39;, &#39;single&#39;, &#39;multiple&#39;, &#39;none&#39;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;memberSyntaxSortOrder&quot;: [&#x27;all&#x27;, &#x27;single&#x27;, &#x27;multiple&#x27;, &#x27;none&#x27;] }]*/</span>
+
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> foo <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> z <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;zoo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> {a, b} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;</code></pre></div>
+</div><h3 id="allowseparatedgroups"><a class="anchor" href="#allowseparatedgroups">#</a><code>allowSeparatedGroups</code></h3>
+<p>When <code>true</code>, the rule checks the sorting of import declaration statements only for those that appear on consecutive lines. Default is <code>false</code>.</p>
+<p>In other words, a blank line or a comment line or line with any other statement after an import declaration statement will reset the sorting of import declaration statements.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>{ &quot;allowSeparatedGroups&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;allowSeparatedGroups&quot;: true }]*/</span>
+
+<span class="hljs-keyword">import</span> b <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> c <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;baz.js&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;allowSeparatedGroups&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;allowSeparatedGroups&quot;: true }]*/</span>
+
+<span class="hljs-keyword">import</span> b <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> c <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;
+
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;baz.js&#x27;</span>;</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;allowSeparatedGroups&quot;: true }]*/</span>
+
+<span class="hljs-keyword">import</span> b <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> c <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;
+<span class="hljs-comment">// comment</span>
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;baz.js&#x27;</span>;</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint sort-imports: [&quot;error&quot;, { &quot;allowSeparatedGroups&quot;: true }]*/</span>
+
+<span class="hljs-keyword">import</span> b <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.js&#x27;</span>;
+<span class="hljs-keyword">import</span> c <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;bar.js&#x27;</span>;
+<span class="hljs-title function_">quux</span>();
+<span class="hljs-keyword">import</span> a <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;baz.js&#x27;</span>;</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>This rule is a formatting preference and not following it won&#39;t negatively affect the quality of your code. If alphabetizing imports isn&#39;t a part of your coding standards, then you can leave this rule disabled.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="sort-keys.html"><code>sort-keys</code></a>, <a href="sort-vars.html"><code>sort-vars</code></a></p></div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#default-settings">Default settings</a><a class="toc-3" href="#ignorecase">ignoreCase</a><a class="toc-3" href="#ignoredeclarationsort">ignoreDeclarationSort</a><a class="toc-3" href="#ignoremembersort">ignoreMemberSort</a><a class="toc-3" href="#membersyntaxsortorder">memberSyntaxSortOrder</a><a class="toc-3" href="#allowseparatedgroups">allowSeparatedGroups</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

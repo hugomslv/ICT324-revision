@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projet modèle complet · ICT-324 Révision</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/hljs.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../index.html">Accueil</a><a class="nav-link" href="../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../pages/vite.html">1. Vite</a><a class="nav-link" href="../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../pages/projets.html">Projets du cours</a><a class="nav-link active" href="../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../docs/index.html">Index des docs</a><a class="nav-link" href="../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../docs/vite/index.html">Vite</a><a class="nav-link" href="../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+
+<h1>Projet modèle complet</h1><p class="lead">Un projet Vite qui coche toutes les cases de l'évaluation, vérifié de A à Z : 0 erreur de lint, 11 tests verts, doc JSDoc avec image, build pour un sous-dossier, envoi FTP testé sur un serveur local, 0 lien cassé.</p><p>Dossier : <code>projets/modele/</code> (sans <code>node_modules</code>). Versions : Vite 8.3, ESLint 10.11, Vitest 5.0, JSDoc 4.0.5.</p>
+<h2 id="reutiliser-le-modele"><a class="anchor" href="#reutiliser-le-modele">#</a>Réutiliser le modèle</h2>
+<div class="code"><pre><code class="hljs lang-bash"><span class="hljs-comment"># avec réseau</span>
+<span class="hljs-built_in">cp</span> -r projets/modele mon-projet      <span class="hljs-comment"># Windows : copier le dossier dans l&#x27;explorateur</span>
+<span class="hljs-built_in">cd</span> mon-projet
+npm install</code></pre></div>
+<p>Puis :</p>
+<ol>
+<li><code>package.json</code> → changer <code>&quot;name&quot;</code>.</li>
+<li><code>vite.config.js</code> → mettre le bon dossier dans <code>base</code>.</li>
+<li>Remplacer <code>src/math.js</code> et <code>src/math.test.js</code> par ton code.</li>
+<li>Adapter les règles de <code>eslint.config.js</code> à la consigne.</li>
+<li><code>npm run all</code> : lint + tests + doc + build + vérification.</li>
+</ol>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Ou partir d'un projet Vite neuf</div><p>Crée le projet avec <code>npm create vite@latest</code>, installe les dépendances, puis recopie seulement les fichiers de config de cette page.</p>
+</div><h2 id="arborescence"><a class="anchor" href="#arborescence">#</a>Arborescence</h2>
+<div class="code"><pre><code class="hljs lang-text">modele/
+├── index.html              ← favicon + image de public/ en chemin absolu
+├── package.json            ← tous les scripts
+├── vite.config.js          ← base + build + config Vitest (coverage)
+├── eslint.config.js        ← règles du cours + ignores + globals Node pour scripts/
+├── jsdoc-conf.json         ← src/ uniquement, tests exclus, README en accueil
+├── README.md               ← avec image ./img/capture.png
+├── .gitignore              ← node_modules, dist, docs, coverage, .env
+├── .env.example            ← modèle des identifiants FTP (sans le vrai mot de passe)
+├── img/capture.png         ← image du README (copiée dans docs/img/ par npm run doc)
+├── public/
+│   ├── favicon.svg
+│   └── images/logo.png     ← fichier « fixe » (nom non modifié au build)
+├── scripts/
+│   ├── publish.sh          ← envoi FTP (lftp)
+│   └── check-dist.js       ← vérifie dist/ avant l&#x27;envoi
+├── src/
+│   ├── main.js             ← les 3 bonnes façons de référencer une image
+│   ├── style.css           ← url(&quot;/images/logo.png&quot;)
+│   ├── math.js             ← module documenté en JSDoc
+│   ├── math.test.js        ← 11 tests
+│   └── assets/vite.svg     ← image importée par le JS
+├── docs/                   ← généré : npm run doc
+├── coverage/               ← généré : npm run coverage
+└── dist/                   ← généré : npm run build</code></pre></div>
+<p>Résultats générés à ouvrir : <a href="../projets/modele/docs/index.html">docs/index.html</a> · <a href="../projets/modele/coverage/index.html">coverage/index.html</a></p>
+<h2 id="les-scripts"><a class="anchor" href="#les-scripts">#</a>Les scripts</h2>
+<div class="code"><div class="code-title">modele/package.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;modele&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;0.0.0&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;private&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;module&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;dev&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;build&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite build&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;preview&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite preview&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;lint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;eslint .&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;lint:fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;eslint . --fix&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;test&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;test:run&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest run&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;coverage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest run --coverage&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;doc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;jsdoc -c jsdoc-conf.json &amp;&amp; node -e \&quot;require(&#x27;fs&#x27;).cpSync(&#x27;img&#x27;, &#x27;docs/img&#x27;, { recursive: true })\&quot;&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;publish&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dotenv -e .env -- bash scripts/publish.sh&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;all&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;npm run lint &amp;&amp; npm run test:run &amp;&amp; npm run doc &amp;&amp; npm run build &amp;&amp; npm run check&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;check&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;node scripts/check-dist.js&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;devDependencies&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;@eslint/js&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^10.0.1&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;@maintained/eslint-plugin-filename-rules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^1.5.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;@vitest/coverage-v8&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^5.0.1&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;dotenv-cli&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^11.0.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;eslint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^10.11.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;globals&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^17.12.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;jsdoc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^4.0.5&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;vite&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^8.3.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;vitest&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^5.0.1&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p class="file-link"><a href="../projets/modele/package.json">📄 ouvrir le fichier package.json</a></p><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Script</th>
+<th>Commande</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>npm run dev</code></td>
+<td>serveur de dev</td>
+</tr>
+<tr>
+<td><code>npm run lint</code> / <code>lint:fix</code></td>
+<td>ESLint / avec correction auto</td>
+</tr>
+<tr>
+<td><code>npm test</code></td>
+<td>Vitest en mode watch</td>
+</tr>
+<tr>
+<td><code>npm run test:run</code></td>
+<td>Vitest une fois</td>
+</tr>
+<tr>
+<td><code>npm run coverage</code></td>
+<td>couverture</td>
+</tr>
+<tr>
+<td><code>npm run doc</code></td>
+<td>JSDoc + copie de <code>img/</code> dans <code>docs/img/</code> (compatible Windows)</td>
+</tr>
+<tr>
+<td><code>npm run build</code></td>
+<td>build dans <code>dist/</code></td>
+</tr>
+<tr>
+<td><code>npm run preview</code></td>
+<td>sert <code>dist/</code> sur <code>http://localhost:4173/mon_dossier/</code></td>
+</tr>
+<tr>
+<td><code>npm run check</code></td>
+<td>vérifie <code>dist/</code> (liens, casse, favicon)</td>
+</tr>
+<tr>
+<td><code>npm run publish</code></td>
+<td>envoi FTP (lit <code>.env</code>)</td>
+</tr>
+<tr>
+<td><code>npm run all</code></td>
+<td>lint → tests → doc → build → check (s&#39;arrête à la 1re erreur)</td>
+</tr>
+</tbody></table></div>
+<p>Sortie réelle de <code>npm run all</code> (fin) :</p>
+<div class="code"><pre><code class="hljs lang-text"> Test Files  1 passed (1)
+      Tests  11 passed (11)
+vite v8.3.0 building client environment for production...
+✓ 7 modules transformed.
+dist/index.html                 0.80 kB │ gzip: 0.47 kB
+dist/assets/vite-BF8QNONU.svg   8.70 kB │ gzip: 1.60 kB
+dist/assets/index-Dj4gvqNB.css  0.14 kB │ gzip: 0.14 kB
+dist/assets/index-_2MRZmio.js   1.23 kB │ gzip: 0.65 kB
+✓ built in 23ms
+base = &quot;/mon_dossier/&quot;
+6 fichiers analysés dans dist/
+✅ Aucun lien cassé détecté : dist/ est prêt pour le FTP.</code></pre></div>
+<h2 id="configuration"><a class="anchor" href="#configuration">#</a>Configuration</h2>
+<div class="code"><div class="code-title">modele/vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig, coverageConfigDefaults } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest/config&quot;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-comment">// Dossier de publication sur le serveur FTP : https://serveur/mon_dossier/</span>
+  <span class="hljs-comment">// (commence ET finit par &quot;/&quot;). Pour un chemin relatif universel : &quot;./&quot;</span>
+  <span class="hljs-attr">base</span>: <span class="hljs-string">&quot;/mon_dossier/&quot;</span>,
+  <span class="hljs-attr">build</span>: {
+    <span class="hljs-attr">outDir</span>: <span class="hljs-string">&quot;dist&quot;</span>,
+    <span class="hljs-comment">// Nécessaire si le code utilise un &quot;await&quot; au niveau racine (top-level)</span>
+    <span class="hljs-attr">target</span>: <span class="hljs-string">&quot;esnext&quot;</span>,
+  },
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">environment</span>: <span class="hljs-string">&quot;node&quot;</span>,
+    <span class="hljs-attr">coverage</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-string">&quot;v8&quot;</span>,
+      <span class="hljs-attr">include</span>: [ <span class="hljs-string">&quot;src/**/*.js&quot;</span> ],
+      <span class="hljs-attr">exclude</span>: [ <span class="hljs-string">&quot;src/main.js&quot;</span>, ...coverageConfigDefaults.<span class="hljs-property">exclude</span> ],
+      <span class="hljs-attr">reporter</span>: [ <span class="hljs-string">&quot;text&quot;</span>, <span class="hljs-string">&quot;html&quot;</span>, <span class="hljs-string">&quot;json&quot;</span> ],
+      <span class="hljs-attr">reportsDirectory</span>: <span class="hljs-string">&quot;./coverage&quot;</span>,
+    },
+  },
+})</code></pre></div>
+<p class="file-link"><a href="../projets/modele/vite.config.js">📄 ouvrir le fichier vite.config.js</a></p><div class="code"><div class="code-title">modele/eslint.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> js <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/js&quot;</span>
+<span class="hljs-keyword">import</span> globals <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;globals&quot;</span>
+<span class="hljs-keyword">import</span> { defineConfig, globalIgnores } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+  <span class="hljs-title function_">globalIgnores</span>([ <span class="hljs-string">&quot;dist/&quot;</span>, <span class="hljs-string">&quot;docs/&quot;</span>, <span class="hljs-string">&quot;coverage/&quot;</span>, <span class="hljs-string">&quot;node_modules/&quot;</span> ]),
+  {
+    <span class="hljs-attr">files</span>: [ <span class="hljs-string">&quot;**/*.{js,mjs,cjs}&quot;</span> ],
+    <span class="hljs-attr">plugins</span>: { js },
+    <span class="hljs-attr">extends</span>: [ <span class="hljs-string">&quot;js/recommended&quot;</span> ],
+    <span class="hljs-attr">languageOptions</span>: { <span class="hljs-attr">globals</span>: globals.<span class="hljs-property">browser</span> },
+    <span class="hljs-attr">rules</span>: {
+      <span class="hljs-attr">quotes</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;double&quot;</span> ],
+      <span class="hljs-string">&quot;no-unused-vars&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-undef&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-implicit-globals&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-const-assign&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-var&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;prefer-const&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;array-bracket-spacing&quot;</span>: [
+        <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;always&quot;</span>, { <span class="hljs-attr">arraysInArrays</span>: <span class="hljs-literal">false</span> },
+      ],
+      <span class="hljs-string">&quot;object-curly-spacing&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;always&quot;</span> ],
+      <span class="hljs-attr">eqeqeq</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-attr">semi</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;never&quot;</span> ],
+      <span class="hljs-attr">indent</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-number">2</span> ],
+      <span class="hljs-string">&quot;brace-style&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;1tbs&quot;</span> ],
+      <span class="hljs-string">&quot;linebreak-style&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;unix&quot;</span> ],
+      <span class="hljs-string">&quot;max-len&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, { <span class="hljs-attr">code</span>: <span class="hljs-number">80</span> } ],
+    },
+  },
+  {
+    <span class="hljs-comment">// scripts exécutés par Node (process, __dirname...) et fichiers de config</span>
+    <span class="hljs-attr">files</span>: [ <span class="hljs-string">&quot;scripts/**/*.js&quot;</span>, <span class="hljs-string">&quot;*.config.js&quot;</span> ],
+    <span class="hljs-attr">languageOptions</span>: { <span class="hljs-attr">globals</span>: globals.<span class="hljs-property">node</span> },
+  },
+])</code></pre></div>
+<p class="file-link"><a href="../projets/modele/eslint.config.js">📄 ouvrir le fichier eslint.config.js</a></p><div class="code"><div class="code-title">modele/jsdoc-conf.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;plugins&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;plugins/markdown&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;recurseDepth&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">10</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;source&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;include&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;src&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;includePattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;.+\\.js(doc|x)?$&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;excludePattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;(^|\\/|\\\\)_|\\.test\\.js$&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;sourceType&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;module&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;tags&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;allowUnknownTags&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;dictionaries&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;jsdoc&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;closure&quot;</span><span class="hljs-punctuation">]</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;templates&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;cleverLinks&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;monospaceLinks&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;opts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;template&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;templates/default&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;encoding&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;utf8&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;destination&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./docs/&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;readme&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./README.md&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;recurse&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p class="file-link"><a href="../projets/modele/jsdoc-conf.json">📄 ouvrir le fichier jsdoc-conf.json</a></p><h2 id="code-source"><a class="anchor" href="#code-source">#</a>Code source</h2>
+<div class="code"><div class="code-title">modele/index.html</div><pre><code class="hljs lang-html"><span class="hljs-meta">&lt;!doctype <span class="hljs-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;fr&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">&quot;UTF-8&quot;</span> /&gt;</span>
+    <span class="hljs-comment">&lt;!-- Favicon dans public/ : chemin ABSOLU &quot;/...&quot; -&gt; Vite ajoute &quot;base&quot; au build --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;icon&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;image/svg+xml&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/favicon.svg&quot;</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;viewport&quot;</span> <span class="hljs-attr">content</span>=<span class="hljs-string">&quot;width=device-width, initial-scale=1.0&quot;</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Projet modèle ICT-324<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;app&quot;</span>&gt;</span>
+      <span class="hljs-comment">&lt;!-- Image de public/ dans le HTML : chemin absolu, réécrit au build --&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/images/logo.png&quot;</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;Logo&quot;</span> <span class="hljs-attr">width</span>=<span class="hljs-string">&quot;80&quot;</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Projet modèle<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;result&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/src/main.js&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></code></pre></div>
+<p class="file-link"><a href="../projets/modele/index.html">📄 ouvrir le fichier index.html</a></p><div class="code"><div class="code-title">modele/src/main.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&quot;./style.css&quot;</span>
+<span class="hljs-keyword">import</span> vite_logo <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./assets/vite.svg&quot;</span>
+<span class="hljs-keyword">import</span> { add, rotate } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./math.js&quot;</span>
+
+<span class="hljs-keyword">const</span> app = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&quot;#app&quot;</span>)
+
+<span class="hljs-comment">// Image importée depuis src/ : Vite calcule le bon chemin (avec base)</span>
+<span class="hljs-keyword">const</span> img_src = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&quot;img&quot;</span>)
+img_src.<span class="hljs-property">src</span> = vite_logo
+img_src.<span class="hljs-property">alt</span> = <span class="hljs-string">&quot;Vite&quot;</span>
+app.<span class="hljs-title function_">appendChild</span>(img_src)
+
+<span class="hljs-comment">// Fichier de public/ utilisé dans le JS : TOUJOURS préfixer avec BASE_URL</span>
+<span class="hljs-keyword">const</span> img_public = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&quot;img&quot;</span>)
+img_public.<span class="hljs-property">src</span> = <span class="hljs-string">`<span class="hljs-subst">${<span class="hljs-keyword">import</span>.meta.env.BASE_URL}</span>images/logo.png`</span>
+img_public.<span class="hljs-property">alt</span> = <span class="hljs-string">&quot;Logo&quot;</span>
+img_public.<span class="hljs-property">width</span> = <span class="hljs-number">40</span>
+app.<span class="hljs-title function_">appendChild</span>(img_public)
+
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&quot;#result&quot;</span>).<span class="hljs-property">textContent</span> =
+  <span class="hljs-string">`add(1, 2) = <span class="hljs-subst">${add(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)}</span> | rotate([ 1, 2, 3 ]) = <span class="hljs-subst">${rotate([ <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span> ])}</span>`</span></code></pre></div>
+<p class="file-link"><a href="../projets/modele/src/main.js">📄 ouvrir le fichier main.js</a></p><div class="code"><div class="code-title">modele/src/style.css</div><pre><code class="hljs lang-css"><span class="hljs-selector-tag">body</span> {
+  <span class="hljs-attribute">font-family</span>: system-ui, sans-serif;
+  <span class="hljs-attribute">text-align</span>: center;
+  <span class="hljs-comment">/* Image de public/ dans le CSS : chemin absolu, Vite ajoute base */</span>
+  <span class="hljs-attribute">background</span>: <span class="hljs-number">#fafafa</span> <span class="hljs-built_in">url</span>(<span class="hljs-string">&quot;/images/logo.png&quot;</span>) no-repeat right <span class="hljs-number">1rem</span> top <span class="hljs-number">1rem</span> / <span class="hljs-number">40px</span>;
+}</code></pre></div>
+<p class="file-link"><a href="../projets/modele/src/style.css">📄 ouvrir le fichier style.css</a></p><div class="code"><div class="code-title">modele/src/math.js</div><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@file</span> Fonctions mathématiques de base.
+ * <span class="hljs-doctag">@module</span> <span class="hljs-variable">math</span>
+ * <span class="hljs-doctag">@author</span> <span class="hljs-variable">Hugo</span>
+ * <span class="hljs-doctag">@version</span> 1.0.0
+ */</span>
+
+<span class="hljs-comment">/**
+ * Additionne deux nombres.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">a</span> - Premier nombre.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">b</span> - Second nombre.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number|string</span>} La somme, ou &quot;error&quot; si un paramètre n&#x27;est pas
+ * un nombre.
+ * <span class="hljs-doctag">@example</span>
+ * add(1, 2) // 3
+ * add(1, &quot;a&quot;) // &quot;error&quot;
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">a, b</span>) {
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> a !== <span class="hljs-string">&quot;number&quot;</span> || <span class="hljs-keyword">typeof</span> b !== <span class="hljs-string">&quot;number&quot;</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;error&quot;</span>
+  }
+  <span class="hljs-keyword">return</span> a + b
+}
+
+<span class="hljs-comment">/**
+ * Soustrait deux nombres.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">a</span> - Premier nombre.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">b</span> - Nombre à soustraire.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number|string</span>} La différence, ou &quot;error&quot;.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">sub</span>(<span class="hljs-params">a, b</span>) {
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> a !== <span class="hljs-string">&quot;number&quot;</span> || <span class="hljs-keyword">typeof</span> b !== <span class="hljs-string">&quot;number&quot;</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;error&quot;</span>
+  }
+  <span class="hljs-keyword">return</span> a - b
+}
+
+<span class="hljs-comment">/**
+ * Fait tourner un tableau de n positions vers la gauche.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number[]</span>} <span class="hljs-variable">arr</span> - Tableau de nombres.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} [n=1] - Nombre de positions.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number[]|string</span>} Nouveau tableau, ou &quot;error&quot;.
+ * <span class="hljs-doctag">@throws</span> {<span class="hljs-type">never</span>} Ne lance jamais d&#x27;exception, retourne &quot;error&quot;.
+ * <span class="hljs-doctag">@see</span> {<span class="hljs-type">@link add</span>}
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">rotate</span>(<span class="hljs-params">arr, n = <span class="hljs-number">1</span></span>) {
+  <span class="hljs-keyword">if</span> (!<span class="hljs-title class_">Array</span>.<span class="hljs-title function_">isArray</span>(arr)) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;error&quot;</span>
+  }
+  <span class="hljs-keyword">if</span> (arr.<span class="hljs-title function_">some</span>(<span class="hljs-function">(<span class="hljs-params">v</span>) =&gt;</span> <span class="hljs-keyword">typeof</span> v !== <span class="hljs-string">&quot;number&quot;</span>)) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;error&quot;</span>
+  }
+  <span class="hljs-keyword">return</span> arr.<span class="hljs-title function_">slice</span>(n).<span class="hljs-title function_">concat</span>(arr.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, n))
+}</code></pre></div>
+<p class="file-link"><a href="../projets/modele/src/math.js">📄 ouvrir le fichier math.js</a></p><div class="code"><div class="code-title">modele/src/math.test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { describe, test, it, expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>
+<span class="hljs-comment">// Le test est DANS src/ -&gt; chemin relatif &quot;./math.js&quot; (pas &quot;./src/math.js&quot;)</span>
+<span class="hljs-keyword">import</span> { add, sub, rotate } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./math.js&quot;</span>
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;add&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;1 + 2 = 3&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">3</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;0.1 + 0.2 ≈ 0.3 (flottants)&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>(<span class="hljs-number">0.1</span>, <span class="hljs-number">0.2</span>)).<span class="hljs-title function_">toBeCloseTo</span>(<span class="hljs-number">0.3</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;paramètre invalide -&gt; &#x27;error&#x27;&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>, <span class="hljs-string">&quot;a&quot;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;error&quot;</span>)
+  })
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;sub&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;1 - 2 = -1&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">sub</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)).<span class="hljs-title function_">toBe</span>(-<span class="hljs-number">1</span>)
+  })
+  <span class="hljs-comment">// test.each : un même test avec plusieurs jeux de données</span>
+  test.<span class="hljs-title function_">each</span>([
+    [ <span class="hljs-number">5</span>, <span class="hljs-number">3</span>, <span class="hljs-number">2</span> ],
+    [ <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span> ],
+    [ -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span> ],
+  ])(<span class="hljs-string">&quot;sub(%i, %i) = %i&quot;</span>, <span class="hljs-function">(<span class="hljs-params">a, b, expected</span>) =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">sub</span>(a, b)).<span class="hljs-title function_">toBe</span>(expected)
+  })
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;rotate&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;[1,2,3,4] -&gt; [2,3,4,1]&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// toEqual pour comparer le CONTENU d&#x27;un tableau / objet</span>
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">rotate</span>([ <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span> ])).<span class="hljs-title function_">toEqual</span>([ <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">1</span> ])
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;tableau vide&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">rotate</span>([])).<span class="hljs-title function_">toEqual</span>([])
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;pas un tableau -&gt; &#x27;error&#x27;&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">rotate</span>(<span class="hljs-string">&quot;abc&quot;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;error&quot;</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;tableau imbriqué -&gt; &#x27;error&#x27;&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">rotate</span>([[ <span class="hljs-number">1</span> ], <span class="hljs-number">2</span> ])).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;error&quot;</span>)
+  })
+})</code></pre></div>
+<p class="file-link"><a href="../projets/modele/src/math.test.js">📄 ouvrir le fichier math.test.js</a></p><h2 id="documentation"><a class="anchor" href="#documentation">#</a>Documentation</h2>
+<div class="code"><div class="code-title">modele/README.md</div><pre><code class="hljs lang-md"><span class="hljs-section"># Projet modèle ICT-324</span>
+
+Projet <span class="hljs-strong">**Vite**</span> avec linter <span class="hljs-strong">**ESLint**</span>, tests <span class="hljs-strong">**Vitest**</span> et documentation <span class="hljs-strong">**JSDoc**</span>.
+
+![<span class="hljs-string">Capture du projet</span>](<span class="hljs-link">./img/capture.png</span>)
+
+<span class="hljs-section">## Installation</span>
+
+<span class="hljs-code">```bash
+npm install
+```</span>
+
+<span class="hljs-section">## Commandes</span>
+
+| Commande | Rôle |
+|---|---|
+| <span class="hljs-code">`npm run dev`</span> | Serveur de développement |
+| <span class="hljs-code">`npm run lint`</span> | Vérifie le code |
+| <span class="hljs-code">`npm test`</span> | Lance les tests |
+| <span class="hljs-code">`npm run coverage`</span> | Couverture de code |
+| <span class="hljs-code">`npm run doc`</span> | Génère la doc dans <span class="hljs-code">`docs/`</span> |
+| <span class="hljs-code">`npm run build`</span> | Build de production dans <span class="hljs-code">`dist/`</span> |
+
+<span class="hljs-section">## Utilisation</span>
+
+<span class="hljs-code">```javascript
+import { add } from &quot;./src/math.js&quot;
+add(1, 2) // 3
+```</span>
+
+<span class="hljs-section">## Auteur</span>
+
+Hugo</code></pre></div>
+<p class="file-link"><a href="../projets/modele/README.md">📄 ouvrir le fichier README.md</a></p><h2 id="verifier-dist-sans-serveur"><a class="anchor" href="#verifier-dist-sans-serveur">#</a>Vérifier dist sans serveur</h2>
+<p><code>scripts/check-dist.js</code> : aucune dépendance, marche sous Windows, macOS et Linux. Explications et sorties d&#39;exemple dans <a href="build-ftp.html#verifier-dist-sans-serveur">Build &amp; FTP</a>.</p>
+<div class="code"><div class="code-title">modele/scripts/check-dist.js</div><pre><code class="hljs lang-js"><span class="hljs-comment">// Vérifie le dossier dist/ AVANT l&#x27;envoi FTP (sans réseau, sans serveur).</span>
+<span class="hljs-comment">// Usage : node scripts/check-dist.js   (lit &quot;base&quot; dans vite.config.js)</span>
+<span class="hljs-comment">//         node scripts/check-dist.js /mon_dossier/</span>
+<span class="hljs-comment">// Signale : chemins absolus sans le &quot;base&quot;, fichiers introuvables,</span>
+<span class="hljs-comment">// différences de majuscules/minuscules (le serveur Linux y est sensible).</span>
+<span class="hljs-keyword">import</span> fs <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:fs&quot;</span>
+<span class="hljs-keyword">import</span> path <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:path&quot;</span>
+
+<span class="hljs-keyword">const</span> dist = path.<span class="hljs-title function_">resolve</span>(<span class="hljs-string">&quot;dist&quot;</span>)
+<span class="hljs-keyword">if</span> (!fs.<span class="hljs-title function_">existsSync</span>(dist)) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(<span class="hljs-string">&quot;❌ dist/ introuvable : lance d&#x27;abord  npm run build&quot;</span>)
+  process.<span class="hljs-title function_">exit</span>(<span class="hljs-number">1</span>)
+}
+
+<span class="hljs-keyword">let</span> base = process.<span class="hljs-property">argv</span>[<span class="hljs-number">2</span>]
+<span class="hljs-keyword">if</span> (!base) {
+  <span class="hljs-keyword">const</span> conf = [ <span class="hljs-string">&quot;vite.config.js&quot;</span>, <span class="hljs-string">&quot;vite.config.mjs&quot;</span> ]
+    .<span class="hljs-title function_">find</span>(<span class="hljs-function">(<span class="hljs-params">f</span>) =&gt;</span> fs.<span class="hljs-title function_">existsSync</span>(f))
+  <span class="hljs-keyword">const</span> txt = conf ? fs.<span class="hljs-title function_">readFileSync</span>(conf, <span class="hljs-string">&quot;utf8&quot;</span>) : <span class="hljs-string">&quot;&quot;</span>
+  <span class="hljs-keyword">const</span> m = txt.<span class="hljs-title function_">match</span>(<span class="hljs-regexp">/^\s*base\s*:\s*[&quot;&#x27;`]([^&quot;&#x27;`]*)[&quot;&#x27;`]/m</span>)
+  base = m ? m[<span class="hljs-number">1</span>] : <span class="hljs-string">&quot;/&quot;</span>
+}
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`base = &quot;<span class="hljs-subst">${base}</span>&quot;`</span>)
+
+<span class="hljs-keyword">const</span> problems = []
+<span class="hljs-keyword">const</span> warnings = []
+<span class="hljs-keyword">const</span> files = []
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">walk</span> = (<span class="hljs-params">dir</span>) =&gt; {
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> e <span class="hljs-keyword">of</span> fs.<span class="hljs-title function_">readdirSync</span>(dir, { <span class="hljs-attr">withFileTypes</span>: <span class="hljs-literal">true</span> })) {
+    <span class="hljs-keyword">const</span> p = path.<span class="hljs-title function_">join</span>(dir, e.<span class="hljs-property">name</span>)
+    <span class="hljs-keyword">if</span> (e.<span class="hljs-title function_">isDirectory</span>()) <span class="hljs-title function_">walk</span>(p)
+    <span class="hljs-keyword">else</span> files.<span class="hljs-title function_">push</span>(p)
+  }
+}
+<span class="hljs-title function_">walk</span>(dist)
+
+<span class="hljs-comment">// existe avec la casse EXACTE (macOS/Windows ne font pas la différence)</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">existsExact</span> = (<span class="hljs-params">abs</span>) =&gt; {
+  <span class="hljs-keyword">const</span> rel = path.<span class="hljs-title function_">relative</span>(dist, abs)
+  <span class="hljs-keyword">if</span> (rel.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;..&quot;</span>)) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+  <span class="hljs-keyword">let</span> cur = dist
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> part <span class="hljs-keyword">of</span> rel.<span class="hljs-title function_">split</span>(path.<span class="hljs-property">sep</span>)) {
+    <span class="hljs-keyword">if</span> (!fs.<span class="hljs-title function_">existsSync</span>(cur) || !fs.<span class="hljs-title function_">statSync</span>(cur).<span class="hljs-title function_">isDirectory</span>()) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+    <span class="hljs-keyword">if</span> (!fs.<span class="hljs-title function_">readdirSync</span>(cur).<span class="hljs-title function_">includes</span>(part)) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+    cur = path.<span class="hljs-title function_">join</span>(cur, part)
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>
+}
+
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">EXTERNAL</span> = <span class="hljs-regexp">/^(https?:|data:|mailto:|tel:|javascript:|#|\/\/|blob:)/i</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">skip</span> = (<span class="hljs-params">u</span>) =&gt; <span class="hljs-variable constant_">EXTERNAL</span>.<span class="hljs-title function_">test</span>(u) || u === <span class="hljs-string">&quot;&quot;</span> || u.<span class="hljs-title function_">includes</span>(<span class="hljs-string">&quot;${&quot;</span>)
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">check</span>(<span class="hljs-params">url, <span class="hljs-keyword">from</span>, kind</span>) {
+  <span class="hljs-keyword">if</span> (<span class="hljs-title function_">skip</span>(url)) <span class="hljs-keyword">return</span>
+  <span class="hljs-keyword">const</span> clean = <span class="hljs-built_in">decodeURI</span>(url.<span class="hljs-title function_">split</span>(<span class="hljs-regexp">/[?#]/</span>)[<span class="hljs-number">0</span>])
+  <span class="hljs-keyword">if</span> (!clean) <span class="hljs-keyword">return</span>
+  <span class="hljs-keyword">const</span> where = <span class="hljs-string">`<span class="hljs-subst">${path.relative(dist, <span class="hljs-keyword">from</span>)}</span> (<span class="hljs-subst">${kind}</span>)`</span>
+  <span class="hljs-keyword">let</span> target
+  <span class="hljs-keyword">if</span> (clean.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;/&quot;</span>)) {
+    <span class="hljs-keyword">if</span> (base.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;/&quot;</span>) &amp;&amp; base !== <span class="hljs-string">&quot;/&quot;</span> &amp;&amp; !clean.<span class="hljs-title function_">startsWith</span>(base)) {
+      problems.<span class="hljs-title function_">push</span>(<span class="hljs-string">`<span class="hljs-subst">${where}</span> : &quot;<span class="hljs-subst">${url}</span>&quot; est absolu mais ne commence pas par`</span>
+        + <span class="hljs-string">` &quot;<span class="hljs-subst">${base}</span>&quot; → 404 sur le serveur`</span>)
+      <span class="hljs-keyword">return</span>
+    }
+    <span class="hljs-keyword">const</span> cut = base.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;/&quot;</span>) ? base.<span class="hljs-property">length</span> : <span class="hljs-number">1</span>
+    target = path.<span class="hljs-title function_">join</span>(dist, clean.<span class="hljs-title function_">slice</span>(cut))
+  } <span class="hljs-keyword">else</span> {
+    <span class="hljs-comment">// relatif : au fichier pour HTML/CSS, à la page (racine) pour le JS</span>
+    <span class="hljs-keyword">const</span> dir = kind === <span class="hljs-string">&quot;js&quot;</span> ? dist : path.<span class="hljs-title function_">dirname</span>(<span class="hljs-keyword">from</span>)
+    target = path.<span class="hljs-title function_">resolve</span>(dir, clean)
+  }
+  <span class="hljs-keyword">if</span> (clean.<span class="hljs-title function_">endsWith</span>(<span class="hljs-string">&quot;/&quot;</span>)) target = path.<span class="hljs-title function_">join</span>(target, <span class="hljs-string">&quot;index.html&quot;</span>)
+  <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">existsExact</span>(target)) {
+    <span class="hljs-keyword">const</span> loose = fs.<span class="hljs-title function_">existsSync</span>(target)
+    problems.<span class="hljs-title function_">push</span>(<span class="hljs-string">`<span class="hljs-subst">${where}</span> : &quot;<span class="hljs-subst">${url}</span>&quot; → <span class="hljs-subst">${loose
+      ? <span class="hljs-string">&quot;MAJUSCULES/minuscules différentes (OK en local, 404 sur Linux)&quot;</span>
+      : <span class="hljs-string">&quot;fichier introuvable dans dist/&quot;</span>}</span>`</span>)
+  }
+}
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> f <span class="hljs-keyword">of</span> files) {
+  <span class="hljs-keyword">const</span> ext = path.<span class="hljs-title function_">extname</span>(f).<span class="hljs-title function_">toLowerCase</span>()
+  <span class="hljs-keyword">const</span> name = path.<span class="hljs-title function_">basename</span>(f)
+  <span class="hljs-keyword">if</span> (<span class="hljs-regexp">/[A-Z\s]|[^\x20-\x7e]/</span>.<span class="hljs-title function_">test</span>(path.<span class="hljs-title function_">relative</span>(dist, f))
+    &amp;&amp; !<span class="hljs-regexp">/-[A-Za-z0-9_-]{8}\.\w+$/</span>.<span class="hljs-title function_">test</span>(name)) {
+    warnings.<span class="hljs-title function_">push</span>(<span class="hljs-string">&quot;nom de fichier risqué (majuscule, espace ou accent) :&quot;</span>
+      + <span class="hljs-string">` <span class="hljs-subst">${path.relative(dist, f)}</span>`</span>)
+  }
+  <span class="hljs-keyword">if</span> (![ <span class="hljs-string">&quot;.html&quot;</span>, <span class="hljs-string">&quot;.css&quot;</span>, <span class="hljs-string">&quot;.js&quot;</span> ].<span class="hljs-title function_">includes</span>(ext)) <span class="hljs-keyword">continue</span>
+  <span class="hljs-keyword">const</span> txt = fs.<span class="hljs-title function_">readFileSync</span>(f, <span class="hljs-string">&quot;utf8&quot;</span>)
+  <span class="hljs-keyword">if</span> (ext === <span class="hljs-string">&quot;.html&quot;</span>) {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> m <span class="hljs-keyword">of</span> txt.<span class="hljs-title function_">matchAll</span>(<span class="hljs-regexp">/\s(?:src|href)=[&quot;&#x27;]([^&quot;&#x27;]+)[&quot;&#x27;]/g</span>)) {
+      <span class="hljs-title function_">check</span>(m[<span class="hljs-number">1</span>], f, <span class="hljs-string">&quot;html&quot;</span>)
+    }
+  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (ext === <span class="hljs-string">&quot;.css&quot;</span>) {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> m <span class="hljs-keyword">of</span> txt.<span class="hljs-title function_">matchAll</span>(<span class="hljs-regexp">/url\(\s*[&quot;&#x27;]?([^&quot;&#x27;)]+)[&quot;&#x27;]?\s*\)/g</span>)) {
+      <span class="hljs-title function_">check</span>(m[<span class="hljs-number">1</span>], f, <span class="hljs-string">&quot;css&quot;</span>)
+    }
+  } <span class="hljs-keyword">else</span> {
+    <span class="hljs-comment">// chaînes du JS qui ressemblent à un fichier : &quot;/img/a.png&quot;, `./x.svg`</span>
+    <span class="hljs-keyword">const</span> exts = <span class="hljs-string">&quot;png|jpe?g|gif|svg|webp|ico|css|js|json|html|woff2?|ttf|pdf&quot;</span>
+    <span class="hljs-keyword">const</span> q = <span class="hljs-string">&quot;[\&quot;&#x27;`]&quot;</span>
+    <span class="hljs-keyword">const</span> re = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RegExp</span>(
+      <span class="hljs-string">`<span class="hljs-subst">${q}</span>((?:\\.{0,2}\\/)[\\w./@-]+\\.(?:<span class="hljs-subst">${exts}</span>))<span class="hljs-subst">${q}</span>`</span>, <span class="hljs-string">&quot;g&quot;</span>)
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> m <span class="hljs-keyword">of</span> txt.<span class="hljs-title function_">matchAll</span>(re)) <span class="hljs-title function_">check</span>(m[<span class="hljs-number">1</span>], f, <span class="hljs-string">&quot;js&quot;</span>)
+  }
+}
+
+<span class="hljs-keyword">if</span> (!files.<span class="hljs-title function_">some</span>(<span class="hljs-function">(<span class="hljs-params">f</span>) =&gt;</span> <span class="hljs-regexp">/favicon/i</span>.<span class="hljs-title function_">test</span>(path.<span class="hljs-title function_">basename</span>(f)))) {
+  warnings.<span class="hljs-title function_">push</span>(<span class="hljs-string">&quot;aucun favicon dans dist/ (mets-le dans public/)&quot;</span>)
+}
+
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`<span class="hljs-subst">${files.length}</span> fichiers analysés dans dist/`</span>)
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> w <span class="hljs-keyword">of</span> warnings) <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;⚠️ &quot;</span>, w)
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> problems) <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;❌&quot;</span>, p)
+<span class="hljs-keyword">if</span> (problems.<span class="hljs-property">length</span>) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`\n<span class="hljs-subst">${problems.length}</span> problème(s) : à corriger avant le FTP.`</span>)
+  process.<span class="hljs-title function_">exit</span>(<span class="hljs-number">1</span>)
+}
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;✅ Aucun lien cassé détecté : dist/ est prêt pour le FTP.&quot;</span>)</code></pre></div>
+<p class="file-link"><a href="../projets/modele/scripts/check-dist.js">📄 ouvrir le fichier check-dist.js</a></p><h2 id="publication"><a class="anchor" href="#publication">#</a>Publication</h2>
+<div class="code"><div class="code-title">modele/scripts/publish.sh</div><pre><code class="hljs lang-bash"><span class="hljs-meta">#!/usr/bin/env bash</span>
+<span class="hljs-comment"># Envoie le contenu de dist/ dans le dossier FTP_DEST du serveur</span>
+<span class="hljs-built_in">set</span> -euo pipefail
+
+lftp -u <span class="hljs-string">&quot;<span class="hljs-variable">$FTP_USER</span>,<span class="hljs-variable">$FTP_PASS</span>&quot;</span> <span class="hljs-string">&quot;<span class="hljs-variable">$FTP_HOST</span>&quot;</span> \
+  -e <span class="hljs-string">&quot;set ssl:verify-certificate no; mirror -R --delete dist <span class="hljs-variable">$FTP_DEST</span>; bye&quot;</span></code></pre></div>
+<p class="file-link"><a href="../projets/modele/scripts/publish.sh">📄 ouvrir le fichier publish.sh</a></p><div class="code"><div class="code-title">modele/.env.example</div><pre><code class="hljs lang-ini"><span class="hljs-attr">FTP_HOST</span>=ftp.exemple.ch
+<span class="hljs-attr">FTP_USER</span>=mon_login
+<span class="hljs-attr">FTP_PASS</span>=mon_mot_de_passe
+<span class="hljs-attr">FTP_DEST</span>=/mon_dossier</code></pre></div>
+<p class="file-link"><a href="../projets/modele/.env.example">📄 ouvrir le fichier .env.example</a></p><div class="code"><div class="code-title">modele/.gitignore</div><pre><code class="hljs lang-txt"># Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Générés
+docs/
+coverage/
+.env</code></pre></div>
+<p class="file-link"><a href="../projets/modele/.gitignore">📄 ouvrir le fichier .gitignore</a></p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#reutiliser-le-modele">Réutiliser le modèle</a><a class="toc-2" href="#arborescence">Arborescence</a><a class="toc-2" href="#les-scripts">Les scripts</a><a class="toc-2" href="#configuration">Configuration</a><a class="toc-2" href="#code-source">Code source</a><a class="toc-2" href="#documentation">Documentation</a><a class="toc-2" href="#verifier-dist-sans-serveur">Vérifier dist sans serveur</a><a class="toc-2" href="#publication">Publication</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../assets/app.js"></script>
+</body>
+</html>

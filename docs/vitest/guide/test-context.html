@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test Context | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/test-context  <a class="ext small" href="https://vitest.dev/guide/test-context">version en ligne</a></div>
+<h1 id="test-context"><a class="anchor" href="#test-context">#</a>Test Context</h1>
+<p>Inspired by <a href="https://playwright.dev/docs/test-fixtures">Playwright Fixtures</a>, Vitest&#39;s test context allows you to define utils, states, and fixtures that can be used in your tests.</p>
+<h2 id="usage"><a class="anchor" href="#usage">#</a>Usage</h2>
+<p>The first argument for each test callback is a test context.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;should work&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ task }</span>) =&gt;</span> {
+  <span class="hljs-comment">// prints name of the test</span>
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(task.<span class="hljs-property">name</span>)
+})</code></pre></div>
+<h2 id="built-in-test-context"><a class="anchor" href="#built-in-test-context">#</a>Built-in Test Context</h2>
+<h3 id="task"><a class="anchor" href="#task">#</a><code>task</code></h3>
+<p>A readonly object containing metadata about the test.</p>
+<h3 id="expect"><a class="anchor" href="#expect">#</a><code>expect</code></h3>
+<p>The <code>expect</code> API bound to the current test:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;math is easy&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ expect }</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-number">2</span> + <span class="hljs-number">2</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">4</span>)
+})</code></pre></div>
+<p>This API is useful for running snapshot tests concurrently because global expect cannot track them:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+it.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;math is easy&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ expect }</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-number">2</span> + <span class="hljs-number">2</span>).<span class="hljs-title function_">toMatchInlineSnapshot</span>()
+})
+
+it.<span class="hljs-title function_">concurrent</span>(<span class="hljs-string">&#x27;math is hard&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ expect }</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-number">2</span> * <span class="hljs-number">2</span>).<span class="hljs-title function_">toMatchInlineSnapshot</span>()
+})</code></pre></div>
+<h3 id="skip"><a class="anchor" href="#skip">#</a><code>skip</code></h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">skip</span>(<span class="hljs-params"><span class="hljs-attr">note</span>?: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">never</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">skip</span>(<span class="hljs-params"><span class="hljs-attr">condition</span>: <span class="hljs-built_in">boolean</span>, <span class="hljs-attr">note</span>?: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Skips subsequent test execution and marks test as skipped:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;math is hard&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ skip }</span>) =&gt;</span> {
+  <span class="hljs-title function_">skip</span>()
+  <span class="hljs-title function_">expect</span>(<span class="hljs-number">2</span> + <span class="hljs-number">2</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">5</span>)
+})</code></pre></div>
+<p>Since Vitest 3.1, it accepts a boolean parameter to skip the test conditionally:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;math is hard&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ skip, mind }</span>) =&gt;</span> {
+  <span class="hljs-title function_">skip</span>(mind === <span class="hljs-string">&#x27;foggy&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(<span class="hljs-number">2</span> + <span class="hljs-number">2</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">5</span>)
+})</code></pre></div>
+<h3 id="annotate"><a class="anchor" href="#annotate">#</a><code>annotate</code> <Version>3.2.0</Version></h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">annotate</span>(<span class="hljs-params">
+  <span class="hljs-attr">message</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">attachment</span>?: <span class="hljs-title class_">TestAttachment</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TestAnnotation</span>&gt;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">annotate</span>(<span class="hljs-params">
+  <span class="hljs-attr">message</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">type</span>?: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">attachment</span>?: <span class="hljs-title class_">TestAttachment</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TestAnnotation</span>&gt;</code></pre></div>
+<p>Add a <a href="test-annotations.html">test annotation</a> that will be displayed by your <a href="../config/reporters.html">reporter</a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;annotations API&#x27;</span>, <span class="hljs-title function_">async</span> ({ annotate }) =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">annotate</span>(<span class="hljs-string">&#x27;https://github.com/vitest-dev/vitest/pull/7953&#x27;</span>, <span class="hljs-string">&#x27;issues&#x27;</span>)
+})</code></pre></div>
+<h3 id="signal"><a class="anchor" href="#signal">#</a><code>signal</code> <Version>3.2.0</Version></h3>
+<p>An <a href="https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal"><code>AbortSignal</code></a> that can be aborted by Vitest. The signal is aborted in these situations:</p>
+<ul>
+<li>Test times out</li>
+<li>User manually cancelled the test run with Ctrl+C</li>
+<li><a href="../api/advanced/vitest.html#cancelcurrentrun"><code>vitest.cancelCurrentRun</code></a> was called programmatically</li>
+<li>Another test failed in parallel and the <a href="../config/bail.html"><code>bail</code></a> flag is set</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;stop request when test times out&#x27;</span>, <span class="hljs-title function_">async</span> ({ signal }) =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">&#x27;/resource&#x27;</span>, { signal })
+}, <span class="hljs-number">2000</span>)</code></pre></div>
+<h3 id="bench"><a class="anchor" href="#bench">#</a><code>bench</code> <Version>5.0.0</Version></h3>
+<p>The <code>bench</code> fixture lets you define and run benchmarks inside regular tests. You can measure throughput, compare implementations, and assert relative performance:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;compare parsers&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> bench.<span class="hljs-title function_">compare</span>(
+    <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;JSON.parse&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(<span class="hljs-string">&#x27;{&quot;key&quot;:&quot;value&quot;}&#x27;</span>)
+    }),
+    <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;custom parser&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title function_">customParse</span>(<span class="hljs-string">&#x27;{&quot;key&quot;:&quot;value&quot;}&#x27;</span>)
+    }),
+  )
+
+  <span class="hljs-title function_">expect</span>(result.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;JSON.parse&#x27;</span>)).<span class="hljs-title function_">toBeFasterThan</span>(result.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;custom parser&#x27;</span>))
+})</code></pre></div>
+<p>See the <a href="benchmarking.html">Benchmarks guide</a> for full documentation on comparisons, baselines, and assertion matchers.</p>
+<h3 id="ontestfailed"><a class="anchor" href="#ontestfailed">#</a><code>onTestFailed</code></h3>
+<p>The <a href="../api/hooks.html#ontestfailed"><code>onTestFailed</code></a> hook bound to the current test. This API is useful if you are running tests concurrently and need to have a special handling only for this specific test.</p>
+<h3 id="ontestfinished"><a class="anchor" href="#ontestfinished">#</a><code>onTestFinished</code></h3>
+<p>The <a href="../api/hooks.html#ontestfailed"><code>onTestFinished</code></a> hook bound to the current test. This API is useful if you are running tests concurrently and need to have a special handling only for this specific test.</p>
+<h2 id="extend-test-context"><a class="anchor" href="#extend-test-context">#</a>Extend Test Context</h2>
+<p>Vitest allows you to extend the test context with custom fixtures using <code>test.extend</code>.</p>
+<p>The <code>test.extend</code> method lets you create a custom test API with fixtures - reusable values that are automatically set up and torn down for your tests. Vitest supports two syntaxes: the builder pattern (recommended) and the object syntax (Playwright-compatible).</p>
+<h3 id="builder-pattern"><a class="anchor" href="#builder-pattern">#</a>Builder Pattern <Version>4.1.0</Version></h3>
+<p>The builder pattern is the recommended way to define fixtures because it provides automatic type inference. TypeScript infers the type of each fixture from its return value, so you don&#39;t need to declare types manually.</p>
+<div class="code"><div class="code-title">my-test.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test <span class="hljs-keyword">as</span> baseTest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> test = baseTest
+  <span class="hljs-comment">// Simple value - type is inferred as { port: number; host: string }</span>
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;config&#x27;</span>, { <span class="hljs-attr">port</span>: <span class="hljs-number">3000</span>, <span class="hljs-attr">host</span>: <span class="hljs-string">&#x27;localhost&#x27;</span> })
+  <span class="hljs-comment">// Function fixture - type is inferred from return value</span>
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;server&#x27;</span>, <span class="hljs-title function_">async</span> ({ config }) =&gt; {
+    <span class="hljs-comment">// TypeScript knows config is { port: number; host: string }</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`http://<span class="hljs-subst">${config.host}</span>:<span class="hljs-subst">${config.port}</span>`</span>
+  })</code></pre></div>
+<p>Then use it in your tests:</p>
+<div class="code"><div class="code-title">my-test.test.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./my-test.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;server uses correct port&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ config, server }</span>) =&gt;</span> {
+  <span class="hljs-comment">// TypeScript knows the types:</span>
+  <span class="hljs-comment">// - config is { port: number; host: string }</span>
+  <span class="hljs-comment">// - server is string</span>
+  <span class="hljs-title function_">expect</span>(server).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;http://localhost:3000&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(config.<span class="hljs-property">port</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">3000</span>)
+})</code></pre></div>
+<h4 id="setup-and-cleanup-with-oncleanup"><a class="anchor" href="#setup-and-cleanup-with-oncleanup">#</a>Setup and Cleanup with <code>onCleanup</code></h4>
+<p>For fixtures that need setup or cleanup logic, use a function. The <code>onCleanup</code> callback registers teardown logic that runs after the fixture&#39;s scope ends:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test <span class="hljs-keyword">as</span> baseTest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;tempFile&#x27;</span>, <span class="hljs-title function_">async</span> ({}, { onCleanup }) =&gt; {
+    <span class="hljs-keyword">const</span> filePath = <span class="hljs-string">`/tmp/test-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>.txt`</span>
+    <span class="hljs-keyword">await</span> fs.<span class="hljs-title function_">writeFile</span>(filePath, <span class="hljs-string">&#x27;test data&#x27;</span>)
+
+    <span class="hljs-comment">// Register cleanup - runs after test completes</span>
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-title function_">async</span> () =&gt; {
+      <span class="hljs-keyword">await</span> fs.<span class="hljs-title function_">unlink</span>(filePath)
+    })
+
+    <span class="hljs-keyword">return</span> filePath
+  })</code></pre></div>
+<p>For more complex examples:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;database&#x27;</span>, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;file&#x27;</span> }, <span class="hljs-title function_">async</span> ({}, { onCleanup }) =&gt; {
+    <span class="hljs-keyword">const</span> db = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createDatabase</span>()
+    <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">connect</span>()
+
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-title function_">async</span> () =&gt; {
+      <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">disconnect</span>()
+    })
+
+    <span class="hljs-keyword">return</span> db
+  })
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;user&#x27;</span>, <span class="hljs-title function_">async</span> ({ database }, { onCleanup }) =&gt; {
+    <span class="hljs-keyword">const</span> user = <span class="hljs-keyword">await</span> database.<span class="hljs-title function_">createTestUser</span>()
+
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-title function_">async</span> () =&gt; {
+      <span class="hljs-keyword">await</span> database.<span class="hljs-title function_">deleteUser</span>(user.<span class="hljs-property">id</span>)
+    })
+
+    <span class="hljs-keyword">return</span> user
+  })</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>The <code>onCleanup</code> function can only be called <strong>once per fixture</strong>. If you need multiple cleanup operations, either combine them into a single cleanup function, or split your fixture into multiple smaller fixtures:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// ❌ This will throw an error</span>
+<span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;resources&#x27;</span>, <span class="hljs-title function_">async</span> ({}, { onCleanup }) =&gt; {
+    <span class="hljs-keyword">const</span> a = <span class="hljs-keyword">await</span> <span class="hljs-title function_">acquireA</span>()
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">releaseA</span>(a))
+
+    <span class="hljs-keyword">const</span> b = <span class="hljs-keyword">await</span> <span class="hljs-title function_">acquireB</span>()
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">releaseB</span>(b)) <span class="hljs-comment">// Error: onCleanup can only be called once</span>
+
+    <span class="hljs-keyword">return</span> { a, b }
+  })
+
+<span class="hljs-comment">// ✅ Split into separate fixtures (recommended)</span>
+<span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;resourceA&#x27;</span>, <span class="hljs-title function_">async</span> ({}, { onCleanup }) =&gt; {
+    <span class="hljs-keyword">const</span> a = <span class="hljs-keyword">await</span> <span class="hljs-title function_">acquireA</span>()
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">releaseA</span>(a))
+    <span class="hljs-keyword">return</span> a
+  })
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;resourceB&#x27;</span>, <span class="hljs-title function_">async</span> ({}, { onCleanup }) =&gt; {
+    <span class="hljs-keyword">const</span> b = <span class="hljs-keyword">await</span> <span class="hljs-title function_">acquireB</span>()
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">releaseB</span>(b))
+    <span class="hljs-keyword">return</span> b
+  })</code></pre></div>
+<p>Splitting into separate fixtures is the recommended approach as it provides better isolation and makes dependencies explicit.</p>
+</div><h4 id="fixture-options"><a class="anchor" href="#fixture-options">#</a>Fixture Options</h4>
+<p>The second argument to <code>.extend()</code> accepts options:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest
+  <span class="hljs-comment">// Automatic fixture - runs for every test even if not used</span>
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;metrics&#x27;</span>, { <span class="hljs-attr">auto</span>: <span class="hljs-literal">true</span> }, <span class="hljs-function">(<span class="hljs-params">{}, { onCleanup }</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> metrics = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MetricsCollector</span>()
+    metrics.<span class="hljs-title function_">start</span>()
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-function">() =&gt;</span> metrics.<span class="hljs-title function_">stop</span>())
+    <span class="hljs-keyword">return</span> metrics
+  })
+  <span class="hljs-comment">// Worker-scoped fixture - initialized once per worker</span>
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;config&#x27;</span>, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;worker&#x27;</span> }, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-title function_">loadConfig</span>()
+  })
+  <span class="hljs-comment">// File-scoped fixture - initialized once per file</span>
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;database&#x27;</span>, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;file&#x27;</span> }, <span class="hljs-title function_">async</span> ({ config }, { onCleanup }) =&gt; {
+    <span class="hljs-keyword">const</span> db = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createDatabase</span>(config)
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-function">() =&gt;</span> db.<span class="hljs-title function_">close</span>())
+    <span class="hljs-keyword">return</span> db
+  })
+  <span class="hljs-comment">// Injected fixture - can be overridden via config</span>
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;baseUrl&#x27;</span>, { <span class="hljs-attr">injected</span>: <span class="hljs-literal">true</span> }, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;http://localhost:3000&#x27;</span>
+  })</code></pre></div>
+<p>For test-scoped fixtures (the default), you can omit the options:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;simple&#x27;</span>, <span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;value&#x27;</span>)</code></pre></div>
+<h4 id="accessing-other-fixtures"><a class="anchor" href="#accessing-other-fixtures">#</a>Accessing Other Fixtures</h4>
+<p>Each fixture can access previously defined fixtures via its first parameter. This works for both function and non-function fixtures:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;config&#x27;</span>, { <span class="hljs-attr">apiUrl</span>: <span class="hljs-string">&#x27;https://api.example.com&#x27;</span>, <span class="hljs-attr">port</span>: <span class="hljs-number">3000</span> })
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;client&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ config }</span>) =&gt;</span> {
+    <span class="hljs-comment">// TypeScript knows config is { apiUrl: string; port: number }</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ApiClient</span>(config.<span class="hljs-property">apiUrl</span>)
+  })
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;user&#x27;</span>, <span class="hljs-title function_">async</span> ({ client }) =&gt; {
+    <span class="hljs-comment">// TypeScript knows client is ApiClient</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> client.<span class="hljs-title function_">getCurrentUser</span>()
+  })</code></pre></div>
+<h4 id="object-syntax-playwright-compatible"><a class="anchor" href="#object-syntax-playwright-compatible">#</a>Object Syntax (Playwright-Compatible)</h4>
+<p>Vitest also supports a Playwright-compatible object syntax. This is useful if you&#39;re migrating from Playwright or prefer defining all fixtures at once:</p>
+<div class="code"><div class="code-title">my-test.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test <span class="hljs-keyword">as</span> baseTest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> test = baseTest.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-attr">page</span>: <span class="hljs-title function_">async</span> ({}, use) =&gt; {
+    <span class="hljs-comment">// setup the fixture before each test function</span>
+    <span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">newPage</span>()
+
+    <span class="hljs-comment">// use the fixture value</span>
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">use</span>(page)
+
+    <span class="hljs-comment">// cleanup the fixture after each test function</span>
+    <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">close</span>()
+  },
+  <span class="hljs-attr">baseUrl</span>: <span class="hljs-string">&#x27;http://localhost:3000&#x27;</span>
+})</code></pre></div>
+<p>The key difference from the builder pattern is the <code>use()</code> callback pattern for cleanup:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// Object syntax: cleanup code goes AFTER use()</span>
+<span class="hljs-keyword">const</span> test = baseTest.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-attr">database</span>: <span class="hljs-title function_">async</span> ({}, use) =&gt; {
+    <span class="hljs-keyword">const</span> db = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createDatabase</span>()
+    <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">connect</span>()
+
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">use</span>(db) <span class="hljs-comment">// Test runs here</span>
+
+    <span class="hljs-comment">// Cleanup after the test</span>
+    <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">disconnect</span>()
+  }
+})
+
+<span class="hljs-comment">// Builder pattern: cleanup is registered with onCleanup()</span>
+<span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;database&#x27;</span>, <span class="hljs-title function_">async</span> ({}, { onCleanup }) =&gt; {
+    <span class="hljs-keyword">const</span> db = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createDatabase</span>()
+    <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">connect</span>()
+
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-function">() =&gt;</span> db.<span class="hljs-title function_">disconnect</span>())
+
+    <span class="hljs-keyword">return</span> db <span class="hljs-comment">// Test runs after this returns</span>
+  })</code></pre></div>
+<div class="box box-info"><div class="box-title">ℹ️ Info</div><p>With the object syntax, you need to provide types manually as a generic parameter since TypeScript cannot infer them from the <code>use()</code> callback:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest.<span class="hljs-property">extend</span>&lt;{
+  <span class="hljs-attr">page</span>: <span class="hljs-title class_">Page</span>
+  <span class="hljs-attr">baseUrl</span>: <span class="hljs-built_in">string</span>
+}&gt;({
+  <span class="hljs-attr">page</span>: <span class="hljs-title function_">async</span> ({}, use) =&gt; {
+    <span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">newPage</span>()
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">use</span>(page)
+    <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">close</span>()
+  },
+  <span class="hljs-attr">baseUrl</span>: <span class="hljs-string">&#x27;http://localhost:3000&#x27;</span>
+})</code></pre></div>
+</div><h4 id="tuple-syntax-for-options"><a class="anchor" href="#tuple-syntax-for-options">#</a>Tuple Syntax for Options</h4>
+<p>With the object syntax, use a tuple to specify fixture options:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-comment">// Auto fixture</span>
+  <span class="hljs-attr">fixture</span>: [
+    <span class="hljs-title function_">async</span> ({}, use) =&gt; {
+      <span class="hljs-title function_">setup</span>()
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">use</span>()
+      <span class="hljs-title function_">teardown</span>()
+    },
+    { <span class="hljs-attr">auto</span>: <span class="hljs-literal">true</span> }
+  ],
+  <span class="hljs-comment">// Scoped fixture</span>
+  <span class="hljs-attr">database</span>: [
+    <span class="hljs-title function_">async</span> ({}, use) =&gt; {
+      <span class="hljs-keyword">const</span> db = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createDatabase</span>()
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">use</span>(db)
+      <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">close</span>()
+    },
+    { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;file&#x27;</span> }
+  ],
+  <span class="hljs-comment">// Injected fixture</span>
+  <span class="hljs-attr">url</span>: [
+    <span class="hljs-string">&#x27;/default&#x27;</span>,
+    { <span class="hljs-attr">injected</span>: <span class="hljs-literal">true</span> }
+  ],
+})</code></pre></div>
+<h3 id="fixture-initialization"><a class="anchor" href="#fixture-initialization">#</a>Fixture Initialization</h3>
+<p>Vitest runner will smartly initialize your fixtures and inject them into the test context based on usage.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test <span class="hljs-keyword">as</span> baseTest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;database&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;database initializing&#x27;</span>)
+    <span class="hljs-keyword">return</span> <span class="hljs-title function_">createDatabase</span>()
+  })
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;cache&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">return</span> <span class="hljs-title function_">createCache</span>()
+  })
+
+<span class="hljs-comment">// database will not run</span>
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;no fixtures needed&#x27;</span>, <span class="hljs-function">() =&gt;</span> {})
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;only cache&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ cache }</span>) =&gt;</span> {})
+
+<span class="hljs-comment">// database will run</span>
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;needs database&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ database }</span>) =&gt;</span> {})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>When using <code>test.extend()</code> with fixtures, you should always use the object destructuring pattern <code>{ database }</code> to access context both in fixture function and test function.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;context must be destructured&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">context</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(context.<span class="hljs-property">database</span>).<span class="hljs-title function_">toBeDefined</span>()
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;context must be destructured&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ database }</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(database).<span class="hljs-title function_">toBeDefined</span>()
+})</code></pre></div>
+</div><h3 id="extending-extended-tests"><a class="anchor" href="#extending-extended-tests">#</a>Extending Extended Tests</h3>
+<p>You can extend an already extended test to add more fixtures:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test <span class="hljs-keyword">as</span> dbTest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./my-test.js&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> test = dbTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;user&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ database }</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> database.<span class="hljs-title function_">createUser</span>()
+  })</code></pre></div>
+<p>With the object syntax:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test <span class="hljs-keyword">as</span> dbTest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./my-test.js&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> test = dbTest.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-attr">admin</span>: <span class="hljs-title function_">async</span> ({ database }, use) =&gt; {
+    <span class="hljs-keyword">const</span> admin = <span class="hljs-keyword">await</span> database.<span class="hljs-title function_">createAdmin</span>()
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">use</span>(admin)
+    <span class="hljs-keyword">await</span> database.<span class="hljs-title function_">deleteUser</span>(admin.<span class="hljs-property">id</span>)
+  }
+})</code></pre></div>
+<h3 id="mixing-both-syntaxes"><a class="anchor" href="#mixing-both-syntaxes">#</a>Mixing Both Syntaxes</h3>
+<p>You can combine both approaches. The builder pattern can be chained after object-based extensions:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest
+  <span class="hljs-comment">// Object syntax for simple fixtures</span>
+  .<span class="hljs-property">extend</span>&lt;{ <span class="hljs-attr">apiKey</span>: <span class="hljs-built_in">string</span> }&gt;({
+    <span class="hljs-attr">apiKey</span>: <span class="hljs-string">&#x27;test-key-123&#x27;</span>,
+  })
+  <span class="hljs-comment">// Builder pattern for complex fixtures with inference</span>
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;client&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ apiKey }</span>) =&gt;</span> {
+    <span class="hljs-comment">// TypeScript knows apiKey is string</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ApiClient</span>(apiKey)
+  })</code></pre></div>
+<h3 id="fixture-scopes"><a class="anchor" href="#fixture-scopes">#</a>Fixture Scopes <Version>3.2.0</Version></h3>
+<p>By default, fixtures are initialized for each test. You can change this with the <code>scope</code> option to share fixtures across tests.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>By default any fixture without a scope is treated as a <code>test</code> fixture. This means that you cannot use it inside <code>worker</code> and <code>file</code> scopes. If you wish to access it there, consider specifying a scope manually:</p>
+<div class="code"><pre><code class="hljs lang-ts">test
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;port&#x27;</span>, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;worker&#x27;</span> }, <span class="hljs-number">5000</span>)
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;db&#x27;</span>, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;worker&#x27;</span> }, <span class="hljs-title function_">async</span> ({ port }) =&gt; {
+    <span class="hljs-keyword">return</span> <span class="hljs-title function_">createDb</span>(port)
+  })</code></pre></div>
+<p>Note that you cannot override non-test fixtures inside <code>describe</code> blocks:</p>
+<div class="code"><pre><code class="hljs lang-ts">test.<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;a nested suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  test.<span class="hljs-title function_">override</span>(<span class="hljs-string">&#x27;port&#x27;</span>, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;worker&#x27;</span> }, <span class="hljs-number">3000</span>) <span class="hljs-comment">// throws an error</span>
+})</code></pre></div>
+<p>Consider overriding it on the top level of the module, or by using <a href="#default-fixture-injected"><code>injected</code></a> option and providing the value in the project config.</p>
+<p>Also note that in <a href="../config/isolate.html">non-isolate</a> mode overriding a <code>worker</code> fixture will affect the fixture value in all test files running after it was overridden.</p>
+</div><h4 id="test-scope-default"><a class="anchor" href="#test-scope-default">#</a>Test Scope (Default)</h4>
+<p>Test-scoped fixtures are created fresh for each test:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;counter&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">value</span>: <span class="hljs-number">0</span> }
+  })
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;first test&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ counter }</span>) =&gt;</span> {
+  counter.<span class="hljs-property">value</span>++
+  <span class="hljs-title function_">expect</span>(counter.<span class="hljs-property">value</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">1</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;second test&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ counter }</span>) =&gt;</span> {
+  <span class="hljs-comment">// Fresh instance, value is 0 again</span>
+  <span class="hljs-title function_">expect</span>(counter.<span class="hljs-property">value</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">0</span>)
+})</code></pre></div>
+<p>Test-scoped fixtures have access to the <a href="#built-in-test-context">built-in test context</a> (<code>task</code>, <code>expect</code>, <code>skip</code>, etc.):</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;testInfo&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ task }</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">name</span>: task.<span class="hljs-property">name</span> }
+  })</code></pre></div>
+<h4 id="file-scope"><a class="anchor" href="#file-scope">#</a>File Scope</h4>
+<p>File-scoped fixtures are initialized once per test file:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;database&#x27;</span>, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;file&#x27;</span> }, <span class="hljs-title function_">async</span> ({}, { onCleanup }) =&gt; {
+    <span class="hljs-keyword">const</span> db = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createDatabase</span>()
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-function">() =&gt;</span> db.<span class="hljs-title function_">close</span>())
+    <span class="hljs-keyword">return</span> db
+  })
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;first test&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ database }</span>) =&gt;</span> {
+  <span class="hljs-comment">// Uses the same database instance</span>
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;second test&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ database }</span>) =&gt;</span> {
+  <span class="hljs-comment">// Same database instance as first test</span>
+})</code></pre></div>
+<h4 id="worker-scope"><a class="anchor" href="#worker-scope">#</a>Worker Scope</h4>
+<p>Worker-scoped fixtures are initialized once per worker process:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;config&#x27;</span>, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;worker&#x27;</span> }, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadExpensiveConfig</span>()
+  })</code></pre></div>
+<div class="box box-info"><div class="box-title">ℹ️ Info</div><p>By default, every file runs in a separate worker, so <code>file</code> and <code>worker</code> scopes work the same way. However, if you disable <a href="../config/isolate.html">isolation</a>, then the number of workers is limited by <a href="../config/maxworkers.html"><code>maxWorkers</code></a>, and worker-scoped fixtures will be shared across files running in the same worker.</p>
+<p>When running tests in <code>vmThreads</code> or <code>vmForks</code>, <code>scope: &#39;worker&#39;</code> works the same way as <code>scope: &#39;file&#39;</code> because each file has its own VM context.</p>
+</div><h4 id="scope-hierarchy"><a class="anchor" href="#scope-hierarchy">#</a>Scope Hierarchy</h4>
+<p>Fixtures can only access other fixtures from the same or higher (longer-lived) scopes:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Fixture Scope</th>
+<th>Can Access</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>worker</code></td>
+<td>Only other worker fixtures</td>
+</tr>
+<tr>
+<td><code>file</code></td>
+<td>Worker + file fixtures</td>
+</tr>
+<tr>
+<td><code>test</code></td>
+<td>Worker + file + test fixtures + <a href="#built-in-test-context">test context</a></td>
+</tr>
+</tbody></table></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;config&#x27;</span>, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;worker&#x27;</span> }, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">apiUrl</span>: <span class="hljs-string">&#x27;https://api.example.com&#x27;</span> }
+  })
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;database&#x27;</span>, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;file&#x27;</span> }, <span class="hljs-title function_">async</span> ({ config }, { onCleanup }) =&gt; {
+    <span class="hljs-comment">// ✅ File fixture can access worker fixture</span>
+    <span class="hljs-keyword">const</span> db = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createDatabase</span>(config.<span class="hljs-property">apiUrl</span>)
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-function">() =&gt;</span> db.<span class="hljs-title function_">close</span>())
+    <span class="hljs-keyword">return</span> db
+  })
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;user&#x27;</span>, <span class="hljs-title function_">async</span> ({ database, task }) =&gt; {
+    <span class="hljs-comment">// ✅ Test fixture can access file fixture AND test context</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> database.<span class="hljs-title function_">createUser</span>(task.<span class="hljs-property">name</span>)
+  })</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Only test-scoped fixtures have access to the <a href="#built-in-test-context">built-in test context</a> (<code>task</code>, <code>expect</code>, <code>skip</code>, etc.). Worker and file fixtures run outside of any specific test, so test-specific properties are not available to them.</p>
+<p>If you need the file path in a file-scoped fixture, use <code>expect.getState().testPath</code> instead.</p>
+</div><h4 id="type-safe-scope-access"><a class="anchor" href="#type-safe-scope-access">#</a>Type-Safe Scope Access <Version>3.2.0</Version></h4>
+<p>With the builder pattern, TypeScript automatically enforces scope-based access rules. If you try to access a test-scoped fixture from a file-scoped fixture, you&#39;ll get a compile-time error.</p>
+<p>If you&#39;re using the object syntax and want the same type safety, you can use the <code>$worker</code>, <code>$file</code>, and <code>$test</code> keys to explicitly declare which fixtures belong to which scope:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest.<span class="hljs-property">extend</span>&lt;{
+  <span class="hljs-attr">$worker</span>: { <span class="hljs-attr">config</span>: <span class="hljs-title class_">Config</span> }
+  <span class="hljs-attr">$file</span>: { <span class="hljs-attr">database</span>: <span class="hljs-title class_">Database</span> }
+  <span class="hljs-attr">$test</span>: { <span class="hljs-attr">user</span>: <span class="hljs-title class_">User</span> }
+}&gt;({
+  <span class="hljs-attr">config</span>: [<span class="hljs-title function_">async</span> ({}, use) =&gt; {
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">use</span>(<span class="hljs-title function_">loadConfig</span>())
+  }, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;worker&#x27;</span> }],
+
+  <span class="hljs-attr">database</span>: [<span class="hljs-title function_">async</span> ({ config }, use) =&gt; {
+    <span class="hljs-keyword">const</span> db = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createDatabase</span>(config)
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">use</span>(db)
+    <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">close</span>()
+  }, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;file&#x27;</span> }],
+
+  <span class="hljs-attr">user</span>: <span class="hljs-title function_">async</span> ({ database }, use) =&gt; {
+    <span class="hljs-keyword">const</span> user = <span class="hljs-keyword">await</span> database.<span class="hljs-title function_">createUser</span>()
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">use</span>(user)
+    <span class="hljs-keyword">await</span> database.<span class="hljs-title function_">deleteUser</span>(user.<span class="hljs-property">id</span>)
+  },
+})</code></pre></div>
+<p>This provides the same compile-time safety as the builder pattern, catching scope violations at build time rather than runtime.</p>
+<h3 id="default-fixture-injected"><a class="anchor" href="#default-fixture-injected">#</a>Default Fixture (Injected)</h3>
+<p>Since Vitest 3, you can provide different values in different <a href="projects.html">projects</a>. To enable this, pass <code>{ injected: true }</code> in the options. If the key is not specified in the <a href="../config/provide.html">project configuration</a>, the default value will be used.</p>
+<div class="code-group"><div class="code"><div class="code-title">fixtures.test.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test <span class="hljs-keyword">as</span> baseTest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;url&#x27;</span>, { <span class="hljs-attr">injected</span>: <span class="hljs-literal">true</span> }, <span class="hljs-string">&#x27;/default&#x27;</span>)
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;works correctly&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ url }</span>) =&gt;</span> {
+  <span class="hljs-comment">// url is &quot;/default&quot; in &quot;project-new&quot;</span>
+  <span class="hljs-comment">// url is &quot;/full&quot; in &quot;project-full&quot;</span>
+  <span class="hljs-comment">// url is &quot;/empty&quot; in &quot;project-empty&quot;</span>
+})</code></pre></div>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;project-new&#x27;</span>,
+        },
+      },
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;project-full&#x27;</span>,
+          <span class="hljs-attr">provide</span>: {
+            <span class="hljs-attr">url</span>: <span class="hljs-string">&#x27;/full&#x27;</span>,
+          },
+        },
+      },
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;project-empty&#x27;</span>,
+          <span class="hljs-attr">provide</span>: {
+            <span class="hljs-attr">url</span>: <span class="hljs-string">&#x27;/empty&#x27;</span>,
+          },
+        },
+      },
+    ],
+  },
+})</code></pre></div>
+</div><h3 id="overriding-fixture-values"><a class="anchor" href="#overriding-fixture-values">#</a>Overriding Fixture Values <Version>4.1.0</Version></h3>
+<p>You can override fixture values for a specific suite and its children using <code>test.override</code>. This is useful when you need different fixture values for different test scenarios.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Vitest will automatically inherit the options, if they are not provided when overriding. Note that you cannot override fixture&#39;s <code>scope</code> or <code>auto</code> options.</p>
+</div><h4 id="builder-pattern-recommended"><a class="anchor" href="#builder-pattern-recommended">#</a>Builder Pattern (Recommended)</h4>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test <span class="hljs-keyword">as</span> baseTest, describe, expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;config&#x27;</span>, { <span class="hljs-attr">port</span>: <span class="hljs-number">3000</span>, <span class="hljs-attr">host</span>: <span class="hljs-string">&#x27;localhost&#x27;</span> })
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;server&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ config }</span>) =&gt;</span> <span class="hljs-string">`http://<span class="hljs-subst">${config.host}</span>:<span class="hljs-subst">${config.port}</span>`</span>)
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;production environment&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// Override with a new static value (chainable)</span>
+  test
+    .<span class="hljs-title function_">override</span>(<span class="hljs-string">&#x27;config&#x27;</span>, { <span class="hljs-attr">port</span>: <span class="hljs-number">8080</span>, <span class="hljs-attr">host</span>: <span class="hljs-string">&#x27;api.example.com&#x27;</span> })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;uses production config&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ server }</span>) =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(server).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;http://api.example.com:8080&#x27;</span>)
+  })
+})
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;with custom server&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// Override with a function that can access other fixtures</span>
+  test.<span class="hljs-title function_">override</span>(<span class="hljs-string">&#x27;server&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ config }</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`https://<span class="hljs-subst">${config.host}</span>:<span class="hljs-subst">${config.port}</span>/v2`</span>
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;uses custom server&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ server }</span>) =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(server).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;https://localhost:3000/v2&#x27;</span>)
+  })
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;uses default values&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ server }</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(server).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;http://localhost:3000&#x27;</span>)
+})</code></pre></div>
+<h4 id="chaining-multiple-overrides"><a class="anchor" href="#chaining-multiple-overrides">#</a>Chaining Multiple Overrides</h4>
+<p><code>test.override</code> returns the test API, so you can chain multiple calls:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;production environment&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  test
+    .<span class="hljs-title function_">override</span>(<span class="hljs-string">&#x27;environment&#x27;</span>, <span class="hljs-string">&#x27;production&#x27;</span>)
+    .<span class="hljs-title function_">override</span>(<span class="hljs-string">&#x27;port&#x27;</span>, <span class="hljs-number">8080</span>)
+    .<span class="hljs-title function_">override</span>(<span class="hljs-string">&#x27;debug&#x27;</span>, <span class="hljs-literal">false</span>)
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;uses production settings&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ environment, port, debug }</span>) =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(environment).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;production&#x27;</span>)
+    <span class="hljs-title function_">expect</span>(port).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">8080</span>)
+    <span class="hljs-title function_">expect</span>(debug).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">false</span>)
+  })
+})</code></pre></div>
+<h4 id="object-syntax"><a class="anchor" href="#object-syntax">#</a>Object Syntax</h4>
+<p>You can also use object syntax to override multiple fixtures at once:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;different configuration&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  test.<span class="hljs-title function_">override</span>({
+    <span class="hljs-attr">config</span>: { <span class="hljs-attr">port</span>: <span class="hljs-number">4000</span>, <span class="hljs-attr">host</span>: <span class="hljs-string">&#x27;test.local&#x27;</span> },
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;uses overwritten config&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ config }</span>) =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(config.<span class="hljs-property">port</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">4000</span>)
+  })
+})</code></pre></div>
+<h4 id="with-cleanup"><a class="anchor" href="#with-cleanup">#</a>With Cleanup</h4>
+<p>When overwriting with a function, you can use <code>onCleanup</code> just like in <code>test.extend</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;with custom database&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  test.<span class="hljs-title function_">override</span>(<span class="hljs-string">&#x27;database&#x27;</span>, <span class="hljs-title function_">async</span> ({ config }, { onCleanup }) =&gt; {
+    <span class="hljs-keyword">const</span> db = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createTestDatabase</span>(config)
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-function">() =&gt;</span> db.<span class="hljs-title function_">drop</span>())
+    <span class="hljs-keyword">return</span> db
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;uses custom database&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ database }</span>) =&gt;</span> {
+    <span class="hljs-comment">// Uses the overwritten database</span>
+  })
+})</code></pre></div>
+<h4 id="nested-scopes"><a class="anchor" href="#nested-scopes">#</a>Nested Scopes</h4>
+<p>Overrides are inherited by nested suites and can be overwritten again:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;level 1&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  test.<span class="hljs-title function_">override</span>(<span class="hljs-string">&#x27;value&#x27;</span>, <span class="hljs-string">&#x27;one&#x27;</span>)
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;uses level 1 value&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ value }</span>) =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(value).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;one&#x27;</span>)
+  })
+
+  <span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;level 2&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    test.<span class="hljs-title function_">override</span>(<span class="hljs-string">&#x27;value&#x27;</span>, <span class="hljs-string">&#x27;two&#x27;</span>)
+
+    <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;uses level 2 value&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ value }</span>) =&gt;</span> {
+      <span class="hljs-title function_">expect</span>(value).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;two&#x27;</span>)
+    })
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;still uses level 1 value&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ value }</span>) =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(value).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;one&#x27;</span>)
+  })
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that you cannot introduce new fixtures inside <code>test.override</code>. Extend the test context with <code>test.extend</code> instead.</p>
+</div><div class="box box-info"><div class="box-title">ℹ️ Info</div><p><code>test.scoped</code> is deprecated in favor of <code>test.override</code>. The <code>test.scoped</code> API still works but will be removed in a future version.</p>
+</div><h3 id="type-safe-hooks"><a class="anchor" href="#type-safe-hooks">#</a>Type-Safe Hooks</h3>
+<p>When using <code>test.extend</code>, the extended <code>test</code> object provides type-safe hooks that are aware of the extended context:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;counter&#x27;</span>, { <span class="hljs-attr">value</span>: <span class="hljs-number">0</span>, <span class="hljs-title function_">increment</span>(<span class="hljs-params"></span>) { <span class="hljs-variable language_">this</span>.<span class="hljs-property">value</span>++ } })
+
+<span class="hljs-comment">// Unlike global hooks, these hooks are aware of the extended context</span>
+test.<span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">(<span class="hljs-params">{ counter }</span>) =&gt;</span> {
+  counter.<span class="hljs-title function_">increment</span>()
+})
+
+test.<span class="hljs-title function_">afterEach</span>(<span class="hljs-function">(<span class="hljs-params">{ counter }</span>) =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Final count:&#x27;</span>, counter.<span class="hljs-property">value</span>)
+})</code></pre></div>
+<h4 id="suite-level-hooks"><a class="anchor" href="#suite-level-hooks">#</a>Suite-Level Hooks with Fixtures <Version>4.1.0</Version></h4>
+<p>The extended <code>test</code> object also provides <a href="../api/hooks.html#beforeall"><code>beforeAll</code></a>, <a href="../api/hooks.html#afterall"><code>afterAll</code></a>, and <a href="../api/hooks.html#aroundall"><code>aroundAll</code></a> hooks that can access file-scoped and worker-scoped fixtures:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;config&#x27;</span>, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;file&#x27;</span> }, <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">loadConfig</span>())
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;database&#x27;</span>, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;file&#x27;</span> }, <span class="hljs-title function_">async</span> ({ config }, { onCleanup }) =&gt; {
+    <span class="hljs-keyword">const</span> db = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createDatabase</span>(config)
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-function">() =&gt;</span> db.<span class="hljs-title function_">close</span>())
+    <span class="hljs-keyword">return</span> db
+  })
+
+<span class="hljs-comment">// Access file-scoped fixtures in suite-level hooks</span>
+test.<span class="hljs-title function_">aroundAll</span>(<span class="hljs-title function_">async</span> (runSuite, { database }) =&gt; {
+  <span class="hljs-keyword">await</span> database.<span class="hljs-title function_">transaction</span>(runSuite)
+})
+
+test.<span class="hljs-title function_">beforeAll</span>(<span class="hljs-title function_">async</span> ({ database }) =&gt; {
+  <span class="hljs-keyword">await</span> database.<span class="hljs-title function_">createUsers</span>()
+})
+
+test.<span class="hljs-title function_">afterAll</span>(<span class="hljs-title function_">async</span> ({ database }) =&gt; {
+  <span class="hljs-keyword">await</span> database.<span class="hljs-title function_">removeUsers</span>()
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : IMPORTANT</div><p>Suite-level hooks (<code>beforeAll</code>, <code>afterAll</code>, <code>aroundAll</code>) <strong>must be called on the <code>test</code> object returned from <code>test.extend()</code></strong> to have access to the extended fixtures. Using the global <code>beforeAll</code>/<code>afterAll</code>/<code>aroundAll</code> functions will not have access to your custom fixtures:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test <span class="hljs-keyword">as</span> baseTest, beforeAll } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;database&#x27;</span>, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;file&#x27;</span> }, <span class="hljs-title function_">async</span> ({}, { onCleanup }) =&gt; {
+    <span class="hljs-keyword">const</span> db = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createDatabase</span>()
+    <span class="hljs-title function_">onCleanup</span>(<span class="hljs-function">() =&gt;</span> db.<span class="hljs-title function_">close</span>())
+    <span class="hljs-keyword">return</span> db
+  })
+
+<span class="hljs-comment">// ❌ WRONG: Global beforeAll doesn&#x27;t have access to &#x27;database&#x27;</span>
+<span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">(<span class="hljs-params">{ database }</span>) =&gt;</span> {
+  <span class="hljs-comment">// Error: &#x27;database&#x27; is undefined</span>
+})
+
+<span class="hljs-comment">// ✅ CORRECT: Use test.beforeAll to access fixtures</span>
+test.<span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">(<span class="hljs-params">{ database }</span>) =&gt;</span> {
+  <span class="hljs-comment">// &#x27;database&#x27; is available</span>
+})</code></pre></div>
+<p>This applies to all suite-level hooks: <code>beforeAll</code>, <code>afterAll</code>, and <code>aroundAll</code>.</p>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Suite-level hooks can only access <a href="#fixture-scopes"><strong>file-scoped</strong> and <strong>worker-scoped</strong> fixtures</a>, including <code>auto</code> fixtures. Test-scoped fixtures are not available in these hooks because they run outside the context of individual tests. If you try to access a test-scoped fixture in a suite-level hook, Vitest will throw an error.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> test = baseTest
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;testFixture&#x27;</span>, <span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;test-scoped&#x27;</span>)
+  .<span class="hljs-title function_">extend</span>(<span class="hljs-string">&#x27;fileFixture&#x27;</span>, { <span class="hljs-attr">scope</span>: <span class="hljs-string">&#x27;file&#x27;</span> }, <span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;file-scoped&#x27;</span>)
+
+<span class="hljs-comment">// ❌ Error: test-scoped fixtures not available in beforeAll</span>
+test.<span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">(<span class="hljs-params">{ testFixture }</span>) =&gt;</span> {})
+
+<span class="hljs-comment">// ✅ Works: file-scoped fixtures are available</span>
+test.<span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">(<span class="hljs-params">{ fileFixture }</span>) =&gt;</span> {})</code></pre></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#usage">Usage</a><a class="toc-2" href="#built-in-test-context">Built-in Test Context</a><a class="toc-3" href="#task">task</a><a class="toc-3" href="#expect">expect</a><a class="toc-3" href="#skip">skip</a><a class="toc-3" href="#annotate">annotate 3.2.0</a><a class="toc-3" href="#signal">signal 3.2.0</a><a class="toc-3" href="#bench">bench 5.0.0</a><a class="toc-3" href="#ontestfailed">onTestFailed</a><a class="toc-3" href="#ontestfinished">onTestFinished</a><a class="toc-2" href="#extend-test-context">Extend Test Context</a><a class="toc-3" href="#builder-pattern">Builder Pattern 4.1.0</a><a class="toc-3" href="#fixture-initialization">Fixture Initialization</a><a class="toc-3" href="#extending-extended-tests">Extending Extended Tests</a><a class="toc-3" href="#mixing-both-syntaxes">Mixing Both Syntaxes</a><a class="toc-3" href="#fixture-scopes">Fixture Scopes 3.2.0</a><a class="toc-3" href="#default-fixture-injected">Default Fixture (Injected)</a><a class="toc-3" href="#overriding-fixture-values">Overriding Fixture Values 4.1.0</a><a class="toc-3" href="#type-safe-hooks">Type-Safe Hooks</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

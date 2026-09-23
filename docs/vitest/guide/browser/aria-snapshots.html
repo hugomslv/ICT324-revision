@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARIA Snapshots | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/browser/aria-snapshots  <a class="ext small" href="https://vitest.dev/guide/browser/aria-snapshots">version en ligne</a></div>
+<h1 id="aria-snapshots"><a class="anchor" href="#aria-snapshots">#</a>ARIA Snapshots <Experimental /> <Version>4.1.4</Version></h1>
+<p>ARIA snapshots let you test the accessibility structure of your pages. Instead of asserting against raw HTML or visual output, you assert against the accessibility tree — the same structure that screen readers and other assistive technologies use.</p>
+<p>Given this HTML:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">nav</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Main&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/&quot;</span>&gt;</span>Home<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/about&quot;</span>&gt;</span>About<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">nav</span>&gt;</span></code></pre></div>
+<p>You can assert its accessibility tree:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;navigation&#x27;</span>)).<span class="hljs-title function_">toMatchAriaInlineSnapshot</span>(<span class="hljs-string">`
+  - navigation &quot;Main&quot;:
+    - link &quot;Home&quot;:
+      - /url: /
+    - link &quot;About&quot;:
+      - /url: /about
+`</span>)</code></pre></div>
+<p>This catches accessibility regressions: missing labels, broken roles, incorrect heading levels, and more — things that DOM snapshots would miss. Even if the underlying HTML structure changes, the assertion would not fail as long as content matches semantically.</p>
+<p>For advanced cases, you can also generate and inspect the ARIA tree through <code>utils.aria</code> from <code>vitest/browser</code>. See the <a href="../../api/browser/context.html#aria">Context API</a> for details.</p>
+<h2 id="snapshot-workflow"><a class="anchor" href="#snapshot-workflow">#</a>Snapshot Workflow</h2>
+<p>ARIA snapshots use the same Vitest snapshot workflow as other snapshot assertions. File snapshots, inline snapshots, <code>--update</code> / <code>-u</code>, watch mode updates, and CI snapshot behavior all work the same way.</p>
+<p>See the main <a href="../snapshot.html">Snapshot guide</a> for the general snapshot workflow, update behavior, and review guidelines.</p>
+<h2 id="basic-usage"><a class="anchor" href="#basic-usage">#</a>Basic Usage</h2>
+<p>Given a page with this HTML:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Log In&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Email&quot;</span> /&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Password&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;password&quot;</span> /&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>Submit<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span></code></pre></div>
+<h3 id="file-snapshots"><a class="anchor" href="#file-snapshots">#</a>File Snapshots</h3>
+<p>Use <code>toMatchAriaSnapshot()</code> to store the snapshot in a <code>.snap</code> file alongside your test:</p>
+<div class="code"><div class="code-title">basic.test.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;login form&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;form&#x27;</span>)).<span class="hljs-title function_">toMatchAriaSnapshot</span>()
+})</code></pre></div>
+<p>On first run, Vitest generates a snapshot file entry:</p>
+<div class="code"><div class="code-title">__snapshots__/basic.test.ts.snap</div><pre><code class="hljs lang-js"><span class="hljs-comment">// Vitest Snapshot ...</span>
+
+<span class="hljs-built_in">exports</span>[<span class="hljs-string">`login form 1`</span>] = <span class="hljs-string">`
+- form &quot;Log In&quot;:
+  - textbox &quot;Email&quot;
+  - textbox &quot;Password&quot;
+  - button &quot;Submit&quot;
+`</span></code></pre></div>
+<h3 id="inline-snapshots"><a class="anchor" href="#inline-snapshots">#</a>Inline Snapshots</h3>
+<p>Use <code>toMatchAriaInlineSnapshot()</code> to store the snapshot directly in the test file:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;login form&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;form&#x27;</span>)).<span class="hljs-title function_">toMatchAriaInlineSnapshot</span>(<span class="hljs-string">`
+    - form &quot;Log In&quot;:
+      - textbox &quot;Email&quot;
+      - textbox &quot;Password&quot;
+      - button &quot;Submit&quot;
+  `</span>)
+})</code></pre></div>
+<h2 id="browser-mode-retry-behavior"><a class="anchor" href="#browser-mode-retry-behavior">#</a>Browser Mode Retry Behavior</h2>
+<p>In <a href="index.html">Browser Mode</a>, <code>expect.element()</code> polls the DOM and waits for the accessibility tree to <strong>stabilize</strong> before evaluating the result. On each poll, the matcher re-queries the element and re-captures the accessibility tree. The snapshot is considered stable when two consecutive polls produce the same output.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;form&#x27;</span>)).<span class="hljs-title function_">toMatchAriaInlineSnapshot</span>(<span class="hljs-string">`
+  - form &quot;Log In&quot;:
+    - textbox &quot;Email&quot;
+    - textbox &quot;Password&quot;
+    - button &quot;Submit&quot;
+`</span>)</code></pre></div>
+<p>On first run or with <code>--update</code>, the stable result is written as the new snapshot.</p>
+<p>When an existing snapshot is present, the matcher also checks whether the stable result matches. If it does not, polling resets and continues — giving the DOM time to reach the expected state. This handles cases like animations, async rendering, or delayed state updates where the tree may briefly stabilize in an intermediate state before settling into its final form.</p>
+<h2 id="preserving-hand-edited-patterns"><a class="anchor" href="#preserving-hand-edited-patterns">#</a>Preserving Hand-Edited Patterns</h2>
+<p>When you hand-edit a snapshot to use regex patterns, those patterns survive <code>--update</code>. Only the literal parts that changed are overwritten. This lets you write flexible assertions that don&#39;t break when content changes.</p>
+<h3 id="example"><a class="anchor" href="#example">#</a>Example</h3>
+<p><strong>Step 1.</strong> Your shopping cart page renders this HTML:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Your Cart<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Cart Items&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>Wireless Headphones — $79.99<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>Checkout<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></code></pre></div>
+<p>You run your test for the first time with <code>--update</code>. Vitest generates the snapshot:</p>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-string">heading</span> <span class="hljs-string">&quot;Your Cart&quot;</span> [<span class="hljs-string">level=1</span>]
+<span class="hljs-bullet">-</span> <span class="hljs-string">list</span> <span class="hljs-attr">&quot;Cart Items&quot;:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">listitem:</span> <span class="hljs-string">Wireless</span> <span class="hljs-string">Headphones</span> <span class="hljs-string">—</span> <span class="hljs-string">$79.99</span>
+<span class="hljs-bullet">-</span> <span class="hljs-string">button</span> <span class="hljs-string">&quot;Checkout&quot;</span></code></pre></div>
+<p><strong>Step 2.</strong> The item names and prices are seeded test data that may change. You hand-edit those lines to regex patterns, but keep the stable structure as literals:</p>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-string">heading</span> <span class="hljs-string">&quot;Your Cart&quot;</span> [<span class="hljs-string">level=1</span>]
+<span class="hljs-bullet">-</span> <span class="hljs-string">list</span> <span class="hljs-attr">&quot;Cart Items&quot;:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">listitem:</span> <span class="hljs-string">/.+</span> <span class="hljs-string">—</span> <span class="hljs-string">\$\d+\.\d+/</span>
+<span class="hljs-bullet">-</span> <span class="hljs-string">button</span> <span class="hljs-string">&quot;Checkout&quot;</span></code></pre></div>
+<p><strong>Step 3.</strong> Later, a developer renames the button from &quot;Checkout&quot; to &quot;Place Order&quot;. Running <code>--update</code> updates that literal but preserves your regex patterns:</p>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-string">heading</span> <span class="hljs-string">&quot;Your Cart&quot;</span> [<span class="hljs-string">level=1</span>]
+<span class="hljs-bullet">-</span> <span class="hljs-string">list</span> <span class="hljs-attr">&quot;Cart Items&quot;:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">listitem:</span> <span class="hljs-string">/.+</span> <span class="hljs-string">—</span> <span class="hljs-string">\$\d+\.\d+/</span>
+<span class="hljs-bullet">-</span> <span class="hljs-string">button</span> <span class="hljs-string">&quot;Place Order&quot;</span>   <span class="hljs-string">👈</span> <span class="hljs-string">New</span> <span class="hljs-string">snapshot</span> <span class="hljs-string">updated</span> <span class="hljs-string">with</span> <span class="hljs-string">new</span> <span class="hljs-string">string</span></code></pre></div>
+<p>The regex patterns you wrote in step 2 are preserved because they still match the actual content. Only the mismatched literal &quot;Checkout&quot; was updated to &quot;Place Order&quot;.</p>
+<h2 id="snapshot-format"><a class="anchor" href="#snapshot-format">#</a>Snapshot Format</h2>
+<p>ARIA snapshots use a YAML-like syntax. Each line represents a node in the accessibility tree.</p>
+<div class="box box-info"><div class="box-title">ℹ️ Info</div><p>ARIA snapshot templates use a <strong>subset of YAML</strong> syntax. Only the features needed for accessibility trees are supported: scalar values, nested mappings via indentation, and sequences (<code>- item</code>). Advanced YAML features like anchors, tags, flow collections, and multi-line scalars are not supported.</p>
+<p>Captured text is also whitespace-normalized before it is rendered into the snapshot. Newlines, <code>&lt;br&gt;</code> line breaks, tabs, and repeated whitespace collapse to single spaces, so multi-line DOM text is emitted as a single-line snapshot value.</p>
+</div><p>Each accessible element in the tree is represented as a YAML node:</p>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-string">role</span> <span class="hljs-string">&quot;name&quot;</span> [<span class="hljs-string">attribute=value</span>]</code></pre></div>
+<ul>
+<li><code>role</code>: The ARIA role of the element, such as <code>heading</code>, <code>list</code>, <code>listitem</code>, or <code>button</code></li>
+<li><code>&quot;name&quot;</code>: The <a href="https://w3c.github.io/accname/">accessible name</a>, when present. Quoted strings match exact values, and <code>/patterns/</code> match regular expressions</li>
+<li><code>[attribute=value]</code>: Accessibility states and properties such as <code>checked</code>, <code>disabled</code>, <code>expanded</code>, <code>level</code>, <code>pressed</code>, or <code>selected</code></li>
+</ul>
+<p>These values come from ARIA attributes and the browser&#39;s accessibility tree, including semantics inferred from native HTML elements.</p>
+<p>Because ARIA snapshots reflect the browser&#39;s accessibility tree, content excluded from that tree, such as <code>aria-hidden=&quot;true&quot;</code> or <code>display: none</code>, does not appear in the snapshot.</p>
+<h3 id="roles-and-accessible-names"><a class="anchor" href="#roles-and-accessible-names">#</a>Roles and Accessible Names</h3>
+<p>For example:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>Submit<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Welcome<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/&quot;</span>&gt;</span>Home<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Email&quot;</span> /&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-string">button</span> <span class="hljs-string">&quot;Submit&quot;</span>
+<span class="hljs-bullet">-</span> <span class="hljs-string">heading</span> <span class="hljs-string">&quot;Welcome&quot;</span> [<span class="hljs-string">level=1</span>]
+<span class="hljs-bullet">-</span> <span class="hljs-string">link</span> <span class="hljs-string">&quot;Home&quot;</span>
+<span class="hljs-bullet">-</span> <span class="hljs-string">textbox</span> <span class="hljs-string">&quot;Email&quot;</span></code></pre></div>
+<p>The role usually comes from the element&#39;s native semantics, though it can also be defined with ARIA. The accessible name is computed from text content, associated labels, <code>aria-label</code>, <code>aria-labelledby</code>, and related naming rules.</p>
+<p>For a closer look at how names are computed, see <a href="https://w3c.github.io/accname/">Accessible Name and Description Computation</a>.</p>
+<p>Some content appears in the snapshot as a text node instead of a role-based element:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span>Hello world<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-attr">text:</span> <span class="hljs-string">Hello</span> <span class="hljs-string">world</span></code></pre></div>
+<p>Text values are always serialized on a single line after whitespace normalization. For example:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>
+Line 1
+Line 2<span class="hljs-tag">&lt;<span class="hljs-name">br</span> /&gt;</span>Line 3
+Line 4
+<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-attr">paragraph:</span> <span class="hljs-string">Line</span> <span class="hljs-number">1</span> <span class="hljs-string">Line</span> <span class="hljs-number">2</span> <span class="hljs-string">Line</span> <span class="hljs-number">3</span> <span class="hljs-string">Line</span> <span class="hljs-number">4</span></code></pre></div>
+<h3 id="children"><a class="anchor" href="#children">#</a>Children</h3>
+<p>Child elements appear nested under their parent:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>First<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>Second<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>Third<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-attr">list:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">listitem:</span> <span class="hljs-string">First</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">listitem:</span> <span class="hljs-string">Second</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">listitem:</span> <span class="hljs-string">Third</span></code></pre></div>
+<p>If the parent has an accessible name, the snapshot includes it before the nested children:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">nav</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Main&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/&quot;</span>&gt;</span>Home<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/about&quot;</span>&gt;</span>About<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">nav</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-string">navigation</span> <span class="hljs-attr">&quot;Main&quot;:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">link</span> <span class="hljs-string">&quot;Home&quot;</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">link</span> <span class="hljs-string">&quot;About&quot;</span></code></pre></div>
+<p>If an element only contains a single text child and has no other properties, the text is rendered inline:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Hello world<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-attr">paragraph:</span> <span class="hljs-string">Hello</span> <span class="hljs-string">world</span></code></pre></div>
+<h3 id="attributes"><a class="anchor" href="#attributes">#</a>Attributes</h3>
+<p>ARIA states and properties appear in brackets:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>HTML</th>
+<th>Snapshot</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&lt;input type=&quot;checkbox&quot; checked aria-label=&quot;Agree&quot;&gt;</code></td>
+<td><code>- checkbox &quot;Agree&quot; [checked]</code></td>
+</tr>
+<tr>
+<td><code>&lt;input type=&quot;checkbox&quot; aria-checked=&quot;mixed&quot; aria-label=&quot;Select all&quot;&gt;</code></td>
+<td><code>- checkbox &quot;Select all&quot; [checked=mixed]</code></td>
+</tr>
+<tr>
+<td><code>&lt;button aria-disabled=&quot;true&quot;&gt;Submit&lt;/button&gt;</code></td>
+<td><code>- button &quot;Submit&quot; [disabled]</code></td>
+</tr>
+<tr>
+<td><code>&lt;button aria-expanded=&quot;true&quot;&gt;Menu&lt;/button&gt;</code></td>
+<td><code>- button &quot;Menu&quot; [expanded]</code></td>
+</tr>
+<tr>
+<td><code>&lt;h2&gt;Title&lt;/h2&gt;</code></td>
+<td><code>- heading &quot;Title&quot; [level=2]</code></td>
+</tr>
+<tr>
+<td><code>&lt;button aria-pressed=&quot;true&quot;&gt;Bold&lt;/button&gt;</code></td>
+<td><code>- button &quot;Bold&quot; [pressed]</code></td>
+</tr>
+<tr>
+<td><code>&lt;button aria-pressed=&quot;mixed&quot;&gt;Bold&lt;/button&gt;</code></td>
+<td><code>- button &quot;Bold&quot; [pressed=mixed]</code></td>
+</tr>
+<tr>
+<td><code>&lt;option selected&gt;English&lt;/option&gt;</code></td>
+<td><code>- option &quot;English&quot; [selected]</code></td>
+</tr>
+</tbody></table></div>
+<p>Attributes only appear when they are active. A button that is not disabled simply has no <code>[disabled]</code> attribute — there is no <code>[disabled=false]</code>.</p>
+<h3 id="pseudo-attributes"><a class="anchor" href="#pseudo-attributes">#</a>Pseudo-Attributes</h3>
+<p>Some DOM properties that aren&#39;t part of ARIA but are useful for testing are exposed with a <code>/</code> prefix:</p>
+<h4 id="url"><a class="anchor" href="#url">#</a><code>/url:</code></h4>
+<p>Links include their URL:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/&quot;</span>&gt;</span>Home<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-string">link</span> <span class="hljs-attr">&quot;Home&quot;:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">/url:</span> <span class="hljs-string">/</span></code></pre></div>
+<h4 id="placeholder"><a class="anchor" href="#placeholder">#</a><code>/placeholder:</code></h4>
+<p>Textboxes can include their placeholder text:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Email&quot;</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">&quot;user@example.com&quot;</span> /&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-string">textbox</span> <span class="hljs-attr">&quot;Email&quot;:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">/placeholder:</span> <span class="hljs-string">user@example.com</span></code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce : When does <code>/placeholder:</code> appear?</div><p>The <code>/placeholder:</code> pseudo-attribute only appears when the placeholder text is <strong>different from the accessible name</strong>. When an input has a placeholder but no <code>aria-label</code> or associated <code>&lt;label&gt;</code>, the browser uses the placeholder as the accessible name. In that case, the placeholder information is already in the name and is not duplicated.</p>
+<ul>
+<li>When placeholder is the accessible name:</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">&quot;Search&quot;</span> /&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-string">textbox</span> <span class="hljs-string">&quot;Search&quot;</span></code></pre></div>
+<ul>
+<li>When placeholder differs from the accessible name:</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">&quot;Search&quot;</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Search products&quot;</span> /&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-string">textbox</span> <span class="hljs-attr">&quot;Search products&quot;:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">/placeholder:</span> <span class="hljs-string">Search</span></code></pre></div>
+</div><h2 id="matching"><a class="anchor" href="#matching">#</a>Matching</h2>
+<h3 id="regular-expressions"><a class="anchor" href="#regular-expressions">#</a>Regular Expressions</h3>
+<p>Use regex patterns to match names flexibly:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Welcome, Alice<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://example.com/profile/123&quot;</span>&gt;</span>Profile<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-string">heading</span> <span class="hljs-string">/Welcome,</span> <span class="hljs-string">.*/</span>
+<span class="hljs-bullet">-</span> <span class="hljs-string">link</span> <span class="hljs-attr">&quot;Profile&quot;:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">/url:</span> <span class="hljs-string">/https:\/\/example\.com\/.*/</span></code></pre></div>
+<p>Regex also works in pseudo-attribute values:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Search&quot;</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">&quot;Type to search...&quot;</span> /&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-yaml"><span class="hljs-bullet">-</span> <span class="hljs-string">textbox</span> <span class="hljs-attr">&quot;Search&quot;:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">/placeholder:</span> <span class="hljs-string">/Type</span> <span class="hljs-string">.*/</span></code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Escaping backslashes in regex patterns</div><p>Snapshots are stored as JavaScript strings — in backtick-delimited template literals for inline snapshots and in <code>.snap</code> files. Because of this, backslashes need to be <strong>doubled</strong> when you hand-edit a snapshot to add a regex pattern.</p>
+<p>For example, to match one or more digits with <code>\d+</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// ✅ Correct — double backslash</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-title function_">toMatchAriaInlineSnapshot</span>(<span class="hljs-string">`
+  - button: /item \\d+/
+`</span>)
+
+<span class="hljs-comment">// ❌ Wrong — single backslash is consumed by JS, regex sees &quot;d+&quot; instead of &quot;\d+&quot;</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-title function_">toMatchAriaInlineSnapshot</span>(<span class="hljs-string">`
+  - button: /item \d+/
+`</span>)</code></pre></div>
+<p>This applies to both inline snapshots and <code>.snap</code> files. When Vitest <strong>auto-generates</strong> or <strong>updates</strong> a snapshot, escaping is handled automatically — you only need to worry about this when hand-editing regex patterns.</p>
+</div><h3 id="child-matching"><a class="anchor" href="#child-matching">#</a>Child Matching</h3>
+<p>The <code>/children</code> directive controls how a node&#39;s children are compared against the template. There are three modes:</p>
+<h4 id="partial-matching-default"><a class="anchor" href="#partial-matching-default">#</a>Partial Matching (default)</h4>
+<p>By default (no <code>/children</code> directive), templates use <strong>contain</strong> semantics — extra children in the actual tree are allowed as long as all template children appear as an ordered subsequence. This is the same as <code>/children: contain</code>.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">main</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Welcome<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Some intro text<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>Get Started<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">main</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// This passes — the template children are a subset of the actual children</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;main&#x27;</span>)).<span class="hljs-title function_">toMatchAriaInlineSnapshot</span>(<span class="hljs-string">`
+  - main:
+    - heading &quot;Welcome&quot; [level=1]
+`</span>)</code></pre></div>
+<p>This is useful for focused, resilient tests that don&#39;t break when unrelated content is added.</p>
+<h4 id="exact-matching-children-equal"><a class="anchor" href="#exact-matching-children-equal">#</a>Exact Matching (<code>/children: equal</code>)</h4>
+<p>Requires that the node&#39;s immediate children match the template exactly — same count, same order. No extra children are allowed at this level.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Features&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>Feature A<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>Feature B<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>Feature C<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// This FAILS — the list has 3 items but the template only lists 2</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;list&#x27;</span>)).<span class="hljs-title function_">toMatchAriaInlineSnapshot</span>(<span class="hljs-string">`
+  - list &quot;Features&quot;:
+    - /children: equal
+    - listitem: Feature A
+    - listitem: Feature B
+`</span>)</code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// This PASSES — all 3 items are listed</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;list&#x27;</span>)).<span class="hljs-title function_">toMatchAriaInlineSnapshot</span>(<span class="hljs-string">`
+  - list &quot;Features&quot;:
+    - /children: equal
+    - listitem: Feature A
+    - listitem: Feature B
+    - listitem: Feature C
+`</span>)</code></pre></div>
+<p>The strict matching only applies at the level where <code>/children</code> is placed. Descendants of each <code>listitem</code> still use the default contain semantics.</p>
+<h4 id="deep-exact-matching-children-deep-equal"><a class="anchor" href="#deep-exact-matching-children-deep-equal">#</a>Deep Exact Matching (<code>/children: deep-equal</code>)</h4>
+<p>Like <code>equal</code>, but the strict matching <strong>propagates to all descendants</strong>. Every level of nesting must match exactly — same count, same order, no extra nodes at any depth.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;navigation&#x27;</span>)).<span class="hljs-title function_">toMatchAriaInlineSnapshot</span>(<span class="hljs-string">`
+  - navigation &quot;Main&quot;:
+    - /children: deep-equal
+    - link &quot;Home&quot;:
+      - /url: /
+    - link &quot;About&quot;:
+      - /url: /about
+`</span>)</code></pre></div>
+<p>With <code>deep-equal</code>, every child of each <code>link</code> must also match exactly. If a link had an extra child node not listed in the template, the assertion would fail.</p>
+<h4 id="comparison"><a class="anchor" href="#comparison">#</a>Comparison</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Directive</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Partial</td>
+<td><em>(default)</em> or <code>/children: contain</code></td>
+<td>Template children are an ordered subsequence — extra actual children are ignored</td>
+</tr>
+<tr>
+<td>Exact</td>
+<td><code>/children: equal</code></td>
+<td>Immediate children must match exactly; descendants still use partial matching</td>
+</tr>
+<tr>
+<td>Deep exact</td>
+<td><code>/children: deep-equal</code></td>
+<td>All children at every depth must match exactly</td>
+</tr>
+</tbody></table></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#snapshot-workflow">Snapshot Workflow</a><a class="toc-2" href="#basic-usage">Basic Usage</a><a class="toc-3" href="#file-snapshots">File Snapshots</a><a class="toc-3" href="#inline-snapshots">Inline Snapshots</a><a class="toc-2" href="#browser-mode-retry-behavior">Browser Mode Retry Behavior</a><a class="toc-2" href="#preserving-hand-edited-patterns">Preserving Hand-Edited Patterns</a><a class="toc-3" href="#example">Example</a><a class="toc-2" href="#snapshot-format">Snapshot Format</a><a class="toc-3" href="#roles-and-accessible-names">Roles and Accessible Names</a><a class="toc-3" href="#children">Children</a><a class="toc-3" href="#attributes">Attributes</a><a class="toc-3" href="#pseudo-attributes">Pseudo-Attributes</a><a class="toc-2" href="#matching">Matching</a><a class="toc-3" href="#regular-expressions">Regular Expressions</a><a class="toc-3" href="#child-matching">Child Matching</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

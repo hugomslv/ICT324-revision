@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>prefer-reflect (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/prefer-reflect <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/prefer-reflect">version en ligne</a></div>
+<h1>prefer-reflect</h1><p>The original intent of this rule now seems misguided as we have come to understand that <code>Reflect</code> methods are not actually intended to replace the <code>Object</code> counterparts the rule suggests, but rather exist as low-level primitives to be used with proxies in order to replicate the default behavior of various previously existing functionality.</p>
+<p><strong>Please note</strong>: This rule contains an incorrect behavior - it will suggest you to use <code>Reflect.getOwnPropertyNames</code> rather than <code>Object.getOwnPropertyNames</code>, but the former one doesn&#39;t exist in the <a href="https://www.ecma-international.org/ecma-262/6.0/index.html#sec-reflection">specification</a>. We suggest using the <code>exceptions</code> option with <code>&quot;getOwnPropertyNames&quot;</code> to avoid this false suggestion.</p>
+<p>The ES6 Reflect API comes with a handful of methods which somewhat deprecate methods on old constructors:</p>
+<ul>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/index.html#sec-reflect.apply"><code>Reflect.apply</code></a> effectively deprecates <a href="https://www.ecma-international.org/ecma-262/6.0/index.html#sec-function.prototype.apply"><code>Function.prototype.apply</code></a> and <a href="https://www.ecma-international.org/ecma-262/6.0/index.html#sec-function.prototype.call"><code>Function.prototype.call</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/index.html#sec-reflect.deleteproperty"><code>Reflect.deleteProperty</code></a> effectively deprecates the <a href="https://www.ecma-international.org/ecma-262/6.0/index.html#sec-delete-operator-runtime-semantics-evaluation"><code>delete</code> keyword</a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/index.html#sec-reflect.getownpropertydescriptor"><code>Reflect.getOwnPropertyDescriptor</code></a> effectively deprecates <a href="https://www.ecma-international.org/ecma-262/6.0/index.html#sec-object.getownpropertydescriptor"><code>Object.getOwnPropertyDescriptor</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/index.html#sec-reflect.getprototypeof"><code>Reflect.getPrototypeOf</code></a> effectively deprecates <a href="https://www.ecma-international.org/ecma-262/6.0/index.html#sec-object.getprototypeof"><code>Object.getPrototypeOf</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/index.html#sec-reflect.setprototypeof"><code>Reflect.setPrototypeOf</code></a> effectively deprecates <a href="https://www.ecma-international.org/ecma-262/6.0/index.html#sec-object.setprototypeof"><code>Object.setPrototypeOf</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/index.html#sec-reflect.preventextensions"><code>Reflect.preventExtensions</code></a>  effectively deprecates <a href="https://www.ecma-international.org/ecma-262/6.0/index.html#sec-object.preventextensions"><code>Object.preventExtensions</code></a></li>
+</ul>
+<p>The prefer-reflect rule will flag usage of any older method, suggesting to instead use the newer Reflect version.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<h3 id="exceptions"><a class="anchor" href="#exceptions">#</a>Exceptions</h3>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-string">&quot;prefer-reflect&quot;</span>: [&lt;enabled&gt;, { <span class="hljs-string">&quot;exceptions&quot;</span>: [&lt;...exceptions&gt;] }]</code></pre></div>
+<p>The <code>exceptions</code> option allows you to pass an array of methods names you&#39;d like to continue to use in the old style.</p>
+<p>For example if you wish to use all Reflect methods, except for <code>Function.prototype.apply</code> then your config would look like <code>prefer-reflect: [2, { &quot;exceptions&quot;: [&quot;apply&quot;] }]</code>.</p>
+<p>If you want to use Reflect methods, but keep using the <code>delete</code> keyword, then your config would look like <code>prefer-reflect: [2, { &quot;exceptions&quot;: [&quot;delete&quot;] }]</code>.</p>
+<p>These can be combined as much as you like. To make all methods exceptions (thereby rendering this rule useless), use <code>prefer-reflect: [2, { &quot;exceptions&quot;: [&quot;apply&quot;, &quot;call&quot;, &quot;defineProperty&quot;, &quot;getOwnPropertyDescriptor&quot;, &quot;getPrototypeOf&quot;, &quot;setPrototypeOf&quot;, &quot;isExtensible&quot;, &quot;getOwnPropertyNames&quot;, &quot;preventExtensions&quot;, &quot;delete&quot;] }]</code></p>
+<h3 id="reflectapply"><a class="anchor" href="#reflectapply">#</a>Reflect.apply</h3>
+<p>Deprecates <code>Function.prototype.apply()</code> and <code>Function.prototype.call()</code></p>
+<p>Examples of <strong>incorrect</strong> code for this rule when used without exceptions:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+myFunction.<span class="hljs-title function_">apply</span>(<span class="hljs-literal">undefined</span>, args);
+myFunction.<span class="hljs-title function_">apply</span>(<span class="hljs-literal">null</span>, args);
+obj.<span class="hljs-property">myMethod</span>.<span class="hljs-title function_">apply</span>(obj, args);
+obj.<span class="hljs-property">myMethod</span>.<span class="hljs-title function_">apply</span>(other, args);
+
+myFunction.<span class="hljs-title function_">call</span>(<span class="hljs-literal">undefined</span>, arg);
+myFunction.<span class="hljs-title function_">call</span>(<span class="hljs-literal">null</span>, arg);
+obj.<span class="hljs-property">myMethod</span>.<span class="hljs-title function_">call</span>(obj, arg);
+obj.<span class="hljs-property">myMethod</span>.<span class="hljs-title function_">call</span>(other, arg);</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule when used without exceptions:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">apply</span>(myFunction, <span class="hljs-literal">undefined</span>, args);
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">apply</span>(myFunction, <span class="hljs-literal">null</span>, args);
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">apply</span>(obj.<span class="hljs-property">myMethod</span>, obj, args);
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">apply</span>(obj.<span class="hljs-property">myMethod</span>, other, args);
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">apply</span>(myFunction, <span class="hljs-literal">undefined</span>, [arg]);
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">apply</span>(myFunction, <span class="hljs-literal">null</span>, [arg]);
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">apply</span>(obj.<span class="hljs-property">myMethod</span>, obj, [arg]);
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">apply</span>(obj.<span class="hljs-property">myMethod</span>, other, [arg]);</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;exceptions&quot;: [&quot;apply&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: [&quot;error&quot;, { &quot;exceptions&quot;: [&quot;apply&quot;] }]*/</span>
+
+<span class="hljs-comment">// in addition to Reflect.apply(...):</span>
+myFunction.<span class="hljs-title function_">apply</span>(<span class="hljs-literal">undefined</span>, args);
+myFunction.<span class="hljs-title function_">apply</span>(<span class="hljs-literal">null</span>, args);
+obj.<span class="hljs-property">myMethod</span>.<span class="hljs-title function_">apply</span>(obj, args);
+obj.<span class="hljs-property">myMethod</span>.<span class="hljs-title function_">apply</span>(other, args);</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;exceptions&quot;: [&quot;call&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: [&quot;error&quot;, { &quot;exceptions&quot;: [&quot;call&quot;] }]*/</span>
+
+<span class="hljs-comment">// in addition to Reflect.apply(...):</span>
+myFunction.<span class="hljs-title function_">call</span>(<span class="hljs-literal">undefined</span>, arg);
+myFunction.<span class="hljs-title function_">call</span>(<span class="hljs-literal">null</span>, arg);
+obj.<span class="hljs-property">myMethod</span>.<span class="hljs-title function_">call</span>(obj, arg);
+obj.<span class="hljs-property">myMethod</span>.<span class="hljs-title function_">call</span>(other, arg);</code></pre></div>
+</div><h3 id="reflectdefineproperty"><a class="anchor" href="#reflectdefineproperty">#</a>Reflect.defineProperty</h3>
+<p>Deprecates <code>Object.defineProperty()</code></p>
+<p>Examples of <strong>incorrect</strong> code for this rule when used without exceptions:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">defineProperty</span>({}, <span class="hljs-string">&#x27;foo&#x27;</span>, {<span class="hljs-attr">value</span>: <span class="hljs-number">1</span>})</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule when used without exceptions:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">defineProperty</span>({}, <span class="hljs-string">&#x27;foo&#x27;</span>, {<span class="hljs-attr">value</span>: <span class="hljs-number">1</span>})</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;exceptions&quot;: [&quot;defineProperty&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: [&quot;error&quot;, { &quot;exceptions&quot;: [&quot;defineProperty&quot;] }]*/</span>
+
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">defineProperty</span>({}, <span class="hljs-string">&#x27;foo&#x27;</span>, {<span class="hljs-attr">value</span>: <span class="hljs-number">1</span>})
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">defineProperty</span>({}, <span class="hljs-string">&#x27;foo&#x27;</span>, {<span class="hljs-attr">value</span>: <span class="hljs-number">1</span>})</code></pre></div>
+</div><h3 id="reflectgetownpropertydescriptor"><a class="anchor" href="#reflectgetownpropertydescriptor">#</a>Reflect.getOwnPropertyDescriptor</h3>
+<p>Deprecates <code>Object.getOwnPropertyDescriptor()</code></p>
+<p>Examples of <strong>incorrect</strong> code for this rule when used without exceptions:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">getOwnPropertyDescriptor</span>({}, <span class="hljs-string">&#x27;foo&#x27;</span>)</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule when used without exceptions:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">getOwnPropertyDescriptor</span>({}, <span class="hljs-string">&#x27;foo&#x27;</span>)</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;exceptions&quot;: [&quot;getOwnPropertyDescriptor&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: [&quot;error&quot;, { &quot;exceptions&quot;: [&quot;getOwnPropertyDescriptor&quot;] }]*/</span>
+
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">getOwnPropertyDescriptor</span>({}, <span class="hljs-string">&#x27;foo&#x27;</span>)
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">getOwnPropertyDescriptor</span>({}, <span class="hljs-string">&#x27;foo&#x27;</span>)</code></pre></div>
+</div><h3 id="reflectgetprototypeof"><a class="anchor" href="#reflectgetprototypeof">#</a>Reflect.getPrototypeOf</h3>
+<p>Deprecates <code>Object.getPrototypeOf()</code></p>
+<p>Examples of <strong>incorrect</strong> code for this rule when used without exceptions:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">getPrototypeOf</span>({}, <span class="hljs-string">&#x27;foo&#x27;</span>)</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule when used without exceptions:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">getPrototypeOf</span>({}, <span class="hljs-string">&#x27;foo&#x27;</span>)</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;exceptions&quot;: [&quot;getPrototypeOf&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: [&quot;error&quot;, { &quot;exceptions&quot;: [&quot;getPrototypeOf&quot;] }]*/</span>
+
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">getPrototypeOf</span>({}, <span class="hljs-string">&#x27;foo&#x27;</span>)
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">getPrototypeOf</span>({}, <span class="hljs-string">&#x27;foo&#x27;</span>)</code></pre></div>
+</div><h3 id="reflectsetprototypeof"><a class="anchor" href="#reflectsetprototypeof">#</a>Reflect.setPrototypeOf</h3>
+<p>Deprecates <code>Object.setPrototypeOf()</code></p>
+<p>Examples of <strong>incorrect</strong> code for this rule when used without exceptions:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">setPrototypeOf</span>({}, <span class="hljs-title class_">Object</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>)</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule when used without exceptions:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">setPrototypeOf</span>({}, <span class="hljs-title class_">Object</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>)</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;exceptions&quot;: [&quot;setPrototypeOf&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: [&quot;error&quot;, { &quot;exceptions&quot;: [&quot;setPrototypeOf&quot;] }]*/</span>
+
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">setPrototypeOf</span>({}, <span class="hljs-title class_">Object</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>)
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">setPrototypeOf</span>({}, <span class="hljs-title class_">Object</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>)</code></pre></div>
+</div><h3 id="reflectisextensible"><a class="anchor" href="#reflectisextensible">#</a>Reflect.isExtensible</h3>
+<p>Deprecates <code>Object.isExtensible</code></p>
+<p>Examples of <strong>incorrect</strong> code for this rule when used without exceptions:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">isExtensible</span>({})</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule when used without exceptions:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">isExtensible</span>({})</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;exceptions&quot;: [&quot;isExtensible&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: [&quot;error&quot;, { &quot;exceptions&quot;: [&quot;isExtensible&quot;] }]*/</span>
+
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">isExtensible</span>({})
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">isExtensible</span>({})</code></pre></div>
+</div><h3 id="reflectpreventextensions"><a class="anchor" href="#reflectpreventextensions">#</a>Reflect.preventExtensions</h3>
+<p>Deprecates <code>Object.preventExtensions()</code></p>
+<p>Examples of <strong>incorrect</strong> code for this rule when used without exceptions:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">preventExtensions</span>({})</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule when used without exceptions:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">preventExtensions</span>({})</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;exceptions&quot;: [&quot;preventExtensions&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: [&quot;error&quot;, { &quot;exceptions&quot;: [&quot;preventExtensions&quot;] }]*/</span>
+
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">preventExtensions</span>({})
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">preventExtensions</span>({})</code></pre></div>
+</div><h3 id="reflectdeleteproperty"><a class="anchor" href="#reflectdeleteproperty">#</a>Reflect.deleteProperty</h3>
+<p>Deprecates the <code>delete</code> keyword</p>
+<p>Examples of <strong>incorrect</strong> code for this rule when used without exceptions:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">delete</span> foo.<span class="hljs-property">bar</span>; <span class="hljs-comment">// deleting object property</span></code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule when used without exceptions:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">delete</span> bar; <span class="hljs-comment">// deleting variable</span>
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">deleteProperty</span>(foo, <span class="hljs-string">&#x27;bar&#x27;</span>);</code></pre></div>
+</div><p>Note: For a rule preventing deletion of variables, see <a href="no-delete-var.html">no-delete-var instead</a></p>
+<p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;exceptions&quot;: [&quot;delete&quot;] }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint prefer-reflect: [&quot;error&quot;, { &quot;exceptions&quot;: [&quot;delete&quot;] }]*/</span>
+
+<span class="hljs-keyword">delete</span> bar
+<span class="hljs-keyword">delete</span> foo.<span class="hljs-property">bar</span>
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">deleteProperty</span>(foo, <span class="hljs-string">&#x27;bar&#x27;</span>);</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>This rule should not be used in ES3/5 environments.</p>
+<p>In ES2015 (ES6) or later, if you don&#39;t want to be notified about places where Reflect could be used, you can safely disable this rule.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="no-useless-call.html"><code>no-useless-call</code></a>, <a href="prefer-spread.html"><code>prefer-spread</code></a>, <a href="no-delete-var.html"><code>no-delete-var</code></a></p></div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#exceptions">Exceptions</a><a class="toc-3" href="#reflectapply">Reflect.apply</a><a class="toc-3" href="#reflectdefineproperty">Reflect.defineProperty</a><a class="toc-3" href="#reflectgetownpropertydescriptor">Reflect.getOwnPropertyDescriptor</a><a class="toc-3" href="#reflectgetprototypeof">Reflect.getPrototypeOf</a><a class="toc-3" href="#reflectsetprototypeof">Reflect.setPrototypeOf</a><a class="toc-3" href="#reflectisextensible">Reflect.isExtensible</a><a class="toc-3" href="#reflectpreventextensions">Reflect.preventExtensions</a><a class="toc-3" href="#reflectdeleteproperty">Reflect.deleteProperty</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

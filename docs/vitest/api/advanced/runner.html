@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Runner API advanced (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/advanced/runner  <a class="ext small" href="https://vitest.dev/api/advanced/runner">version en ligne</a></div>
+<h1 id="runner-api-advanced"><a class="anchor" href="#runner-api-advanced">#</a>Runner API <Badge type="danger">advanced</Badge></h1>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This is advanced API. If you just want to <a href="../../guide/index.html">run tests</a>, you probably don&#39;t need this. It is primarily used by library authors.</p>
+</div><p>You can specify a path to your test runner with the <code>runner</code> option in your configuration file. This file should have a default export with a class constructor implementing these methods:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">VitestRunner</span> {
+  <span class="hljs-comment">/**
+   * First thing that&#x27;s getting called before actually collecting and running tests.
+   */</span>
+  <span class="hljs-attr">onBeforeCollect</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">paths</span>: <span class="hljs-built_in">string</span>[]</span>) =&gt;</span> <span class="hljs-built_in">unknown</span>
+  <span class="hljs-comment">/**
+   * Called after collecting tests and before &quot;onBeforeRun&quot;.
+   */</span>
+  <span class="hljs-attr">onCollected</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">files</span>: <span class="hljs-title class_">File</span>[]</span>) =&gt;</span> <span class="hljs-built_in">unknown</span>
+
+  <span class="hljs-comment">/**
+   * Called when test runner should cancel next test runs.
+   * Runner should listen for this method and mark tests and suites as skipped in
+   * &quot;onBeforeRunSuite&quot; and &quot;onBeforeRunTask&quot; when called.
+   */</span>
+  <span class="hljs-attr">onCancel</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">reason</span>: <span class="hljs-title class_">CancelReason</span></span>) =&gt;</span> <span class="hljs-built_in">unknown</span>
+
+  <span class="hljs-comment">/**
+   * Called before running a single test. Doesn&#x27;t have &quot;result&quot; yet.
+   */</span>
+  <span class="hljs-attr">onBeforeRunTask</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">test</span>: <span class="hljs-title class_">Test</span></span>) =&gt;</span> <span class="hljs-built_in">unknown</span>
+  <span class="hljs-comment">/**
+   * Called before actually running the test function. Already has &quot;result&quot; with &quot;state&quot; and &quot;startTime&quot;.
+   */</span>
+  <span class="hljs-attr">onBeforeTryTask</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">test</span>: <span class="hljs-title class_">Test</span>, <span class="hljs-attr">options</span>: { retry: <span class="hljs-built_in">number</span>; repeats: <span class="hljs-built_in">number</span> }</span>) =&gt;</span> <span class="hljs-built_in">unknown</span>
+  <span class="hljs-comment">/**
+   * Called after result and state are set.
+   */</span>
+  <span class="hljs-attr">onAfterRunTask</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">test</span>: <span class="hljs-title class_">Test</span></span>) =&gt;</span> <span class="hljs-built_in">unknown</span>
+  <span class="hljs-comment">/**
+   * Called right after running the test function. Doesn&#x27;t have new state yet. Will not be called, if the test function throws.
+   */</span>
+  <span class="hljs-attr">onAfterTryTask</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">test</span>: <span class="hljs-title class_">Test</span>, <span class="hljs-attr">options</span>: { retry: <span class="hljs-built_in">number</span>; repeats: <span class="hljs-built_in">number</span> }</span>) =&gt;</span> <span class="hljs-built_in">unknown</span>
+  <span class="hljs-comment">/**
+   * Called after the retry resolution happened. Unlike `onAfterTryTask`, the test now has a new state.
+   * All `after` hooks were also called by this point.
+   */</span>
+  <span class="hljs-attr">onAfterRetryTask</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">test</span>: <span class="hljs-title class_">Test</span>, <span class="hljs-attr">options</span>: { retry: <span class="hljs-built_in">number</span>; repeats: <span class="hljs-built_in">number</span> }</span>) =&gt;</span> <span class="hljs-built_in">unknown</span>
+
+  <span class="hljs-comment">/**
+   * Called before running a single suite. Doesn&#x27;t have &quot;result&quot; yet.
+   */</span>
+  <span class="hljs-attr">onBeforeRunSuite</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">suite</span>: <span class="hljs-title class_">Suite</span></span>) =&gt;</span> <span class="hljs-built_in">unknown</span>
+  <span class="hljs-comment">/**
+   * Called after running a single suite. Has state and result.
+   */</span>
+  <span class="hljs-attr">onAfterRunSuite</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">suite</span>: <span class="hljs-title class_">Suite</span></span>) =&gt;</span> <span class="hljs-built_in">unknown</span>
+
+  <span class="hljs-comment">/**
+   * If defined, will be called instead of usual Vitest suite partition and handling.
+   * &quot;before&quot; and &quot;after&quot; hooks will not be ignored.
+   */</span>
+  <span class="hljs-attr">runSuite</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">suite</span>: <span class="hljs-title class_">Suite</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-comment">/**
+   * If defined, will be called instead of usual Vitest handling. Useful, if you have your custom test function.
+   * &quot;before&quot; and &quot;after&quot; hooks will not be ignored.
+   */</span>
+  <span class="hljs-attr">runTask</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">test</span>: <span class="hljs-title class_">TaskPopulated</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+
+  <span class="hljs-comment">/**
+   * Called, when a task is updated. The same as &quot;onTaskUpdate&quot; in a reporter, but this is running in the same thread as tests.
+   */</span>
+  <span class="hljs-attr">onTaskUpdate</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">task</span>: [<span class="hljs-built_in">string</span>, <span class="hljs-title class_">TaskResult</span> | <span class="hljs-literal">undefined</span>, <span class="hljs-title class_">TaskMeta</span> | <span class="hljs-literal">undefined</span>][]</span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+
+  <span class="hljs-comment">/**
+   * Called before running all tests in collected paths.
+   */</span>
+  <span class="hljs-attr">onBeforeRunFiles</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">files</span>: <span class="hljs-title class_">File</span>[]</span>) =&gt;</span> <span class="hljs-built_in">unknown</span>
+  <span class="hljs-comment">/**
+   * Called right after running all tests in collected paths.
+   */</span>
+  <span class="hljs-attr">onAfterRunFiles</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">files</span>: <span class="hljs-title class_">File</span>[]</span>) =&gt;</span> <span class="hljs-built_in">unknown</span>
+  <span class="hljs-comment">/**
+   * Called when new context for a test is defined. Useful, if you want to add custom properties to the context.
+   * If you only want to define custom context with a runner, consider using &quot;beforeAll&quot; in &quot;setupFiles&quot; instead.
+   */</span>
+  <span class="hljs-attr">extendTaskContext</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">context</span>: <span class="hljs-title class_">TestContext</span></span>) =&gt;</span> <span class="hljs-title class_">TestContext</span>
+  <span class="hljs-comment">/**
+   * Called when certain files are imported. Can be called in two situations: to collect tests and to import setup files.
+   */</span>
+  <span class="hljs-attr">importFile</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">filepath</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">source</span>: <span class="hljs-title class_">VitestRunnerImportSource</span></span>) =&gt;</span> <span class="hljs-built_in">unknown</span>
+  <span class="hljs-comment">/**
+   * Function that is called when the runner attempts to get the value when `test.extend` is used with `{ injected: true }`
+   */</span>
+  <span class="hljs-attr">injectValue</span>?: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">key</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-built_in">unknown</span>
+  <span class="hljs-comment">/**
+   * Publicly available configuration.
+   */</span>
+  <span class="hljs-attr">config</span>: <span class="hljs-title class_">SerializedConfig</span>
+  <span class="hljs-comment">/**
+   * The name of the current pool. Can affect how stack trace is inferred on the server side.
+   */</span>
+  <span class="hljs-attr">pool</span>?: <span class="hljs-built_in">string</span>
+}</code></pre></div>
+<p>When initiating this class, Vitest passes down Vitest config, - you should expose it as a <code>config</code> property:</p>
+<div class="code"><div class="code-title">runner.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">RunnerTestFile</span>, <span class="hljs-title class_">SerializedConfig</span>, <span class="hljs-title class_">TestRunner</span>, <span class="hljs-title class_">VitestTestRunner</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">CustomRunner</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">TestRunner</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">VitestTestRunner</span> {
+  <span class="hljs-keyword">public</span> <span class="hljs-attr">config</span>: <span class="hljs-title class_">SerializedConfig</span>
+
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"><span class="hljs-attr">config</span>: <span class="hljs-title class_">SerializedConfig</span></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">config</span> = config
+  }
+
+  <span class="hljs-title function_">onAfterRunFiles</span>(<span class="hljs-params"><span class="hljs-attr">files</span>: <span class="hljs-title class_">RunnerTestFile</span>[]</span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;finished running&#x27;</span>, files)
+  }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title class_">CustomRunner</span></code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Vitest also injects an instance of <code>ModuleRunner</code> from <code>vite/module-runner</code> as <code>moduleRunner</code> property. You can use it to process files in <code>importFile</code> method (this is default behavior of <code>TestRunner</code> and <code>BenchmarkRunner</code>).</p>
+<p><code>ModuleRunner</code> exposes <code>import</code> method, which is used to import test files in a Vite-friendly environment. Meaning, it will resolve imports and transform file content at runtime so that Node can understand it:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Runner</span> {
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">importFile</span>(<span class="hljs-params"><span class="hljs-attr">filepath</span>: <span class="hljs-built_in">string</span></span>) {
+    <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">moduleRunner</span>.<span class="hljs-keyword">import</span>(filepath)
+  }
+}</code></pre></div>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If you don&#39;t have a custom runner or didn&#39;t define <code>runTest</code> method, Vitest will try to retrieve a task automatically. If you didn&#39;t add a function with <code>setFn</code>, it will fail.</p>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Snapshot support and some other features depend on the runner. If you don&#39;t want to lose it, you can extend your runner from <code>TestRunner</code> imported from <code>vitest</code>. It also exposes <code>NodeBenchmarkRunner</code>, if you want to extend benchmark functionality.</p>
+</div><h2 id="tasks"><a class="anchor" href="#tasks">#</a>Tasks</h2>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>The &quot;Runner Tasks API&quot; is experimental and should primarily be used only in the test runtime. Vitest also exposes the <a href="test-module.html">&quot;Reported Tasks API&quot;</a>, which should be preferred when working in the main thread (inside the reporter, for example).</p>
+<p>The team is currently discussing if &quot;Runner Tasks&quot; should be replaced by &quot;Reported Tasks&quot; in the future.</p>
+</div><p>Suites and tests are called <code>tasks</code> internally. Vitest runner initiates a <code>File</code> task before collecting any tests - this is a superset of <code>Suite</code> with a few additional properties. It is available on every task (including <code>File</code>) as a <code>file</code> property.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">File</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Suite</span> {
+  <span class="hljs-comment">/**
+   * The name of the pool that the file belongs to.
+   * <span class="hljs-doctag">@default</span> &#x27;forks&#x27;
+   */</span>
+  <span class="hljs-attr">pool</span>?: <span class="hljs-built_in">string</span>
+  <span class="hljs-comment">/**
+   * The path to the file in UNIX format.
+   */</span>
+  <span class="hljs-attr">filepath</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-comment">/**
+   * The name of the test project the file belongs to.
+   */</span>
+  <span class="hljs-attr">projectName</span>: <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-comment">/**
+   * The time it took to collect all tests in the file.
+   * This time also includes importing all the file dependencies.
+   */</span>
+  <span class="hljs-attr">collectDuration</span>?: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * The time it took to import the setup file.
+   */</span>
+  <span class="hljs-attr">setupDuration</span>?: <span class="hljs-built_in">number</span>
+}</code></pre></div>
+<p>Every suite has a <code>tasks</code> property that is populated during collection phase. It is useful to traverse the task tree from the top down.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Suite</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">TaskBase</span> {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;suite&#x27;</span>
+  <span class="hljs-comment">/**
+   * File task. It&#x27;s the root task of the file.
+   */</span>
+  <span class="hljs-attr">file</span>: <span class="hljs-title class_">File</span>
+  <span class="hljs-comment">/**
+   * An array of tasks that are part of the suite.
+   */</span>
+  <span class="hljs-attr">tasks</span>: <span class="hljs-title class_">Task</span>[]
+}</code></pre></div>
+<p>Every task has a <code>suite</code> property that references a suite it is located in. If <code>test</code> or <code>describe</code> are initiated at the top level, they will not have a <code>suite</code> property (it will <strong>not</strong> be equal to <code>file</code>!). <code>File</code> also never has a <code>suite</code> property. It is useful to traverse the tasks from the bottom up.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Test</span>&lt;<span class="hljs-title class_">ExtraContext</span> = <span class="hljs-built_in">object</span>&gt; <span class="hljs-keyword">extends</span> <span class="hljs-title class_">TaskBase</span> {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;test&#x27;</span>
+  <span class="hljs-comment">/**
+   * Test context that will be passed to the test function.
+   */</span>
+  <span class="hljs-attr">context</span>: <span class="hljs-title class_">TestContext</span> &amp; <span class="hljs-title class_">ExtraContext</span>
+  <span class="hljs-comment">/**
+   * File task. It&#x27;s the root task of the file.
+   */</span>
+  <span class="hljs-attr">file</span>: <span class="hljs-title class_">File</span>
+  <span class="hljs-comment">/**
+   * Whether the task was skipped by calling `context.skip()`.
+   */</span>
+  <span class="hljs-attr">pending</span>?: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-comment">/**
+   * Whether the task should succeed if it fails. If the task fails, it will be marked as passed.
+   */</span>
+  <span class="hljs-attr">fails</span>?: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-comment">/**
+   * Store promises (from async expects) to wait for them before finishing the test
+   */</span>
+  <span class="hljs-attr">promises</span>?: <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">any</span>&gt;[]
+}</code></pre></div>
+<p>Every task can have a <code>result</code> field. Suites can only have this field if an error thrown within a suite callback or <code>beforeAll</code>/<code>afterAll</code> callbacks prevents them from collecting tests. Tests always have this field after their callbacks are called - the <code>state</code> and <code>errors</code> fields are present depending on the outcome. If an error was thrown in <code>beforeEach</code> or <code>afterEach</code> callbacks, the thrown error will be present in <code>task.result.errors</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">TaskResult</span> {
+  <span class="hljs-comment">/**
+   * State of the task. Inherits the `task.mode` during collection.
+   * When the task has finished, it will be changed to `pass` or `fail`.
+   * - **pass**: task ran successfully
+   * - **fail**: task failed
+   */</span>
+  <span class="hljs-attr">state</span>: <span class="hljs-title class_">TaskState</span>
+  <span class="hljs-comment">/**
+   * Errors that occurred during the task execution. It is possible to have several errors
+   * if `expect.soft()` failed multiple times.
+   */</span>
+  <span class="hljs-attr">errors</span>?: <span class="hljs-title class_">TestError</span>[]
+  <span class="hljs-comment">/**
+   * How long in milliseconds the task took to run.
+   */</span>
+  <span class="hljs-attr">duration</span>?: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * Time in milliseconds when the task started running.
+   */</span>
+  <span class="hljs-attr">startTime</span>?: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * Heap size in bytes after the task finished.
+   * Only available if `logHeapUsage` option is set and `process.memoryUsage` is defined.
+   */</span>
+  <span class="hljs-attr">heap</span>?: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * State of related to this task hooks. Useful during reporting.
+   */</span>
+  <span class="hljs-attr">hooks</span>?: <span class="hljs-title class_">Partial</span>&lt;<span class="hljs-title class_">Record</span>&lt;<span class="hljs-string">&#x27;afterAll&#x27;</span> | <span class="hljs-string">&#x27;beforeAll&#x27;</span> | <span class="hljs-string">&#x27;beforeEach&#x27;</span> | <span class="hljs-string">&#x27;afterEach&#x27;</span>, <span class="hljs-title class_">TaskState</span>&gt;&gt;
+  <span class="hljs-comment">/**
+   * The amount of times the task was retried. The task is retried only if it
+   * failed and `retry` option is set.
+   */</span>
+  <span class="hljs-attr">retryCount</span>?: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * The amount of times the task was repeated. The task is repeated only if
+   * `repeats` option is set. This number also contains `retryCount`.
+   */</span>
+  <span class="hljs-attr">repeatCount</span>?: <span class="hljs-built_in">number</span>
+}</code></pre></div>
+<h2 id="your-task-function"><a class="anchor" href="#your-task-function">#</a>Your Task Function</h2>
+<p>Vitest exposes <code>createTaskCollector</code> utility to create your own <code>test</code> method. It behaves the same way as a test, but calls a custom method during collection.</p>
+<p>A task is an object that is part of a suite. It is automatically added to the current suite with a <code>suite.task</code> method:</p>
+<div class="code"><div class="code-title">custom.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> { afterAll, beforeAll, describe, <span class="hljs-title class_">TestRunner</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// this function will be called during collection phase:</span>
+<span class="hljs-comment">// don&#x27;t call function handler here, add it to suite tasks</span>
+<span class="hljs-comment">// with &quot;getCurrentSuite().task()&quot; method</span>
+<span class="hljs-comment">// note: createTaskCollector provides support for &quot;todo&quot;/&quot;each&quot;/...</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> myCustomTask = <span class="hljs-title class_">TestRunner</span>.<span class="hljs-title function_">createTaskCollector</span>(
+  <span class="hljs-keyword">function</span> (<span class="hljs-params">name, fn, timeout</span>) {
+    <span class="hljs-title class_">TestRunner</span>.<span class="hljs-title function_">getCurrentSuite</span>().<span class="hljs-title function_">task</span>(name, {
+      ...<span class="hljs-variable language_">this</span>, <span class="hljs-comment">// so &quot;todo&quot;/&quot;skip&quot;/... is tracked correctly</span>
+      <span class="hljs-attr">meta</span>: {
+        <span class="hljs-attr">customPropertyToDifferentiateTask</span>: <span class="hljs-literal">true</span>
+      },
+      <span class="hljs-attr">handler</span>: fn,
+      timeout,
+    })
+  }
+)</code></pre></div>
+<div class="code"><div class="code-title">tasks.test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> {
+  afterAll,
+  beforeAll,
+  describe,
+  myCustomTask
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./custom.js&#x27;</span>
+<span class="hljs-keyword">import</span> { gardener } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./gardener.js&#x27;</span>
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;take care of the garden&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">() =&gt;</span> {
+    gardener.<span class="hljs-title function_">putWorkingClothes</span>()
+  })
+
+  <span class="hljs-title function_">myCustomTask</span>(<span class="hljs-string">&#x27;weed the grass&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    gardener.<span class="hljs-title function_">weedTheGrass</span>()
+  })
+  myCustomTask.<span class="hljs-title function_">todo</span>(<span class="hljs-string">&#x27;mow the lawn&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    gardener.<span class="hljs-title function_">mowerTheLawn</span>()
+  })
+  <span class="hljs-title function_">myCustomTask</span>(<span class="hljs-string">&#x27;water flowers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    gardener.<span class="hljs-title function_">waterFlowers</span>()
+  })
+
+  <span class="hljs-title function_">afterAll</span>(<span class="hljs-function">() =&gt;</span> {
+    gardener.<span class="hljs-title function_">goHome</span>()
+  })
+})</code></pre></div>
+<div class="code"><pre><code class="hljs lang-bash">vitest ./garden/tasks.test.js</code></pre></div>
+
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

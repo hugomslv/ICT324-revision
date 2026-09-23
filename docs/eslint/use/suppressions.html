@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bulk Suppressions (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › use/suppressions  <a class="ext small" href="https://eslint.org/docs/latest/use/suppressions">version en ligne</a></div>
+<h1>Bulk Suppressions</h1><p>Enabling a new lint rule as <code>&quot;error&quot;</code> can be challenging when the codebase has many violations and the rule isn&#39;t auto-fixable. Unless the rule is enabled during the early stages of the project, it becomes harder and harder to enable it as the codebase grows. Existing violations must be resolved before enabling the rule, but while doing that other violations may occur.</p>
+<p>To address this, ESLint provides a way to suppress existing violations for one or more rules. While the rule will be enforced for new code, the existing violations will not be reported. This way, you can address the existing violations at your own pace.</p>
+<div class="box box-important"><div class="box-title">❗ Important</div><p>Only rules configured as <code>&quot;error&quot;</code> are suppressed. If a rule is enabled as <code>&quot;warn&quot;</code>, ESLint will not suppress the violations.</p>
+</div><p>After you enable a rule as <code>&quot;error&quot;</code> in your configuration file, you can suppress all the existing violations at once by using the <code>--suppress-all</code> flag. It is recommended to execute the command with the <code>--fix</code> flag so that you don&#39;t suppress violations that can be auto-fixed.</p>
+<div class="code"><pre><code class="hljs lang-bash">eslint --fix --suppress-all</code></pre></div>
+<p>This command will suppress all the existing violations of all the rules that are enabled as <code>&quot;error&quot;</code>. Running the <code>eslint</code> command again will not report these violations.</p>
+<p>If you would like to suppress violations of a specific rule, you can use the <code>--suppress-rule</code> flag.</p>
+<div class="code"><pre><code class="hljs lang-bash">eslint --fix --suppress-rule no-unused-expressions</code></pre></div>
+<p>You can also suppress violations of multiple rules by providing multiple rule names.</p>
+<div class="code"><pre><code class="hljs lang-bash">eslint --fix --suppress-rule no-unused-expressions --suppress-rule no-unsafe-assignment</code></pre></div>
+<h2 id="suppressions-file"><a class="anchor" href="#suppressions-file">#</a>Suppressions File</h2>
+<p>When you suppress violations, ESLint creates a <code>eslint-suppressions.json</code> file in the root of the project. This file contains the list of rules that have been suppressed. You should commit this file to the repository so that the suppressions are shared with all the developers.</p>
+<p>If necessary, you can change the location of the suppressions file by using the <code>--suppressions-location</code> argument. Note that the argument must be provided not only when suppressing violations but also when running ESLint. This is necessary so that ESLint picks up the correct suppressions file.</p>
+<div class="code"><pre><code class="hljs lang-bash">eslint --suppressions-location .github/.eslint-suppressions</code></pre></div>
+<h2 id="resolving-suppressions"><a class="anchor" href="#resolving-suppressions">#</a>Resolving Suppressions</h2>
+<p>You can address any of the reported violations by making the necessary changes to the code as usual. If you run ESLint again you will notice that it exits with a non-zero exit code and an error is reported about unused suppressions. This is because the violations have been resolved but the suppressions are still in place.</p>
+<div class="code"><pre><code class="hljs lang-bash">&gt; eslint
+There are suppressions left that <span class="hljs-keyword">do</span> not occur anymore. Consider re-running the <span class="hljs-built_in">command</span> with `--prune-suppressions`.</code></pre></div>
+<p>To remove the suppressions that are no longer needed, you can use the <a href="command-line-interface.html#--prune-suppressions"><code>--prune-suppressions</code></a> flag.</p>
+<div class="code"><pre><code class="hljs lang-bash">eslint --prune-suppressions</code></pre></div>
+<p>To ignore unused suppressions when calculating the exit code and not report an error about unused suppressions, you can use the <code>--pass-on-unpruned-suppressions</code> flag.</p>
+<div class="code"><pre><code class="hljs lang-bash">eslint --pass-on-unpruned-suppressions</code></pre></div>
+<p>For more information on the available CLI options, refer to <a href="command-line-interface.html">Command Line Interface</a>.</p>
+<h2 id="usage-with-the-nodejs-api"><a class="anchor" href="#usage-with-the-nodejs-api">#</a>Usage with the Node.js API</h2>
+<p>Suppressions can also be applied when using ESLint programmatically through the <a href="https://eslint.org/docs/latest/integrate/nodejs-api" class="ext" title="lien en ligne (non disponible hors-ligne)">Node.js API</a>. To enable suppressions, set the <code>applySuppressions</code> option to <code>true</code> in the <code>ESLint</code> constructor:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> eslint = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ESLint</span>({
+	<span class="hljs-attr">applySuppressions</span>: <span class="hljs-literal">true</span>,
+});</code></pre></div>
+<p>By default, ESLint looks for <code>eslint-suppressions.json</code> in the current working directory. You can specify a custom suppressions file location using the <code>suppressionsLocation</code> option:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> eslint = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ESLint</span>({
+	<span class="hljs-attr">applySuppressions</span>: <span class="hljs-literal">true</span>,
+	<span class="hljs-attr">suppressionsLocation</span>: <span class="hljs-string">&quot;./config/my-suppressions.json&quot;</span>,
+});</code></pre></div>
+<p>When using <code>lintText()</code>, you must provide the <code>filePath</code> option for suppressions to take effect, since suppressions are matched by file path.</p>
+<p><strong>Note:</strong> The Node.js API only supports applying existing suppressions. Creating new suppressions (<code>--suppress-all</code>, <code>--suppress-rule</code>) and pruning unused suppressions (<code>--prune-suppressions</code>) are only available through the CLI.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#suppressions-file">Suppressions File</a><a class="toc-2" href="#resolving-suppressions">Resolving Suppressions</a><a class="toc-2" href="#usage-with-the-nodejs-api">Usage with the Node.js API</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

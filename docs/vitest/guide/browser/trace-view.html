@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trace View 5.0.0 (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/browser/trace-view  <a class="ext small" href="https://vitest.dev/guide/browser/trace-view">version en ligne</a></div>
+<h1 id="trace-view-5-0-0"><a class="anchor" href="#trace-view-5-0-0">#</a>Trace View <Badge type="warning" text="Experimental" /> <Version>5.0.0</Version></h1>
+<p><code>browser.traceView</code> records browser interactions as DOM snapshots and lets you replay them step by step in Vitest&#39;s built-in trace viewer. It is useful when the live browser view is not enough: you can inspect earlier tests, failed retries, screenshots, assertions, and user actions after the browser has already moved on.</p>
+<p>Trace view is additive to the current browser testing workflow. Enabling it does not force a single debugging mode. You can use it with the normal local browser UI, with a headless browser and Vitest UI, or with the HTML reporter in CI.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Trace view, browser UI, and HTML reports</div><p>The normal local browser mode opens the <a href="../../config/browser/ui.html">browser UI</a>, where tests run in a visible iframe. This is useful while developing, but the iframe only shows the current browser state. When another test runs, the previous rendered state is gone.</p>
+<p><code>browser.traceView</code> keeps a replayable record for each test. In local browser UI mode, the trace viewer appears alongside the existing live view so you can keep using the browser UI while also inspecting recorded steps.</p>
+<p>For static output, add the <a href="../reporters.html#html-reporter">HTML reporter</a>. The same trace viewer can then be opened from the generated report, which is useful for run-mode and CI failures.</p>
+</div><details class="box"><summary>Looking for Playwright traces?</summary><p>This page now documents Vitest&#39;s built-in <code>browser.traceView</code> feature. The previous <code>browser.trace</code> guide for Playwright traces moved to <a href="playwright-traces.html">Playwright Traces</a>.</p>
+</details><h2 id="quick-start"><a class="anchor" href="#quick-start">#</a>Quick Start</h2>
+<p>Enable trace view with the <a href="../../config/browser/traceview.html"><code>browser.traceView</code></a> option:</p>
+<div class="code-group"><div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">traceView</span>: <span class="hljs-literal">true</span>,
+    },
+  },
+})</code></pre></div>
+<div class="code"><div class="code-title">CLI</div><pre><code class="hljs lang-bash">vitest --browser.traceView</code></pre></div>
+</div><p>When <code>browser.traceView</code> is enabled, tests with recorded traces can be opened in the trace viewer from the <a href="../../config/browser/ui.html">browser UI</a>, <a href="../ui.html">Vitest UI</a>, and <a href="../reporters.html#html-reporter">HTML reporter</a>.</p>
+<p>With the HTML reporter enabled, the <a href="https://github.com/vitest-dev/vscode#trace-view">Vitest VS Code extension</a> adds an <strong>Open Trace View</strong> action to tests in the Testing view and editor gutter.</p>
+<p>The viewer has two resizable panes:</p>
+<ul>
+<li><strong>Step list</strong> (left) — every recorded action, assertion, mark, and lifecycle entry, with name, timing, selector, and source location. Failed actions and assertions are highlighted in red.</li>
+<li><strong>DOM snapshot</strong> (right) — a reconstruction of the page at the selected step. The interacted element is highlighted in blue.</li>
+</ul>
+<p>Selecting a step also opens its source location in the Editor tab when that location is available.</p>
+<span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span><p><small>Example replay uses <a href="https://github.com/vuetifyjs/vuetify">Vuetify&#39;s</a> <code>VDateInput</code> component.</small></p>
+<h2 id="common-setups"><a class="anchor" href="#common-setups">#</a>Common Setups</h2>
+<!--
+TODO: The browser UI / Vitest UI / browser driver combinations are not specific to trace view and might be better documented in the Browser Mode guide.  Something like:
+
+  | top-level --ui | browser.ui | browser.headless | Result |
+  | --- | --- | --- | --- |
+  | off | true | false | browser UI/live iframe in headed browser |
+  | on | false | true | pure Vitest UI, tests in headless browser |
+  | on | false | false | pure Vitest UI, tests in separate headed browser window |
+
+--><p><code>browser.traceView</code> records traces. The browser mode, UI, and reporter options determine where you inspect them.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Configuration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Add trace replay to the normal local browser UI</td>
+<td><code>vitest --browser.traceView</code></td>
+<td>Uses the default local headed browser UI and adds trace replay for recorded tests.</td>
+</tr>
+<tr>
+<td>Debug locally with a headless browser</td>
+<td><code>vitest --browser.traceView --browser.headless --ui</code></td>
+<td>The browser runs headless, while Vitest UI shows recorded trace steps and snapshots.</td>
+</tr>
+<tr>
+<td>Debug locally with a visible browser window and Vitest UI</td>
+<td><code>vitest --browser.traceView --browser.headless=false --browser.ui=false --ui</code></td>
+<td>Vitest UI shows recorded trace steps and snapshots, while tests run in a separate headed browser window.</td>
+</tr>
+<tr>
+<td>Generate a static report for CI or run mode</td>
+<td><code>vitest run --browser.traceView --reporter=html</code></td>
+<td>The HTML report includes the trace viewer for recorded tests.</td>
+</tr>
+</tbody></table></div>
+<h2 id="relation-to-playwright-traces"><a class="anchor" href="#relation-to-playwright-traces">#</a>Relation to Playwright Traces</h2>
+<p><code>browser.traceView</code> and <a href="../../config/browser/trace.html"><code>browser.trace</code></a> are independent features:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><code>browser.traceView</code></th>
+<th><code>browser.trace</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Provider support</td>
+<td>All providers (playwright, webdriverio, preview)</td>
+<td>Playwright only</td>
+</tr>
+<tr>
+<td>Viewer</td>
+<td>Browser UI / Vitest UI / HTML reporter</td>
+<td>Playwright Trace Viewer / trace.playwright.dev</td>
+</tr>
+<tr>
+<td>Format</td>
+<td><a href="https://github.com/rrweb-io/rrweb">rrweb</a> DOM snapshots</td>
+<td>Playwright <code>.trace.zip</code></td>
+</tr>
+<tr>
+<td>Requires external tool</td>
+<td>No</td>
+<td>Yes (<code>npx playwright show-trace</code>)</td>
+</tr>
+</tbody></table></div>
+<p>You can enable both at the same time. See <a href="playwright-traces.html">Playwright Traces</a> for the <code>browser.trace</code> workflow.</p>
+<h2 id="recorded-steps"><a class="anchor" href="#recorded-steps">#</a>Recorded Steps</h2>
+<p>Trace entries are recorded automatically for:</p>
+<ul>
+<li><code>expect.element(...)</code> assertions</li>
+<li>Interactive actions like <code>click</code>, <code>dblClick</code>, <code>tripleClick</code>, <code>fill</code>, <code>clear</code>, <code>type</code>, <code>hover</code>, <code>selectOptions</code>, <code>upload</code>, <code>dragAndDrop</code>, <code>tab</code>, <code>keyboard</code>, <code>wheel</code>, and screenshots</li>
+<li>Test runner lifecycle event (e.g. <code>vitest:onAfterRetryTask</code> is recorded after each test and retry run)</li>
+</ul>
+<p>Each entry captures the DOM state at that point, along with timing information, the selector, and the source location that triggered it.</p>
+<p>In Vitest UI, trace entries are streamed as the test runs, so you can inspect recorded steps before the test finishes. Long-running actions, <code>expect.element(...)</code> assertions, and callback <code>page.mark()</code> entries appear as in-progress steps first, then update with their final status and duration.</p>
+<h2 id="custom-trace-entries"><a class="anchor" href="#custom-trace-entries">#</a>Custom Trace Entries</h2>
+<p>You can insert your own named entries with <code>page.mark()</code> and <code>locator.mark()</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">mark</span>(<span class="hljs-string">&#x27;content rendered&#x27;</span>)
+
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Sign in&#x27;</span> }).<span class="hljs-title function_">mark</span>(<span class="hljs-string">&#x27;sign in button&#x27;</span>)</code></pre></div>
+<p>You can also pass a callback to <code>page.mark()</code>. Note that grouping is not currently supported — each inner action is recorded individually, and the mark entry appears at the end:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> page.<span class="hljs-title function_">mark</span>(<span class="hljs-string">&#x27;sign in flow&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Email&#x27;</span> }).<span class="hljs-title function_">fill</span>(<span class="hljs-string">&#x27;john@example.com&#x27;</span>)
+  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Password&#x27;</span> }).<span class="hljs-title function_">fill</span>(<span class="hljs-string">&#x27;secret&#x27;</span>)
+  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Sign in&#x27;</span> }).<span class="hljs-title function_">click</span>()
+})</code></pre></div>
+<p>Use <a href="../../api/vi.html#vi-defineHelper"><code>vi.defineHelper()</code></a> to make entries from reusable helpers point to the call site rather than the helper&#39;s internals:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">const</span> renderContent = vi.<span class="hljs-title function_">defineHelper</span>(<span class="hljs-title function_">async</span> (<span class="hljs-attr">html</span>: <span class="hljs-built_in">string</span>) =&gt; {
+  <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-property">innerHTML</span> = html
+  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">elementLocator</span>(<span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>).<span class="hljs-title function_">mark</span>(<span class="hljs-string">&#x27;render&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;shows button&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">renderContent</span>(<span class="hljs-string">&#x27;&lt;button&gt;Hello&lt;/button&gt;&#x27;</span>) <span class="hljs-comment">// trace entry points here</span>
+})</code></pre></div>
+<h2 id="retries-and-repeats"><a class="anchor" href="#retries-and-repeats">#</a>Retries and Repeats</h2>
+<p>Each attempt — retry or repeat — is recorded as a separate trace. When a test has multiple attempts, the viewer opens the most recent one by default. You can switch between attempts in the Report tab.</p>
+<h2 id="snapshot-fidelity"><a class="anchor" href="#snapshot-fidelity">#</a>Snapshot Fidelity</h2>
+<p>By default, trace view captures the DOM tree, attributes, form values, same-origin readable CSS, element scroll positions, viewport size, and window scroll position. Images and canvas pixels are not inlined by default.</p>
+<p>Stylesheets are captured through the browser&#39;s CSSOM. Readable <code>&lt;style&gt;</code> tags and same-origin <code>&lt;link rel=&quot;stylesheet&quot;&gt;</code> files are serialized into the snapshot and replayed as inline styles, so normal component styles keep working in the trace viewer and HTML reporter. This captures the parsed CSS rules the browser applied, not the exact original stylesheet bytes: comments, formatting, invalid rules, and CSS resource files such as background images or fonts are not bundled this way.</p>
+<p>Enable additional fidelity options with the object form:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">traceView</span>: {
+        <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">inlineImages</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">recordCanvas</span>: <span class="hljs-literal">true</span>,
+      },
+    },
+  },
+})</code></pre></div>
+<p><code>inlineImages</code> stores loaded <code>&lt;img&gt;</code> pixels in the trace snapshot. This is mostly useful for the HTML reporter, where the report should be portable without depending on external image URLs. This is pixel capture, not original resource capture: SVGs are rasterized, animated images are not preserved as animations, and CSS background images or fonts are not covered. Cross-origin images need CORS-readable pixels to be inlined; otherwise they can still render from the external URL if it remains reachable.</p>
+<p><code>recordCanvas</code> stores readable canvas pixels in the trace snapshot. This is useful for charts and simple 2D canvas output, but it is not a full canvas drawing timeline and does not provide complete WebGL replay.</p>
+<h3 id="external-resource-limits"><a class="anchor" href="#external-resource-limits">#</a>External Resource Limits</h3>
+<p>Trace view does not currently provide a general resource store. Resources that are not captured into the snapshot remain URL-backed.</p>
+<p>This means CSS background images and <code>@font-face</code> files referenced from serialized CSS still depend on their original URLs. External images can still render in the viewer when the browser can load the URL, but they are not portable in the HTML reporter unless <code>inlineImages</code> can capture their pixels. Cross-origin images need CORS-readable pixels for that capture; otherwise the browser can display them, but rrweb cannot safely draw them into a canvas data URL.</p>
+<p>Use <code>inlineImages</code> for loaded <code>&lt;img&gt;</code> elements that need to be portable in the HTML reporter. CSS subresources, fonts, non-CORS cross-origin images, videos, and other external files remain limitations of the current snapshot-based trace format.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Canvas replay sandbox</div><p><code>recordCanvas</code> enables a weaker iframe sandbox in the trace viewer. rrweb replays canvas data through an image load handler, so Vitest allows scripts inside the replay iframe for traces recorded with <code>recordCanvas</code>. Keep this option enabled only when canvas pixels are useful for debugging.</p>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#quick-start">Quick Start</a><a class="toc-2" href="#common-setups">Common Setups</a><a class="toc-2" href="#relation-to-playwright-traces">Relation to Playwright Traces</a><a class="toc-2" href="#recorded-steps">Recorded Steps</a><a class="toc-2" href="#custom-trace-entries">Custom Trace Entries</a><a class="toc-2" href="#retries-and-repeats">Retries and Repeats</a><a class="toc-2" href="#snapshot-fidelity">Snapshot Fidelity</a><a class="toc-3" href="#external-resource-limits">External Resource Limits</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

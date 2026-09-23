@@ -1,0 +1,1849 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>expect (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › api/expect  <a class="ext small" href="https://vitest.dev/api/expect">version en ligne</a></div>
+<h1 id="expect"><a class="anchor" href="#expect">#</a>expect</h1>
+<p>The following types are used in the type signatures below</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">type</span> <span class="hljs-title class_">Awaitable</span>&lt;T&gt; = T | <span class="hljs-title class_">PromiseLike</span>&lt;T&gt;</code></pre></div>
+<p><code>expect</code> is used to create assertions. In this context <code>assertions</code> are functions that can be called to assert a statement. Vitest provides <code>chai</code> assertions by default and also <code>Jest</code> compatible assertions built on top of <code>chai</code>. Since Vitest 4.1, for spy/mock testing, Vitest also provides Chai-style assertions (e.g., <a href="#called"><code>expect(spy).to.have.been.called()</code></a>) alongside Jest-style assertions (e.g., <code>expect(spy).toHaveBeenCalled()</code>). Unlike <code>Jest</code>, Vitest supports a message as the second argument - if the assertion fails, the error message will be equal to it.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ExpectStatic</span>
+  <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Chai</span>.<span class="hljs-title class_">ExpectStatic</span>,
+  <span class="hljs-title class_">Matchers</span>&lt;<span class="hljs-built_in">any</span>&gt;,
+  <span class="hljs-title class_">AsymmetricMatchersContaining</span> {
+  &lt;T&gt;(<span class="hljs-attr">actual</span>: T, <span class="hljs-attr">message</span>?: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Assertion</span>&lt;<span class="hljs-built_in">void</span>, T&gt;
+  <span class="hljs-attr">extend</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">expects</span>: <span class="hljs-title class_">MatchersObject</span></span>) =&gt;</span> <span class="hljs-built_in">void</span>
+  <span class="hljs-attr">anything</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">any</span>
+  <span class="hljs-attr">any</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">constructor</span>: <span class="hljs-built_in">unknown</span></span>) =&gt;</span> <span class="hljs-built_in">any</span>
+  <span class="hljs-attr">getState</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">MatcherState</span>
+  <span class="hljs-attr">setState</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">state</span>: <span class="hljs-title class_">Partial</span>&lt;<span class="hljs-title class_">MatcherState</span>&gt;</span>) =&gt;</span> <span class="hljs-built_in">void</span>
+  <span class="hljs-attr">not</span>: <span class="hljs-title class_">AsymmetricMatchersContaining</span>
+}</code></pre></div>
+<p>For example, this code asserts that an <code>input</code> value is equal to <code>2</code>. If it&#39;s not, the assertion will throw an error, and the test will fail.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> input = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>)
+
+<span class="hljs-title function_">expect</span>(input).<span class="hljs-property">to</span>.<span class="hljs-title function_">equal</span>(<span class="hljs-number">2</span>) <span class="hljs-comment">// chai API</span>
+<span class="hljs-title function_">expect</span>(input).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">2</span>) <span class="hljs-comment">// jest API</span></code></pre></div>
+<p>Technically this example doesn&#39;t use <a href="test.html"><code>test</code></a> function, so in the console you will see Node.js error instead of Vitest output. To learn more about <code>test</code>, please read <a href="test.html">Test API Reference</a>.</p>
+<p>Also, <code>expect</code> can be used statically to access matcher functions, described later, and more.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p><code>expect</code> has no effect on testing types, if the expression doesn&#39;t have a type error. If you want to use Vitest as <a href="../guide/testing-types.html">type checker</a>, use <a href="expect-typeof.html"><code>expectTypeOf</code></a> or <a href="assert-type.html"><code>assertType</code></a>.</p>
+</div><h2 id="assert"><a class="anchor" href="#assert">#</a>assert</h2>
+<ul>
+<li><strong>Type:</strong> <code>Chai.AssertStatic</code></li>
+</ul>
+<p>Vitest reexports chai&#39;s <a href="https://www.chaijs.com/api/assert/"><code>assert</code> API</a> as <code>expect.assert</code> for convenience. You can see the supported methods on the <a href="assert.html">Assert API page</a>.</p>
+<p>This is especially useful if you need to narrow down the type, since <code>expect.to*</code> methods do not support that:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Cat</span> {
+  <span class="hljs-attr">__type</span>: <span class="hljs-string">&#x27;Cat&#x27;</span>
+  <span class="hljs-title function_">mew</span>(): <span class="hljs-built_in">void</span>
+}
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Dog</span> {
+  <span class="hljs-attr">__type</span>: <span class="hljs-string">&#x27;Dog&#x27;</span>
+  <span class="hljs-title function_">bark</span>(): <span class="hljs-built_in">void</span>
+}
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Animal</span> = <span class="hljs-title class_">Cat</span> | <span class="hljs-title class_">Dog</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">animal</span>: <span class="hljs-title class_">Animal</span> = { <span class="hljs-attr">__type</span>: <span class="hljs-string">&#x27;Dog&#x27;</span>, <span class="hljs-attr">bark</span>: <span class="hljs-function">() =&gt;</span> {} }
+
+expect.<span class="hljs-title function_">assert</span>(animal.<span class="hljs-property">__type</span> === <span class="hljs-string">&#x27;Dog&#x27;</span>)
+<span class="hljs-comment">// does not show a type error!</span>
+<span class="hljs-title function_">expect</span>(animal.<span class="hljs-title function_">bark</span>()).<span class="hljs-title function_">toBeUndefined</span>()</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Note that <code>expect.assert</code> also supports other type-narrowing methods (like <code>assert.isDefined</code>, <code>assert.exists</code> and so on).</p>
+</div><h2 id="soft"><a class="anchor" href="#soft">#</a>soft</h2>
+<ul>
+<li><strong>Type:</strong> <code>ExpectStatic &amp; (actual: any) =&gt; Assertions</code></li>
+</ul>
+<p><code>expect.soft</code> functions similarly to <code>expect</code>, but instead of terminating the test execution upon a failed assertion, it continues running and marks the failure as a test failure. All errors encountered during the test will be displayed until the test is completed.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;expect.soft test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  expect.<span class="hljs-title function_">soft</span>(<span class="hljs-number">1</span> + <span class="hljs-number">1</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">3</span>) <span class="hljs-comment">// mark the test as fail and continue</span>
+  expect.<span class="hljs-title function_">soft</span>(<span class="hljs-number">1</span> + <span class="hljs-number">2</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">4</span>) <span class="hljs-comment">// mark the test as fail and continue</span>
+})
+<span class="hljs-comment">// reporter will report both errors at the end of the run</span></code></pre></div>
+<p>It can also be used with <code>expect</code>. if <code>expect</code> assertion fails, the test will be terminated and all errors will be displayed.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;expect.soft test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  expect.<span class="hljs-title function_">soft</span>(<span class="hljs-number">1</span> + <span class="hljs-number">1</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">3</span>) <span class="hljs-comment">// mark the test as fail and continue</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-number">1</span> + <span class="hljs-number">2</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">4</span>) <span class="hljs-comment">// failed and terminate the test, all previous errors will be output</span>
+  expect.<span class="hljs-title function_">soft</span>(<span class="hljs-number">1</span> + <span class="hljs-number">3</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">5</span>) <span class="hljs-comment">// do not run</span>
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p><code>expect.soft</code> can only be used inside the <a href="test.html"><code>test</code></a> function.</p>
+</div><h2 id="poll"><a class="anchor" href="#poll">#</a>poll</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">ExpectPoll</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">ExpectStatic</span> {
+  (<span class="hljs-attr">actual</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">options</span>: { signal: AbortSignal }</span>) =&gt;</span> T, <span class="hljs-attr">options</span>?: { <span class="hljs-attr">interval</span>?: <span class="hljs-built_in">number</span>; <span class="hljs-attr">timeout</span>?: <span class="hljs-built_in">number</span>; <span class="hljs-attr">message</span>?: <span class="hljs-built_in">string</span> }): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Assertions</span>&lt;<span class="hljs-title class_">Awaited</span>&lt;T&gt;&gt;&gt;
+}</code></pre></div>
+<p><code>expect.poll</code> reruns the <em>assertion</em> until it is succeeded. You can configure how often Vitest retries and how long it waits by setting <code>interval</code> and <code>timeout</code> options. The <code>timeout</code> applies to the whole polling operation, including pending callback and async matcher execution.</p>
+<p>The callback receives an <code>AbortSignal</code> that is aborted when the poll timeout is reached.</p>
+<p>If an error is thrown inside the <code>expect.poll</code> callback, Vitest will retry again until the timeout runs out.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;element exists&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-title function_">asyncInjectElement</span>()
+
+  <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">poll</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;.element&#x27;</span>)).<span class="hljs-title function_">toBeTruthy</span>()
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p><code>expect.poll</code> makes every assertion asynchronous, so you need to await it. Since Vitest 3, if you forget to await it, the test will fail with a warning to do so.</p>
+<p><code>expect.poll</code> doesn&#39;t work with several matchers:</p>
+<ul>
+<li>Snapshot matchers are not supported because they will always succeed. If your condition is flaky, consider using <a href="vi.html#vi-waitfor"><code>vi.waitFor</code></a> instead to resolve it first:</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> flakyValue = <span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">waitFor</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">getFlakyValue</span>())
+<span class="hljs-title function_">expect</span>(flakyValue).<span class="hljs-title function_">toMatchSnapshot</span>()</code></pre></div>
+<ul>
+<li><code>.resolves</code> and <code>.rejects</code> are not supported. <code>expect.poll</code> already awaits the condition if it&#39;s asynchronous.</li>
+<li><code>toThrow</code> and its aliases are not supported because the <code>expect.poll</code> condition is always resolved before the matcher gets the value</li>
+</ul>
+</div><h2 id="not"><a class="anchor" href="#not">#</a>not</h2>
+<p>Using <code>not</code> will negate the assertion. For example, this code asserts that an <code>input</code> value is not equal to <code>2</code>. If it&#39;s equal, the assertion will throw an error, and the test will fail.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> input = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">16</span>)
+
+<span class="hljs-title function_">expect</span>(input).<span class="hljs-property">not</span>.<span class="hljs-property">to</span>.<span class="hljs-title function_">equal</span>(<span class="hljs-number">2</span>) <span class="hljs-comment">// chai API</span>
+<span class="hljs-title function_">expect</span>(input).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBe</span>(<span class="hljs-number">2</span>) <span class="hljs-comment">// jest API</span></code></pre></div>
+<h2 id="tobe"><a class="anchor" href="#tobe">#</a>toBe</h2>
+<ul>
+<li><strong>Type:</strong> <code>(value: any) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toBe</code> can be used to assert if primitives are equal or that objects share the same reference. It is equivalent of calling <code>expect(Object.is(3, 3)).toBe(true)</code>. If the objects are not the same, but you want to check if their structures are identical, you can use <a href="#toequal"><code>toEqual</code></a>.</p>
+<p>For example, the code below checks if the trader has 13 apples.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> stock = {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;apples&#x27;</span>,
+  <span class="hljs-attr">count</span>: <span class="hljs-number">13</span>,
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;stock has 13 apples&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(stock.<span class="hljs-property">type</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;apples&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(stock.<span class="hljs-property">count</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">13</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;stocks are the same&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> refStock = stock <span class="hljs-comment">// same reference</span>
+
+  <span class="hljs-title function_">expect</span>(stock).<span class="hljs-title function_">toBe</span>(refStock)
+})</code></pre></div>
+<p>Try not to use <code>toBe</code> with floating-point numbers. Since JavaScript rounds them, <code>0.1 + 0.2</code> is not strictly <code>0.3</code>. To reliably assert floating-point numbers, use <a href="#tobecloseto"><code>toBeCloseTo</code></a> assertion.</p>
+<h2 id="tobecloseto"><a class="anchor" href="#tobecloseto">#</a>toBeCloseTo</h2>
+<ul>
+<li><strong>Type:</strong> <code>(value: number, numDigits?: number) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>Use <code>toBeCloseTo</code> to compare floating-point numbers. The optional <code>numDigits</code> argument limits the number of digits to check <em>after</em> the decimal point. The default for <code>numDigits</code> is 2. For example:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+test.<span class="hljs-title function_">fails</span>(<span class="hljs-string">&#x27;decimals are not equal in javascript&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-number">0.2</span> + <span class="hljs-number">0.1</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">0.3</span>) <span class="hljs-comment">// 0.2 + 0.1 is 0.30000000000000004</span>
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;decimals are rounded to 5 after the point&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// 0.2 + 0.1 is 0.30000 | &quot;000000000004&quot; removed</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-number">0.2</span> + <span class="hljs-number">0.1</span>).<span class="hljs-title function_">toBeCloseTo</span>(<span class="hljs-number">0.3</span>, <span class="hljs-number">5</span>)
+  <span class="hljs-comment">// nothing from 0.30000000000000004 is removed</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-number">0.2</span> + <span class="hljs-number">0.1</span>).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeCloseTo</span>(<span class="hljs-number">0.3</span>, <span class="hljs-number">50</span>)
+})</code></pre></div>
+<h2 id="tobedefined"><a class="anchor" href="#tobedefined">#</a>toBeDefined</h2>
+<ul>
+<li><strong>Type:</strong> <code>() =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toBeDefined</code> asserts that the value is not equal to <code>undefined</code>. Useful use case would be to check if function <em>returned</em> anything.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getApples</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-number">3</span>
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;function returned something&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">getApples</span>()).<span class="hljs-title function_">toBeDefined</span>()
+})</code></pre></div>
+<h2 id="tobeundefined"><a class="anchor" href="#tobeundefined">#</a>toBeUndefined</h2>
+<ul>
+<li><strong>Type:</strong> <code>() =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>Opposite of <code>toBeDefined</code>, <code>toBeUndefined</code> asserts that the value <em>is</em> equal to <code>undefined</code>. Useful use case would be to check if function hasn&#39;t <em>returned</em> anything.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getApplesFromStock</span>(<span class="hljs-params"><span class="hljs-attr">stock</span>: <span class="hljs-built_in">string</span></span>) {
+  <span class="hljs-keyword">if</span> (stock === <span class="hljs-string">&#x27;Bill&#x27;</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-number">13</span>
+  }
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;mary doesn\&#x27;t have a stock&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">getApplesFromStock</span>(<span class="hljs-string">&#x27;Mary&#x27;</span>)).<span class="hljs-title function_">toBeUndefined</span>()
+})</code></pre></div>
+<h2 id="tobetruthy"><a class="anchor" href="#tobetruthy">#</a>toBeTruthy</h2>
+<ul>
+<li><strong>Type:</strong> <code>() =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toBeTruthy</code> asserts that the value is true when converted to boolean. Useful if you don&#39;t care for the value, but just want to know it can be converted to <code>true</code>.</p>
+<p>For example, having this code you don&#39;t care for the return value of <code>stocks.getInfo</code> - it maybe a complex object, a string, or anything else. The code will still work.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">Stocks</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./stocks.js&#x27;</span>
+
+<span class="hljs-keyword">const</span> stocks = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Stocks</span>()
+stocks.<span class="hljs-title function_">sync</span>(<span class="hljs-string">&#x27;Bill&#x27;</span>)
+<span class="hljs-keyword">if</span> (stocks.<span class="hljs-title function_">getInfo</span>(<span class="hljs-string">&#x27;Bill&#x27;</span>)) {
+  stocks.<span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-string">&#x27;Bill&#x27;</span>)
+}</code></pre></div>
+<p>So if you want to test that <code>stocks.getInfo</code> will be truthy, you could write:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">Stocks</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./stocks.js&#x27;</span>
+
+<span class="hljs-keyword">const</span> stocks = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Stocks</span>()
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;if we know Bill stock, sell apples to him&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  stocks.<span class="hljs-title function_">sync</span>(<span class="hljs-string">&#x27;Bill&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(stocks.<span class="hljs-title function_">getInfo</span>(<span class="hljs-string">&#x27;Bill&#x27;</span>)).<span class="hljs-title function_">toBeTruthy</span>()
+})</code></pre></div>
+<p>Everything in JavaScript is truthy, except <code>false</code>, <code>null</code>, <code>undefined</code>, <code>NaN</code>, <code>0</code>, <code>-0</code>, <code>0n</code>, <code>&quot;&quot;</code> and <code>document.all</code>.</p>
+<h2 id="tobefalsy"><a class="anchor" href="#tobefalsy">#</a>toBeFalsy</h2>
+<ul>
+<li><strong>Type:</strong> <code>() =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toBeFalsy</code> asserts that the value is false when converted to boolean. Useful if you don&#39;t care for the value, but just want to know if it can be converted to <code>false</code>.</p>
+<p>For example, having this code you don&#39;t care for the return value of <code>stocks.stockFailed</code> - it may return any falsy value, but the code will still work.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">Stocks</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./stocks.js&#x27;</span>
+
+<span class="hljs-keyword">const</span> stocks = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Stocks</span>()
+stocks.<span class="hljs-title function_">sync</span>(<span class="hljs-string">&#x27;Bill&#x27;</span>)
+<span class="hljs-keyword">if</span> (!stocks.<span class="hljs-title function_">stockFailed</span>(<span class="hljs-string">&#x27;Bill&#x27;</span>)) {
+  stocks.<span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-string">&#x27;Bill&#x27;</span>)
+}</code></pre></div>
+<p>So if you want to test that <code>stocks.stockFailed</code> will be falsy, you could write:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">Stocks</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./stocks.js&#x27;</span>
+
+<span class="hljs-keyword">const</span> stocks = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Stocks</span>()
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;if Bill stock hasn\&#x27;t failed, sell apples to him&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  stocks.<span class="hljs-title function_">syncStocks</span>(<span class="hljs-string">&#x27;Bill&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(stocks.<span class="hljs-title function_">stockFailed</span>(<span class="hljs-string">&#x27;Bill&#x27;</span>)).<span class="hljs-title function_">toBeFalsy</span>()
+})</code></pre></div>
+<p>Everything in JavaScript is truthy, except <code>false</code>, <code>null</code>, <code>undefined</code>, <code>NaN</code>, <code>0</code>, <code>-0</code>, <code>0n</code>, <code>&quot;&quot;</code> and <code>document.all</code>.</p>
+<h2 id="tobenull"><a class="anchor" href="#tobenull">#</a>toBeNull</h2>
+<ul>
+<li><strong>Type:</strong> <code>() =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toBeNull</code> simply asserts if something is <code>null</code>. Alias for <code>.toBe(null)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">apples</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;we don\&#x27;t have apples&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">apples</span>()).<span class="hljs-title function_">toBeNull</span>()
+})</code></pre></div>
+<h2 id="tobenullable"><a class="anchor" href="#tobenullable">#</a>toBeNullable</h2>
+<ul>
+<li><strong>Type:</strong> <code>() =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toBeNullable</code> simply asserts if something is nullable (<code>null</code> or <code>undefined</code>).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">apples</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">bananas</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">undefined</span>
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;we don\&#x27;t have apples&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">apples</span>()).<span class="hljs-title function_">toBeNullable</span>()
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;we don\&#x27;t have bananas&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">bananas</span>()).<span class="hljs-title function_">toBeNullable</span>()
+})</code></pre></div>
+<h2 id="tobenan"><a class="anchor" href="#tobenan">#</a>toBeNaN</h2>
+<ul>
+<li><strong>Type:</strong> <code>() =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toBeNaN</code> simply asserts if something is <code>NaN</code>. Alias for <code>.toBe(NaN)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getApplesCount</span>(<span class="hljs-params"></span>) {
+  i++
+  <span class="hljs-keyword">return</span> i &gt; <span class="hljs-number">1</span> ? <span class="hljs-title class_">Number</span>.<span class="hljs-property">NaN</span> : i
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;getApplesCount has some unusual side effects...&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">getApplesCount</span>()).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeNaN</span>()
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">getApplesCount</span>()).<span class="hljs-title function_">toBeNaN</span>()
+})</code></pre></div>
+<h2 id="tobeoneof"><a class="anchor" href="#tobeoneof">#</a>toBeOneOf</h2>
+<ul>
+<li><strong>Type:</strong> <code>(sample: Array&lt;any&gt; | Set&lt;any&gt;) =&gt; any</code></li>
+</ul>
+<p><code>toBeOneOf</code> asserts if a value matches any of the values in the provided array or set.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : EXPERIMENTAL</div><p>Providing a <code>Set</code> is an experimental feature and may change in a future release.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;fruit is one of the allowed values&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(fruit).<span class="hljs-title function_">toBeOneOf</span>([<span class="hljs-string">&#x27;apple&#x27;</span>, <span class="hljs-string">&#x27;banana&#x27;</span>, <span class="hljs-string">&#x27;orange&#x27;</span>])
+})</code></pre></div>
+<p>The asymmetric matcher is particularly useful when testing optional properties that could be either <code>null</code> or <code>undefined</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;optional properties can be null or undefined&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> user = {
+    <span class="hljs-attr">firstName</span>: <span class="hljs-string">&#x27;John&#x27;</span>,
+    <span class="hljs-attr">middleName</span>: <span class="hljs-literal">undefined</span>,
+    <span class="hljs-attr">lastName</span>: <span class="hljs-string">&#x27;Doe&#x27;</span>
+  }
+
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toEqual</span>({
+    <span class="hljs-attr">firstName</span>: expect.<span class="hljs-title function_">any</span>(<span class="hljs-title class_">String</span>),
+    <span class="hljs-attr">middleName</span>: expect.<span class="hljs-title function_">toBeOneOf</span>([expect.<span class="hljs-title function_">any</span>(<span class="hljs-title class_">String</span>), <span class="hljs-literal">undefined</span>]),
+    <span class="hljs-attr">lastName</span>: expect.<span class="hljs-title function_">any</span>(<span class="hljs-title class_">String</span>),
+  })
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You can use <code>expect.not</code> with this matcher to ensure a value does NOT match any of the provided options.</p>
+</div><h2 id="tobetypeof"><a class="anchor" href="#tobetypeof">#</a>toBeTypeOf</h2>
+<ul>
+<li><strong>Type:</strong> <code>(c: &#39;bigint&#39; | &#39;boolean&#39; | &#39;function&#39; | &#39;number&#39; | &#39;object&#39; | &#39;string&#39; | &#39;symbol&#39; | &#39;undefined&#39;) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toBeTypeOf</code> asserts if an actual value is of type of received type.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> actual = <span class="hljs-string">&#x27;stock&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;stock is type of string&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(actual).<span class="hljs-title function_">toBeTypeOf</span>(<span class="hljs-string">&#x27;string&#x27;</span>)
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p><code>toBeTypeOf</code> uses the native <code>typeof</code> operator under the hood with all its quirks, most notably that the value <code>null</code> has type <code>object</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;toBeTypeOf cannot check for null or array&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-literal">null</span>).<span class="hljs-title function_">toBeTypeOf</span>(<span class="hljs-string">&#x27;object&#x27;</span>)
+  <span class="hljs-title function_">expect</span>([]).<span class="hljs-title function_">toBeTypeOf</span>(<span class="hljs-string">&#x27;object&#x27;</span>)
+})</code></pre></div>
+</div><h2 id="tobeinstanceof"><a class="anchor" href="#tobeinstanceof">#</a>toBeInstanceOf</h2>
+<ul>
+<li><strong>Type:</strong> <code>(c: any) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toBeInstanceOf</code> asserts if an actual value is instance of received class.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">Stocks</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./stocks.js&#x27;</span>
+
+<span class="hljs-keyword">const</span> stocks = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Stocks</span>()
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;stocks are instance of Stocks&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(stocks).<span class="hljs-title function_">toBeInstanceOf</span>(<span class="hljs-title class_">Stocks</span>)
+})</code></pre></div>
+<h2 id="tobegreaterthan"><a class="anchor" href="#tobegreaterthan">#</a>toBeGreaterThan</h2>
+<ul>
+<li><strong>Type:</strong> <code>(n: number | bigint) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toBeGreaterThan</code> asserts if actual value is greater than received one. Equal values will fail the test.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { getApples } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./stocks.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;have more then 10 apples&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">getApples</span>()).<span class="hljs-title function_">toBeGreaterThan</span>(<span class="hljs-number">10</span>)
+})</code></pre></div>
+<h2 id="tobegreaterthanorequal"><a class="anchor" href="#tobegreaterthanorequal">#</a>toBeGreaterThanOrEqual</h2>
+<ul>
+<li><strong>Type:</strong> <code>(n: number | bigint) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toBeGreaterThanOrEqual</code> asserts if actual value is greater than received one or equal to it.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { getApples } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./stocks.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;have 11 apples or more&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">getApples</span>()).<span class="hljs-title function_">toBeGreaterThanOrEqual</span>(<span class="hljs-number">11</span>)
+})</code></pre></div>
+<h2 id="tobelessthan"><a class="anchor" href="#tobelessthan">#</a>toBeLessThan</h2>
+<ul>
+<li><strong>Type:</strong> <code>(n: number | bigint) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toBeLessThan</code> asserts if actual value is less than received one. Equal values will fail the test.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { getApples } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./stocks.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;have less then 20 apples&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">getApples</span>()).<span class="hljs-title function_">toBeLessThan</span>(<span class="hljs-number">20</span>)
+})</code></pre></div>
+<h2 id="tobelessthanorequal"><a class="anchor" href="#tobelessthanorequal">#</a>toBeLessThanOrEqual</h2>
+<ul>
+<li><strong>Type:</strong> <code>(n: number | bigint) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toBeLessThanOrEqual</code> asserts if actual value is less than received one or equal to it.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { getApples } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./stocks.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;have 11 apples or less&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">getApples</span>()).<span class="hljs-title function_">toBeLessThanOrEqual</span>(<span class="hljs-number">11</span>)
+})</code></pre></div>
+<h2 id="toequal"><a class="anchor" href="#toequal">#</a>toEqual</h2>
+<ul>
+<li><strong>Type:</strong> <code>(received: any) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toEqual</code> asserts if actual value is equal to received one or has the same structure, if it is an object (compares them recursively). You can see the difference between <code>toEqual</code> and <a href="#tobe"><code>toBe</code></a> in this example:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> stockBill = {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;apples&#x27;</span>,
+  <span class="hljs-attr">count</span>: <span class="hljs-number">13</span>,
+}
+
+<span class="hljs-keyword">const</span> stockMary = {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;apples&#x27;</span>,
+  <span class="hljs-attr">count</span>: <span class="hljs-number">13</span>,
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;stocks have the same properties&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(stockBill).<span class="hljs-title function_">toEqual</span>(stockMary)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;stocks are not the same&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(stockBill).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBe</span>(stockMary)
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>For <code>Error</code> objects, non-enumerable properties such as <code>name</code>, <code>message</code>, <code>cause</code> and <code>AggregateError.errors</code> are also compared. For <code>Error.cause</code>, the comparison is done asymmetrically:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// success</span>
+<span class="hljs-title function_">expect</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;hi&#x27;</span>, { <span class="hljs-attr">cause</span>: <span class="hljs-string">&#x27;x&#x27;</span> })).<span class="hljs-title function_">toEqual</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;hi&#x27;</span>))
+
+<span class="hljs-comment">// fail</span>
+<span class="hljs-title function_">expect</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;hi&#x27;</span>)).<span class="hljs-title function_">toEqual</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;hi&#x27;</span>, { <span class="hljs-attr">cause</span>: <span class="hljs-string">&#x27;x&#x27;</span> }))</code></pre></div>
+<p>To test if something was thrown, use <a href="#tothrow"><code>toThrow</code></a> assertion.</p>
+</div><h2 id="tostrictequal"><a class="anchor" href="#tostrictequal">#</a>toStrictEqual</h2>
+<ul>
+<li><strong>Type:</strong> <code>(received: any) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toStrictEqual</code> asserts if the actual value is equal to the received one or has the same structure if it is an object (compares them recursively), and of the same type.</p>
+<p>Differences from <a href="#toequal"><code>.toEqual</code></a>:</p>
+<ul>
+<li>Keys with <code>undefined</code> properties are checked. e.g. <code>{a: undefined, b: 2}</code> does not match <code>{b: 2}</code> when using <code>.toStrictEqual</code>.</li>
+<li>Array sparseness is checked. e.g. <code>[, 1]</code> does not match <code>[undefined, 1]</code> when using <code>.toStrictEqual</code>.</li>
+<li>Object types are checked to be equal. e.g. A class instance with fields <code>a</code> and <code>b</code> will not equal a literal object with fields <code>a</code> and <code>b</code>.</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Stock</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"><span class="hljs-keyword">type</span></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">type</span> = <span class="hljs-keyword">type</span>
+  }
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;structurally the same, but semantically different&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Stock</span>(<span class="hljs-string">&#x27;apples&#x27;</span>)).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;apples&#x27;</span> })
+  <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Stock</span>(<span class="hljs-string">&#x27;apples&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toStrictEqual</span>({ <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;apples&#x27;</span> })
+})</code></pre></div>
+<h2 id="tocontain"><a class="anchor" href="#tocontain">#</a>toContain</h2>
+<ul>
+<li><strong>Type:</strong> <code>(received: string) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toContain</code> asserts if the actual value is in an array. <code>toContain</code> can also check whether a string is a substring of another string. If you are running tests in a browser-like environment, this assertion can also check if class is contained in a <code>classList</code>, or an element is inside another one.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { getAllFruits } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./stocks.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;the fruit list contains orange&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">getAllFruits</span>()).<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&#x27;orange&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;pineapple contains apple&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-string">&#x27;pineapple&#x27;</span>).<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&#x27;apple&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;the element contains a class and is contained&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> element = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;#el&#x27;</span>)
+  <span class="hljs-comment">// element has a class</span>
+  <span class="hljs-title function_">expect</span>(element.<span class="hljs-property">classList</span>).<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&#x27;flex&#x27;</span>)
+  <span class="hljs-comment">// element is inside another one</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;#wrapper&#x27;</span>)).<span class="hljs-title function_">toContain</span>(element)
+})</code></pre></div>
+<h2 id="tocontainequal"><a class="anchor" href="#tocontainequal">#</a>toContainEqual</h2>
+<ul>
+<li><strong>Type:</strong> <code>(received: any) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toContainEqual</code> asserts if an item with a specific structure and values is contained in an array.
+It works like <a href="#toequal"><code>toEqual</code></a> inside for each element.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { getFruitStock } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./stocks.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;apple available&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">getFruitStock</span>()).<span class="hljs-title function_">toContainEqual</span>({ <span class="hljs-attr">fruit</span>: <span class="hljs-string">&#x27;apple&#x27;</span>, <span class="hljs-attr">count</span>: <span class="hljs-number">5</span> })
+})</code></pre></div>
+<h2 id="tohavelength"><a class="anchor" href="#tohavelength">#</a>toHaveLength</h2>
+<ul>
+<li><strong>Type:</strong> <code>(received: number) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toHaveLength</code> asserts if an object has a <code>.length</code> property and it is set to a certain numeric value.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;toHaveLength&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-string">&#x27;abc&#x27;</span>).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">3</span>)
+  <span class="hljs-title function_">expect</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">3</span>)
+
+  <span class="hljs-title function_">expect</span>(<span class="hljs-string">&#x27;&#x27;</span>).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">3</span>) <span class="hljs-comment">// doesn&#x27;t have .length of 3</span>
+  <span class="hljs-title function_">expect</span>({ <span class="hljs-attr">length</span>: <span class="hljs-number">3</span> }).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">3</span>)
+})</code></pre></div>
+<h2 id="tohaveproperty"><a class="anchor" href="#tohaveproperty">#</a>toHaveProperty</h2>
+<ul>
+<li><strong>Type:</strong> <code>(key: any, received?: any) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toHaveProperty</code> asserts if a property at provided reference <code>key</code> exists for an object.</p>
+<p>You can provide an optional value argument also known as deep equality, like the <code>toEqual</code> matcher to compare the received property value.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> invoice = {
+  <span class="hljs-string">&#x27;isActive&#x27;</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-string">&#x27;P.O&#x27;</span>: <span class="hljs-string">&#x27;12345&#x27;</span>,
+  <span class="hljs-string">&#x27;customer&#x27;</span>: {
+    <span class="hljs-attr">first_name</span>: <span class="hljs-string">&#x27;John&#x27;</span>,
+    <span class="hljs-attr">last_name</span>: <span class="hljs-string">&#x27;Doe&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;China&#x27;</span>,
+  },
+  <span class="hljs-string">&#x27;total_amount&#x27;</span>: <span class="hljs-number">5000</span>,
+  <span class="hljs-string">&#x27;items&#x27;</span>: [
+    {
+      <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;apples&#x27;</span>,
+      <span class="hljs-attr">quantity</span>: <span class="hljs-number">10</span>,
+    },
+    {
+      <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;oranges&#x27;</span>,
+      <span class="hljs-attr">quantity</span>: <span class="hljs-number">5</span>,
+    },
+  ],
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;John Doe Invoice&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(invoice).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;isActive&#x27;</span>) <span class="hljs-comment">// assert that the key exists</span>
+  <span class="hljs-title function_">expect</span>(invoice).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;total_amount&#x27;</span>, <span class="hljs-number">5000</span>) <span class="hljs-comment">// assert that the key exists and the value is equal</span>
+
+  <span class="hljs-title function_">expect</span>(invoice).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;account&#x27;</span>) <span class="hljs-comment">// assert that this key does not exist</span>
+
+  <span class="hljs-comment">// Deep referencing using dot notation</span>
+  <span class="hljs-title function_">expect</span>(invoice).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;customer.first_name&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(invoice).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;customer.last_name&#x27;</span>, <span class="hljs-string">&#x27;Doe&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(invoice).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;customer.location&#x27;</span>, <span class="hljs-string">&#x27;India&#x27;</span>)
+
+  <span class="hljs-comment">// Deep referencing using an array containing the key</span>
+  <span class="hljs-title function_">expect</span>(invoice).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;items[0].type&#x27;</span>, <span class="hljs-string">&#x27;apples&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(invoice).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;items.0.type&#x27;</span>, <span class="hljs-string">&#x27;apples&#x27;</span>) <span class="hljs-comment">// dot notation also works</span>
+
+  <span class="hljs-comment">// Deep referencing using an array containing the keyPath</span>
+  <span class="hljs-title function_">expect</span>(invoice).<span class="hljs-title function_">toHaveProperty</span>([<span class="hljs-string">&#x27;items&#x27;</span>, <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;type&#x27;</span>], <span class="hljs-string">&#x27;apples&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(invoice).<span class="hljs-title function_">toHaveProperty</span>([<span class="hljs-string">&#x27;items&#x27;</span>, <span class="hljs-string">&#x27;0&#x27;</span>, <span class="hljs-string">&#x27;type&#x27;</span>], <span class="hljs-string">&#x27;apples&#x27;</span>) <span class="hljs-comment">// string notation also works</span>
+
+  <span class="hljs-comment">// Wrap your key in an array to avoid the key from being parsed as a deep reference</span>
+  <span class="hljs-title function_">expect</span>(invoice).<span class="hljs-title function_">toHaveProperty</span>([<span class="hljs-string">&#x27;P.O&#x27;</span>], <span class="hljs-string">&#x27;12345&#x27;</span>)
+
+  <span class="hljs-comment">// Deep equality of object property</span>
+  <span class="hljs-title function_">expect</span>(invoice).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;items[0]&#x27;</span>, { <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-attr">quantity</span>: <span class="hljs-number">10</span> })
+})</code></pre></div>
+<h2 id="tomatch"><a class="anchor" href="#tomatch">#</a>toMatch</h2>
+<ul>
+<li><strong>Type:</strong> <code>(received: string | regexp) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toMatch</code> asserts if a string matches a regular expression or a string.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;top fruits&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-string">&#x27;top fruits include apple, orange and grape&#x27;</span>).<span class="hljs-title function_">toMatch</span>(<span class="hljs-regexp">/apple/</span>)
+  <span class="hljs-title function_">expect</span>(<span class="hljs-string">&#x27;applefruits&#x27;</span>).<span class="hljs-title function_">toMatch</span>(<span class="hljs-string">&#x27;fruit&#x27;</span>) <span class="hljs-comment">// toMatch also accepts a string</span>
+})</code></pre></div>
+<h2 id="tomatchobject"><a class="anchor" href="#tomatchobject">#</a>toMatchObject</h2>
+<ul>
+<li><strong>Type:</strong> <code>(received: object | array) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p><code>toMatchObject</code> asserts if an object matches a subset of the properties of an object.</p>
+<p>You can also pass an array of objects. This is useful if you want to check that two arrays match in their number and order of elements, as opposed to <code>arrayContaining</code>, which allows for extra elements in the received array.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> johnInvoice = {
+  <span class="hljs-attr">isActive</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">customer</span>: {
+    <span class="hljs-attr">first_name</span>: <span class="hljs-string">&#x27;John&#x27;</span>,
+    <span class="hljs-attr">last_name</span>: <span class="hljs-string">&#x27;Doe&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;China&#x27;</span>,
+  },
+  <span class="hljs-attr">total_amount</span>: <span class="hljs-number">5000</span>,
+  <span class="hljs-attr">items</span>: [
+    {
+      <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;apples&#x27;</span>,
+      <span class="hljs-attr">quantity</span>: <span class="hljs-number">10</span>,
+    },
+    {
+      <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;oranges&#x27;</span>,
+      <span class="hljs-attr">quantity</span>: <span class="hljs-number">5</span>,
+    },
+  ],
+}
+
+<span class="hljs-keyword">const</span> johnDetails = {
+  <span class="hljs-attr">customer</span>: {
+    <span class="hljs-attr">first_name</span>: <span class="hljs-string">&#x27;John&#x27;</span>,
+    <span class="hljs-attr">last_name</span>: <span class="hljs-string">&#x27;Doe&#x27;</span>,
+    <span class="hljs-attr">location</span>: <span class="hljs-string">&#x27;China&#x27;</span>,
+  },
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;invoice has john personal details&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(johnInvoice).<span class="hljs-title function_">toMatchObject</span>(johnDetails)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;the number of elements must match exactly&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// Assert that an array of object matches</span>
+  <span class="hljs-title function_">expect</span>([{ <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span> }, { <span class="hljs-attr">baz</span>: <span class="hljs-number">1</span> }]).<span class="hljs-title function_">toMatchObject</span>([
+    { <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span> },
+    { <span class="hljs-attr">baz</span>: <span class="hljs-number">1</span> },
+  ])
+})</code></pre></div>
+<h2 id="tothrow"><a class="anchor" href="#tothrow">#</a>toThrow</h2>
+<ul>
+<li><p><strong>Type:</strong> <code>(expected?: any) =&gt; Awaitable&lt;void&gt;</code></p>
+</li>
+<li><p><strong>Alias:</strong> <code>toThrowError</code> <Deprecated /></p>
+</li>
+</ul>
+<p><code>toThrow</code> asserts if a function throws an error when it is called.</p>
+<p>You can provide an optional argument to test that a specific error is thrown:</p>
+<ul>
+<li><code>RegExp</code>: error message matches the pattern</li>
+<li><code>string</code>: error message includes the substring</li>
+<li>any other value: compare with thrown value using deep equality (similar to <code>toEqual</code>)</li>
+</ul>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You must wrap the code in a function, otherwise the error will not be caught, and test will fail.</p>
+<p>This does not apply for async calls as <a href="#rejects">rejects</a> correctly unwraps the promise:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;expect rejects toThrow&#x27;</span>, <span class="hljs-title function_">async</span> ({ expect }) =&gt; {
+  <span class="hljs-keyword">const</span> promise = <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">reject</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;Test&#x27;</span>))
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(promise).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toThrow</span>()
+})</code></pre></div>
+</div><p>For example, if we want to test that <code>getFruitStock(&#39;pineapples&#39;)</code> throws, we could write:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getFruitStock</span>(<span class="hljs-params"><span class="hljs-attr">type</span>: <span class="hljs-built_in">string</span></span>) {
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">type</span> === <span class="hljs-string">&#x27;pineapples&#x27;</span>) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;Pineapples are not in stock&#x27;</span>)
+  }
+
+  <span class="hljs-comment">// Do some other stuff</span>
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;throws on pineapples&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// Test that the error message says &quot;stock&quot; somewhere: these are equivalent</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">getFruitStock</span>(<span class="hljs-string">&#x27;pineapples&#x27;</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-regexp">/stock/</span>)
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">getFruitStock</span>(<span class="hljs-string">&#x27;pineapples&#x27;</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;stock&#x27;</span>)
+
+  <span class="hljs-comment">// Test the exact error message</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">getFruitStock</span>(<span class="hljs-string">&#x27;pineapples&#x27;</span>)).<span class="hljs-title function_">toThrow</span>(
+    <span class="hljs-regexp">/^Pineapples are not in stock$/</span>,
+  )
+
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">getFruitStock</span>(<span class="hljs-string">&#x27;pineapples&#x27;</span>)).<span class="hljs-title function_">toThrow</span>(
+    <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;Pineapples are not in stock&#x27;</span>),
+  )
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">getFruitStock</span>(<span class="hljs-string">&#x27;pineapples&#x27;</span>)).<span class="hljs-title function_">toThrow</span>(expect.<span class="hljs-title function_">objectContaining</span>({
+    <span class="hljs-attr">message</span>: <span class="hljs-string">&#x27;Pineapples are not in stock&#x27;</span>,
+  }))
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>To test async functions, use in combination with <a href="#rejects">rejects</a>.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getAsyncFruitStock</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">reject</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;empty&#x27;</span>))
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;throws on pineapples&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">getAsyncFruitStock</span>()).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;empty&#x27;</span>)
+})</code></pre></div>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You can also test non-Error values that are thrown:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;throws non-Error values&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-keyword">throw</span> <span class="hljs-number">42</span> }).<span class="hljs-title function_">toThrow</span>(<span class="hljs-number">42</span>)
+  <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-keyword">throw</span> { <span class="hljs-attr">message</span>: <span class="hljs-string">&#x27;error&#x27;</span> } }).<span class="hljs-title function_">toThrow</span>({ <span class="hljs-attr">message</span>: <span class="hljs-string">&#x27;error&#x27;</span> })
+})</code></pre></div>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention : Unhandled Rejections with Fake Timers</div><p>When using fake timers, an async function that rejects <em>during</em> a <code>vi.advanceTimersByTimeAsync</code> call will trigger an <a href="https://nodejs.org/api/process.html#event-unhandledrejection">unhandled rejection</a> — even if you later assert it with <code>.rejects.toThrow()</code>. This happens because the error is thrown before the <code>expect</code> chain has a chance to catch it.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> <span class="hljs-built_in">setTimeout</span>(resolve, <span class="hljs-number">100</span>))
+  <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;boom&#x27;</span>)
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;rejects&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-title function_">foo</span>()
+
+  <span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">advanceTimersByTimeAsync</span>(<span class="hljs-number">100</span>)
+
+  <span class="hljs-comment">// The assertion passes, but the error was already &quot;unhandled&quot; during advanceTimersByTimeAsync</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(result).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toThrow</span>()
+})</code></pre></div>
+<p>To avoid this, prefer <a href="vi.html#vi-settimertickmode"><code>vi.setTimerTickMode(&#39;nextTimerAsync&#39;)</code></a> so that timers tick automatically as promises settle, without needing a manual advance:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> {
+  vi.<span class="hljs-title function_">useFakeTimers</span>()
+  vi.<span class="hljs-title function_">setTimerTickMode</span>(<span class="hljs-string">&#x27;nextTimerAsync&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;rejects&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// No advanceTimersByTimeAsync needed — the error is caught by rejects.toThrow()</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">foo</span>()).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;boom&#x27;</span>)
+})</code></pre></div>
+<p>Alternatively, set up the <code>.rejects.toThrow()</code> assertion <em>before</em> advancing timers so the rejection is handled immediately:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;rejects&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-title function_">foo</span>()
+  <span class="hljs-keyword">const</span> assertion = <span class="hljs-title function_">expect</span>(result).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;boom&#x27;</span>)
+
+  <span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">advanceTimersByTimeAsync</span>(<span class="hljs-number">100</span>)
+  <span class="hljs-keyword">await</span> assertion
+})</code></pre></div>
+</div><h2 id="tomatchsnapshot"><a class="anchor" href="#tomatchsnapshot">#</a>toMatchSnapshot</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(shape?: Partial&lt;T&gt; | string, hint?: string) =&gt; void</code></li>
+</ul>
+<p>This ensures that a value matches the most recent snapshot.</p>
+<p>You can provide an optional <code>hint</code> string argument that is appended to the test name. Although Vitest always appends a number at the end of a snapshot name, short descriptive hints might be more useful than numbers to differentiate multiple snapshots in a single it or test block. Vitest sorts snapshots by name in the corresponding <code>.snap</code> file.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>  When a snapshot mismatches and causes the test to fail, if the mismatch is expected, you can press <code>u</code> key to update the snapshot once. Or you can pass <code>-u</code> or <code>--update</code> CLI options to make Vitest always update the tests.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;matches snapshot&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> data = { <span class="hljs-attr">foo</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([<span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-string">&#x27;snapshot&#x27;</span>]) }
+  <span class="hljs-title function_">expect</span>(data).<span class="hljs-title function_">toMatchSnapshot</span>()
+})</code></pre></div>
+<p>You can also provide a shape of an object, if you are testing just a shape of an object, and don&#39;t need it to be 100% compatible:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;matches snapshot&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> data = { <span class="hljs-attr">foo</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([<span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-string">&#x27;snapshot&#x27;</span>]) }
+  <span class="hljs-title function_">expect</span>(data).<span class="hljs-title function_">toMatchSnapshot</span>({ <span class="hljs-attr">foo</span>: expect.<span class="hljs-title function_">any</span>(<span class="hljs-title class_">Set</span>) })
+})</code></pre></div>
+<h2 id="tomatchinlinesnapshot"><a class="anchor" href="#tomatchinlinesnapshot">#</a>toMatchInlineSnapshot</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(shape?: Partial&lt;T&gt; | string, snapshot?: string, hint?: string) =&gt; void</code></li>
+</ul>
+<p>This ensures that a value matches the most recent snapshot.</p>
+<p>Vitest adds and updates the inlineSnapshot string argument to the matcher in the test file (instead of an external <code>.snap</code> file).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;matches inline snapshot&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> data = { <span class="hljs-attr">foo</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([<span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-string">&#x27;snapshot&#x27;</span>]) }
+  <span class="hljs-comment">// Vitest will update following content when updating the snapshot</span>
+  <span class="hljs-title function_">expect</span>(data).<span class="hljs-title function_">toMatchInlineSnapshot</span>(<span class="hljs-string">`
+    {
+      &quot;foo&quot;: Set {
+        &quot;bar&quot;,
+        &quot;snapshot&quot;,
+      },
+    }
+  `</span>)
+})</code></pre></div>
+<p>You can also provide a shape of an object, if you are testing just a shape of an object, and don&#39;t need it to be 100% compatible:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;matches snapshot&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> data = { <span class="hljs-attr">foo</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([<span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-string">&#x27;snapshot&#x27;</span>]) }
+  <span class="hljs-title function_">expect</span>(data).<span class="hljs-title function_">toMatchInlineSnapshot</span>(
+    { <span class="hljs-attr">foo</span>: expect.<span class="hljs-title function_">any</span>(<span class="hljs-title class_">Set</span>) },
+    <span class="hljs-string">`
+    {
+      &quot;foo&quot;: Any&lt;Set&gt;,
+    }
+  `</span>
+  )
+})</code></pre></div>
+<h2 id="tomatchfilesnapshot"><a class="anchor" href="#tomatchfilesnapshot">#</a>toMatchFileSnapshot</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(filepath: string, hint?: string) =&gt; Promise&lt;void&gt;</code></li>
+</ul>
+<p>Compare or update the snapshot with the content of a file explicitly specified (instead of the <code>.snap</code> file).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;render basic&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-title function_">renderHTML</span>(<span class="hljs-title function_">h</span>(<span class="hljs-string">&#x27;div&#x27;</span>, { <span class="hljs-attr">class</span>: <span class="hljs-string">&#x27;foo&#x27;</span> }))
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(result).<span class="hljs-title function_">toMatchFileSnapshot</span>(<span class="hljs-string">&#x27;./test/basic.output.html&#x27;</span>)
+})</code></pre></div>
+<p>Note that since file system operation is async, you need to use <code>await</code> with <code>toMatchFileSnapshot()</code>. If <code>await</code> is not used, Vitest treats it like <code>expect.soft</code>, meaning the code after the statement will continue to run even if the snapshot mismatches. After the test finishes, Vitest will check the snapshot and fail if there is a mismatch.</p>
+<h2 id="tothrowerrormatchingsnapshot"><a class="anchor" href="#tothrowerrormatchingsnapshot">#</a>toThrowErrorMatchingSnapshot</h2>
+<ul>
+<li><strong>Type:</strong> <code>(hint?: string) =&gt; void</code></li>
+</ul>
+<p>The same as <a href="#tomatchsnapshot"><code>toMatchSnapshot</code></a>, but expects the same value as <a href="#tothrow"><code>toThrow</code></a>.</p>
+<h2 id="tothrowerrormatchinginlinesnapshot"><a class="anchor" href="#tothrowerrormatchinginlinesnapshot">#</a>toThrowErrorMatchingInlineSnapshot</h2>
+<ul>
+<li><strong>Type:</strong> <code>(snapshot?: string, hint?: string) =&gt; void</code></li>
+</ul>
+<p>The same as <a href="#tomatchinlinesnapshot"><code>toMatchInlineSnapshot</code></a>, but expects the same value as <a href="#tothrow"><code>toThrow</code></a>.</p>
+<h2 id="tomatcharisnapshot"><a class="anchor" href="#tomatcharisnapshot">#</a>toMatchAriaSnapshot <Version type="experimental">4.1.4</Version> <Experimental /></h2>
+<ul>
+<li><strong>Type:</strong> <code>() =&gt; void</code></li>
+</ul>
+<p>Captures the accessibility tree of a DOM element and generate a snapshot file or compares it against a stored snapshot. See the <a href="../guide/browser/aria-snapshots.html">ARIA Snapshots guide</a> for more details.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;navigation accessibility&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-property">innerHTML</span> = <span class="hljs-string">`
+    &lt;nav aria-label=&quot;Actions&quot;&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+      &lt;button&gt;Cancel&lt;/button&gt;
+    &lt;/nav&gt;
+  `</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;nav&#x27;</span>)).<span class="hljs-title function_">toMatchAriaSnapshot</span>()
+})</code></pre></div>
+<h2 id="tomatchariainlinesnapshot"><a class="anchor" href="#tomatchariainlinesnapshot">#</a>toMatchAriaInlineSnapshot <Version type="experimental">4.1.4</Version> <Experimental /></h2>
+<ul>
+<li><strong>Type:</strong> <code>(snapshot?: string) =&gt; void</code></li>
+</ul>
+<p>Same as <a href="#tomatcharisnapshot"><code>toMatchAriaSnapshot</code></a>, but stores the snapshot inline in the test file. See the <a href="../guide/browser/aria-snapshots.html">ARIA Snapshots guide</a> for more details.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;user profile&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>).<span class="hljs-title function_">toMatchAriaInlineSnapshot</span>(<span class="hljs-string">`
+    - heading &quot;Dashboard&quot; [level=1]
+    - button /User \\d+/: Profile
+  `</span>)
+})</code></pre></div>
+<h2 id="tohavebeencalled"><a class="anchor" href="#tohavebeencalled">#</a>toHaveBeenCalled</h2>
+<ul>
+<li><strong>Type:</strong> <code>() =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>This assertion is useful for testing that a function has been called. Requires a spy function to be passed to <code>expect</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> market = {
+  <span class="hljs-title function_">buy</span>(<span class="hljs-params"><span class="hljs-attr">subject</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">amount</span>: <span class="hljs-built_in">number</span></span>) {
+    <span class="hljs-comment">// ...</span>
+  },
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy function&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> buySpy = vi.<span class="hljs-title function_">spyOn</span>(market, <span class="hljs-string">&#x27;buy&#x27;</span>)
+
+  <span class="hljs-title function_">expect</span>(buySpy).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveBeenCalled</span>()
+
+  market.<span class="hljs-title function_">buy</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">10</span>)
+
+  <span class="hljs-title function_">expect</span>(buySpy).<span class="hljs-title function_">toHaveBeenCalled</span>()
+})</code></pre></div>
+<h2 id="tohavebeencalledtimes"><a class="anchor" href="#tohavebeencalledtimes">#</a>toHaveBeenCalledTimes</h2>
+<ul>
+<li><strong>Type:</strong> <code>(amount: number) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>This assertion checks if a function was called a certain amount of times. Requires a spy function to be passed to <code>expect</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> market = {
+  <span class="hljs-title function_">buy</span>(<span class="hljs-params"><span class="hljs-attr">subject</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">amount</span>: <span class="hljs-built_in">number</span></span>) {
+    <span class="hljs-comment">// ...</span>
+  },
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy function called two times&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> buySpy = vi.<span class="hljs-title function_">spyOn</span>(market, <span class="hljs-string">&#x27;buy&#x27;</span>)
+
+  market.<span class="hljs-title function_">buy</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">10</span>)
+  market.<span class="hljs-title function_">buy</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">20</span>)
+
+  <span class="hljs-title function_">expect</span>(buySpy).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(<span class="hljs-number">2</span>)
+})</code></pre></div>
+<h2 id="tohavebeencalledwith"><a class="anchor" href="#tohavebeencalledwith">#</a>toHaveBeenCalledWith</h2>
+<ul>
+<li><strong>Type:</strong> <code>(...args: any[]) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>This assertion checks if a function was called at least once with certain parameters. Requires a spy function to be passed to <code>expect</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> market = {
+  <span class="hljs-title function_">buy</span>(<span class="hljs-params"><span class="hljs-attr">subject</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">amount</span>: <span class="hljs-built_in">number</span></span>) {
+    <span class="hljs-comment">// ...</span>
+  },
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy function&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> buySpy = vi.<span class="hljs-title function_">spyOn</span>(market, <span class="hljs-string">&#x27;buy&#x27;</span>)
+
+  market.<span class="hljs-title function_">buy</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">10</span>)
+  market.<span class="hljs-title function_">buy</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">20</span>)
+
+  <span class="hljs-title function_">expect</span>(buySpy).<span class="hljs-title function_">toHaveBeenCalledWith</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">10</span>)
+  <span class="hljs-title function_">expect</span>(buySpy).<span class="hljs-title function_">toHaveBeenCalledWith</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">20</span>)
+})</code></pre></div>
+<h2 id="tohavebeencalledbefore"><a class="anchor" href="#tohavebeencalledbefore">#</a>toHaveBeenCalledBefore</h2>
+<ul>
+<li><strong>Type:</strong> <code>(mock: MockInstance, failIfNoFirstInvocation?: boolean) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>This assertion checks if a <code>Mock</code> was called before another <code>Mock</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;calls mock1 before mock2&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> mock1 = vi.<span class="hljs-title function_">fn</span>()
+  <span class="hljs-keyword">const</span> mock2 = vi.<span class="hljs-title function_">fn</span>()
+
+  <span class="hljs-title function_">mock1</span>()
+  <span class="hljs-title function_">mock2</span>()
+  <span class="hljs-title function_">mock1</span>()
+
+  <span class="hljs-title function_">expect</span>(mock1).<span class="hljs-title function_">toHaveBeenCalledBefore</span>(mock2)
+})</code></pre></div>
+<h2 id="tohavebeencalledafter"><a class="anchor" href="#tohavebeencalledafter">#</a>toHaveBeenCalledAfter</h2>
+<ul>
+<li><strong>Type:</strong> <code>(mock: MockInstance, failIfNoFirstInvocation?: boolean) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>This assertion checks if a <code>Mock</code> was called after another <code>Mock</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;calls mock1 after mock2&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> mock1 = vi.<span class="hljs-title function_">fn</span>()
+  <span class="hljs-keyword">const</span> mock2 = vi.<span class="hljs-title function_">fn</span>()
+
+  <span class="hljs-title function_">mock2</span>()
+  <span class="hljs-title function_">mock1</span>()
+  <span class="hljs-title function_">mock2</span>()
+
+  <span class="hljs-title function_">expect</span>(mock1).<span class="hljs-title function_">toHaveBeenCalledAfter</span>(mock2)
+})</code></pre></div>
+<h2 id="tohavebeencalledexactlyoncewith"><a class="anchor" href="#tohavebeencalledexactlyoncewith">#</a>toHaveBeenCalledExactlyOnceWith</h2>
+<ul>
+<li><strong>Type:</strong> <code>(...args: any[]) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>This assertion checks if a function was called exactly once and with certain parameters. Requires a spy function to be passed to <code>expect</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> market = {
+  <span class="hljs-title function_">buy</span>(<span class="hljs-params"><span class="hljs-attr">subject</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">amount</span>: <span class="hljs-built_in">number</span></span>) {
+    <span class="hljs-comment">// ...</span>
+  },
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy function&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> buySpy = vi.<span class="hljs-title function_">spyOn</span>(market, <span class="hljs-string">&#x27;buy&#x27;</span>)
+
+  market.<span class="hljs-title function_">buy</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">10</span>)
+
+  <span class="hljs-title function_">expect</span>(buySpy).<span class="hljs-title function_">toHaveBeenCalledExactlyOnceWith</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">10</span>)
+})</code></pre></div>
+<h2 id="tohavebeenlastcalledwith"><a class="anchor" href="#tohavebeenlastcalledwith">#</a>toHaveBeenLastCalledWith</h2>
+<ul>
+<li><strong>Type:</strong> <code>(...args: any[]) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>This assertion checks if a function was called with certain parameters at its last invocation. Requires a spy function to be passed to <code>expect</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> market = {
+  <span class="hljs-title function_">buy</span>(<span class="hljs-params"><span class="hljs-attr">subject</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">amount</span>: <span class="hljs-built_in">number</span></span>) {
+    <span class="hljs-comment">// ...</span>
+  },
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy function&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> buySpy = vi.<span class="hljs-title function_">spyOn</span>(market, <span class="hljs-string">&#x27;buy&#x27;</span>)
+
+  market.<span class="hljs-title function_">buy</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">10</span>)
+  market.<span class="hljs-title function_">buy</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">20</span>)
+
+  <span class="hljs-title function_">expect</span>(buySpy).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveBeenLastCalledWith</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">10</span>)
+  <span class="hljs-title function_">expect</span>(buySpy).<span class="hljs-title function_">toHaveBeenLastCalledWith</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">20</span>)
+})</code></pre></div>
+<h2 id="tohavebeennthcalledwith"><a class="anchor" href="#tohavebeennthcalledwith">#</a>toHaveBeenNthCalledWith</h2>
+<ul>
+<li><strong>Type:</strong> <code>(time: number, ...args: any[]) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>This assertion checks if a function was called with certain parameters at the certain time. The count starts at 1. So, to check the second entry, you would write <code>.toHaveBeenNthCalledWith(2, ...)</code>.</p>
+<p>Requires a spy function to be passed to <code>expect</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> market = {
+  <span class="hljs-title function_">buy</span>(<span class="hljs-params"><span class="hljs-attr">subject</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">amount</span>: <span class="hljs-built_in">number</span></span>) {
+    <span class="hljs-comment">// ...</span>
+  },
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;first call of spy function called with right params&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> buySpy = vi.<span class="hljs-title function_">spyOn</span>(market, <span class="hljs-string">&#x27;buy&#x27;</span>)
+
+  market.<span class="hljs-title function_">buy</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">10</span>)
+  market.<span class="hljs-title function_">buy</span>(<span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">20</span>)
+
+  <span class="hljs-title function_">expect</span>(buySpy).<span class="hljs-title function_">toHaveBeenNthCalledWith</span>(<span class="hljs-number">1</span>, <span class="hljs-string">&#x27;apples&#x27;</span>, <span class="hljs-number">10</span>)
+})</code></pre></div>
+<h2 id="tohavereturned"><a class="anchor" href="#tohavereturned">#</a>toHaveReturned</h2>
+<ul>
+<li><strong>Type:</strong> <code>() =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>This assertion checks if a function has successfully returned a value at least once (i.e., did not throw an error). Requires a spy function to be passed to <code>expect</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getApplesPrice</span>(<span class="hljs-params"><span class="hljs-attr">amount</span>: <span class="hljs-built_in">number</span></span>) {
+  <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">PRICE</span> = <span class="hljs-number">10</span>
+  <span class="hljs-keyword">return</span> amount * <span class="hljs-variable constant_">PRICE</span>
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy function returned a value&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> getPriceSpy = vi.<span class="hljs-title function_">fn</span>(getApplesPrice)
+
+  <span class="hljs-keyword">const</span> price = <span class="hljs-title function_">getPriceSpy</span>(<span class="hljs-number">10</span>)
+
+  <span class="hljs-title function_">expect</span>(price).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">100</span>)
+  <span class="hljs-title function_">expect</span>(getPriceSpy).<span class="hljs-title function_">toHaveReturned</span>()
+})</code></pre></div>
+<h2 id="tohavereturnedtimes"><a class="anchor" href="#tohavereturnedtimes">#</a>toHaveReturnedTimes</h2>
+<ul>
+<li><strong>Type:</strong> <code>(amount: number) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>This assertion checks if a function has successfully returned a value an exact amount of times (i.e., did not throw an error). Requires a spy function to be passed to <code>expect</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy function returns a value two times&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> sell = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">product</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> ({ product }))
+
+  <span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;apples&#x27;</span>)
+  <span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;bananas&#x27;</span>)
+
+  <span class="hljs-title function_">expect</span>(sell).<span class="hljs-title function_">toHaveReturnedTimes</span>(<span class="hljs-number">2</span>)
+})</code></pre></div>
+<h2 id="tohavereturnedwith"><a class="anchor" href="#tohavereturnedwith">#</a>toHaveReturnedWith</h2>
+<ul>
+<li><strong>Type:</strong> <code>(returnValue: any) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>You can call this assertion to check if a function has successfully returned a value with certain parameters at least once. Requires a spy function to be passed to <code>expect</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy function returns a product&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> sell = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">product</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> ({ product }))
+
+  <span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;apples&#x27;</span>)
+
+  <span class="hljs-title function_">expect</span>(sell).<span class="hljs-title function_">toHaveReturnedWith</span>({ <span class="hljs-attr">product</span>: <span class="hljs-string">&#x27;apples&#x27;</span> })
+})</code></pre></div>
+<h2 id="tohavelastreturnedwith"><a class="anchor" href="#tohavelastreturnedwith">#</a>toHaveLastReturnedWith</h2>
+<ul>
+<li><strong>Type:</strong> <code>(returnValue: any) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>You can call this assertion to check if a function has successfully returned a certain value when it was last invoked. Requires a spy function to be passed to <code>expect</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy function returns bananas on a last call&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> sell = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">product</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> ({ product }))
+
+  <span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;apples&#x27;</span>)
+  <span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;bananas&#x27;</span>)
+
+  <span class="hljs-title function_">expect</span>(sell).<span class="hljs-title function_">toHaveLastReturnedWith</span>({ <span class="hljs-attr">product</span>: <span class="hljs-string">&#x27;bananas&#x27;</span> })
+})</code></pre></div>
+<h2 id="tohaventhreturnedwith"><a class="anchor" href="#tohaventhreturnedwith">#</a>toHaveNthReturnedWith</h2>
+<ul>
+<li><strong>Type:</strong> <code>(time: number, returnValue: any) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>You can call this assertion to check if a function has successfully returned a value with certain parameters on a certain call. Requires a spy function to be passed to <code>expect</code>.</p>
+<p>The count starts at 1. So, to check the second entry, you would write <code>.toHaveNthReturnedWith(2, ...)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy function returns bananas on second call&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> sell = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">product</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> ({ product }))
+
+  <span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;apples&#x27;</span>)
+  <span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;bananas&#x27;</span>)
+
+  <span class="hljs-title function_">expect</span>(sell).<span class="hljs-title function_">toHaveNthReturnedWith</span>(<span class="hljs-number">2</span>, { <span class="hljs-attr">product</span>: <span class="hljs-string">&#x27;bananas&#x27;</span> })
+})</code></pre></div>
+<h2 id="tohaveresolved"><a class="anchor" href="#tohaveresolved">#</a>toHaveResolved</h2>
+<ul>
+<li><strong>Type:</strong> <code>() =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>This assertion checks if a function has successfully resolved a value at least once (i.e., did not reject). Requires a spy function to be passed to <code>expect</code>.</p>
+<p>If the function returned a promise, but it was not resolved yet, this will fail.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> db <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./db/apples.js&#x27;</span>
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">getApplesPrice</span>(<span class="hljs-params"><span class="hljs-attr">amount</span>: <span class="hljs-built_in">number</span></span>) {
+  <span class="hljs-keyword">return</span> amount * <span class="hljs-keyword">await</span> db.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;price&#x27;</span>)
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy function resolved a value&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> getPriceSpy = vi.<span class="hljs-title function_">fn</span>(getApplesPrice)
+
+  <span class="hljs-keyword">const</span> price = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getPriceSpy</span>(<span class="hljs-number">10</span>)
+
+  <span class="hljs-title function_">expect</span>(price).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">100</span>)
+  <span class="hljs-title function_">expect</span>(getPriceSpy).<span class="hljs-title function_">toHaveResolved</span>()
+})</code></pre></div>
+<h2 id="tohaveresolvedtimes"><a class="anchor" href="#tohaveresolvedtimes">#</a>toHaveResolvedTimes</h2>
+<ul>
+<li><strong>Type:</strong> <code>(amount: number) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>This assertion checks if a function has successfully resolved a value an exact amount of times (i.e., did not reject). Requires a spy function to be passed to <code>expect</code>.</p>
+<p>This will only count resolved promises. If the function returned a promise, but it was not resolved yet, it will not be counted.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy function resolved a value two times&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> sell = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">product</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>({ product }))
+
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;apples&#x27;</span>)
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;bananas&#x27;</span>)
+
+  <span class="hljs-title function_">expect</span>(sell).<span class="hljs-title function_">toHaveResolvedTimes</span>(<span class="hljs-number">2</span>)
+})</code></pre></div>
+<h2 id="tohaveresolvedwith"><a class="anchor" href="#tohaveresolvedwith">#</a>toHaveResolvedWith</h2>
+<ul>
+<li><strong>Type:</strong> <code>(returnValue: any) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>You can call this assertion to check if a function has successfully resolved a certain value at least once. Requires a spy function to be passed to <code>expect</code>.</p>
+<p>If the function returned a promise, but it was not resolved yet, this will fail.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy function resolved a product&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> sell = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">product</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>({ product }))
+
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;apples&#x27;</span>)
+
+  <span class="hljs-title function_">expect</span>(sell).<span class="hljs-title function_">toHaveResolvedWith</span>({ <span class="hljs-attr">product</span>: <span class="hljs-string">&#x27;apples&#x27;</span> })
+})</code></pre></div>
+<h2 id="tohavelastresolvedwith"><a class="anchor" href="#tohavelastresolvedwith">#</a>toHaveLastResolvedWith</h2>
+<ul>
+<li><strong>Type:</strong> <code>(returnValue: any) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>You can call this assertion to check if a function has successfully resolved a certain value when it was last invoked. Requires a spy function to be passed to <code>expect</code>.</p>
+<p>If the function returned a promise, but it was not resolved yet, this will fail.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy function resolves bananas on a last call&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> sell = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">product</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>({ product }))
+
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;apples&#x27;</span>)
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;bananas&#x27;</span>)
+
+  <span class="hljs-title function_">expect</span>(sell).<span class="hljs-title function_">toHaveLastResolvedWith</span>({ <span class="hljs-attr">product</span>: <span class="hljs-string">&#x27;bananas&#x27;</span> })
+})</code></pre></div>
+<h2 id="tohaventhresolvedwith"><a class="anchor" href="#tohaventhresolvedwith">#</a>toHaveNthResolvedWith</h2>
+<ul>
+<li><strong>Type:</strong> <code>(time: number, returnValue: any) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>You can call this assertion to check if a function has successfully resolved a certain value on a specific invocation. Requires a spy function to be passed to <code>expect</code>.</p>
+<p>If the function returned a promise, but it was not resolved yet, this will fail.</p>
+<p>The count starts at 1. So, to check the second entry, you would write <code>.toHaveNthResolvedWith(2, ...)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy function returns bananas on second call&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> sell = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">product</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>({ product }))
+
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;apples&#x27;</span>)
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">sell</span>(<span class="hljs-string">&#x27;bananas&#x27;</span>)
+
+  <span class="hljs-title function_">expect</span>(sell).<span class="hljs-title function_">toHaveNthResolvedWith</span>(<span class="hljs-number">2</span>, { <span class="hljs-attr">product</span>: <span class="hljs-string">&#x27;bananas&#x27;</span> })
+})</code></pre></div>
+<h2 id="tohavebeenexhausted"><a class="anchor" href="#tohavebeenexhausted">#</a>toHaveBeenExhausted <Version>5.0.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>() =&gt; void</code></li>
+</ul>
+<p>This assertion checks that every behavior registered on a <a href="vi.html#vi-when"><code>vi.when</code></a> chain has been consumed. A behavior is considered exhausted when it has been called the number of times specified by its <code>times</code> option, or at least once for behaviors that apply indefinitely.</p>
+<p>Requires a <code>When</code> chain returned by <code>vi.when</code> to be passed to <code>expect</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;all behaviors were consumed&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+  <span class="hljs-keyword">const</span> w = vi.<span class="hljs-title function_">when</span>(spy)
+    .<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">1</span>)
+    .<span class="hljs-title function_">thenReturnOnce</span>(<span class="hljs-string">&#x27;once&#x27;</span>)
+    .<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">2</span>)
+    .<span class="hljs-title function_">thenReturn</span>(<span class="hljs-string">&#x27;always&#x27;</span>)
+
+  <span class="hljs-title function_">expect</span>(w).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveBeenExhausted</span>()
+
+  <span class="hljs-title function_">spy</span>(<span class="hljs-number">1</span>) <span class="hljs-comment">// consumes the `thenReturnOnce` behavior</span>
+  <span class="hljs-title function_">spy</span>(<span class="hljs-number">2</span>) <span class="hljs-comment">// satisfies the `thenReturn` behavior (called at least once)</span>
+
+  <span class="hljs-title function_">expect</span>(w).<span class="hljs-title function_">toHaveBeenExhausted</span>()
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>A <code>When</code> chain with no registered behaviors is never considered exhausted. <code>toHaveBeenExhausted</code> only passes when at least one <code>calledWith</code> with an associated action (<code>then*</code>) has been registered and every registered behavior has been fully consumed.</p>
+</div><h2 id="called"><a class="anchor" href="#called">#</a>called <Version>4.1.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>Assertion</code> (property, not a method)</li>
+</ul>
+<p>Chai-style assertion that checks if a spy was called at least once. This is equivalent to <code>toHaveBeenCalled()</code>.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This is a property assertion following sinon-chai conventions. Access it without parentheses: <code>expect(spy).to.have.been.called</code></p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy was called&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+
+  <span class="hljs-title function_">spy</span>()
+
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-property">called</span>
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">not</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-property">called</span> <span class="hljs-comment">// negation</span>
+})</code></pre></div>
+<h2 id="callcount"><a class="anchor" href="#callcount">#</a>callCount <Version>4.1.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>(count: number) =&gt; void</code></li>
+</ul>
+<p>Chai-style assertion that checks if a spy was called a specific number of times. This is equivalent to <code>toHaveBeenCalledTimes(count)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy call count&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+
+  <span class="hljs-title function_">spy</span>()
+  <span class="hljs-title function_">spy</span>()
+  <span class="hljs-title function_">spy</span>()
+
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-title function_">callCount</span>(<span class="hljs-number">3</span>)
+})</code></pre></div>
+<h2 id="calledwith"><a class="anchor" href="#calledwith">#</a>calledWith <Version>4.1.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>(...args: any[]) =&gt; void</code></li>
+</ul>
+<p>Chai-style assertion that checks if a spy was called with specific arguments at least once. This is equivalent to <code>toHaveBeenCalledWith(...args)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy called with arguments&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+
+  <span class="hljs-title function_">spy</span>(<span class="hljs-string">&#x27;apple&#x27;</span>, <span class="hljs-number">10</span>)
+  <span class="hljs-title function_">spy</span>(<span class="hljs-string">&#x27;banana&#x27;</span>, <span class="hljs-number">20</span>)
+
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-title function_">calledWith</span>(<span class="hljs-string">&#x27;apple&#x27;</span>, <span class="hljs-number">10</span>)
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-title function_">calledWith</span>(<span class="hljs-string">&#x27;banana&#x27;</span>, <span class="hljs-number">20</span>)
+})</code></pre></div>
+<h2 id="calledonce"><a class="anchor" href="#calledonce">#</a>calledOnce <Version>4.1.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>Assertion</code> (property, not a method)</li>
+</ul>
+<p>Chai-style assertion that checks if a spy was called exactly once. This is equivalent to <code>toHaveBeenCalledOnce()</code>.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This is a property assertion following sinon-chai conventions. Access it without parentheses: <code>expect(spy).to.have.been.calledOnce</code></p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy called once&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+
+  <span class="hljs-title function_">spy</span>()
+
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-property">calledOnce</span>
+})</code></pre></div>
+<h2 id="calledoncewith"><a class="anchor" href="#calledoncewith">#</a>calledOnceWith <Version>4.1.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>(...args: any[]) =&gt; void</code></li>
+</ul>
+<p>Chai-style assertion that checks if a spy was called exactly once with specific arguments. This is equivalent to <code>toHaveBeenCalledExactlyOnceWith(...args)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy called once with arguments&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+
+  <span class="hljs-title function_">spy</span>(<span class="hljs-string">&#x27;apple&#x27;</span>, <span class="hljs-number">10</span>)
+
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-title function_">calledOnceWith</span>(<span class="hljs-string">&#x27;apple&#x27;</span>, <span class="hljs-number">10</span>)
+})</code></pre></div>
+<h2 id="calledtwice"><a class="anchor" href="#calledtwice">#</a>calledTwice <Version>4.1.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>Assertion</code> (property, not a method)</li>
+</ul>
+<p>Chai-style assertion that checks if a spy was called exactly twice. This is equivalent to <code>toHaveBeenCalledTimes(2)</code>.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This is a property assertion following sinon-chai conventions. Access it without parentheses: <code>expect(spy).to.have.been.calledTwice</code></p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy called twice&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+
+  <span class="hljs-title function_">spy</span>()
+  <span class="hljs-title function_">spy</span>()
+
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-property">calledTwice</span>
+})</code></pre></div>
+<h2 id="calledthrice"><a class="anchor" href="#calledthrice">#</a>calledThrice <Version>4.1.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>Assertion</code> (property, not a method)</li>
+</ul>
+<p>Chai-style assertion that checks if a spy was called exactly three times. This is equivalent to <code>toHaveBeenCalledTimes(3)</code>.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This is a property assertion following sinon-chai conventions. Access it without parentheses: <code>expect(spy).to.have.been.calledThrice</code></p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy called thrice&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+
+  <span class="hljs-title function_">spy</span>()
+  <span class="hljs-title function_">spy</span>()
+  <span class="hljs-title function_">spy</span>()
+
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-property">calledThrice</span>
+})</code></pre></div>
+<h2 id="lastcalledwith"><a class="anchor" href="#lastcalledwith">#</a>lastCalledWith</h2>
+<ul>
+<li><strong>Type:</strong> <code>(...args: any[]) =&gt; void</code></li>
+</ul>
+<p>Chai-style assertion that checks if the last call to a spy was made with specific arguments. This is equivalent to <code>toHaveBeenLastCalledWith(...args)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy last called with&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+
+  <span class="hljs-title function_">spy</span>(<span class="hljs-string">&#x27;apple&#x27;</span>, <span class="hljs-number">10</span>)
+  <span class="hljs-title function_">spy</span>(<span class="hljs-string">&#x27;banana&#x27;</span>, <span class="hljs-number">20</span>)
+
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-title function_">lastCalledWith</span>(<span class="hljs-string">&#x27;banana&#x27;</span>, <span class="hljs-number">20</span>)
+})</code></pre></div>
+<h2 id="nthcalledwith"><a class="anchor" href="#nthcalledwith">#</a>nthCalledWith</h2>
+<ul>
+<li><strong>Type:</strong> <code>(n: number, ...args: any[]) =&gt; void</code></li>
+</ul>
+<p>Chai-style assertion that checks if the nth call to a spy was made with specific arguments. This is equivalent to <code>toHaveBeenNthCalledWith(n, ...args)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy nth called with&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+
+  <span class="hljs-title function_">spy</span>(<span class="hljs-string">&#x27;apple&#x27;</span>, <span class="hljs-number">10</span>)
+  <span class="hljs-title function_">spy</span>(<span class="hljs-string">&#x27;banana&#x27;</span>, <span class="hljs-number">20</span>)
+  <span class="hljs-title function_">spy</span>(<span class="hljs-string">&#x27;cherry&#x27;</span>, <span class="hljs-number">30</span>)
+
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-title function_">nthCalledWith</span>(<span class="hljs-number">2</span>, <span class="hljs-string">&#x27;banana&#x27;</span>, <span class="hljs-number">20</span>)
+})</code></pre></div>
+<h2 id="returned"><a class="anchor" href="#returned">#</a>returned <Version>4.1.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>(value: any) =&gt; void</code></li>
+</ul>
+<p>Chai-style assertion that checks if a spy returned a specific value at least once. This is equivalent to <code>toHaveReturnedWith(value)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy returned&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;value&#x27;</span>)
+
+  <span class="hljs-title function_">spy</span>()
+
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-title function_">returned</span>(<span class="hljs-string">&#x27;value&#x27;</span>)
+})</code></pre></div>
+<h2 id="returnedwith"><a class="anchor" href="#returnedwith">#</a>returnedWith <Version>4.1.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>(value: any) =&gt; void</code></li>
+</ul>
+<p>Chai-style assertion that checks if a spy returned a specific value at least once. This is equivalent to <code>toHaveReturnedWith(value)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy returned with value&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+    .<span class="hljs-title function_">mockReturnValueOnce</span>(<span class="hljs-string">&#x27;apple&#x27;</span>)
+    .<span class="hljs-title function_">mockReturnValueOnce</span>(<span class="hljs-string">&#x27;banana&#x27;</span>)
+
+  <span class="hljs-title function_">spy</span>()
+  <span class="hljs-title function_">spy</span>()
+
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-title function_">returnedWith</span>(<span class="hljs-string">&#x27;apple&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-title function_">returnedWith</span>(<span class="hljs-string">&#x27;banana&#x27;</span>)
+})</code></pre></div>
+<h2 id="returnedtimes"><a class="anchor" href="#returnedtimes">#</a>returnedTimes <Version>4.1.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>(count: number) =&gt; void</code></li>
+</ul>
+<p>Chai-style assertion that checks if a spy returned successfully a specific number of times. This is equivalent to <code>toHaveReturnedTimes(count)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy returned times&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;result&#x27;</span>)
+
+  <span class="hljs-title function_">spy</span>()
+  <span class="hljs-title function_">spy</span>()
+  <span class="hljs-title function_">spy</span>()
+
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-title function_">returnedTimes</span>(<span class="hljs-number">3</span>)
+})</code></pre></div>
+<h2 id="lastreturnedwith"><a class="anchor" href="#lastreturnedwith">#</a>lastReturnedWith</h2>
+<ul>
+<li><strong>Type:</strong> <code>(value: any) =&gt; void</code></li>
+</ul>
+<p>Chai-style assertion that checks if the last return value of a spy matches the expected value. This is equivalent to <code>toHaveLastReturnedWith(value)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy last returned with&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+    .<span class="hljs-title function_">mockReturnValueOnce</span>(<span class="hljs-string">&#x27;apple&#x27;</span>)
+    .<span class="hljs-title function_">mockReturnValueOnce</span>(<span class="hljs-string">&#x27;banana&#x27;</span>)
+
+  <span class="hljs-title function_">spy</span>()
+  <span class="hljs-title function_">spy</span>()
+
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-title function_">lastReturnedWith</span>(<span class="hljs-string">&#x27;banana&#x27;</span>)
+})</code></pre></div>
+<h2 id="nthreturnedwith"><a class="anchor" href="#nthreturnedwith">#</a>nthReturnedWith</h2>
+<ul>
+<li><strong>Type:</strong> <code>(n: number, value: any) =&gt; void</code></li>
+</ul>
+<p>Chai-style assertion that checks if the nth return value of a spy matches the expected value. This is equivalent to <code>toHaveNthReturnedWith(n, value)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy nth returned with&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+    .<span class="hljs-title function_">mockReturnValueOnce</span>(<span class="hljs-string">&#x27;apple&#x27;</span>)
+    .<span class="hljs-title function_">mockReturnValueOnce</span>(<span class="hljs-string">&#x27;banana&#x27;</span>)
+    .<span class="hljs-title function_">mockReturnValueOnce</span>(<span class="hljs-string">&#x27;cherry&#x27;</span>)
+
+  <span class="hljs-title function_">spy</span>()
+  <span class="hljs-title function_">spy</span>()
+  <span class="hljs-title function_">spy</span>()
+
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-title function_">nthReturnedWith</span>(<span class="hljs-number">2</span>, <span class="hljs-string">&#x27;banana&#x27;</span>)
+})</code></pre></div>
+<h2 id="calledbefore"><a class="anchor" href="#calledbefore">#</a>calledBefore <Version>4.1.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>(mock: MockInstance, failIfNoFirstInvocation?: boolean) =&gt; void</code></li>
+</ul>
+<p>Chai-style assertion that checks if a spy was called before another spy. This is equivalent to <code>toHaveBeenCalledBefore(mock, failIfNoFirstInvocation)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy called before another&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy1 = vi.<span class="hljs-title function_">fn</span>()
+  <span class="hljs-keyword">const</span> spy2 = vi.<span class="hljs-title function_">fn</span>()
+
+  <span class="hljs-title function_">spy1</span>()
+  <span class="hljs-title function_">spy2</span>()
+
+  <span class="hljs-title function_">expect</span>(spy1).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-title function_">calledBefore</span>(spy2)
+})</code></pre></div>
+<h2 id="calledafter"><a class="anchor" href="#calledafter">#</a>calledAfter <Version>4.1.0</Version></h2>
+<ul>
+<li><strong>Type:</strong> <code>(mock: MockInstance, failIfNoFirstInvocation?: boolean) =&gt; void</code></li>
+</ul>
+<p>Chai-style assertion that checks if a spy was called after another spy. This is equivalent to <code>toHaveBeenCalledAfter(mock, failIfNoFirstInvocation)</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;spy called after another&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> spy1 = vi.<span class="hljs-title function_">fn</span>()
+  <span class="hljs-keyword">const</span> spy2 = vi.<span class="hljs-title function_">fn</span>()
+
+  <span class="hljs-title function_">spy1</span>()
+  <span class="hljs-title function_">spy2</span>()
+
+  <span class="hljs-title function_">expect</span>(spy2).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-title function_">calledAfter</span>(spy1)
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Migration Guide</div><p>For a complete guide on migrating from Mocha+Chai+Sinon to Vitest, see the <a href="../guide/migration/mocha.html">Migration Guide</a>.</p>
+</div><h2 id="tosatisfy"><a class="anchor" href="#tosatisfy">#</a>toSatisfy</h2>
+<ul>
+<li><strong>Type:</strong> <code>(predicate: (value: any) =&gt; boolean) =&gt; Awaitable&lt;void&gt;</code></li>
+</ul>
+<p>This assertion checks if a value satisfies a certain predicate.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { describe, expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">isOdd</span> = (<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">number</span></span>) =&gt; value % <span class="hljs-number">2</span> !== <span class="hljs-number">0</span>
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;toSatisfy()&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;pass with 0&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-number">1</span>).<span class="hljs-title function_">toSatisfy</span>(isOdd)
+  })
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;pass with negation&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-number">2</span>).<span class="hljs-property">not</span>.<span class="hljs-title function_">toSatisfy</span>(isOdd)
+  })
+})</code></pre></div>
+<h2 id="resolves"><a class="anchor" href="#resolves">#</a>resolves</h2>
+<ul>
+<li><strong>Type:</strong> <code>Promisify&lt;Assertions&gt;</code></li>
+</ul>
+<p><code>resolves</code> is intended to remove boilerplate when asserting asynchronous code. Use it to unwrap value from the pending promise and assert its value with usual assertions. If the promise rejects, the assertion will fail.</p>
+<p>It returns the same <code>Assertions</code> object, but all matchers now return <code>Promise</code>, so you would need to <code>await</code> it. Also works with <code>chai</code> assertions.</p>
+<p>For example, if you have a function, that makes an API call and returns some data, you may use this code to assert its return value:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">buyApples</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">&#x27;/buy/apples&#x27;</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function"><span class="hljs-params">r</span> =&gt;</span> r.<span class="hljs-title function_">json</span>())
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;buyApples returns new stock id&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// toEqual returns a promise now, so you HAVE to await it</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">buyApples</span>()).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">id</span>: <span class="hljs-number">1</span> }) <span class="hljs-comment">// jest API</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">buyApples</span>()).<span class="hljs-property">resolves</span>.<span class="hljs-property">to</span>.<span class="hljs-title function_">equal</span>({ <span class="hljs-attr">id</span>: <span class="hljs-number">1</span> }) <span class="hljs-comment">// chai API</span>
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If the assertion is not awaited, the test will be marked as &quot;failed&quot; at the end of the test.</p>
+</div><h2 id="rejects"><a class="anchor" href="#rejects">#</a>rejects</h2>
+<ul>
+<li><strong>Type:</strong> <code>Promisify&lt;Assertions&gt;</code></li>
+</ul>
+<p><code>rejects</code> is intended to remove boilerplate when asserting asynchronous code. Use it to unwrap reason why the promise was rejected, and assert its value with usual assertions. If the promise successfully resolves, the assertion will fail.</p>
+<p>It returns the same <code>Assertions</code> object, but all matchers now return <code>Promise</code>, so you would need to <code>await</code> it. Also works with <code>chai</code> assertions.</p>
+<p>For example, if you have a function that fails when you call it, you may use this code to assert the reason:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">buyApples</span>(<span class="hljs-params">id</span>) {
+  <span class="hljs-keyword">if</span> (!id) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;no id&#x27;</span>)
+  }
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;buyApples throws an error when no id provided&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// toThrow returns a promise now, so you HAVE to await it</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">buyApples</span>()).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;no id&#x27;</span>)
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If the assertion is not awaited, the test will be marked as &quot;failed&quot; at the end of the test.</p>
+</div><h2 id="expect-assertions"><a class="anchor" href="#expect-assertions">#</a>expect.assertions</h2>
+<ul>
+<li><strong>Type:</strong> <code>(count: number) =&gt; void</code></li>
+</ul>
+<p>After the test has passed or failed verify that a certain number of assertions was called during a test. A useful case would be to check if an asynchronous code was called.</p>
+<p>For example, if we have a function that asynchronously calls two matchers, we can assert that they were actually called.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">doAsync</span>(<span class="hljs-params">...cbs</span>) {
+  <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(
+    cbs.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">cb, index</span>) =&gt;</span> <span class="hljs-title function_">cb</span>({ index })),
+  )
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;all assertions are called&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  expect.<span class="hljs-title function_">assertions</span>(<span class="hljs-number">2</span>)
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">callback1</span>(<span class="hljs-params">data</span>) {
+    <span class="hljs-title function_">expect</span>(data).<span class="hljs-title function_">toBeTruthy</span>()
+  }
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">callback2</span>(<span class="hljs-params">data</span>) {
+    <span class="hljs-title function_">expect</span>(data).<span class="hljs-title function_">toBeTruthy</span>()
+  }
+
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">doAsync</span>(callback1, callback2)
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>When using <code>assertions</code> with async concurrent tests, <code>expect</code> from the local <a href="../guide/test-context.html">Test Context</a> must be used to ensure the right test is detected.</p>
+</div><h2 id="expect-hasassertions"><a class="anchor" href="#expect-hasassertions">#</a>expect.hasAssertions</h2>
+<ul>
+<li><strong>Type:</strong> <code>() =&gt; void</code></li>
+</ul>
+<p>After the test has passed or failed verify that at least one assertion was called during a test. A useful case would be to check if an asynchronous code was called.</p>
+<p>For example, if you have a code that calls a callback, we can make an assertion inside a callback, but the test will always pass if we don&#39;t check if an assertion was called.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { db } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./db.js&#x27;</span>
+
+<span class="hljs-keyword">const</span> cbs = []
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">onSelect</span>(<span class="hljs-params">cb</span>) {
+  cbs.<span class="hljs-title function_">push</span>(cb)
+}
+
+<span class="hljs-comment">// after selecting from db, we call all callbacks</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">select</span>(<span class="hljs-params">id</span>) {
+  <span class="hljs-keyword">return</span> db.<span class="hljs-title function_">select</span>({ id }).<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(
+      cbs.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">cb</span> =&gt;</span> <span class="hljs-title function_">cb</span>(data)),
+    )
+  })
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;callback was called&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  expect.<span class="hljs-title function_">hasAssertions</span>()
+  <span class="hljs-title function_">onSelect</span>(<span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> {
+    <span class="hljs-comment">// should be called on select</span>
+    <span class="hljs-title function_">expect</span>(data).<span class="hljs-title function_">toBeTruthy</span>()
+  })
+  <span class="hljs-comment">// if not awaited, test will fail</span>
+  <span class="hljs-comment">// if you don&#x27;t have expect.hasAssertions(), test will pass</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">select</span>(<span class="hljs-number">3</span>)
+})</code></pre></div>
+<h2 id="expect-unreachable"><a class="anchor" href="#expect-unreachable">#</a>expect.unreachable</h2>
+<ul>
+<li><strong>Type:</strong> <code>(message?: string) =&gt; never</code></li>
+</ul>
+<p>This method is used to assert that a line should never be reached.</p>
+<p>For example, if we want to test that <code>build()</code> throws due to receiving directories having no <code>src</code> folder, and also handle each error separately, we could do this:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">build</span>(<span class="hljs-params">dir</span>) {
+  <span class="hljs-keyword">if</span> (dir.<span class="hljs-title function_">includes</span>(<span class="hljs-string">&#x27;no-src&#x27;</span>)) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`<span class="hljs-subst">${dir}</span>/src does not exist`</span>)
+  }
+}
+
+<span class="hljs-keyword">const</span> errorDirs = [
+  <span class="hljs-string">&#x27;no-src-folder&#x27;</span>,
+  <span class="hljs-comment">// ...</span>
+]
+
+test.<span class="hljs-title function_">each</span>(errorDirs)(<span class="hljs-string">&#x27;build fails with &quot;%s&quot;&#x27;</span>, <span class="hljs-title function_">async</span> (dir) =&gt; {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">build</span>(dir)
+    expect.<span class="hljs-title function_">unreachable</span>(<span class="hljs-string">&#x27;Should not pass build&#x27;</span>)
+  }
+  <span class="hljs-keyword">catch</span> (<span class="hljs-attr">err</span>: <span class="hljs-built_in">any</span>) {
+    <span class="hljs-title function_">expect</span>(err).<span class="hljs-title function_">toBeInstanceOf</span>(<span class="hljs-title class_">Error</span>)
+    <span class="hljs-title function_">expect</span>(err.<span class="hljs-property">stack</span>).<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&#x27;build&#x27;</span>)
+
+    <span class="hljs-keyword">switch</span> (dir) {
+      <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;no-src-folder&#x27;</span>:
+        <span class="hljs-title function_">expect</span>(err.<span class="hljs-property">message</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">`<span class="hljs-subst">${dir}</span>/src does not exist`</span>)
+        <span class="hljs-keyword">break</span>
+      <span class="hljs-attr">default</span>:
+        <span class="hljs-comment">// to exhaust all error tests</span>
+        expect.<span class="hljs-title function_">unreachable</span>(<span class="hljs-string">&#x27;All error test must be handled&#x27;</span>)
+        <span class="hljs-keyword">break</span>
+    }
+  }
+})</code></pre></div>
+<h2 id="expect-fail"><a class="anchor" href="#expect-fail">#</a>expect.fail</h2>
+<ul>
+<li><strong>Type:</strong> <code>(message?: string) =&gt; never</code></li>
+</ul>
+<p>Explicitly forces a test failure with an optional custom message.</p>
+<p>For example, you can use it inside a <code>try/catch</code> block to ensure an error was thrown:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;fails when error is not thrown&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">performAction</span>()
+    expect.<span class="hljs-title function_">fail</span>(<span class="hljs-string">&#x27;Expected performAction to throw an error&#x27;</span>)
+  }
+  <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-title function_">expect</span>(error).<span class="hljs-title function_">toBeInstanceOf</span>(<span class="hljs-title class_">CustomError</span>)
+  }
+})</code></pre></div>
+<h2 id="expect-anything"><a class="anchor" href="#expect-anything">#</a>expect.anything</h2>
+<ul>
+<li><strong>Type:</strong> <code>() =&gt; any</code></li>
+</ul>
+<p>This asymmetric matcher matches anything except <code>null</code> or <code>undefined</code>. Useful if you just want to be sure that a property exists with any value that&#39;s not either <code>null</code> or <code>undefined</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;object has &quot;apples&quot; key&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>({ <span class="hljs-attr">apples</span>: <span class="hljs-number">22</span> }).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">apples</span>: expect.<span class="hljs-title function_">anything</span>() })
+})</code></pre></div>
+<h2 id="expect-any"><a class="anchor" href="#expect-any">#</a>expect.any</h2>
+<ul>
+<li><strong>Type:</strong> <code>(constructor: unknown) =&gt; any</code></li>
+</ul>
+<p>This asymmetric matcher, when used with an equality check, will return <code>true</code> only if the value is an instance of a specified constructor. Useful, if you have a value that is generated each time, and you only want to know that it exists with a proper type.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { generateId } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./generators.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;&quot;id&quot; is a number&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>({ <span class="hljs-attr">id</span>: <span class="hljs-title function_">generateId</span>() }).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">id</span>: expect.<span class="hljs-title function_">any</span>(<span class="hljs-title class_">Number</span>) })
+})</code></pre></div>
+<h2 id="expect-closeto"><a class="anchor" href="#expect-closeto">#</a>expect.closeTo</h2>
+<ul>
+<li><strong>Type:</strong> <code>(expected: any, precision?: number) =&gt; any</code></li>
+</ul>
+<p><code>expect.closeTo</code> is useful when comparing floating point numbers in object properties or array item. If you need to compare a number, please use <code>.toBeCloseTo</code> instead.</p>
+<p>The optional <code>precision</code> argument limits the number of digits to check <strong>after</strong> the decimal point. For the default value <code>2</code>, the test criterion is <code>Math.abs(expected - received) &lt; 0.005 (that is, 10 ** -2 / 2)</code>.</p>
+<p>For example, this test passes with a precision of 5 digits:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;compare float in object properties&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>({
+    <span class="hljs-attr">title</span>: <span class="hljs-string">&#x27;0.1 + 0.2&#x27;</span>,
+    <span class="hljs-attr">sum</span>: <span class="hljs-number">0.1</span> + <span class="hljs-number">0.2</span>,
+  }).<span class="hljs-title function_">toEqual</span>({
+    <span class="hljs-attr">title</span>: <span class="hljs-string">&#x27;0.1 + 0.2&#x27;</span>,
+    <span class="hljs-attr">sum</span>: expect.<span class="hljs-title function_">closeTo</span>(<span class="hljs-number">0.3</span>, <span class="hljs-number">5</span>),
+  })
+})</code></pre></div>
+<h2 id="expect-arraycontaining"><a class="anchor" href="#expect-arraycontaining">#</a>expect.arrayContaining</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(expected: T[]) =&gt; any</code></li>
+</ul>
+<p>When used with an equality check, this asymmetric matcher will return <code>true</code> if the value is an array and contains specified items.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;basket includes fuji&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> basket = {
+    <span class="hljs-attr">varieties</span>: [
+      <span class="hljs-string">&#x27;Empire&#x27;</span>,
+      <span class="hljs-string">&#x27;Fuji&#x27;</span>,
+      <span class="hljs-string">&#x27;Gala&#x27;</span>,
+    ],
+    <span class="hljs-attr">count</span>: <span class="hljs-number">3</span>
+  }
+  <span class="hljs-title function_">expect</span>(basket).<span class="hljs-title function_">toEqual</span>({
+    <span class="hljs-attr">count</span>: <span class="hljs-number">3</span>,
+    <span class="hljs-attr">varieties</span>: expect.<span class="hljs-title function_">arrayContaining</span>([<span class="hljs-string">&#x27;Fuji&#x27;</span>])
+  })
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You can use <code>expect.not</code> with this matcher to negate the expected value.</p>
+</div><h2 id="expect-objectcontaining"><a class="anchor" href="#expect-objectcontaining">#</a>expect.objectContaining</h2>
+<ul>
+<li><strong>Type:</strong> <code>(expected: any) =&gt; any</code></li>
+</ul>
+<p>When used with an equality check, this asymmetric matcher will return <code>true</code> if the value has a similar shape.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;basket has empire apples&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> basket = {
+    <span class="hljs-attr">varieties</span>: [
+      {
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Empire&#x27;</span>,
+        <span class="hljs-attr">count</span>: <span class="hljs-number">1</span>,
+      }
+    ],
+  }
+  <span class="hljs-title function_">expect</span>(basket).<span class="hljs-title function_">toEqual</span>({
+    <span class="hljs-attr">varieties</span>: [
+      expect.<span class="hljs-title function_">objectContaining</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Empire&#x27;</span> }),
+    ]
+  })
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You can use <code>expect.not</code> with this matcher to negate the expected value.</p>
+</div><h2 id="expect-stringcontaining"><a class="anchor" href="#expect-stringcontaining">#</a>expect.stringContaining</h2>
+<ul>
+<li><strong>Type:</strong> <code>(expected: any) =&gt; any</code></li>
+</ul>
+<p>When used with an equality check, this asymmetric matcher will return <code>true</code> if the value is a string and contains a specified substring.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;variety has &quot;Emp&quot; in its name&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> variety = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Empire&#x27;</span>,
+    <span class="hljs-attr">count</span>: <span class="hljs-number">1</span>,
+  }
+  <span class="hljs-title function_">expect</span>(variety).<span class="hljs-title function_">toEqual</span>({
+    <span class="hljs-attr">name</span>: expect.<span class="hljs-title function_">stringContaining</span>(<span class="hljs-string">&#x27;Emp&#x27;</span>),
+    <span class="hljs-attr">count</span>: <span class="hljs-number">1</span>,
+  })
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You can use <code>expect.not</code> with this matcher to negate the expected value.</p>
+</div><h2 id="expect-stringmatching"><a class="anchor" href="#expect-stringmatching">#</a>expect.stringMatching</h2>
+<ul>
+<li><strong>Type:</strong> <code>(expected: any) =&gt; any</code></li>
+</ul>
+<p>When used with an equality check, this asymmetric matcher will return <code>true</code> if the value is a string and contains a specified substring or if the string matches a regular expression.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;variety ends with &quot;re&quot;&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> variety = {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Empire&#x27;</span>,
+    <span class="hljs-attr">count</span>: <span class="hljs-number">1</span>,
+  }
+  <span class="hljs-title function_">expect</span>(variety).<span class="hljs-title function_">toEqual</span>({
+    <span class="hljs-attr">name</span>: expect.<span class="hljs-title function_">stringMatching</span>(<span class="hljs-regexp">/re$/</span>),
+    <span class="hljs-attr">count</span>: <span class="hljs-number">1</span>,
+  })
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You can use <code>expect.not</code> with this matcher to negate the expected value.</p>
+</div><h2 id="expect-schemamatching"><a class="anchor" href="#expect-schemamatching">#</a>expect.schemaMatching</h2>
+<ul>
+<li><strong>Type:</strong> <code>(expected: StandardSchemaV1) =&gt; any</code></li>
+</ul>
+<p>When used with an equality check, this asymmetric matcher will return <code>true</code> if the value matches the provided schema. The schema must implement the <a href="https://standardschema.dev/">Standard Schema v1</a> specification.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { z } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;zod&#x27;</span>
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> v <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;valibot&#x27;</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-keyword">type</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;arktype&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;email validation&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> user = { <span class="hljs-attr">email</span>: <span class="hljs-string">&#x27;john@example.com&#x27;</span> }
+
+  <span class="hljs-comment">// using Zod</span>
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toEqual</span>({
+    <span class="hljs-attr">email</span>: expect.<span class="hljs-title function_">schemaMatching</span>(z.<span class="hljs-title function_">string</span>().<span class="hljs-title function_">email</span>()),
+  })
+
+  <span class="hljs-comment">// using Valibot</span>
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toEqual</span>({
+    <span class="hljs-attr">email</span>: expect.<span class="hljs-title function_">schemaMatching</span>(v.<span class="hljs-title function_">pipe</span>(v.<span class="hljs-title function_">string</span>(), v.<span class="hljs-title function_">email</span>()))
+  })
+
+  <span class="hljs-comment">// using ArkType</span>
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toEqual</span>({
+    <span class="hljs-attr">email</span>: expect.<span class="hljs-title function_">schemaMatching</span>(<span class="hljs-title function_">type</span>(<span class="hljs-string">&#x27;string.email&#x27;</span>)),
+  })
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You can use <code>expect.not</code> with this matcher to negate the expected value.</p>
+</div><h2 id="expect-addsnapshotserializer"><a class="anchor" href="#expect-addsnapshotserializer">#</a>expect.addSnapshotSerializer</h2>
+<ul>
+<li><strong>Type:</strong> <code>(plugin: PrettyFormatPlugin) =&gt; void</code></li>
+</ul>
+<p>This method adds custom serializers that are called when creating a snapshot. This is an advanced feature - if you want to know more, please read a <a href="../guide/snapshot.html#custom-serializer">guide on custom serializers</a>.</p>
+<p>If you are adding custom serializers, you should call this method inside <a href="../config/setupfiles.html"><code>setupFiles</code></a>. This will affect every snapshot.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If you previously used Vue CLI with Jest, you might want to install <a href="https://npmx.dev/package/jest-serializer-vue">jest-serializer-vue</a>. Otherwise, your snapshots will be wrapped in a string, which cases <code>&quot;</code> to be escaped.</p>
+</div><h2 id="expect-extend"><a class="anchor" href="#expect-extend">#</a>expect.extend</h2>
+<ul>
+<li><strong>Type:</strong> <code>(matchers: MatchersObject) =&gt; void</code></li>
+</ul>
+<p>You can extend default matchers with your own. This function is used to extend the matchers object with custom matchers.</p>
+<p>When you define matchers that way, you also create asymmetric matchers that can be used like <code>expect.stringContaining</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;custom matchers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  expect.<span class="hljs-title function_">extend</span>({
+    <span class="hljs-title function_">toBeFoo</span>(<span class="hljs-params">received</span>) {
+      <span class="hljs-keyword">const</span> { isNot } = <span class="hljs-variable language_">this</span>
+      <span class="hljs-keyword">return</span> {
+        <span class="hljs-attr">message</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-string">`expected <span class="hljs-subst">${received}</span> is<span class="hljs-subst">${isNot ? <span class="hljs-string">&#x27; not&#x27;</span> : <span class="hljs-string">&#x27;&#x27;</span>}</span> foo`</span>,
+        <span class="hljs-attr">pass</span>: received === <span class="hljs-string">&#x27;foo&#x27;</span>,
+      }
+    },
+  })
+
+  <span class="hljs-title function_">expect</span>(<span class="hljs-string">&#x27;foo&#x27;</span>).<span class="hljs-title function_">toBeFoo</span>()
+  <span class="hljs-title function_">expect</span>({ <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;foo&#x27;</span> }).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">foo</span>: expect.<span class="hljs-title function_">toBeFoo</span>() })
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If you want your matchers to appear in every test, you should call this method inside <a href="../config/setupfiles.html"><code>setupFiles</code></a>.</p>
+</div><p>This function is compatible with Jest&#39;s <code>expect.extend</code>, so any library that uses it to create custom matchers will work with Vitest.</p>
+<p>If you are using TypeScript, you can extend the default <code>Matchers</code> interface in an ambient declaration file (e.g: <code>vitest.d.ts</code>) with the code below:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Matchers</span>&lt;R, T&gt; {
+    <span class="hljs-attr">toBeFoo</span>: <span class="hljs-function">() =&gt;</span> R
+  }
+}</code></pre></div>
+<p><code>R</code> is the assertion return type, and <code>T</code> is the type of the received value.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Don&#39;t forget to include the ambient declaration file in your <code>tsconfig.json</code>.</p>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If you want to know more, checkout <a href="../guide/extending-matchers.html">guide on extending matchers</a>.</p>
+</div><h2 id="expect-addequalitytesters"><a class="anchor" href="#expect-addequalitytesters">#</a>expect.addEqualityTesters</h2>
+<ul>
+<li><strong>Type:</strong> <code>(tester: Array&lt;Tester&gt;) =&gt; void</code></li>
+</ul>
+<p>You can use this method to define custom testers, which are methods used by matchers, to test if two objects are equal. It is compatible with Jest&#39;s <code>expect.addEqualityTesters</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">AnagramComparator</span> {
+  <span class="hljs-keyword">public</span> <span class="hljs-attr">word</span>: <span class="hljs-built_in">string</span>
+
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"><span class="hljs-attr">word</span>: <span class="hljs-built_in">string</span></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">word</span> = word
+  }
+
+  <span class="hljs-title function_">equals</span>(<span class="hljs-attr">other</span>: <span class="hljs-title class_">AnagramComparator</span>): <span class="hljs-built_in">boolean</span> {
+    <span class="hljs-keyword">const</span> cleanStr1 = <span class="hljs-variable language_">this</span>.<span class="hljs-property">word</span>.<span class="hljs-title function_">replace</span>(<span class="hljs-regexp">/ /g</span>, <span class="hljs-string">&#x27;&#x27;</span>).<span class="hljs-title function_">toLowerCase</span>()
+    <span class="hljs-keyword">const</span> cleanStr2 = other.<span class="hljs-property">word</span>.<span class="hljs-title function_">replace</span>(<span class="hljs-regexp">/ /g</span>, <span class="hljs-string">&#x27;&#x27;</span>).<span class="hljs-title function_">toLowerCase</span>()
+
+    <span class="hljs-keyword">const</span> sortedStr1 = cleanStr1.<span class="hljs-title function_">split</span>(<span class="hljs-string">&#x27;&#x27;</span>).<span class="hljs-title function_">sort</span>().<span class="hljs-title function_">join</span>(<span class="hljs-string">&#x27;&#x27;</span>)
+    <span class="hljs-keyword">const</span> sortedStr2 = cleanStr2.<span class="hljs-title function_">split</span>(<span class="hljs-string">&#x27;&#x27;</span>).<span class="hljs-title function_">sort</span>().<span class="hljs-title function_">join</span>(<span class="hljs-string">&#x27;&#x27;</span>)
+
+    <span class="hljs-keyword">return</span> sortedStr1 === sortedStr2
+  }
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">isAnagramComparator</span>(<span class="hljs-params"><span class="hljs-attr">a</span>: <span class="hljs-built_in">unknown</span></span>): a is <span class="hljs-title class_">AnagramComparator</span> {
+  <span class="hljs-keyword">return</span> a <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">AnagramComparator</span>
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">areAnagramsEqual</span>(<span class="hljs-params"><span class="hljs-attr">a</span>: <span class="hljs-built_in">unknown</span>, <span class="hljs-attr">b</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-built_in">boolean</span> | <span class="hljs-literal">undefined</span> {
+  <span class="hljs-keyword">const</span> isAAnagramComparator = <span class="hljs-title function_">isAnagramComparator</span>(a)
+  <span class="hljs-keyword">const</span> isBAnagramComparator = <span class="hljs-title function_">isAnagramComparator</span>(b)
+
+  <span class="hljs-keyword">if</span> (isAAnagramComparator &amp;&amp; isBAnagramComparator) {
+    <span class="hljs-keyword">return</span> a.<span class="hljs-title function_">equals</span>(b)
+  }
+  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (isAAnagramComparator === isBAnagramComparator) {
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">undefined</span>
+  }
+  <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>
+  }
+}
+
+expect.<span class="hljs-title function_">addEqualityTesters</span>([areAnagramsEqual])
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;custom equality tester&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">AnagramComparator</span>(<span class="hljs-string">&#x27;listen&#x27;</span>)).<span class="hljs-title function_">toEqual</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">AnagramComparator</span>(<span class="hljs-string">&#x27;silent&#x27;</span>))
+})</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#assert">assert</a><a class="toc-2" href="#soft">soft</a><a class="toc-2" href="#poll">poll</a><a class="toc-2" href="#not">not</a><a class="toc-2" href="#tobe">toBe</a><a class="toc-2" href="#tobecloseto">toBeCloseTo</a><a class="toc-2" href="#tobedefined">toBeDefined</a><a class="toc-2" href="#tobeundefined">toBeUndefined</a><a class="toc-2" href="#tobetruthy">toBeTruthy</a><a class="toc-2" href="#tobefalsy">toBeFalsy</a><a class="toc-2" href="#tobenull">toBeNull</a><a class="toc-2" href="#tobenullable">toBeNullable</a><a class="toc-2" href="#tobenan">toBeNaN</a><a class="toc-2" href="#tobeoneof">toBeOneOf</a><a class="toc-2" href="#tobetypeof">toBeTypeOf</a><a class="toc-2" href="#tobeinstanceof">toBeInstanceOf</a><a class="toc-2" href="#tobegreaterthan">toBeGreaterThan</a><a class="toc-2" href="#tobegreaterthanorequal">toBeGreaterThanOrEqual</a><a class="toc-2" href="#tobelessthan">toBeLessThan</a><a class="toc-2" href="#tobelessthanorequal">toBeLessThanOrEqual</a><a class="toc-2" href="#toequal">toEqual</a><a class="toc-2" href="#tostrictequal">toStrictEqual</a><a class="toc-2" href="#tocontain">toContain</a><a class="toc-2" href="#tocontainequal">toContainEqual</a><a class="toc-2" href="#tohavelength">toHaveLength</a><a class="toc-2" href="#tohaveproperty">toHaveProperty</a><a class="toc-2" href="#tomatch">toMatch</a><a class="toc-2" href="#tomatchobject">toMatchObject</a><a class="toc-2" href="#tothrow">toThrow</a><a class="toc-2" href="#tomatchsnapshot">toMatchSnapshot</a><a class="toc-2" href="#tomatchinlinesnapshot">toMatchInlineSnapshot</a><a class="toc-2" href="#tomatchfilesnapshot">toMatchFileSnapshot</a><a class="toc-2" href="#tothrowerrormatchingsnapshot">toThrowErrorMatchingSnapshot</a><a class="toc-2" href="#tothrowerrormatchinginlinesnapshot">toThrowErrorMatchingInlineSnapshot</a><a class="toc-2" href="#tomatcharisnapshot">toMatchAriaSnapshot 4.1.4</a><a class="toc-2" href="#tomatchariainlinesnapshot">toMatchAriaInlineSnapshot 4.1.4</a><a class="toc-2" href="#tohavebeencalled">toHaveBeenCalled</a><a class="toc-2" href="#tohavebeencalledtimes">toHaveBeenCalledTimes</a><a class="toc-2" href="#tohavebeencalledwith">toHaveBeenCalledWith</a><a class="toc-2" href="#tohavebeencalledbefore">toHaveBeenCalledBefore</a><a class="toc-2" href="#tohavebeencalledafter">toHaveBeenCalledAfter</a><a class="toc-2" href="#tohavebeencalledexactlyoncewith">toHaveBeenCalledExactlyOnceWith</a><a class="toc-2" href="#tohavebeenlastcalledwith">toHaveBeenLastCalledWith</a><a class="toc-2" href="#tohavebeennthcalledwith">toHaveBeenNthCalledWith</a><a class="toc-2" href="#tohavereturned">toHaveReturned</a><a class="toc-2" href="#tohavereturnedtimes">toHaveReturnedTimes</a><a class="toc-2" href="#tohavereturnedwith">toHaveReturnedWith</a><a class="toc-2" href="#tohavelastreturnedwith">toHaveLastReturnedWith</a><a class="toc-2" href="#tohaventhreturnedwith">toHaveNthReturnedWith</a><a class="toc-2" href="#tohaveresolved">toHaveResolved</a><a class="toc-2" href="#tohaveresolvedtimes">toHaveResolvedTimes</a><a class="toc-2" href="#tohaveresolvedwith">toHaveResolvedWith</a><a class="toc-2" href="#tohavelastresolvedwith">toHaveLastResolvedWith</a><a class="toc-2" href="#tohaventhresolvedwith">toHaveNthResolvedWith</a><a class="toc-2" href="#tohavebeenexhausted">toHaveBeenExhausted 5.0.0</a><a class="toc-2" href="#called">called 4.1.0</a><a class="toc-2" href="#callcount">callCount 4.1.0</a><a class="toc-2" href="#calledwith">calledWith 4.1.0</a><a class="toc-2" href="#calledonce">calledOnce 4.1.0</a><a class="toc-2" href="#calledoncewith">calledOnceWith 4.1.0</a><a class="toc-2" href="#calledtwice">calledTwice 4.1.0</a><a class="toc-2" href="#calledthrice">calledThrice 4.1.0</a><a class="toc-2" href="#lastcalledwith">lastCalledWith</a><a class="toc-2" href="#nthcalledwith">nthCalledWith</a><a class="toc-2" href="#returned">returned 4.1.0</a><a class="toc-2" href="#returnedwith">returnedWith 4.1.0</a><a class="toc-2" href="#returnedtimes">returnedTimes 4.1.0</a><a class="toc-2" href="#lastreturnedwith">lastReturnedWith</a><a class="toc-2" href="#nthreturnedwith">nthReturnedWith</a><a class="toc-2" href="#calledbefore">calledBefore 4.1.0</a><a class="toc-2" href="#calledafter">calledAfter 4.1.0</a><a class="toc-2" href="#tosatisfy">toSatisfy</a><a class="toc-2" href="#resolves">resolves</a><a class="toc-2" href="#rejects">rejects</a><a class="toc-2" href="#expect-assertions">expect.assertions</a><a class="toc-2" href="#expect-hasassertions">expect.hasAssertions</a><a class="toc-2" href="#expect-unreachable">expect.unreachable</a><a class="toc-2" href="#expect-fail">expect.fail</a><a class="toc-2" href="#expect-anything">expect.anything</a><a class="toc-2" href="#expect-any">expect.any</a><a class="toc-2" href="#expect-closeto">expect.closeTo</a><a class="toc-2" href="#expect-arraycontaining">expect.arrayContaining</a><a class="toc-2" href="#expect-objectcontaining">expect.objectContaining</a><a class="toc-2" href="#expect-stringcontaining">expect.stringContaining</a><a class="toc-2" href="#expect-stringmatching">expect.stringMatching</a><a class="toc-2" href="#expect-schemamatching">expect.schemaMatching</a><a class="toc-2" href="#expect-addsnapshotserializer">expect.addSnapshotSerializer</a><a class="toc-2" href="#expect-extend">expect.extend</a><a class="toc-2" href="#expect-addequalitytesters">expect.addEqualityTesters</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ES 2015 Modules (JSDoc) · ICT-324 Révision</title>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/hljs.css">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../index.html">Accueil</a><a class="nav-link" href="../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../docs/index.html">Index des docs</a><a class="nav-link" href="../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../docs/vite/index.html">Vite</a><a class="nav-link active" href="../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="index.html">JSDoc</a> › howto-es2015-modules  <a class="ext small" href="https://jsdoc.app/howto-es2015-modules.html">version en ligne</a></div>
+<h1>ES 2015 Modules</h1><p>JSDoc 3 makes it possible to document modules that follow the <a href="http://www.ecma-international.org/ecma-262/6.0/#sec-modules">ECMAScript 2015
+specification</a>. ES 2015 modules are supported in JSDoc 3.4.0 and later.</p>
+<h2 id="module-identifiers"><a class="anchor" href="#module-identifiers">#</a>Module identifiers</h2>
+<p>When you document an ES 2015 module, you&#39;ll use a <a href="tags-module.html"><code>@module</code> tag</a> to document the
+identifier for the module. For example, if users load the module by calling <code>import * as myShirt from &#39;my/shirt&#39;</code>, you&#39;ll write a JSDoc comment that contains the tag <code>@module my/shirt</code>.</p>
+<p>If you use the <code>@module</code> tag without a value, JSDoc will try to guess the correct module identifier
+based on the filepath.</p>
+<p>When you use a JSDoc <a href="about-namepaths.html">namepath</a> to refer to a module from another JSDoc comment, you must
+add the prefix <code>module:</code>. For example, if you want the documentation for the module <code>my/pants</code> to
+link to the module <code>my/shirt</code>, you could use the <a href="tags-see.html"><code>@see</code> tag</a> to document <code>my/pants</code> as
+follows:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Pants module.
+ * <span class="hljs-doctag">@module</span> my/pants
+ * <span class="hljs-doctag">@see</span> module:my/shirt
+ */</span></code></pre></div>
+<p>Similarly, the namepath for each member of the module will start with <code>module:</code>, followed by the
+module name. For example, if your <code>my/pants</code> module exports a <code>Jeans</code> class, and <code>Jeans</code> has an
+instance method named <code>hem</code>, the instance method&#39;s longname is <code>module:my/pants.Jeans#hem</code>.</p>
+<h2 id="exported-values"><a class="anchor" href="#exported-values">#</a>Exported values</h2>
+<p>The following example shows how to document different kinds of exported values in an ES 2015 module.
+In most cases, you can simply add a JSDoc comment to the <code>export</code> statement that defines the
+exported value. If you are exporting a value under another name, you can document the exported value
+within its <code>export</code> block.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Documenting values exported by a module</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/** <span class="hljs-doctag">@module</span> color/mixer */</span>
+
+<span class="hljs-comment">/** The name of the module. */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> name = <span class="hljs-string">&#x27;mixer&#x27;</span>;
+
+<span class="hljs-comment">/** The most recent blended color. */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">var</span> lastColor = <span class="hljs-literal">null</span>;
+
+<span class="hljs-comment">/**
+ * Blend two colors together.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">color1</span> - The first color, in hexadecimal format.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">color2</span> - The second color, in hexadecimal format.
+ * <span class="hljs-doctag">@return</span> {<span class="hljs-type">string</span>} The blended color.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">blend</span>(<span class="hljs-params">color1, color2</span>) {}
+
+<span class="hljs-comment">// convert color to array of RGB values (0-255)</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">rgbify</span>(<span class="hljs-params">color</span>) {}
+
+<span class="hljs-keyword">export</span> {
+    <span class="hljs-comment">/**
+     * Get the red, green, and blue values of a color.
+     * <span class="hljs-doctag">@function</span>
+     * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">color</span> - A color, in hexadecimal format.
+     * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">Array.&amp;lt;number&gt;</span>} An array of the red, green, and blue values,
+     * each ranging from 0 to 255.
+     */</span>
+    rgbify <span class="hljs-keyword">as</span> toRgb
+}</code></pre></div>
+</div>
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Context API | Browser Mode (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/browser/context  <a class="ext small" href="https://vitest.dev/api/browser/context">version en ligne</a></div>
+<h1 id="context-api"><a class="anchor" href="#context-api">#</a>Context API</h1>
+<p>Vitest exposes a context module via <code>vitest/browser</code> entry point. As of 2.0, it exposes a small set of utilities that might be useful to you in tests.</p>
+<h2 id="userevent"><a class="anchor" href="#userevent">#</a><code>userEvent</code></h2>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>The <code>userEvent</code> API is explained in detail at <a href="interactivity.html">Interactivity API</a>.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/**
+ * Handler for user interactions. The support is implemented by the browser provider (`playwright` or `webdriverio`).
+ * If used with `preview` provider, fallbacks to simulated events via `<span class="hljs-doctag">@testing</span>-library/user-event`.
+ * <span class="hljs-doctag">@experimental</span>
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">userEvent</span>: {
+  <span class="hljs-attr">setup</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">UserEvent</span>
+  <span class="hljs-attr">cleanup</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-attr">click</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventClickOptions</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-attr">dblClick</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventDoubleClickOptions</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-attr">tripleClick</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventTripleClickOptions</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-attr">selectOptions</span>: <span class="hljs-function">(<span class="hljs-params">
+    <span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span>,
+    <span class="hljs-attr">values</span>: <span class="hljs-title class_">HTMLElement</span> | <span class="hljs-title class_">HTMLElement</span>[] | <span class="hljs-built_in">string</span> | <span class="hljs-built_in">string</span>[],
+    <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventSelectOptions</span>,
+  </span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-attr">keyboard</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-attr">type</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span>, <span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventTypeOptions</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-attr">clear</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-attr">tab</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventTabOptions</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-attr">hover</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventHoverOptions</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-attr">unhover</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventHoverOptions</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-attr">fill</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span>, <span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventFillOptions</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-attr">dragAndDrop</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">source</span>: <span class="hljs-title class_">Element</span>, <span class="hljs-attr">target</span>: <span class="hljs-title class_">Element</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventDragAndDropOptions</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+}</code></pre></div>
+<h2 id="commands"><a class="anchor" href="#commands">#</a><code>commands</code></h2>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This API is explained in detail at <a href="commands.html">Commands API</a>.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/**
+ * Available commands for the browser.
+ * A shortcut to `server.commands`.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">commands</span>: <span class="hljs-title class_">BrowserCommands</span></code></pre></div>
+<h2 id="page"><a class="anchor" href="#page">#</a><code>page</code></h2>
+<p>The <code>page</code> export provides utilities to interact with the current <code>page</code>.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>While it exposes some utilities from Playwright&#39;s <code>page</code>, it is not the same object. Since the browser context is evaluated in the browser, your tests don&#39;t have access to Playwright&#39;s <code>page</code> because it runs on the server.</p>
+<p>Use <a href="commands.html">Commands API</a> if you need to have access to Playwright&#39;s <code>page</code> object.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">page</span>: {
+  <span class="hljs-comment">/**
+   * Change the size of iframe&#x27;s viewport.
+   */</span>
+  <span class="hljs-title function_">viewport</span>(<span class="hljs-attr">width</span>: <span class="hljs-built_in">number</span>, <span class="hljs-attr">height</span>: <span class="hljs-built_in">number</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-comment">/**
+   * Make a screenshot of the test iframe or a specific element.
+   * <span class="hljs-doctag">@returns</span> Path to the screenshot file or path and base64.
+   */</span>
+  <span class="hljs-title function_">screenshot</span>(<span class="hljs-attr">options</span>: <span class="hljs-title class_">Omit</span>&lt;<span class="hljs-title class_">ScreenshotOptions</span>, <span class="hljs-string">&#x27;base64&#x27;</span>&gt; &amp; { <span class="hljs-attr">base64</span>: <span class="hljs-literal">true</span> }): <span class="hljs-title class_">Promise</span>&lt;{
+    <span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span>
+    <span class="hljs-attr">base64</span>: <span class="hljs-built_in">string</span>
+  }&gt;
+  <span class="hljs-title function_">screenshot</span>(<span class="hljs-attr">options</span>?: <span class="hljs-title class_">ScreenshotOptions</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">string</span>&gt;
+  <span class="hljs-comment">/**
+   * Add a trace marker when browser tracing is enabled.
+   */</span>
+  <span class="hljs-title function_">mark</span>(<span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">options</span>?: { <span class="hljs-attr">stack</span>?: <span class="hljs-built_in">string</span>; <span class="hljs-attr">kind</span>?: <span class="hljs-title class_">BrowserTraceEntryKind</span> }): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  <span class="hljs-comment">/**
+   * Group multiple operations under a trace marker when browser tracing is enabled.
+   */</span>
+  mark&lt;T&gt;(<span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">body</span>: <span class="hljs-function">() =&gt;</span> T | <span class="hljs-title class_">Promise</span>&lt;T&gt;, <span class="hljs-attr">options</span>?: { <span class="hljs-attr">stack</span>?: <span class="hljs-built_in">string</span>; <span class="hljs-attr">kind</span>?: <span class="hljs-title class_">BrowserTraceEntryKind</span> }): <span class="hljs-title class_">Promise</span>&lt;T&gt;
+  <span class="hljs-comment">/**
+   * Extend default `page` object with custom methods.
+   */</span>
+  <span class="hljs-title function_">extend</span>(<span class="hljs-attr">methods</span>: <span class="hljs-title class_">Partial</span>&lt;<span class="hljs-title class_">BrowserPage</span>&gt;): <span class="hljs-title class_">BrowserPage</span>
+  <span class="hljs-comment">/**
+   * Wrap an HTML element in a `Locator`. When querying for elements, the search will always return this element.
+   */</span>
+  <span class="hljs-title function_">elementLocator</span>(<span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span>): <span class="hljs-title class_">Locator</span>
+  <span class="hljs-comment">/**
+   * The iframe locator. This is a document locator that enters the iframe body
+   * and works similarly to the `page` object.
+   * **Warning:** At the moment, this is supported only by the `playwright` provider.
+   */</span>
+  <span class="hljs-title function_">frameLocator</span>(<span class="hljs-attr">iframeElement</span>: <span class="hljs-title class_">Locator</span>): <span class="hljs-title class_">FrameLocator</span>
+
+  <span class="hljs-comment">/**
+   * Locator APIs. See its documentation for more details.
+   */</span>
+  <span class="hljs-title function_">getByRole</span>(<span class="hljs-attr">role</span>: <span class="hljs-title class_">ARIARole</span> | <span class="hljs-built_in">string</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">LocatorByRoleOptions</span>): <span class="hljs-title class_">Locator</span>
+  <span class="hljs-title function_">getByLabelText</span>(<span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">LocatorOptions</span>): <span class="hljs-title class_">Locator</span>
+  <span class="hljs-title function_">getByTestId</span>(<span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span>): <span class="hljs-title class_">Locator</span>
+  <span class="hljs-title function_">getByAltText</span>(<span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">LocatorOptions</span>): <span class="hljs-title class_">Locator</span>
+  <span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">LocatorOptions</span>): <span class="hljs-title class_">Locator</span>
+  <span class="hljs-title function_">getByText</span>(<span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">LocatorOptions</span>): <span class="hljs-title class_">Locator</span>
+  <span class="hljs-title function_">getByTitle</span>(<span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">LocatorOptions</span>): <span class="hljs-title class_">Locator</span>
+}</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>The <code>getBy*</code> API is explained at <a href="locators.html">Locators API</a>.</p>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention : WARNING &lt;Version&gt;3.2.0&lt;/Version&gt;</div><p>Note that <code>screenshot</code> will always return a base64 string if <code>save</code> is set to <code>false</code>.
+The <code>path</code> is also ignored in that case.</p>
+</div><h3 id="mark"><a class="anchor" href="#mark">#</a>mark</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mark</span>(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">options</span>?: { stack?: <span class="hljs-built_in">string</span>; kind?: BrowserTraceEntryKind }</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+<span class="hljs-keyword">function</span> mark&lt;T&gt;(
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">body</span>: <span class="hljs-function">() =&gt;</span> T | <span class="hljs-title class_">Promise</span>&lt;T&gt;,
+  <span class="hljs-attr">options</span>?: { <span class="hljs-attr">stack</span>?: <span class="hljs-built_in">string</span>; <span class="hljs-attr">kind</span>?: <span class="hljs-title class_">BrowserTraceEntryKind</span> },
+): <span class="hljs-title class_">Promise</span>&lt;T&gt;</code></pre></div>
+<p>Adds a named marker to the trace timeline for the current test.</p>
+<p>Pass <code>options.stack</code> to override the callsite location in trace metadata. This is useful for wrapper libraries that need to preserve the end-user source location.</p>
+<p>Pass <code>options.kind</code> to categorize your marker as specific type, for example as <code>&#39;action&#39;</code>.</p>
+<p>If you pass a callback, Vitest creates a trace group with this name, runs the callback, and closes the group automatically.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">mark</span>(<span class="hljs-string">&#x27;before submit&#x27;</span>)
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Submit&#x27;</span> }).<span class="hljs-title function_">click</span>()
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">mark</span>(<span class="hljs-string">&#x27;after submit&#x27;</span>)
+
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">mark</span>(<span class="hljs-string">&#x27;submit flow&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Email&#x27;</span> }).<span class="hljs-title function_">fill</span>(<span class="hljs-string">&#x27;john@example.com&#x27;</span>)
+  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Submit&#x27;</span> }).<span class="hljs-title function_">click</span>()
+}, { <span class="hljs-attr">kind</span>: <span class="hljs-string">&#x27;action&#x27;</span> })</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This method is useful only when <a href="../../config/browser/trace.html"><code>browser.trace</code></a> is enabled.</p>
+<p>A server-side equivalent is available on the <a href="commands.html#recording-trace-markers"><code>BrowserCommandContext</code></a> so <a href="commands.html#custom-commands">custom commands</a> can record markers attributed to the test that triggered them.</p>
+</div><h3 id="framelocator"><a class="anchor" href="#framelocator">#</a>frameLocator</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">frameLocator</span>(<span class="hljs-params"><span class="hljs-attr">iframeElement</span>: <span class="hljs-title class_">Locator</span></span>): <span class="hljs-title class_">FrameLocator</span></code></pre></div>
+<p>The <code>frameLocator</code> method returns a <code>FrameLocator</code> instance that can be used to find elements inside the iframe.</p>
+<p>The frame locator is similar to <code>page</code>. It does not refer to the Iframe HTML element, but to the iframe&#39;s document.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> frame = page.<span class="hljs-title function_">frameLocator</span>(
+  page.<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;iframe&#x27;</span>)
+)
+
+<span class="hljs-keyword">await</span> frame.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello World&#x27;</span>).<span class="hljs-title function_">click</span>() <span class="hljs-comment">// ✅</span>
+<span class="hljs-keyword">await</span> frame.<span class="hljs-title function_">click</span>() <span class="hljs-comment">// ❌ Not available</span></code></pre></div>
+<div class="box box-danger"><div class="box-title">🛑 Danger : IMPORTANT</div><p>By default <code>frameLocator</code> does not support querying elements with <code>expect.element()</code> in cross-origin iframes. Interactive methods, such as <code>.click()</code> work fine. This is different behaviour than Playwright.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> frame = page.<span class="hljs-title function_">frameLocator</span>(page.<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;cross-origin-iframe&#x27;</span>))
+<span class="hljs-keyword">const</span> button = frame.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Submit&#x27;</span> })
+
+<span class="hljs-keyword">await</span> button.<span class="hljs-title function_">click</span>() <span class="hljs-comment">// Interactive methods work fine ✅</span>
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(button).<span class="hljs-title function_">toBeVisible</span>() <span class="hljs-comment">// Querying elements does not work ❌</span></code></pre></div>
+<p>If you need to work with cross-origin iframes, you&#39;ll need to pass <code>args: [&quot;--disable-web-security&quot;]</code> in <a href="../../config/browser/playwright.html#launchoptions"><code>launchOptions</code></a>. Or alternatively create a custom <a href="commands.html#custom-commands">browser command</a> that accesses the iframe on server side where it&#39;s available.</p>
+</div><div class="box box-danger"><div class="box-title">🛑 Danger : IMPORTANT</div><p>At the moment, the <code>frameLocator</code> method is only supported by the <code>playwright</code> provider.</p>
+<p>The interactive methods (like <code>click</code> or <code>fill</code>) are always available on elements within the iframe, but assertions with <code>expect.element</code> require the iframe to have the <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy">same-origin policy</a>.</p>
+</div><h2 id="cdp"><a class="anchor" href="#cdp">#</a><code>cdp</code></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">cdp</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">CDPSession</span></code></pre></div>
+<p>The <code>cdp</code> export returns the current Chrome DevTools Protocol session. It is mostly useful to library authors to build tools on top of it.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>CDP session works only with <code>playwright</code> provider and only when using <code>chromium</code> browser. You can read more about it in playwright&#39;s <a href="https://playwright.dev/docs/api/class-cdpsession"><code>CDPSession</code></a> documentation.</p>
+<p>CDP is a privileged debugging API. It is available only when browser API write and exec operations are enabled through <a href="../../config/api.html#api-allowwrite"><code>api.allowWrite</code></a>, and <a href="../../config/api.html#api-allowexec"><code>api.allowExec</code></a>.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">cdp</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">CDPSession</span></code></pre></div>
+<h2 id="server"><a class="anchor" href="#server">#</a><code>server</code></h2>
+<p>The <code>server</code> export represents the Node.js environment where the Vitest server is running. It is mostly useful for debugging or limiting your tests based on the environment.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">server</span>: {
+  <span class="hljs-comment">/**
+   * Platform the Vitest server is running on.
+   * The same as calling `process.platform` on the server.
+   */</span>
+  <span class="hljs-attr">platform</span>: <span class="hljs-title class_">Platform</span>
+  <span class="hljs-comment">/**
+   * Runtime version of the Vitest server.
+   * The same as calling `process.version` on the server.
+   */</span>
+  <span class="hljs-attr">version</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-comment">/**
+   * Name of the browser provider.
+   */</span>
+  <span class="hljs-attr">provider</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-comment">/**
+   * Name of the current browser.
+   */</span>
+  <span class="hljs-attr">browser</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-comment">/**
+   * Available commands for the browser.
+   */</span>
+  <span class="hljs-attr">commands</span>: <span class="hljs-title class_">BrowserCommands</span>
+  <span class="hljs-comment">/**
+   * Serialized test config.
+   */</span>
+  <span class="hljs-attr">config</span>: <span class="hljs-title class_">SerializedConfig</span>
+}</code></pre></div>
+<h2 id="utils"><a class="anchor" href="#utils">#</a><code>utils</code></h2>
+<p>Utility functions useful for custom render libraries.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">utils</span>: {
+  <span class="hljs-comment">/**
+   * This is similar to calling `page.elementLocator`, but it returns only
+   * locator selectors.
+   */</span>
+  <span class="hljs-title function_">getElementLocatorSelectors</span>(<span class="hljs-attr">element</span>: <span class="hljs-title class_">Element</span>): <span class="hljs-title class_">LocatorSelectors</span>
+  <span class="hljs-comment">/**
+   * Prints prettified HTML of an element.
+   */</span>
+  <span class="hljs-title function_">debug</span>(
+    <span class="hljs-attr">el</span>?: <span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span> | <span class="hljs-literal">null</span> | (<span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span>)[],
+    <span class="hljs-attr">maxLength</span>?: <span class="hljs-built_in">number</span>,
+    <span class="hljs-attr">options</span>?: <span class="hljs-title class_">PrettyDOMOptions</span>,
+  ): <span class="hljs-built_in">void</span>
+  <span class="hljs-comment">/**
+   * Returns prettified HTML of an element.
+   */</span>
+  <span class="hljs-title function_">prettyDOM</span>(
+    <span class="hljs-attr">dom</span>?: <span class="hljs-title class_">Element</span> | <span class="hljs-title class_">Locator</span> | <span class="hljs-literal">undefined</span> | <span class="hljs-literal">null</span>,
+    <span class="hljs-attr">maxLength</span>?: <span class="hljs-built_in">number</span>,
+    <span class="hljs-attr">prettyFormatOptions</span>?: <span class="hljs-title class_">PrettyDOMOptions</span>,
+  ): <span class="hljs-built_in">string</span>
+  <span class="hljs-comment">/**
+   * Configures default options of `prettyDOM` and `debug` functions.
+   * This will also affect `vitest-browser-{framework}` package.
+   */</span>
+  <span class="hljs-title function_">configurePrettyDOM</span>(<span class="hljs-attr">options</span>: <span class="hljs-title class_">StringifyOptions</span>): <span class="hljs-built_in">void</span>
+  <span class="hljs-comment">/**
+   * Creates &quot;Cannot find element&quot; error. Useful for custom locators.
+   */</span>
+  <span class="hljs-title function_">getElementError</span>(<span class="hljs-attr">selector</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">container</span>?: <span class="hljs-title class_">Element</span>): <span class="hljs-title class_">Error</span>
+  <span class="hljs-comment">/**
+   * Utilities for generating and working with ARIA trees and templates.
+   * <span class="hljs-doctag">@experimental</span>
+   */</span>
+  <span class="hljs-attr">aria</span>: {
+    <span class="hljs-title function_">generateAriaTree</span>(<span class="hljs-attr">rootElement</span>: <span class="hljs-title class_">Element</span>): <span class="hljs-title class_">AriaNode</span>
+    <span class="hljs-title function_">renderAriaTree</span>(<span class="hljs-attr">root</span>: <span class="hljs-title class_">AriaNode</span>): <span class="hljs-built_in">string</span>
+    <span class="hljs-title function_">renderAriaTemplate</span>(<span class="hljs-attr">template</span>: <span class="hljs-title class_">AriaTemplateNode</span>): <span class="hljs-built_in">string</span>
+    <span class="hljs-title function_">parseAriaTemplate</span>(<span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">AriaTemplateNode</span>
+    <span class="hljs-title function_">matchAriaTree</span>(<span class="hljs-attr">root</span>: <span class="hljs-title class_">AriaNode</span>, <span class="hljs-attr">template</span>: <span class="hljs-title class_">AriaTemplateNode</span>): { <span class="hljs-attr">pass</span>: <span class="hljs-built_in">boolean</span>; <span class="hljs-attr">resolved</span>: <span class="hljs-built_in">string</span> }
+  }
+}</code></pre></div>
+<h3 id="configureprettydom"><a class="anchor" href="#configureprettydom">#</a>configurePrettyDOM <Version>4.0.0</Version></h3>
+<p>The <code>configurePrettyDOM</code> function allows you to configure default options for the <code>prettyDOM</code> and <code>debug</code> functions. This is useful for customizing how HTML is formatted in test failure messages.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { utils } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+utils.<span class="hljs-title function_">configurePrettyDOM</span>({
+  <span class="hljs-attr">maxDepth</span>: <span class="hljs-number">3</span>,
+  <span class="hljs-attr">filterNode</span>: <span class="hljs-string">&#x27;script, style, [data-test-hide]&#x27;</span>
+})</code></pre></div>
+<h4 id="options"><a class="anchor" href="#options">#</a>Options</h4>
+<ul>
+<li><strong><code>maxDepth</code></strong> - Maximum depth to print nested elements (default: <code>Infinity</code>)</li>
+<li><strong><code>maxLength</code></strong> - Maximum length of the output string (default: <code>7000</code>)</li>
+<li><strong><code>filterNode</code></strong> - A CSS selector string or function to filter out nodes from the output. When a string is provided, elements matching the selector will be excluded. When a function is provided, it should return <code>false</code> to exclude a node.</li>
+<li><strong><code>highlight</code></strong> - Enable syntax highlighting (default: <code>true</code>)</li>
+<li>And other options from <a href="https://npmx.dev/package/@vitest/pretty-format"><code>@vitest/pretty-format</code></a></li>
+</ul>
+<h4 id="filtering-with-css-selectors"><a class="anchor" href="#filtering-with-css-selectors">#</a>Filtering with CSS Selectors <Version>4.1.0</Version></h4>
+<p>The <code>filterNode</code> option allows you to hide irrelevant markup (like scripts, styles, or hidden elements) from test failure messages, making it easier to identify the actual cause of failures.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { utils } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-comment">// Filter out common noise elements</span>
+utils.<span class="hljs-title function_">configurePrettyDOM</span>({
+  <span class="hljs-attr">filterNode</span>: <span class="hljs-string">&#x27;script, style, [data-test-hide]&#x27;</span>
+})
+
+<span class="hljs-comment">// Or use directly with prettyDOM</span>
+<span class="hljs-keyword">const</span> html = utils.<span class="hljs-title function_">prettyDOM</span>(element, <span class="hljs-literal">undefined</span>, {
+  <span class="hljs-attr">filterNode</span>: <span class="hljs-string">&#x27;script, style&#x27;</span>
+})</code></pre></div>
+<p><strong>Common Patterns:</strong></p>
+<p>Filter out scripts and styles:</p>
+<div class="code"><pre><code class="hljs lang-ts">utils.<span class="hljs-title function_">configurePrettyDOM</span>({ <span class="hljs-attr">filterNode</span>: <span class="hljs-string">&#x27;script, style&#x27;</span> })</code></pre></div>
+<p>Hide specific elements with data attributes:</p>
+<div class="code"><pre><code class="hljs lang-ts">utils.<span class="hljs-title function_">configurePrettyDOM</span>({ <span class="hljs-attr">filterNode</span>: <span class="hljs-string">&#x27;[data-test-hide]&#x27;</span> })</code></pre></div>
+<p>Hide nested content within an element:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// Hides all children of elements with data-test-hide-content</span>
+utils.<span class="hljs-title function_">configurePrettyDOM</span>({ <span class="hljs-attr">filterNode</span>: <span class="hljs-string">&#x27;[data-test-hide-content] *&#x27;</span> })</code></pre></div>
+<p>Combine multiple selectors:</p>
+<div class="code"><pre><code class="hljs lang-ts">utils.<span class="hljs-title function_">configurePrettyDOM</span>({
+  <span class="hljs-attr">filterNode</span>: <span class="hljs-string">&#x27;script, style, [data-test-hide], svg&#x27;</span>
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This feature is inspired by Testing Library&#39;s <a href="https://testing-library.com/docs/dom-testing-library/api-configuration/#defaultignore"><code>defaultIgnore</code></a> configuration.</p>
+</div><h3 id="aria"><a class="anchor" href="#aria">#</a>aria <Version type="experimental">5.0.0</Version></h3>
+<p>The <code>aria</code> namespace exposes low-level utilities used by Vitest&#39;s ARIA snapshot matchers.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { utils } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>.<span class="hljs-property">innerHTML</span> = <span class="hljs-string">`
+  &lt;h1&gt;Hello, World!&lt;/h1&gt;
+  &lt;button aria-hidden=&quot;true&quot;&gt;Hidden&lt;/button&gt;
+  &lt;button&gt;Visible&lt;/button&gt;
+`</span>
+<span class="hljs-keyword">const</span> tree = utils.<span class="hljs-property">aria</span>.<span class="hljs-title function_">generateAriaTree</span>(<span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>)
+<span class="hljs-keyword">const</span> yaml = utils.<span class="hljs-property">aria</span>.<span class="hljs-title function_">renderAriaNode</span>(tree)
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(yaml)
+<span class="hljs-comment">// - heading &quot;Hello, World!&quot; [level=1]</span>
+<span class="hljs-comment">// - button &quot;Visible&quot;&quot;</span></code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#userevent">userEvent</a><a class="toc-2" href="#commands">commands</a><a class="toc-2" href="#page">page</a><a class="toc-3" href="#mark">mark</a><a class="toc-3" href="#framelocator">frameLocator</a><a class="toc-2" href="#cdp">cdp</a><a class="toc-2" href="#server">server</a><a class="toc-2" href="#utils">utils</a><a class="toc-3" href="#configureprettydom">configurePrettyDOM 4.0.0</a><a class="toc-3" href="#aria">aria 5.0.0</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

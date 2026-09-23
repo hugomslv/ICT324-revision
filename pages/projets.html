@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projets du cours · ICT-324 Révision</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/hljs.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../index.html">Accueil</a><a class="nav-link" href="../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../pages/vite.html">1. Vite</a><a class="nav-link" href="../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link active" href="../pages/projets.html">Projets du cours</a><a class="nav-link" href="../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../docs/index.html">Index des docs</a><a class="nav-link" href="../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../docs/vite/index.html">Vite</a><a class="nav-link" href="../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+
+<h1>Projets du cours</h1><p class="lead">Les 4 projets téléchargés, rangés dans projets/cours/, expliqués fichier par fichier. J'ai installé et lancé chacun : les remarques « testé » viennent de ces essais.</p><div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Dossier</th>
+<th>Contenu</th>
+<th>Versions</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><a href="#1-lint-exercice-eslint"><code>1-lint</code></a></td>
+<td>Exercice ESLint (règles, plugin noms de fichiers)</td>
+<td>ESLint 9</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="#2-vitest-tests-jsdoc"><code>2-vitest</code></a></td>
+<td>Tests Vitest + JSDoc sur <code>math.js</code></td>
+<td>Vitest 2, JSDoc 4</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="#3-vite-lint-test-doc-tout-ensemble"><code>3-vite_lint_test_doc</code></a></td>
+<td>Vite + lint + tests + doc avec image</td>
+<td>ESLint 10, Vitest 4</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="#4-currency-converter-projet-complet-ftp"><code>4-currency-converter</code></a></td>
+<td>Application complète + publication FTP</td>
+<td>Vite 8, Vitest 3, ESLint 9</td>
+</tr>
+</tbody></table></div>
+<p>Pour relancer un projet : copie le dossier, puis <code>npm install</code> (avec réseau) ou <code>npm ci</code> (installe exactement le <code>package-lock.json</code>).</p>
+<h2 id="1-lint-exercice-eslint"><a class="anchor" href="#1-lint-exercice-eslint">#</a>1. lint : exercice ESLint</h2>
+<div class="code"><pre><code class="hljs lang-text">1-lint/
+├── README.md            ← l&#x27;énoncé (exercices 1 et 2)
+├── img/ict-324_node_install.png
+├── inDex.js             ← code volontairement mauvais (et nom pas en snake_case)
+├── corrige/index.js     ← ma correction (0 erreur, testée)
+├── eslint.config.mjs    ← la config solution
+├── package.json
+└── package-lock.json</code></pre></div>
+<ul>
+<li><strong>Énoncé</strong> : <a href="../projets/cours/1-lint/README.md">README</a> et corrigé détaillé dans <a href="exercices.html#exercice-eslint-1">Exercices corrigés</a>.</li>
+<li><strong>Testé</strong> : <code>npm run lint</code> sur <code>inDex.js</code> donne exactement les <strong>27 erreurs</strong> annoncées dans l&#39;énoncé.</li>
+<li>Pas de <code>&quot;type&quot;: &quot;module&quot;</code> dans <code>package.json</code> → la config est en <strong><code>.mjs</code></strong>.</li>
+<li>Le <code>package.json</code> contient deux plugins de noms de fichiers (<code>eslint-plugin-filename-rules</code> et <code>@maintained/...</code>) : seul <code>@maintained/eslint-plugin-filename-rules</code> est utilisé.</li>
+</ul>
+<div class="code"><div class="code-title">cours/1-lint/eslint.config.mjs</div><pre><code class="hljs lang-mjs"><span class="hljs-keyword">import</span> js <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/js&quot;</span>;
+<span class="hljs-keyword">import</span> { plugin <span class="hljs-keyword">as</span> filenameRules } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@maintained/eslint-plugin-filename-rules&#x27;</span>
+<span class="hljs-keyword">import</span> globals <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;globals&quot;</span>;
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+  { 
+    <span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.{js,mjs,cjs}&quot;</span>], 
+    <span class="hljs-attr">plugins</span>: { js, <span class="hljs-string">&#x27;filename-rules&#x27;</span>: filenameRules }, 
+    <span class="hljs-attr">extends</span>: [<span class="hljs-string">&quot;js/recommended&quot;</span>], 
+    <span class="hljs-attr">languageOptions</span>: { <span class="hljs-attr">globals</span>: globals.<span class="hljs-property">browser</span> },
+    <span class="hljs-attr">rules</span>: {
+      <span class="hljs-attr">quotes</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;double&quot;</span> ],
+      <span class="hljs-string">&quot;no-unused-vars&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-undef&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-implicit-globals&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-const-assign&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-var&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;prefer-const&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;array-bracket-spacing&quot;</span>: [ 
+        <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;always&quot;</span>, { <span class="hljs-string">&quot;arraysInArrays&quot;</span>: <span class="hljs-literal">false</span> } 
+      ],
+      <span class="hljs-attr">eqeqeq</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-attr">semi</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;never&quot;</span> ],
+      <span class="hljs-attr">indent</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-number">2</span> ],
+      <span class="hljs-string">&quot;brace-style&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;1tbs&quot;</span> ],
+      <span class="hljs-string">&quot;linebreak-style&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;unix&quot;</span> ],
+      <span class="hljs-string">&quot;max-len&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, {<span class="hljs-string">&quot;code&quot;</span>:<span class="hljs-number">80</span>} ],
+      <span class="hljs-string">&quot;id-match&quot;</span>: [
+        <span class="hljs-string">&quot;error&quot;</span>,
+        <span class="hljs-string">&quot;^[a-z_]+$&quot;</span>,
+        {
+          <span class="hljs-string">&quot;properties&quot;</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-string">&quot;onlyDeclarations&quot;</span>: <span class="hljs-literal">true</span>
+        }
+      ],
+      <span class="hljs-string">&#x27;filename-rules/match&#x27;</span>: [<span class="hljs-number">2</span>, <span class="hljs-string">&#x27;snake_case&#x27;</span>],
+    }
+  }
+]);</code></pre></div>
+<p class="file-link"><a href="../projets/cours/1-lint/eslint.config.mjs">📄 ouvrir le fichier eslint.config.mjs</a></p><div class="code"><div class="code-title">cours/1-lint/package.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;jseslint&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1.0.0&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ESLint projet for learning&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;main&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;index.js&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;start&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;node index.js&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;lint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;eslint \&quot;**/*.js\&quot; --ignore-pattern node_modules/&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;author&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Pierre Ferrari&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;license&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ISC&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;devDependencies&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;@eslint/js&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^9.33.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;@maintained/eslint-plugin-filename-rules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^1.5.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;eslint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^9.33.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;eslint-plugin-filename-rules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^1.3.1&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;globals&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^16.3.0&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p class="file-link"><a href="../projets/cours/1-lint/package.json">📄 ouvrir le fichier package.json</a></p><h2 id="2-vitest-tests-jsdoc"><a class="anchor" href="#2-vitest-tests-jsdoc">#</a>2. vitest : tests + JSDoc</h2>
+<div class="code"><pre><code class="hljs lang-text">2-vitest/
+├── src/math.js          ← add, sub, rotate (avec JSDoc complet)
+├── src/math.test.js     ← 16 tests
+├── vitest.config.js     ← config de la couverture
+├── jsdoc-conf.json
+├── README.md            ← doc du module (devient la page d&#x27;accueil JSDoc)
+├── test-results.json    ← sortie du reporter JSON
+├── docs/                ← doc JSDoc générée
+└── coverage/            ← rapport de couverture HTML</code></pre></div>
+<ul>
+<li><strong>Testé</strong> : 16 tests passent.</li>
+<li>Ouvrir : <a href="../projets/cours/2-vitest/docs/index.html">la doc générée</a> · <a href="../projets/cours/2-vitest/coverage/index.html">le rapport de couverture</a></li>
+<li>Pas de <code>&quot;type&quot;: &quot;module&quot;</code> → avertissement <em>« The CJS build of Vite&#39;s Node API is deprecated »</em> (sans gravité). Ajoute <code>&quot;type&quot;: &quot;module&quot;</code> pour l&#39;enlever.</li>
+<li>Le test importe <code>&quot;./src/math.js&quot;</code> alors qu&#39;il est déjà dans <code>src/</code>. Ça passe avec Vitest (testé), mais l&#39;écriture normale est <strong><code>&quot;./math.js&quot;</code></strong>.</li>
+<li>Le bloc <code>&quot;dependencies&quot;</code> liste toute l&#39;arborescence interne de Vitest : inutile, seuls les <code>devDependencies</code> comptent.</li>
+<li><code>test-results.json</code> s&#39;obtient avec <code>npx vitest run --reporter=json --outputFile=test-results.json</code>.</li>
+</ul>
+<div class="code"><div class="code-title">cours/2-vitest/src/math.js</div><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@file</span> math.js is a file that contains functions for basic math operations.
+ * <span class="hljs-doctag">@module</span> <span class="hljs-variable">math</span>
+ * <span class="hljs-doctag">@see</span> {<span class="hljs-type">@link https://git.s2.rpn.ch</span>}
+ * <span class="hljs-doctag">@author</span> Pierre Ferrari &lt;pierre.ferrari<span class="hljs-doctag">@rpn</span>.ch&gt;
+ * <span class="hljs-doctag">@version</span> 1.0.0
+ * <span class="hljs-doctag">@license</span>
+ * Copyright [2024] [Pierre Ferrari &lt;pierre.ferrari at rpn.ch&gt;]
+ * 
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */</span>
+
+
+<span class="hljs-comment">/**
+ * Add two numbers.
+ * <span class="hljs-doctag">@author</span> Pierre Ferrari &lt;pierre.ferrari<span class="hljs-doctag">@rpn</span>.ch&gt;
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">a</span> - The first number to add.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">b</span> - The second number to add.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number|string</span>} The sum of the two numbers or &#x27;error&#x27;.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">a, b</span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-title function_">typeof</span>(a)  !== <span class="hljs-string">&#x27;number&#x27;</span> || <span class="hljs-title function_">typeof</span>(b)  !== <span class="hljs-string">&#x27;number&#x27;</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;error&#x27;</span>
+    }
+    <span class="hljs-keyword">return</span> a + b
+}
+
+<span class="hljs-comment">/**
+ * Subtract two numbers.
+ * <span class="hljs-doctag">@author</span> Pierre Ferrari &lt;pierre.ferrari<span class="hljs-doctag">@rpn</span>.ch&gt;
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} a 
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} b 
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number|string</span>} The difference of the two numbers or &#x27;error&#x27;.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">sub</span>(<span class="hljs-params">a, b</span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-title function_">typeof</span>(a)  !== <span class="hljs-string">&#x27;number&#x27;</span> || <span class="hljs-title function_">typeof</span>(b)  !== <span class="hljs-string">&#x27;number&#x27;</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;error&#x27;</span>
+    }
+    <span class="hljs-keyword">return</span> a - b
+}
+
+<span class="hljs-comment">/**
+ * Rotate an array by n positions.
+ * <span class="hljs-doctag">@author</span> Pierre Ferrari &lt;pierre.ferrari<span class="hljs-doctag">@rpn</span>.ch&gt;
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">Array&lt;number&gt;</span>} <span class="hljs-variable">arr</span> - The array to rotate.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">n</span> - The number of positions to rotate.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">Array&lt;number&gt;|string</span>} The rotated array or &#x27;error&#x27;.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">rotate</span>(<span class="hljs-params">arr, n</span>) {
+    <span class="hljs-keyword">if</span> (!<span class="hljs-title class_">Array</span>.<span class="hljs-title function_">isArray</span>(arr)) {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;error&#x27;</span>
+    }
+    <span class="hljs-keyword">if</span> (n === <span class="hljs-literal">undefined</span> || <span class="hljs-title function_">typeof</span>(n) !== <span class="hljs-string">&#x27;number&#x27;</span>) {
+        n = <span class="hljs-number">1</span>
+    }
+    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; arr.<span class="hljs-property">length</span>; i++) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-title function_">typeof</span>(arr[i]) !== <span class="hljs-string">&#x27;number&#x27;</span>) {
+            <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;error&#x27;</span>
+        }
+    }
+    <span class="hljs-keyword">return</span> arr.<span class="hljs-title function_">slice</span>(n).<span class="hljs-title function_">concat</span>(arr.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, n))
+}</code></pre></div>
+<p class="file-link"><a href="../projets/cours/2-vitest/src/math.js">📄 ouvrir le fichier math.js</a></p><div class="code"><div class="code-title">cours/2-vitest/src/math.test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { add, sub, rotate } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./src/math.js&#x27;</span>
+<span class="hljs-keyword">import</span> { test, expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[add] expect the result of 1 + 2 to be 3&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">3</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[add] expect the result of -1 + -0 to be -1&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>(-<span class="hljs-number">1</span>, -<span class="hljs-number">0</span>)).<span class="hljs-title function_">toBe</span>(-<span class="hljs-number">1</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[add] expect the result of -1.0 + 1.0 to be 0&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>(-<span class="hljs-number">1.0</span>, <span class="hljs-number">1.0</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">0</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[add] expect the result of 1 + \&#x27;a\&#x27; to be an error&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>, <span class="hljs-string">&#x27;a&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;error&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[add] expect the result of \&#x27;a\&#x27; + [1] to be an error&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>(<span class="hljs-string">&#x27;a&#x27;</span>, [<span class="hljs-number">1</span>])).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;error&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[sub] expect the result of 1 - 2 to be -1&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">sub</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)).<span class="hljs-title function_">toBe</span>(-<span class="hljs-number">1</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[sub] expect the result of -1 - -0 to be -1&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">sub</span>(-<span class="hljs-number">1</span>, -<span class="hljs-number">0</span>)).<span class="hljs-title function_">toBe</span>(-<span class="hljs-number">1</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[sub] expect the result of -1.0 - 1.0 to be -2&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">sub</span>(-<span class="hljs-number">1.0</span>, <span class="hljs-number">1.0</span>)).<span class="hljs-title function_">toBe</span>(-<span class="hljs-number">2</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[sub] expect the result of 1 + \&#x27;a\&#x27; to be an error&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">sub</span>(<span class="hljs-number">1</span>, <span class="hljs-string">&#x27;a&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;error&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[sub] expect the result of v + [a] to be an error&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">sub</span>(<span class="hljs-string">&#x27;v&#x27;</span>, [<span class="hljs-number">1</span>])).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;error&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[rotate] expect the result of [1, 2, 3, 4] to be [2, 3, 4, 1]&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">rotate</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>], <span class="hljs-number">1</span>)).<span class="hljs-title function_">toEqual</span>([<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">1</span>])
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[rotate] expect the result of [a, 2, 3, 4] to be an error&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">rotate</span>([<span class="hljs-string">&#x27;a&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>], <span class="hljs-number">1</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;error&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[rotate] expect the result of [1, 2, 3, 4, 5] to be [2, 3, 4, 5, 1]&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">rotate</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>], <span class="hljs-number">1</span>)).<span class="hljs-title function_">toEqual</span>([<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">1</span>])
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[rotate] expect the result of [1] to be [1]&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">rotate</span>([<span class="hljs-number">1</span>], <span class="hljs-number">1</span>)).<span class="hljs-title function_">toEqual</span>([<span class="hljs-number">1</span>])
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[rotate] expect the result of [] to be []&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">rotate</span>([], <span class="hljs-number">1</span>)).<span class="hljs-title function_">toEqual</span>([])
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;[rotate] expect the result of [[1], 2, 3, 4, 5, 6, 7, 8, 9, 10] to be an error&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">rotate</span>([[<span class="hljs-number">1</span>], <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">7</span>, <span class="hljs-number">8</span>, <span class="hljs-number">9</span>, <span class="hljs-number">10</span>], <span class="hljs-number">1</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;error&#x27;</span>)
+})</code></pre></div>
+<p class="file-link"><a href="../projets/cours/2-vitest/src/math.test.js">📄 ouvrir le fichier math.test.js</a></p><div class="code"><div class="code-title">cours/2-vitest/vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-comment">// vitest.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig, coverageConfigDefaults } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">coverage</span>: {
+      <span class="hljs-attr">enabled</span>: <span class="hljs-literal">false</span>, <span class="hljs-comment">// activer la couverture</span>
+      <span class="hljs-attr">provider</span>: <span class="hljs-string">&#x27;v8&#x27;</span>, <span class="hljs-comment">// provider de couverture</span>
+      <span class="hljs-comment">// Inclure seulement le code source applicatif (inclut aussi les fichiers non-importés)</span>
+      <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;src/**/*.{js,cjs,mjs,jsx}&#x27;</span>],
+      <span class="hljs-comment">// Exclure des sous-ensembles spécifiques du scope ci-dessus</span>
+      <span class="hljs-attr">exclude</span>: [
+        <span class="hljs-string">&#x27;src/docs/**&#x27;</span>,
+        <span class="hljs-string">&#x27;src/**/__mocks__/**&#x27;</span>,
+        <span class="hljs-string">&#x27;src/vendor/**&#x27;</span>,
+        <span class="hljs-string">&#x27;**/*.d.ts&#x27;</span>,
+        <span class="hljs-string">&#x27;**/*.min.*&#x27;</span>,
+        <span class="hljs-string">&#x27;**/*.config.*&#x27;</span>,
+        <span class="hljs-comment">// conserver les exclusions par défaut et ajouter les vôtres</span>
+        ...coverageConfigDefaults.<span class="hljs-property">exclude</span>,
+      ],
+      <span class="hljs-attr">reporter</span>: [<span class="hljs-string">&#x27;json&#x27;</span>, <span class="hljs-string">&#x27;html&#x27;</span>, <span class="hljs-string">&#x27;text&#x27;</span>],
+      <span class="hljs-attr">reportsDirectory</span>: <span class="hljs-string">&#x27;./coverage&#x27;</span>
+    },
+  },
+})</code></pre></div>
+<p class="file-link"><a href="../projets/cours/2-vitest/vitest.config.js">📄 ouvrir le fichier vitest.config.js</a></p><h2 id="3-vite-lint-test-doc-tout-ensemble"><a class="anchor" href="#3-vite-lint-test-doc-tout-ensemble">#</a>3. vite_lint_test_doc : tout ensemble</h2>
+<div class="code"><pre><code class="hljs lang-text">3-vite_lint_test_doc/
+├── index.js             ← importe ./Utils.js (fichier absent de l&#x27;archive)
+├── src/math.js, src/math.test.js
+├── eslint.config.js     ← même règles que l&#x27;exercice lint (sans les règles de nommage)
+├── vite.config.js       ← bloc test: { globals, environment }
+├── jsdoc-conf.json
+├── README.md            ← contient une image ./img/jsdoc.png
+├── img/jsdoc.png
+├── docs/                ← doc générée, avec docs/img/ copié
+└── coverage/</code></pre></div>
+<ul>
+<li><strong>Le point clé</strong> : le script <code>jsdoc</code> copie <code>img/</code> dans <code>docs/img/</code> pour que l&#39;image du README s&#39;affiche. <a href="../projets/cours/3-vite_lint_test_doc/docs/index.html">Voir la doc générée</a>.</li>
+<li><strong>Testé</strong> : 16 tests passent (Vitest 4.1).</li>
+<li><strong>Testé</strong> : <code>npx eslint .</code> donne <strong>444 erreurs</strong> : ESLint analyse aussi <code>docs/</code> et <code>coverage/</code> (fichiers générés). Il manque <code>globalIgnores([ &quot;docs/&quot;, &quot;coverage/&quot;, &quot;dist/&quot; ])</code>.</li>
+<li><code>vite</code> n&#39;est pas dans les dépendances : il est installé indirectement par <code>vitest</code>, donc <code>npm run dev</code> marche quand même. Mieux vaut l&#39;ajouter (<code>npm i -D vite</code>).</li>
+<li><code>index.js</code> importe <code>cleanUsername</code> depuis <code>./Utils.js</code> qui n&#39;est pas dans l&#39;archive (la couverture montre qu&#39;il existait).</li>
+</ul>
+<div class="code"><div class="code-title">cours/3-vite_lint_test_doc/package.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ict324&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1.0.0&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ESLint projet for learning&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;license&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ISC&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;author&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Pierre Ferrari&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;module&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;main&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;index.js&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;dev&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;build&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite build&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;test&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;test:run&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest run&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;coverage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest run --coverage&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;jsdoc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./node_modules/jsdoc/jsdoc.js -c ./jsdoc-conf.json --readme ./README.md src/math.js &amp;&amp; rm -rf ./docs/img/ &amp;&amp; mkdir ./docs/img/ &amp;&amp; cp -r ./img/* ./docs/img/&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;devDependencies&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;@eslint/js&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^10.0.1&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;@vitest/coverage-v8&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^4.1.11&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;eslint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^10.8.1&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;globals&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^17.11.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;jsdoc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^4.0.5&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;vitest&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^4.1.11&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p class="file-link"><a href="../projets/cours/3-vite_lint_test_doc/package.json">📄 ouvrir le fichier package.json</a></p><div class="code"><div class="code-title">cours/3-vite_lint_test_doc/eslint.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> js <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/js&quot;</span>
+<span class="hljs-comment">//import { plugin as filenameRules } from &#x27;@maintained/eslint-plugin-filename-rules&#x27;</span>
+<span class="hljs-keyword">import</span> globals <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;globals&quot;</span>
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+  { 
+    <span class="hljs-attr">files</span>: [ <span class="hljs-string">&quot;**/*.{js,mjs,cjs}&quot;</span> ], 
+    <span class="hljs-attr">plugins</span>: { js }, <span class="hljs-comment">//, &#x27;filename-rules&#x27;: filenameRules }, </span>
+    <span class="hljs-attr">extends</span>: [ <span class="hljs-string">&quot;js/recommended&quot;</span> ], 
+    <span class="hljs-attr">languageOptions</span>: { <span class="hljs-attr">globals</span>: globals.<span class="hljs-property">browser</span> },
+    <span class="hljs-attr">rules</span>: {
+      <span class="hljs-attr">quotes</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;double&quot;</span> ],
+      <span class="hljs-string">&quot;no-unused-vars&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-undef&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-implicit-globals&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-const-assign&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-var&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;prefer-const&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;array-bracket-spacing&quot;</span>: [ 
+        <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;always&quot;</span>, { <span class="hljs-string">&quot;arraysInArrays&quot;</span>: <span class="hljs-literal">false</span> } 
+      ],
+      <span class="hljs-attr">eqeqeq</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-attr">semi</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;never&quot;</span> ],
+      <span class="hljs-attr">indent</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-number">2</span> ],
+      <span class="hljs-string">&quot;brace-style&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;1tbs&quot;</span> ],
+      <span class="hljs-string">&quot;linebreak-style&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;unix&quot;</span> ],
+      <span class="hljs-comment">//&quot;max-len&quot;: [ &quot;error&quot;, {&quot;code&quot;:80} ],</span>
+      <span class="hljs-comment">//&quot;id-match&quot;: [</span>
+      <span class="hljs-comment">//  &quot;error&quot;,</span>
+      <span class="hljs-comment">//  &quot;^[a-z_]+$&quot;,</span>
+      <span class="hljs-comment">//  {</span>
+      <span class="hljs-comment">//    &quot;properties&quot;: true,</span>
+      <span class="hljs-comment">//    &quot;onlyDeclarations&quot;: true</span>
+      <span class="hljs-comment">//  }</span>
+      <span class="hljs-comment">//],</span>
+      <span class="hljs-comment">//&#x27;filename-rules/match&#x27;: [2, &#x27;snake_case&#x27;],</span>
+    }
+  }
+])</code></pre></div>
+<p class="file-link"><a href="../projets/cours/3-vite_lint_test_doc/eslint.config.js">📄 ouvrir le fichier eslint.config.js</a></p><div class="code"><div class="code-title">cours/3-vite_lint_test_doc/vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vite&quot;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">globals</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">environment</span>: <span class="hljs-string">&quot;node&quot;</span>
+  }
+})</code></pre></div>
+<p class="file-link"><a href="../projets/cours/3-vite_lint_test_doc/vite.config.js">📄 ouvrir le fichier vite.config.js</a></p><h2 id="4-currency-converter-projet-complet-ftp"><a class="anchor" href="#4-currency-converter-projet-complet-ftp">#</a>4. currency-converter : projet complet + FTP</h2>
+<div class="code"><pre><code class="hljs lang-text">4-currency-converter/
+├── index.html           ← favicon, Google Fonts, &lt;script type=&quot;module&quot; src=&quot;/main.js&quot;&gt;
+├── main.js              ← interface (top-level await)
+├── css/style.css
+├── public/favicon.png   ← copié dans dist/
+├── src/api.js           ← appels à l&#x27;API de taux de change + drapeaux
+├── src/api.test.js      ← 10 tests, dont des mocks de fetch
+├── vite.config.js       ← base: &#x27;/ferrarip/&#x27;, target: &#x27;esnext&#x27;, config coverage
+├── eslint.config.mjs
+├── jsdoc-conf.json
+├── scripts/publish.sh   ← envoi FTP avec lftp
+├── .gitignore           ← node_modules, dist, .env, docs, coverage…
+└── package.json         ← script &quot;publish&quot;: &quot;dotenv -e .env -- bash scripts/publish.sh&quot;</code></pre></div>
+<ul>
+<li><strong>C&#39;est le modèle pour la partie FTP</strong> : <code>base</code>, favicon dans <code>public/</code>, script <code>publish</code>.</li>
+<li><strong>Testé</strong> : <code>npm run build</code> → <code>dist/index.html</code> contient <code>/ferrarip/assets/...</code> et <code>dist/favicon.png</code>.</li>
+<li><strong>Testé</strong> : sans <code>target: &#39;esnext&#39;</code>, Vite avertit <em>« Top-level await is not available in the configured target environment »</em> (à cause du <code>await</code> en haut de <code>main.js</code>).</li>
+<li><strong>Testé</strong> : <code>npx eslint .</code> donne <strong>353 erreurs <code>linebreak-style</code></strong> : les fichiers sont en fins de ligne Windows (CRLF). <code>npx eslint . --fix</code> les convertit.</li>
+<li><strong>Testé hors-ligne (fetch coupé)</strong> : <strong>4 tests sur 10 échouent</strong>, ceux qui appellent la vraie API. Les tests avec <code>vi.stubGlobal(&quot;fetch&quot;, ...)</code> passent. Leçon pour l&#39;examen : mocke le réseau.</li>
+<li><strong>Testé</strong> : <code>npm run jsdoc</code> plante (<em>ENOENT: no such file or directory, open &#39;./README.md&#39;</em>) car il n&#39;y a pas de README dans l&#39;archive.</li>
+<li><code>favicon.png</code> est lié en relatif (<code>href=&quot;favicon.png&quot;</code>), laissé tel quel par Vite : ça marche car <code>index.html</code> est à la racine du dossier. <code>href=&quot;/favicon.png&quot;</code> serait plus sûr (réécrit en <code>/ferrarip/favicon.png</code>).</li>
+<li><code>globals</code> et <code>@eslint/js</code> ne sont pas dans le <code>package.json</code> : ils sont présents seulement comme dépendances internes d&#39;ESLint 9. Installe-les explicitement.</li>
+<li><code>prettier</code>, <code>eslint-plugin-prettier</code> sont installés mais pas utilisés dans la config.</li>
+</ul>
+<div class="code"><div class="code-title">cours/4-currency-converter/vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig, coverageConfigDefaults } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+    <span class="hljs-attr">base</span>: <span class="hljs-string">&#x27;/ferrarip/&#x27;</span>,
+    <span class="hljs-attr">build</span>: {
+        <span class="hljs-attr">target</span>: <span class="hljs-string">&#x27;esnext&#x27;</span>
+    },
+    <span class="hljs-attr">test</span>: {
+        <span class="hljs-attr">coverage</span>: {
+            <span class="hljs-attr">enabled</span>: <span class="hljs-literal">false</span>, <span class="hljs-comment">// activer la couverture</span>
+            <span class="hljs-attr">provider</span>: <span class="hljs-string">&#x27;v8&#x27;</span>, <span class="hljs-comment">// provider de couverture</span>
+            <span class="hljs-comment">// Inclure seulement le code source applicatif (inclut aussi les fichiers non-importés)</span>
+            <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;src/**/*.{js,cjs,mjs,jsx}&#x27;</span>],
+            <span class="hljs-comment">// Exclure des sous-ensembles spécifiques du scope ci-dessus</span>
+            <span class="hljs-attr">exclude</span>: [
+                <span class="hljs-string">&#x27;docs/&#x27;</span>,
+                <span class="hljs-string">&#x27;html/&#x27;</span>,
+                <span class="hljs-string">&#x27;src/docs/**&#x27;</span>,
+                <span class="hljs-string">&#x27;src/**/__mocks__/**&#x27;</span>,
+                <span class="hljs-string">&#x27;src/vendor/**&#x27;</span>,
+                <span class="hljs-string">&#x27;**/*.d.ts&#x27;</span>,
+                <span class="hljs-string">&#x27;**/*.min.*&#x27;</span>,
+                <span class="hljs-string">&#x27;**/*.config.*&#x27;</span>,
+                <span class="hljs-comment">// conserver les exclusions par défaut et ajouter les vôtres</span>
+                ...coverageConfigDefaults.<span class="hljs-property">exclude</span>,
+            ],
+            <span class="hljs-attr">reporter</span>: [<span class="hljs-string">&#x27;json&#x27;</span>, <span class="hljs-string">&#x27;html&#x27;</span>, <span class="hljs-string">&#x27;text&#x27;</span>],
+            <span class="hljs-attr">reportsDirectory</span>: <span class="hljs-string">&#x27;./coverage&#x27;</span>
+        }
+    },
+})</code></pre></div>
+<p class="file-link"><a href="../projets/cours/4-currency-converter/vite.config.js">📄 ouvrir le fichier vite.config.js</a></p><div class="code"><div class="code-title">cours/4-currency-converter/package.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;jsconvdevise&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;private&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;0.0.0&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;module&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;dev&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;build&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite build&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;preview&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite preview&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;vitest&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;lint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;eslint&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;jsdoc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./node_modules/jsdoc/jsdoc.js -c ./jsdoc-conf.json --readme ./README.md src/api.js&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;coverage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest run --coverage&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;publish&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dotenv -e .env -- bash scripts/publish.sh&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;devDependencies&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;@vitest/coverage-v8&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^3.2.4&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;@vitest/ui&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^3.2.4&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;dotenv-cli&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^11.0.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;eslint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^9.13.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;eslint-config-prettier&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^9.1.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;eslint-plugin-prettier&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^5.2.1&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;jsdoc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^4.0.4&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;prettier&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^3.3.3&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;vite&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^8.2.2&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;vitest&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^3.2.4&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p class="file-link"><a href="../projets/cours/4-currency-converter/package.json">📄 ouvrir le fichier package.json</a></p><div class="code"><div class="code-title">cours/4-currency-converter/scripts/publish.sh</div><pre><code class="hljs lang-bash"><span class="hljs-meta">#!/usr/bin/env bash</span>
+<span class="hljs-built_in">set</span> -euo pipefail
+
+lftp -u <span class="hljs-string">&quot;<span class="hljs-variable">$FTP_USER</span>,<span class="hljs-variable">$FTP_PASS</span>&quot;</span> <span class="hljs-string">&quot;<span class="hljs-variable">$FTP_HOST</span>&quot;</span> \
+	-e <span class="hljs-string">&quot;mirror -R dist /root/<span class="hljs-variable">$FTP_DEST</span>; bye&quot;</span></code></pre></div>
+<p class="file-link"><a href="../projets/cours/4-currency-converter/scripts/publish.sh">📄 ouvrir le fichier publish.sh</a></p><div class="code"><div class="code-title">cours/4-currency-converter/index.html</div><pre><code class="hljs lang-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;en&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">&quot;UTF-8&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;viewport&quot;</span> <span class="hljs-attr">content</span>=<span class="hljs-string">&quot;width=device-width, initial-scale=1.0&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;preconnect&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://fonts.googleapis.com&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;preconnect&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://fonts.gstatic.com&quot;</span> <span class="hljs-attr">crossorigin</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&amp;display=swap&quot;</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;stylesheet&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;icon&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;image/png&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;favicon.png&quot;</span> /&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Currency Converter<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">section</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;container-flex container-column&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span>Currency Converter<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">&quot;amount&quot;</span>&gt;</span>Amount
+      <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;number&quot;</span> <span class="hljs-attr">step</span>=<span class="hljs-string">&quot;0.1&quot;</span> <span class="hljs-attr">min</span>=<span class="hljs-string">&quot;1&quot;</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;amount&quot;</span> <span class="hljs-attr">required</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;container-flex&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">&quot;from&quot;</span>&gt;</span>From
+        <span class="hljs-tag">&lt;<span class="hljs-name">select</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;from&quot;</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;EUR&quot;</span>&gt;</span>🇪🇺 EUR<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">select</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;invert&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;invert&quot;</span>&gt;</span>⇆<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">&quot;to&quot;</span>&gt;</span>To
+        <span class="hljs-tag">&lt;<span class="hljs-name">select</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;to&quot;</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">option</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;CHF&quot;</span>&gt;</span>🇨🇭 CHF<span class="hljs-tag">&lt;/<span class="hljs-name">option</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">select</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;convert&quot;</span> <span class="hljs-attr">disabled</span>=<span class="hljs-string">&quot;disabled&quot;</span>&gt;</span>Convert<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">h3</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;result&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">section</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/main.js&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>  
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></code></pre></div>
+<p class="file-link"><a href="../projets/cours/4-currency-converter/index.html">📄 ouvrir le fichier index.html</a></p><div class="code"><div class="code-title">cours/4-currency-converter/main.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;./css/style.css&#x27;</span>
+<span class="hljs-keyword">import</span> { getLatestRates,
+  getSupportedCurrencies, currencies_flags } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./src/api.js&#x27;</span>
+
+<span class="hljs-keyword">const</span> supportedCurrencies = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getSupportedCurrencies</span>()
+<span class="hljs-keyword">const</span> currencySelectorFrom = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;from&#x27;</span>)
+currencySelectorFrom.<span class="hljs-property">innerHTML</span> = <span class="hljs-string">&#x27;&#x27;</span>
+<span class="hljs-keyword">const</span> currencySelectorTo = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;to&#x27;</span>)
+currencySelectorTo.<span class="hljs-property">innerHTML</span> = <span class="hljs-string">&#x27;&#x27;</span>
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> currency <span class="hljs-keyword">in</span> supportedCurrencies) {
+  <span class="hljs-keyword">const</span> option = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;option&#x27;</span>)
+  option.<span class="hljs-property">value</span> = currency
+  option.<span class="hljs-property">textContent</span> = <span class="hljs-string">`<span class="hljs-subst">${currencies_flags[currency]}</span> <span class="hljs-subst">${currency}</span>`</span>
+  option.<span class="hljs-property">title</span> = supportedCurrencies[currency]
+  currencySelectorFrom.<span class="hljs-title function_">appendChild</span>(option)
+  currencySelectorTo.<span class="hljs-title function_">appendChild</span>(option.<span class="hljs-title function_">cloneNode</span>(<span class="hljs-literal">true</span>))
+}
+
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;#from option[value=&quot;eur&quot;]&#x27;</span>)
+  .<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">&#x27;selected&#x27;</span>, <span class="hljs-string">&#x27;selected&#x27;</span>)
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;#to option[value=&quot;chf&quot;]&#x27;</span>)
+  .<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">&#x27;selected&#x27;</span>, <span class="hljs-string">&#x27;selected&#x27;</span>)
+
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;convert&#x27;</span>).<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;click&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> amount = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;amount&#x27;</span>).<span class="hljs-property">value</span>
+  <span class="hljs-keyword">const</span> <span class="hljs-keyword">from</span> = currencySelectorFrom.<span class="hljs-property">value</span>
+  <span class="hljs-keyword">const</span> to = currencySelectorTo.<span class="hljs-property">value</span>
+  <span class="hljs-keyword">const</span> latestRates = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getLatestRates</span>(<span class="hljs-keyword">from</span>)
+  <span class="hljs-keyword">const</span> conversionRate = amount * latestRates[<span class="hljs-keyword">from</span>][to]
+  <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;result&#x27;</span>).<span class="hljs-property">textContent</span> = 
+    <span class="hljs-string">`<span class="hljs-subst">${amount}</span> <span class="hljs-subst">${<span class="hljs-keyword">from</span>}</span> = <span class="hljs-subst">${conversionRate.toFixed(<span class="hljs-number">2</span>)}</span> <span class="hljs-subst">${to}</span>`</span>
+})
+
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;amount&#x27;</span>).<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;input&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> amount = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;amount&#x27;</span>).<span class="hljs-property">value</span>
+  <span class="hljs-keyword">const</span> convertButton = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;convert&#x27;</span>)
+  convertButton.<span class="hljs-property">disabled</span> = <span class="hljs-literal">true</span>
+  <span class="hljs-keyword">if</span> (amount === <span class="hljs-string">&#x27;&#x27;</span>) {
+    <span class="hljs-keyword">return</span>
+  }
+  <span class="hljs-keyword">const</span> numericAmount = <span class="hljs-built_in">parseFloat</span>(amount)
+  <span class="hljs-keyword">if</span> (<span class="hljs-title class_">Number</span>.<span class="hljs-built_in">isFinite</span>(numericAmount) &amp;&amp; numericAmount &gt; <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">const</span> fixed = numericAmount.<span class="hljs-title function_">toFixed</span>(<span class="hljs-number">2</span>)
+    convertButton.<span class="hljs-property">disabled</span> = <span class="hljs-literal">false</span>
+    <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;amount&#x27;</span>).<span class="hljs-property">value</span> = fixed
+  }
+})
+
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;invert&#x27;</span>).<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;click&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> <span class="hljs-keyword">from</span> = currencySelectorFrom.<span class="hljs-property">value</span>
+  <span class="hljs-keyword">const</span> to = currencySelectorTo.<span class="hljs-property">value</span>
+  <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelectorAll</span>(<span class="hljs-string">&#x27;option&#x27;</span>)
+    .<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">option</span> =&gt;</span> option.<span class="hljs-title function_">removeAttribute</span>(<span class="hljs-string">&#x27;selected&#x27;</span>))
+  currencySelectorFrom.<span class="hljs-property">value</span> = to
+  currencySelectorTo.<span class="hljs-property">value</span> = <span class="hljs-keyword">from</span>
+})</code></pre></div>
+<p class="file-link"><a href="../projets/cours/4-currency-converter/main.js">📄 ouvrir le fichier main.js</a></p><div class="code"><div class="code-title">cours/4-currency-converter/src/api.test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { expect, test, vi, afterEach } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { getLatestRates, getSupportedCurrencies, currencies_flags } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./api.js&#x27;</span>
+
+<span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> {
+  vi.<span class="hljs-title function_">restoreAllMocks</span>()
+  <span class="hljs-comment">// On restaure fetch</span>
+  vi.<span class="hljs-title function_">unstubAllGlobals</span>()
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;getLatestRates retourne un objet contenant la devise demandée&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> currency = <span class="hljs-string">&#x27;eur&#x27;</span>
+  <span class="hljs-keyword">const</span> rates = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getLatestRates</span>(currency)
+  <span class="hljs-title function_">expect</span>(rates).<span class="hljs-title function_">toBeTypeOf</span>(<span class="hljs-string">&#x27;object&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(rates).<span class="hljs-title function_">toHaveProperty</span>(currency)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;getLatestRates pour CHF retourne le taux CHF&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> currency = <span class="hljs-string">&#x27;eur&#x27;</span>
+  <span class="hljs-keyword">const</span> rates = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getLatestRates</span>(currency)
+  <span class="hljs-title function_">expect</span>(rates).<span class="hljs-title function_">toHaveProperty</span>(currency)
+  <span class="hljs-title function_">expect</span>(rates[currency]).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;chf&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">typeof</span> rates[currency][<span class="hljs-string">&#x27;chf&#x27;</span>]).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;number&#x27;</span>)
+})
+
+
+<span class="hljs-comment">/**
+ * Vérifie que getLatestRates retourne null lorsque l&#x27;API répond avec une erreur.
+ * Le test mocke fetch et console.error pour éviter un appel réseau réel.
+ */</span>
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;getLatestRates retourne null en cas d’erreur&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// Pendant le test, tout appel à fetch() utilise cette fausse fonction. Cela évite un véritable appel réseau.</span>
+  vi.<span class="hljs-title function_">stubGlobal</span>(<span class="hljs-string">&#x27;fetch&#x27;</span>, vi.<span class="hljs-title function_">fn</span>().<span class="hljs-title function_">mockResolvedValue</span>({ <span class="hljs-attr">ok</span>: <span class="hljs-literal">false</span> }))
+  <span class="hljs-comment">// Observe et remplace temporairement une méthode existante :</span>
+  <span class="hljs-comment">// console.error continue d’être appelé ;</span>
+  <span class="hljs-comment">// son affichage est désactivé ;</span>
+  <span class="hljs-comment">// l’appel peut être vérifié : expect(errorSpy).toHaveBeenCalledOnce()</span>
+  vi.<span class="hljs-title function_">spyOn</span>(<span class="hljs-variable language_">console</span>, <span class="hljs-string">&#x27;error&#x27;</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> {})
+
+  <span class="hljs-keyword">const</span> rates = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getLatestRates</span>(<span class="hljs-string">&#x27;eur&#x27;</span>)
+
+  <span class="hljs-title function_">expect</span>(rates).<span class="hljs-title function_">toBeNull</span>()
+  <span class="hljs-comment">//console.error appelé 0 fois : échec ;</span>
+  <span class="hljs-comment">//console.error appelé 1 fois : succès ;</span>
+  <span class="hljs-comment">//console.error appelé 2 fois : échec.</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-variable language_">console</span>.<span class="hljs-property">error</span>).<span class="hljs-title function_">toHaveBeenCalledOnce</span>()
+})
+
+<span class="hljs-comment">/**
+ * Vérifie que getSupportedCurrencies retourne un objet vide lorsque l&#x27;API répond
+ * avec une erreur. Le test mocke fetch et console.error pour isoler ce scénario.
+ */</span>
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;getSupportedCurrencies retourne un objet vide en cas d’erreur&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  vi.<span class="hljs-title function_">stubGlobal</span>(<span class="hljs-string">&#x27;fetch&#x27;</span>, vi.<span class="hljs-title function_">fn</span>().<span class="hljs-title function_">mockResolvedValue</span>({ <span class="hljs-attr">ok</span>: <span class="hljs-literal">false</span> }))
+  vi.<span class="hljs-title function_">spyOn</span>(<span class="hljs-variable language_">console</span>, <span class="hljs-string">&#x27;error&#x27;</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> {})
+
+  <span class="hljs-keyword">const</span> currencies = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getSupportedCurrencies</span>()
+
+  <span class="hljs-title function_">expect</span>(currencies).<span class="hljs-title function_">toEqual</span>({})
+  <span class="hljs-title function_">expect</span>(<span class="hljs-variable language_">console</span>.<span class="hljs-property">error</span>).<span class="hljs-title function_">toHaveBeenCalledOnce</span>()
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;currencies_flags contient le bon drapeau pour CHF&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(currencies_flags[<span class="hljs-string">&#x27;chf&#x27;</span>]).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;🇨🇭&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;Toutes les devises retournées par getSupportedCurrencies sont dans currencies_flags&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> currencies = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getSupportedCurrencies</span>()
+  <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(currencies).<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">devise</span> =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(currencies_flags).<span class="hljs-title function_">toHaveProperty</span>(devise)
+  })
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;getLatestRates fonctionne avec une devise en majuscule&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> rates = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getLatestRates</span>(<span class="hljs-string">&#x27;USD&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(rates).<span class="hljs-title function_">toBeTypeOf</span>(<span class="hljs-string">&#x27;object&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(rates).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&#x27;usd&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;getLatestRates retourne plusieurs taux pour EUR&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> rates = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getLatestRates</span>(<span class="hljs-string">&#x27;eur&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(rates[<span class="hljs-string">&#x27;eur&#x27;</span>]).<span class="hljs-property">length</span>).<span class="hljs-title function_">toBeGreaterThan</span>(<span class="hljs-number">5</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;currencies_flags contient le drapeau pour une devise exotique&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(currencies_flags[<span class="hljs-string">&#x27;xaf&#x27;</span>]).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;🇨🇲&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;getSupportedCurrencies ne retourne pas de devise non supportée&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> currencies = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getSupportedCurrencies</span>()
+  <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(currencies).<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">devise</span> =&gt;</span> {
+    <span class="hljs-title function_">expect</span>([ <span class="hljs-string">&#x27;usd&#x27;</span>, <span class="hljs-string">&#x27;eur&#x27;</span>, <span class="hljs-string">&#x27;chf&#x27;</span>, <span class="hljs-string">&#x27;jpy&#x27;</span>, ...<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(currencies_flags) ]).<span class="hljs-title function_">toContain</span>(devise)
+  })
+})</code></pre></div>
+<p class="file-link"><a href="../projets/cours/4-currency-converter/src/api.test.js">📄 ouvrir le fichier api.test.js</a></p><details class="box"><summary>src/api.js (long : liste des drapeaux)</summary><div class="code"><div class="code-title">cours/4-currency-converter/src/api.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> <span class="hljs-variable constant_">API_BASE</span> = <span class="hljs-string">&#x27;https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies&#x27;</span>
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">API_LIST</span> = <span class="hljs-string">`<span class="hljs-subst">${API_BASE}</span>.min.json`</span>
+
+<span class="hljs-comment">/**
+ * Récupère les taux de change les plus récents pour une devise donnée.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">currency</span> - Code de la devise (ex: &#x27;eur&#x27;, &#x27;usd&#x27;).
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">Promise&lt;Object|null&gt;</span>} Un objet contenant les taux ou null en cas d&#x27;erreur.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">getLatestRates</span>(<span class="hljs-params">currency</span>) {
+  <span class="hljs-keyword">try</span> {
+    currency = currency.<span class="hljs-title function_">toLowerCase</span>()
+    <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`<span class="hljs-subst">${API_BASE}</span>/<span class="hljs-subst">${currency}</span>.json`</span>)
+    <span class="hljs-keyword">if</span> (!response.<span class="hljs-property">ok</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;Erreur lors de la récupération des taux&#x27;</span>)
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> response.<span class="hljs-title function_">json</span>()
+  } <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(error)
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>
+  }
+}
+
+<span class="hljs-comment">/**
+ * Récupère la liste des devises supportées filtrées par celles ayant un drapeau.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">Promise&lt;Object&gt;</span>} Un objet contenant les devises supportées ou un objet vide en cas d&#x27;erreur.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">getSupportedCurrencies</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-variable constant_">API_LIST</span>)
+    <span class="hljs-keyword">if</span> (!response.<span class="hljs-property">ok</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;Erreur lors de la récupération des devises&#x27;</span>)
+    <span class="hljs-keyword">const</span> currencies = <span class="hljs-keyword">await</span> response.<span class="hljs-title function_">json</span>()
+    <span class="hljs-comment">// Filtrage optimisé</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">fromEntries</span>(
+      <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">entries</span>(currencies).<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">[ key ]</span>) =&gt;</span> <span class="hljs-title class_">Object</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">hasOwnProperty</span>.<span class="hljs-title function_">call</span>(currencies_flags, key))
+    )
+  } <span class="hljs-keyword">catch</span> (error) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(error)
+    <span class="hljs-keyword">return</span> {}
+  }
+}
+
+<span class="hljs-comment">/**
+ * Dictionnaire associant chaque code de devise à son emoji de drapeau.
+ * <span class="hljs-doctag">@type</span> {<span class="hljs-type">Object.&lt;string, string&gt;</span>}
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> currencies_flags = {
+  <span class="hljs-string">&quot;aed&quot;</span>: <span class="hljs-string">&quot;🇦🇪&quot;</span>,
+  <span class="hljs-string">&quot;afn&quot;</span>: <span class="hljs-string">&quot;🇦🇫&quot;</span>,
+  <span class="hljs-string">&quot;all&quot;</span>: <span class="hljs-string">&quot;🇦🇱&quot;</span>,
+  <span class="hljs-string">&quot;amd&quot;</span>: <span class="hljs-string">&quot;🇦🇲&quot;</span>,
+  <span class="hljs-string">&quot;ang&quot;</span>: <span class="hljs-string">&quot;🇳🇱&quot;</span>,
+  <span class="hljs-string">&quot;aoa&quot;</span>: <span class="hljs-string">&quot;🇦🇴&quot;</span>,
+  <span class="hljs-string">&quot;ars&quot;</span>: <span class="hljs-string">&quot;🇦🇷&quot;</span>,
+  <span class="hljs-string">&quot;aud&quot;</span>: <span class="hljs-string">&quot;🇦🇺&quot;</span>,
+  <span class="hljs-string">&quot;awg&quot;</span>: <span class="hljs-string">&quot;🇦🇼&quot;</span>,
+  <span class="hljs-string">&quot;azn&quot;</span>: <span class="hljs-string">&quot;🇦🇿&quot;</span>,
+  <span class="hljs-string">&quot;bam&quot;</span>: <span class="hljs-string">&quot;🇧🇦&quot;</span>,
+  <span class="hljs-string">&quot;bbd&quot;</span>: <span class="hljs-string">&quot;🇧🇧&quot;</span>,
+  <span class="hljs-string">&quot;bdt&quot;</span>: <span class="hljs-string">&quot;🇧🇩&quot;</span>,
+  <span class="hljs-string">&quot;bgn&quot;</span>: <span class="hljs-string">&quot;🇧🇬&quot;</span>,
+  <span class="hljs-string">&quot;bhd&quot;</span>: <span class="hljs-string">&quot;🇧🇭&quot;</span>,
+  <span class="hljs-string">&quot;bif&quot;</span>: <span class="hljs-string">&quot;🇧🇮&quot;</span>,
+  <span class="hljs-string">&quot;bmd&quot;</span>: <span class="hljs-string">&quot;🇧🇲&quot;</span>,
+  <span class="hljs-string">&quot;bnd&quot;</span>: <span class="hljs-string">&quot;🇧🇳&quot;</span>,
+  <span class="hljs-string">&quot;bob&quot;</span>: <span class="hljs-string">&quot;🇧🇴&quot;</span>,
+  <span class="hljs-string">&quot;brl&quot;</span>: <span class="hljs-string">&quot;🇧🇷&quot;</span>,
+  <span class="hljs-string">&quot;bsd&quot;</span>: <span class="hljs-string">&quot;🇧🇸&quot;</span>,
+  <span class="hljs-string">&quot;btn&quot;</span>: <span class="hljs-string">&quot;🇧🇹&quot;</span>,
+  <span class="hljs-string">&quot;bwp&quot;</span>: <span class="hljs-string">&quot;🇧🇼&quot;</span>,
+  <span class="hljs-string">&quot;byn&quot;</span>: <span class="hljs-string">&quot;🇧🇾&quot;</span>,
+  <span class="hljs-string">&quot;byr&quot;</span>: <span class="hljs-string">&quot;🇧🇾&quot;</span>,
+  <span class="hljs-string">&quot;bzd&quot;</span>: <span class="hljs-string">&quot;🇧🇿&quot;</span>,
+  <span class="hljs-string">&quot;cad&quot;</span>: <span class="hljs-string">&quot;🇨🇦&quot;</span>,
+  <span class="hljs-string">&quot;cdf&quot;</span>: <span class="hljs-string">&quot;🇨🇩&quot;</span>,
+  <span class="hljs-string">&quot;chf&quot;</span>: <span class="hljs-string">&quot;🇨🇭&quot;</span>,
+  <span class="hljs-string">&quot;clf&quot;</span>: <span class="hljs-string">&quot;🇨🇱&quot;</span>,
+  <span class="hljs-string">&quot;clp&quot;</span>: <span class="hljs-string">&quot;🇨🇱&quot;</span>,
+  <span class="hljs-string">&quot;cny&quot;</span>: <span class="hljs-string">&quot;🇨🇳&quot;</span>,
+  <span class="hljs-string">&quot;cop&quot;</span>: <span class="hljs-string">&quot;🇨🇴&quot;</span>,
+  <span class="hljs-string">&quot;crc&quot;</span>: <span class="hljs-string">&quot;🇨🇷&quot;</span>,
+  <span class="hljs-string">&quot;cuc&quot;</span>: <span class="hljs-string">&quot;🇨🇺&quot;</span>,
+  <span class="hljs-string">&quot;cup&quot;</span>: <span class="hljs-string">&quot;🇨🇺&quot;</span>,
+  <span class="hljs-string">&quot;cve&quot;</span>: <span class="hljs-string">&quot;🇨🇻&quot;</span>,
+  <span class="hljs-string">&quot;czk&quot;</span>: <span class="hljs-string">&quot;🇨🇿&quot;</span>,
+  <span class="hljs-string">&quot;djf&quot;</span>: <span class="hljs-string">&quot;🇩🇯&quot;</span>,
+  <span class="hljs-string">&quot;dkk&quot;</span>: <span class="hljs-string">&quot;🇩🇰&quot;</span>,
+  <span class="hljs-string">&quot;dop&quot;</span>: <span class="hljs-string">&quot;🇩🇴&quot;</span>,
+  <span class="hljs-string">&quot;dzd&quot;</span>: <span class="hljs-string">&quot;🇩🇿&quot;</span>,
+  <span class="hljs-string">&quot;egp&quot;</span>: <span class="hljs-string">&quot;🇪🇬&quot;</span>,
+  <span class="hljs-string">&quot;ern&quot;</span>: <span class="hljs-string">&quot;🇪🇷&quot;</span>,
+  <span class="hljs-string">&quot;etb&quot;</span>: <span class="hljs-string">&quot;🇪🇹&quot;</span>,
+  <span class="hljs-string">&quot;eur&quot;</span>: <span class="hljs-string">&quot;🇪🇺&quot;</span>,
+  <span class="hljs-string">&quot;fjd&quot;</span>: <span class="hljs-string">&quot;🇫🇯&quot;</span>,
+  <span class="hljs-string">&quot;fkp&quot;</span>: <span class="hljs-string">&quot;🇫🇰&quot;</span>,
+  <span class="hljs-string">&quot;gbp&quot;</span>: <span class="hljs-string">&quot;🇬🇧&quot;</span>,
+  <span class="hljs-string">&quot;gel&quot;</span>: <span class="hljs-string">&quot;🇬🇪&quot;</span>,
+  <span class="hljs-string">&quot;ghs&quot;</span>: <span class="hljs-string">&quot;🇬🇭&quot;</span>,
+  <span class="hljs-string">&quot;gip&quot;</span>: <span class="hljs-string">&quot;🇬🇮&quot;</span>,
+  <span class="hljs-string">&quot;gmd&quot;</span>: <span class="hljs-string">&quot;🇬🇲&quot;</span>,
+  <span class="hljs-string">&quot;gnf&quot;</span>: <span class="hljs-string">&quot;🇬🇳&quot;</span>,
+  <span class="hljs-string">&quot;gtq&quot;</span>: <span class="hljs-string">&quot;🇬🇹&quot;</span>,
+  <span class="hljs-string">&quot;gyd&quot;</span>: <span class="hljs-string">&quot;🇬🇾&quot;</span>,
+  <span class="hljs-string">&quot;hkd&quot;</span>: <span class="hljs-string">&quot;🇭🇰&quot;</span>,
+  <span class="hljs-string">&quot;hnl&quot;</span>: <span class="hljs-string">&quot;🇭🇳&quot;</span>,
+  <span class="hljs-string">&quot;hrk&quot;</span>: <span class="hljs-string">&quot;🇭🇷&quot;</span>,
+  <span class="hljs-string">&quot;htg&quot;</span>: <span class="hljs-string">&quot;🇭🇹&quot;</span>,
+  <span class="hljs-string">&quot;huf&quot;</span>: <span class="hljs-string">&quot;🇭🇺&quot;</span>,
+  <span class="hljs-string">&quot;idr&quot;</span>: <span class="hljs-string">&quot;🇮🇩&quot;</span>,
+  <span class="hljs-string">&quot;ils&quot;</span>: <span class="hljs-string">&quot;🇮🇱&quot;</span>,
+  <span class="hljs-string">&quot;inr&quot;</span>: <span class="hljs-string">&quot;🇮🇳&quot;</span>,
+  <span class="hljs-string">&quot;iqd&quot;</span>: <span class="hljs-string">&quot;🇮🇶&quot;</span>,
+  <span class="hljs-string">&quot;irr&quot;</span>: <span class="hljs-string">&quot;🇮🇷&quot;</span>,
+  <span class="hljs-string">&quot;isk&quot;</span>: <span class="hljs-string">&quot;🇮🇸&quot;</span>,
+  <span class="hljs-string">&quot;jmd&quot;</span>: <span class="hljs-string">&quot;🇯🇲&quot;</span>,
+  <span class="hljs-string">&quot;jod&quot;</span>: <span class="hljs-string">&quot;🇯🇴&quot;</span>,
+  <span class="hljs-string">&quot;jpy&quot;</span>: <span class="hljs-string">&quot;🇯🇵&quot;</span>,
+  <span class="hljs-string">&quot;kes&quot;</span>: <span class="hljs-string">&quot;🇰🇪&quot;</span>,
+  <span class="hljs-string">&quot;kgs&quot;</span>: <span class="hljs-string">&quot;🇰🇬&quot;</span>,
+  <span class="hljs-string">&quot;khr&quot;</span>: <span class="hljs-string">&quot;🇰🇭&quot;</span>,
+  <span class="hljs-string">&quot;kmf&quot;</span>: <span class="hljs-string">&quot;🇰🇲&quot;</span>,
+  <span class="hljs-string">&quot;kpw&quot;</span>: <span class="hljs-string">&quot;🇰🇵&quot;</span>,
+  <span class="hljs-string">&quot;krw&quot;</span>: <span class="hljs-string">&quot;🇰🇷&quot;</span>,
+  <span class="hljs-string">&quot;kwd&quot;</span>: <span class="hljs-string">&quot;🇰🇼&quot;</span>,
+  <span class="hljs-string">&quot;kyd&quot;</span>: <span class="hljs-string">&quot;🇰🇾&quot;</span>,
+  <span class="hljs-string">&quot;kzt&quot;</span>: <span class="hljs-string">&quot;🇰🇿&quot;</span>,
+  <span class="hljs-string">&quot;lak&quot;</span>: <span class="hljs-string">&quot;🇱🇦&quot;</span>,
+  <span class="hljs-string">&quot;lbp&quot;</span>: <span class="hljs-string">&quot;🇱🇧&quot;</span>,
+  <span class="hljs-string">&quot;lkr&quot;</span>: <span class="hljs-string">&quot;🇱🇰&quot;</span>,
+  <span class="hljs-string">&quot;lrd&quot;</span>: <span class="hljs-string">&quot;🇱🇷&quot;</span>,
+  <span class="hljs-string">&quot;lsl&quot;</span>: <span class="hljs-string">&quot;🇱🇸&quot;</span>,
+  <span class="hljs-string">&quot;ltl&quot;</span>: <span class="hljs-string">&quot;🇱🇹&quot;</span>,
+  <span class="hljs-string">&quot;lvl&quot;</span>: <span class="hljs-string">&quot;🇱🇻&quot;</span>,
+  <span class="hljs-string">&quot;lyd&quot;</span>: <span class="hljs-string">&quot;🇱🇾&quot;</span>,
+  <span class="hljs-string">&quot;mad&quot;</span>: <span class="hljs-string">&quot;🇲🇦&quot;</span>,
+  <span class="hljs-string">&quot;mdl&quot;</span>: <span class="hljs-string">&quot;🇲🇩&quot;</span>,
+  <span class="hljs-string">&quot;mga&quot;</span>: <span class="hljs-string">&quot;🇲🇬&quot;</span>,
+  <span class="hljs-string">&quot;mkd&quot;</span>: <span class="hljs-string">&quot;🇲🇰&quot;</span>,
+  <span class="hljs-string">&quot;mmk&quot;</span>: <span class="hljs-string">&quot;🇲🇲&quot;</span>,
+  <span class="hljs-string">&quot;mnt&quot;</span>: <span class="hljs-string">&quot;🇲🇳&quot;</span>,
+  <span class="hljs-string">&quot;mop&quot;</span>: <span class="hljs-string">&quot;🇲🇴&quot;</span>,
+  <span class="hljs-string">&quot;mro&quot;</span>: <span class="hljs-string">&quot;🇲🇷&quot;</span>,
+  <span class="hljs-string">&quot;mur&quot;</span>: <span class="hljs-string">&quot;🇲🇺&quot;</span>,
+  <span class="hljs-string">&quot;mvr&quot;</span>: <span class="hljs-string">&quot;🇲🇻&quot;</span>,
+  <span class="hljs-string">&quot;mwk&quot;</span>: <span class="hljs-string">&quot;🇲🇼&quot;</span>,
+  <span class="hljs-string">&quot;mxn&quot;</span>: <span class="hljs-string">&quot;🇲🇽&quot;</span>,
+  <span class="hljs-string">&quot;myr&quot;</span>: <span class="hljs-string">&quot;🇲🇾&quot;</span>,
+  <span class="hljs-string">&quot;mzn&quot;</span>: <span class="hljs-string">&quot;🇲🇿&quot;</span>,
+  <span class="hljs-string">&quot;nad&quot;</span>: <span class="hljs-string">&quot;🇳🇦&quot;</span>,
+  <span class="hljs-string">&quot;ngn&quot;</span>: <span class="hljs-string">&quot;🇳🇬&quot;</span>,
+  <span class="hljs-string">&quot;nio&quot;</span>: <span class="hljs-string">&quot;🇳🇮&quot;</span>,
+  <span class="hljs-string">&quot;nok&quot;</span>: <span class="hljs-string">&quot;🇳🇴&quot;</span>,
+  <span class="hljs-string">&quot;npr&quot;</span>: <span class="hljs-string">&quot;🇳🇵&quot;</span>,
+  <span class="hljs-string">&quot;nzd&quot;</span>: <span class="hljs-string">&quot;🇳🇿&quot;</span>,
+  <span class="hljs-string">&quot;omr&quot;</span>: <span class="hljs-string">&quot;🇴🇲&quot;</span>,
+  <span class="hljs-string">&quot;pab&quot;</span>: <span class="hljs-string">&quot;🇵🇦&quot;</span>,
+  <span class="hljs-string">&quot;pen&quot;</span>: <span class="hljs-string">&quot;🇵🇪&quot;</span>,
+  <span class="hljs-string">&quot;pgk&quot;</span>: <span class="hljs-string">&quot;🇵🇬&quot;</span>,
+  <span class="hljs-string">&quot;php&quot;</span>: <span class="hljs-string">&quot;🇵🇭&quot;</span>,
+  <span class="hljs-string">&quot;pkr&quot;</span>: <span class="hljs-string">&quot;🇵🇰&quot;</span>,
+  <span class="hljs-string">&quot;pln&quot;</span>: <span class="hljs-string">&quot;🇵🇱&quot;</span>,
+  <span class="hljs-string">&quot;pyg&quot;</span>: <span class="hljs-string">&quot;🇵🇾&quot;</span>,
+  <span class="hljs-string">&quot;qar&quot;</span>: <span class="hljs-string">&quot;🇶🇦&quot;</span>,
+  <span class="hljs-string">&quot;ron&quot;</span>: <span class="hljs-string">&quot;🇷🇴&quot;</span>,
+  <span class="hljs-string">&quot;rsd&quot;</span>: <span class="hljs-string">&quot;🇷🇸&quot;</span>,
+  <span class="hljs-string">&quot;rub&quot;</span>: <span class="hljs-string">&quot;🇷🇺&quot;</span>,
+  <span class="hljs-string">&quot;rwf&quot;</span>: <span class="hljs-string">&quot;🇷🇼&quot;</span>,
+  <span class="hljs-string">&quot;sar&quot;</span>: <span class="hljs-string">&quot;🇸🇦&quot;</span>,
+  <span class="hljs-string">&quot;sbd&quot;</span>: <span class="hljs-string">&quot;🇸🇧&quot;</span>,
+  <span class="hljs-string">&quot;scr&quot;</span>: <span class="hljs-string">&quot;🇸🇨&quot;</span>,
+  <span class="hljs-string">&quot;sdg&quot;</span>: <span class="hljs-string">&quot;🇸🇩&quot;</span>,
+  <span class="hljs-string">&quot;sek&quot;</span>: <span class="hljs-string">&quot;🇸🇪&quot;</span>,
+  <span class="hljs-string">&quot;sgd&quot;</span>: <span class="hljs-string">&quot;🇸🇬&quot;</span>,
+  <span class="hljs-string">&quot;shp&quot;</span>: <span class="hljs-string">&quot;🇸🇭&quot;</span>,
+  <span class="hljs-string">&quot;sle&quot;</span>: <span class="hljs-string">&quot;🇸🇱&quot;</span>,
+  <span class="hljs-string">&quot;sll&quot;</span>: <span class="hljs-string">&quot;🇸🇱&quot;</span>,
+  <span class="hljs-string">&quot;sos&quot;</span>: <span class="hljs-string">&quot;🇸🇴&quot;</span>,
+  <span class="hljs-string">&quot;srd&quot;</span>: <span class="hljs-string">&quot;🇸🇷&quot;</span>,
+  <span class="hljs-string">&quot;std&quot;</span>: <span class="hljs-string">&quot;🇸🇹&quot;</span>,
+  <span class="hljs-string">&quot;syp&quot;</span>: <span class="hljs-string">&quot;🇸🇾&quot;</span>,
+  <span class="hljs-string">&quot;szl&quot;</span>: <span class="hljs-string">&quot;🇸🇿&quot;</span>,
+  <span class="hljs-string">&quot;thb&quot;</span>: <span class="hljs-string">&quot;🇹🇭&quot;</span>,
+  <span class="hljs-string">&quot;tjs&quot;</span>: <span class="hljs-string">&quot;🇹🇯&quot;</span>,
+  <span class="hljs-string">&quot;tmt&quot;</span>: <span class="hljs-string">&quot;🇹🇲&quot;</span>,
+  <span class="hljs-string">&quot;tnd&quot;</span>: <span class="hljs-string">&quot;🇹🇳&quot;</span>,
+  <span class="hljs-string">&quot;top&quot;</span>: <span class="hljs-string">&quot;🇹🇴&quot;</span>,
+  <span class="hljs-string">&quot;try&quot;</span>: <span class="hljs-string">&quot;🇹🇷&quot;</span>,
+  <span class="hljs-string">&quot;ttd&quot;</span>: <span class="hljs-string">&quot;🇹🇹&quot;</span>,
+  <span class="hljs-string">&quot;twd&quot;</span>: <span class="hljs-string">&quot;🇹🇼&quot;</span>,
+  <span class="hljs-string">&quot;tzs&quot;</span>: <span class="hljs-string">&quot;🇹🇿&quot;</span>,
+  <span class="hljs-string">&quot;uah&quot;</span>: <span class="hljs-string">&quot;🇺🇦&quot;</span>,
+  <span class="hljs-string">&quot;ugx&quot;</span>: <span class="hljs-string">&quot;🇺🇬&quot;</span>,
+  <span class="hljs-string">&quot;usd&quot;</span>: <span class="hljs-string">&quot;🇺🇸&quot;</span>,
+  <span class="hljs-string">&quot;uyu&quot;</span>: <span class="hljs-string">&quot;🇺🇾&quot;</span>,
+  <span class="hljs-string">&quot;uzs&quot;</span>: <span class="hljs-string">&quot;🇺🇿&quot;</span>,
+  <span class="hljs-string">&quot;vef&quot;</span>: <span class="hljs-string">&quot;🇻🇪&quot;</span>,
+  <span class="hljs-string">&quot;ves&quot;</span>: <span class="hljs-string">&quot;🇻🇪&quot;</span>,
+  <span class="hljs-string">&quot;vnd&quot;</span>: <span class="hljs-string">&quot;🇻🇳&quot;</span>,
+  <span class="hljs-string">&quot;vuv&quot;</span>: <span class="hljs-string">&quot;🇻🇺&quot;</span>,
+  <span class="hljs-string">&quot;wst&quot;</span>: <span class="hljs-string">&quot;🇼🇸&quot;</span>,
+  <span class="hljs-string">&quot;xaf&quot;</span>: <span class="hljs-string">&quot;🇨🇲&quot;</span>,
+  <span class="hljs-string">&quot;xcd&quot;</span>: <span class="hljs-string">&quot;🇦🇮&quot;</span>,
+  <span class="hljs-string">&quot;xof&quot;</span>: <span class="hljs-string">&quot;🇧🇯&quot;</span>,
+  <span class="hljs-string">&quot;xpf&quot;</span>: <span class="hljs-string">&quot;🇵🇫&quot;</span>,
+  <span class="hljs-string">&quot;yer&quot;</span>: <span class="hljs-string">&quot;🇾🇪&quot;</span>,
+  <span class="hljs-string">&quot;zar&quot;</span>: <span class="hljs-string">&quot;🇿🇦&quot;</span>,
+  <span class="hljs-string">&quot;zmw&quot;</span>: <span class="hljs-string">&quot;🇿🇲&quot;</span>,
+  <span class="hljs-string">&quot;zwl&quot;</span>: <span class="hljs-string">&quot;🇿🇼&quot;</span>
+}</code></pre></div>
+<p class="file-link"><a href="../projets/cours/4-currency-converter/src/api.js">📄 ouvrir le fichier api.js</a></p></details><h2 id="exemples-supplementaires-faits-et-testes-pour-toi"><a class="anchor" href="#exemples-supplementaires-faits-et-testes-pour-toi">#</a>Exemples supplémentaires (faits et testés pour toi)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Dossier</th>
+<th>Contenu</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="modele.html"><code>projets/modele/</code></a></td>
+<td>projet complet de référence : Vite + ESLint + Vitest + JSDoc + FTP + vérificateur</td>
+</tr>
+<tr>
+<td><code>projets/exemples/vitest-avance/</code></td>
+<td>mocks de <code>fetch</code>, <code>toThrow</code>, test DOM avec jsdom, seuils de couverture (<a href="vitest.html#mocks-simuler-fetch-console">voir</a>)</td>
+</tr>
+<tr>
+<td><code>projets/exemples/jsdoc-complet/</code></td>
+<td>tous les tags JSDoc, <code>@typedef</code>, classe, tutoriel, <code>-P package.json</code> (<a href="../projets/exemples/jsdoc-complet/docs/demo-jsdoc/1.2.0/index.html">doc générée</a>)</td>
+</tr>
+</tbody></table></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#1-lint-exercice-eslint">1. lint : exercice ESLint</a><a class="toc-2" href="#2-vitest-tests-jsdoc">2. vitest : tests + JSDoc</a><a class="toc-2" href="#3-vite-lint-test-doc-tout-ensemble">3. vite_lint_test_doc : tout ensemble</a><a class="toc-2" href="#4-currency-converter-projet-complet-ftp">4. currency-converter : projet complet + FTP</a><a class="toc-2" href="#exemples-supplementaires-faits-et-testes-pour-toi">Exemples supplémentaires (faits et testés pour toi)</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../assets/app.js"></script>
+</body>
+</html>

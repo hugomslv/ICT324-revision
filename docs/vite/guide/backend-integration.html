@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backend Integration (Vite) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link active" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vite</a> › guide/backend-integration  <a class="ext small" href="https://vite.dev/guide/backend-integration">version en ligne</a></div>
+<h1 id="backend-integration"><a class="anchor" href="#backend-integration">#</a>Backend Integration</h1>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Note</div><p>If you want to serve the HTML using a traditional backend (e.g. Rails, Laravel) but use Vite for serving assets, check for existing integrations listed in <a href="https://github.com/vitejs/awesome-vite#integrations-with-backends">Awesome Vite</a>.</p>
+<p>If you need a custom integration, you can follow the steps in this guide to configure it manually.</p>
+</div><ol>
+<li><p>In your Vite config, configure the entry and enable build manifest:</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-comment">// overwrite default .html entry</span>
+  <span class="hljs-attr">input</span>: <span class="hljs-string">&#x27;/path/to/main.js&#x27;</span>,
+  <span class="hljs-attr">server</span>: {
+    <span class="hljs-attr">cors</span>: {
+      <span class="hljs-comment">// the origin you will be accessing via browser</span>
+      <span class="hljs-attr">origin</span>: <span class="hljs-string">&#x27;http://my-backend.example.com&#x27;</span>,
+    },
+  },
+  <span class="hljs-attr">build</span>: {
+    <span class="hljs-comment">// generate .vite/manifest.json in outDir</span>
+    <span class="hljs-attr">manifest</span>: <span class="hljs-literal">true</span>,
+  },
+})</code></pre></div>
+<p>If you haven&#39;t disabled the <a href="../config/build-options.html#build-polyfillmodulepreload">module preload polyfill</a>, you also need to import the polyfill in your entry</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// add the beginning of your app entry</span>
+<span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/modulepreload-polyfill&#x27;</span></code></pre></div>
+</li>
+<li><p>For development, inject the following in your server&#39;s HTML template (substitute <code>http://localhost:5173</code> with the local URL Vite is running at):</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-comment">&lt;!-- if development --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;http://localhost:5173/@vite/client&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;http://localhost:5173/main.js&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></code></pre></div>
+<p>In order to properly serve assets, you have two options:</p>
+<ul>
+<li>Make sure the server is configured to proxy static assets requests to the Vite server</li>
+<li>Set <a href="../config/server-options.html#server-origin"><code>server.origin</code></a> so that generated asset URLs will be resolved using the back-end server URL instead of a relative path</li>
+</ul>
+<p>This is needed for assets such as images to load properly.</p>
+<p>Note if you are using React with <code>@vitejs/plugin-react</code>, you&#39;ll also need to add this before the above scripts, since the plugin is not able to modify the HTML you are serving (substitute <code>http://localhost:5173</code> with the local URL Vite is running at):</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span>&gt;</span><span class="language-javascript">
+  <span class="hljs-keyword">import</span> <span class="hljs-title class_">RefreshRuntime</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;http://localhost:5173/@react-refresh&#x27;</span>
+  <span class="hljs-title class_">RefreshRuntime</span>.<span class="hljs-title function_">injectIntoGlobalHook</span>(<span class="hljs-variable language_">window</span>)
+  <span class="hljs-variable language_">window</span>.<span class="hljs-property">$RefreshReg$</span> = <span class="hljs-function">() =&gt;</span> {}
+  <span class="hljs-variable language_">window</span>.<span class="hljs-property">$RefreshSig$</span> = <span class="hljs-function">() =&gt;</span> <span class="hljs-function">(<span class="hljs-params">type</span>) =&gt;</span> type
+  <span class="hljs-variable language_">window</span>.<span class="hljs-property">__vite_plugin_react_preamble_installed__</span> = <span class="hljs-literal">true</span>
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></code></pre></div>
+</li>
+<li><p>For production, after running <code>vite build</code>, a <code>.vite/manifest.json</code> file will be generated alongside other asset files. An example manifest file looks like this:</p>
+<div class="code"><div class="code-title">.vite/manifest.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;_shared-B7PI925R.js&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;file&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;assets/shared-B7PI925R.js&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;shared&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;css&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;assets/shared-ChJ_j-JJ.css&quot;</span><span class="hljs-punctuation">]</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;_shared-ChJ_j-JJ.css&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;file&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;assets/shared-ChJ_j-JJ.css&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;src&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;_shared-ChJ_j-JJ.css&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;logo.svg&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;file&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;assets/logo-BuPIv-2h.svg&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;src&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;logo.svg&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;baz.js&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;file&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;assets/baz-B2H3sXNv.js&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;baz&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;src&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;baz.js&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;isDynamicEntry&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;views/bar.js&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;file&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;assets/bar-gkvgaI9m.js&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;bar&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;src&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;views/bar.js&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;isEntry&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;_shared-B7PI925R.js&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;dynamicImports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;baz.js&quot;</span><span class="hljs-punctuation">]</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;views/foo.js&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;file&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;assets/foo-BRBmoGS9.js&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;foo&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;src&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;views/foo.js&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;isEntry&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;_shared-B7PI925R.js&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;css&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;assets/foo-5UjPuW-k.css&quot;</span><span class="hljs-punctuation">]</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>The manifest maps source files to their build outputs and dependencies:</p>
+<div class="code"><pre><code class="hljs lang-dot">digraph manifest {
+  rankdir=TB
+  node [shape=box style=&quot;rounded,filled&quot; fontname=&quot;Arial&quot; fontsize=10 margin=&quot;0.2,0.1&quot; fontcolor=&quot;${#3c3c43|#ffffff}&quot; color=&quot;${#c2c2c4|#3c3f44}&quot;]
+  edge [color=&quot;${#67676c|#98989f}&quot; fontname=&quot;Arial&quot; fontsize=9 fontcolor=&quot;${#67676c|#98989f}&quot;]
+  bgcolor=&quot;transparent&quot;
+
+  foo [label=&quot;views/foo.js\n(entry)&quot; fillcolor=&quot;${#e9eaff|#222541}&quot;]
+  bar [label=&quot;views/bar.js\n(entry)&quot; fillcolor=&quot;${#e9eaff|#222541}&quot;]
+  shared [label=&quot;_shared-B7PI925R.js\n(common chunk)&quot; fillcolor=&quot;${#f2ecfc|#2c273e}&quot;]
+  baz [label=&quot;baz.js\n(dynamic import)&quot; fillcolor=&quot;${#fcf4dc|#38301a}&quot;]
+  foocss [label=&quot;foo.css&quot; shape=ellipse fillcolor=&quot;${#fde4e8|#3a1d27}&quot;]
+  sharedcss [label=&quot;shared.css&quot; shape=ellipse fillcolor=&quot;${#fde4e8|#3a1d27}&quot;]
+  logo [label=&quot;logo.svg\n(asset)&quot; shape=ellipse fillcolor=&quot;${#def5ed|#15312d}&quot;]
+
+  foo -&gt; shared [label=&quot;imports&quot;]
+  bar -&gt; shared [label=&quot;imports&quot;]
+  bar -&gt; baz [label=&quot;dynamicImports&quot; style=dashed]
+  foo -&gt; foocss [label=&quot;css&quot;]
+  shared -&gt; sharedcss [label=&quot;css&quot;]
+}</code></pre></div>
+<p>The manifest has a <code>Record&lt;name, chunk&gt;</code> structure where each chunk follows the <code>ManifestChunk</code> interface:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">ManifestChunk</span> {
+  <span class="hljs-comment">/**
+   * The input file name of this chunk / asset if known
+   */</span>
+  <span class="hljs-attr">src</span>?: <span class="hljs-built_in">string</span>
+  <span class="hljs-comment">/**
+   * The output file name of this chunk / asset
+   */</span>
+  <span class="hljs-attr">file</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-comment">/**
+   * The list of CSS files imported by this chunk
+   */</span>
+  <span class="hljs-attr">css</span>?: <span class="hljs-built_in">string</span>[]
+  <span class="hljs-comment">/**
+   * The list of asset files imported by this chunk, excluding CSS files
+   */</span>
+  <span class="hljs-attr">assets</span>?: <span class="hljs-built_in">string</span>[]
+  <span class="hljs-comment">/**
+   * Whether this chunk or asset is an entry point
+   */</span>
+  <span class="hljs-attr">isEntry</span>?: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-comment">/**
+   * The name of this chunk / asset if known
+   */</span>
+  <span class="hljs-attr">name</span>?: <span class="hljs-built_in">string</span>
+  <span class="hljs-comment">/**
+   * Whether this chunk is a dynamic entry point
+   *
+   * This field is only present in JS chunks.
+   */</span>
+  <span class="hljs-attr">isDynamicEntry</span>?: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-comment">/**
+   * The list of statically imported chunks by this chunk
+   *
+   * The values are the keys of the manifest. This field is only present in JS chunks.
+   */</span>
+  <span class="hljs-attr">imports</span>?: <span class="hljs-built_in">string</span>[]
+  <span class="hljs-comment">/**
+   * The list of dynamically imported chunks by this chunk
+   *
+   * The values are the keys of the manifest. This field is only present in JS chunks.
+   */</span>
+  <span class="hljs-attr">dynamicImports</span>?: <span class="hljs-built_in">string</span>[]
+}</code></pre></div>
+<p>Each entry in the manifest represents one of the following:</p>
+<ul>
+<li><strong>Entry chunks</strong>: Generated from files specified in <a href="https://rolldown.rs/reference/InputOptions.input#input"><code>build.rolldownOptions.input</code></a>. These chunks have <code>isEntry: true</code> and their key is the relative src path from project root.</li>
+<li><strong>Dynamic entry chunks</strong>: Generated from dynamic imports. These chunks have <code>isDynamicEntry: true</code> and their key is the relative src path from project root.</li>
+<li><strong>Non-entry chunks</strong>: Their key is the base name of the generated file prefixed with <code>_</code>.</li>
+<li><strong>Asset chunks</strong>: Generated from imported assets like images, fonts. Their key is the relative src path from project root.</li>
+<li><strong>CSS files</strong>: When <a href="../config/build-options.html#build-csscodesplit"><code>build.cssCodeSplit</code></a> is <code>false</code>, a single CSS file is generated with the key <code>style.css</code>. When <code>build.cssCodeSplit</code> is not <code>false</code>, the key is generated similar to JS chunks (i.e. entry chunks will not have <code>_</code> prefix and non-entry chunks will have <code>_</code> prefix).</li>
+</ul>
+<p>JS chunks (chunks other than assets or CSS) will contain information on their static and dynamic imports (both are keys that map to the corresponding chunk in the manifest). Chunks also list their corresponding CSS and asset files if they have any.</p>
+</li>
+<li><p>You can use this file to render links or preload directives with hashed filenames.</p>
+<p>Here is an example HTML template to render the proper links. The syntax here is for
+explanation only, substitute with your server templating language. The <code>importedChunks</code>
+function is for illustration and isn&#39;t provided by Vite.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-comment">&lt;!-- if production --&gt;</span>
+
+<span class="hljs-comment">&lt;!-- for cssFile of manifest[name].css --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;stylesheet&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/{{ cssFile }}&quot;</span> /&gt;</span>
+
+<span class="hljs-comment">&lt;!-- for chunk of importedChunks(manifest, name) --&gt;</span>
+<span class="hljs-comment">&lt;!-- for cssFile of chunk.css --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;stylesheet&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/{{ cssFile }}&quot;</span> /&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/{{ manifest[name].file }}&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+<span class="hljs-comment">&lt;!-- for chunk of importedChunks(manifest, name) --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;modulepreload&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/{{ chunk.file }}&quot;</span> /&gt;</span></code></pre></div>
+<p>Specifically, a backend generating HTML should include the following tags given a manifest
+file and an entry point. Note that following this order is recommended for optimal performance:</p>
+<ol>
+<li>A <code>&lt;link rel=&quot;stylesheet&quot;&gt;</code> tag for each file in the entry point chunk&#39;s <code>css</code> list (if it exists)</li>
+<li>Recursively follow all chunks in the entry point&#39;s <code>imports</code> list and include a
+<code>&lt;link rel=&quot;stylesheet&quot;&gt;</code> tag for each CSS file of each imported chunk&#39;s <code>css</code> list (if it exists).</li>
+<li>A tag for the <code>file</code> key of the entry point chunk. This can be <code>&lt;script type=&quot;module&quot;&gt;</code> for JavaScript, <code>&lt;link rel=&quot;stylesheet&quot;&gt;</code> for CSS.</li>
+<li>Optionally, <code>&lt;link rel=&quot;modulepreload&quot;&gt;</code> tag for the <code>file</code> of each imported JavaScript
+chunk, again recursively following the imports starting from the entry point chunk.</li>
+</ol>
+<p>Following the above example manifest, for the entry point <code>views/foo.js</code> the following tags should be included in production:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;stylesheet&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;assets/foo-5UjPuW-k.css&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;stylesheet&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;assets/shared-ChJ_j-JJ.css&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;assets/foo-BRBmoGS9.js&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-comment">&lt;!-- optional --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;modulepreload&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;assets/shared-B7PI925R.js&quot;</span> /&gt;</span></code></pre></div>
+<p>While the following should be included for the entry point <code>views/bar.js</code>:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;stylesheet&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;assets/shared-ChJ_j-JJ.css&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;assets/bar-gkvgaI9m.js&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-comment">&lt;!-- optional --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;modulepreload&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;assets/shared-B7PI925R.js&quot;</span> /&gt;</span></code></pre></div>
+</li>
+</ol>
+<details class="box"><summary>Pseudo implementation of <code>importedChunks</code></summary><p>   An example pseudo implementation of <code>importedChunks</code> in TypeScript (This will
+   need to be adapted for your programming language and templating language):</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">Manifest</span>, <span class="hljs-title class_">ManifestChunk</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">importedChunks</span>(<span class="hljs-params">
+  <span class="hljs-attr">manifest</span>: <span class="hljs-title class_">Manifest</span>,
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>,
+</span>): <span class="hljs-title class_">ManifestChunk</span>[] {
+  <span class="hljs-keyword">const</span> seen = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>&lt;<span class="hljs-built_in">string</span>&gt;()
+
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">getImportedChunks</span>(<span class="hljs-params"><span class="hljs-attr">chunk</span>: <span class="hljs-title class_">ManifestChunk</span></span>): <span class="hljs-title class_">ManifestChunk</span>[] {
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">chunks</span>: <span class="hljs-title class_">ManifestChunk</span>[] = []
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> file <span class="hljs-keyword">of</span> chunk.<span class="hljs-property">imports</span> ?? []) {
+      <span class="hljs-keyword">const</span> importee = manifest[file]
+      <span class="hljs-keyword">if</span> (seen.<span class="hljs-title function_">has</span>(file)) {
+        <span class="hljs-keyword">continue</span>
+      }
+      seen.<span class="hljs-title function_">add</span>(file)
+
+      chunks.<span class="hljs-title function_">push</span>(...<span class="hljs-title function_">getImportedChunks</span>(importee))
+      chunks.<span class="hljs-title function_">push</span>(importee)
+    }
+
+    <span class="hljs-keyword">return</span> chunks
+  }
+
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">getImportedChunks</span>(manifest[name])
+}</code></pre></div>
+</details><div class="box box-info"><div class="box-title">ℹ️ Info : Chunk Import Maps Support (Experimental)</div><p>   If you are using the experimental <a href="../config/build-options.html#build-chunkimportmap"><code>build.chunkImportMap</code></a> option, you also need to inject the import map into the HTML.</p>
+<p>   The import map is output to <code>importmap.json</code> in the output directory. Make sure to inject the <code>&lt;script type=&quot;importmap&quot;&gt;</code> tag before any <code>&lt;script type=&quot;module&quot;&gt;</code> tags or <code>&lt;link rel=&quot;modulepreload&quot;&gt;</code> tags.</p>
+</div>
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

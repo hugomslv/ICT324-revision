@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting Started with ESLint (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › use/getting-started  <a class="ext small" href="https://eslint.org/docs/latest/use/getting-started">version en ligne</a></div>
+<h1>Getting Started with ESLint</h1><p>ESLint is a tool for identifying and reporting on patterns found in ECMAScript/JavaScript code, with the goal of making code more consistent and avoiding bugs.</p>
+<p>ESLint is completely pluggable. Every single rule is a plugin and you can add more at runtime. You can also add community plugins, configurations, and parsers to extend the functionality of ESLint.</p>
+<h2 id="prerequisites"><a class="anchor" href="#prerequisites">#</a>Prerequisites</h2>
+<p>To use ESLint, you must have <a href="https://nodejs.org/en/">Node.js</a> (<code>^20.19.0</code>, <code>^22.13.0</code>, or <code>&gt;=24</code>) installed and built with SSL and ICU support. (If you are using an official Node.js distribution, both SSL and ICU are always built in.)</p>
+<p>If you use ESLint&#39;s TypeScript type definitions, TypeScript 5.3 or later is required.</p>
+<h2 id="quick-start"><a class="anchor" href="#quick-start">#</a>Quick start</h2>
+<p>You can install and configure ESLint using this command:</p>
+<div class="code"><pre><code class="hljs lang-bash">npm init @eslint/config@latest</code></pre></div>
+<p>If you want to use a specific shareable config that is hosted on npm, you can use the <code>--config</code> option and specify the package name:</p>
+<div class="code"><pre><code class="hljs lang-bash">npm init @eslint/config@latest -- --config eslint-config-xo</code></pre></div>
+<p><strong>Note:</strong> <code>npm init @eslint/config</code> assumes you have a <code>package.json</code> file already. If you don&#39;t, make sure to run <code>npm init</code> or <code>yarn init</code> beforehand.</p>
+<p>After that, you can run ESLint on any file or directory like this:</p>
+<div class="code"><pre><code class="hljs lang-bash">npx eslint yourfile.js</code></pre></div>
+<h2 id="configuration"><a class="anchor" href="#configuration">#</a>Configuration</h2>
+<p><strong>Note:</strong> If you are coming from a version before 9.0.0 please see the <a href="configure/migration-guide.html">migration guide</a>.</p>
+<p>When you run <code>npm init @eslint/config</code>, you&#39;ll be asked a series of questions to determine how you&#39;re using ESLint and what options should be included. After answering these questions, you&#39;ll have an <code>eslint.config.js</code> (or <code>eslint.config.mjs</code>) file created in your directory.</p>
+<p>For example, one of the questions is &quot;Where does your code run?&quot; If you select &quot;Browser&quot; then your configuration file will contain the definitions for global variables found in web browsers. Here&#39;s an example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+<span class="hljs-keyword">import</span> globals <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;globals&quot;</span>;
+<span class="hljs-keyword">import</span> js <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/js&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{ <span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>], <span class="hljs-attr">languageOptions</span>: { <span class="hljs-attr">globals</span>: globals.<span class="hljs-property">browser</span> } },
+	{ <span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>], <span class="hljs-attr">plugins</span>: { js }, <span class="hljs-attr">extends</span>: [<span class="hljs-string">&quot;js/recommended&quot;</span>] },
+]);</code></pre></div>
+<p>The <code>&quot;js/recommended&quot;</code> configuration ensures all of the rules marked as recommended on the <a href="../rules/index.html">rules page</a> will be turned on. Alternatively, you can use configurations that others have created by searching for &quot;eslint-config&quot; on <a href="https://www.npmjs.com/search?q=eslint-config">npmjs.com</a>. ESLint will not lint your code unless you extend from a shared configuration or explicitly turn rules on in your configuration.</p>
+<p>You can configure rules individually by defining a new object with a <code>rules</code> key, as in this example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+<span class="hljs-keyword">import</span> js <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/js&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{ <span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>], <span class="hljs-attr">plugins</span>: { js }, <span class="hljs-attr">extends</span>: [<span class="hljs-string">&quot;js/recommended&quot;</span>] },
+
+	{
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;no-unused-vars&quot;</span>: <span class="hljs-string">&quot;warn&quot;</span>,
+			<span class="hljs-string">&quot;no-undef&quot;</span>: <span class="hljs-string">&quot;warn&quot;</span>,
+		},
+	},
+]);</code></pre></div>
+<p>The names <code>&quot;no-unused-vars&quot;</code> and <code>&quot;no-undef&quot;</code> are the names of <a href="../rules/index.html">rules</a> in ESLint. The first value is the error level of the rule and can be one of these values:</p>
+<ul>
+<li><code>&quot;off&quot;</code> or <code>0</code> - turn the rule off</li>
+<li><code>&quot;warn&quot;</code> or <code>1</code> - turn the rule on as a warning (doesn’t affect exit code)</li>
+<li><code>&quot;error&quot;</code> or <code>2</code> - turn the rule on as an error (exit code will be 1)</li>
+</ul>
+<p>The three error levels allow you fine-grained control over how ESLint applies rules (for more configuration options and details, see the configuration docs).</p>
+<h2 id="global-install"><a class="anchor" href="#global-install">#</a>Global Install</h2>
+<p>It is also possible to install ESLint globally, rather than locally, using <code>npm install eslint --global</code>. However, this is not recommended, and any plugins or shareable configs that you use must still be installed locally even if you install ESLint globally.</p>
+<h2 id="manual-set-up"><a class="anchor" href="#manual-set-up">#</a>Manual Set Up</h2>
+<p>You can also manually set up ESLint in your project.</p>
+<div class="box box-important"><div class="box-title">❗ Important</div><p>If you are using <a href="https://pnpm.io">pnpm</a>, be sure to create a <code>.npmrc</code> file with at least the following settings:</p>
+<div class="code"><pre><code class="hljs lang-text">auto-install-peers=true
+node-linker=hoisted</code></pre></div>
+<p>This ensures that pnpm installs dependencies in a way that is more compatible with npm and is less likely to produce errors.</p>
+</div><p>Before you begin, you must already have a <code>package.json</code> file. If you don&#39;t, make sure to run <code>npm init</code> or <code>yarn init</code> to create the file beforehand.</p>
+<ol>
+<li>Install the ESLint packages in your project:</li>
+</ol>
+<div class="code"><pre><code class="hljs lang-bash">npm install --save-dev eslint@latest @eslint/js@latest</code></pre></div>
+<ol start="2">
+<li><p>Add an <code>eslint.config.js</code> file:</p>
+<div class="code"><pre><code class="hljs lang-shell"><span class="hljs-comment"># Create JavaScript configuration file</span>
+<span class="hljs-built_in">touch</span> eslint.config.js</code></pre></div>
+</li>
+<li><p>Add configuration to the <code>eslint.config.js</code> file. Refer to the <a href="configure/index.html">Configure ESLint documentation</a> to learn how to add rules, custom configurations, plugins, and more.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+<span class="hljs-keyword">import</span> js <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/js&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+    {
+        <span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>],
+        <span class="hljs-attr">plugins</span>: {
+            js,
+        },
+        <span class="hljs-attr">extends</span>: [<span class="hljs-string">&quot;js/recommended&quot;</span>],
+        <span class="hljs-attr">rules</span>: {
+            <span class="hljs-string">&quot;no-unused-vars&quot;</span>: <span class="hljs-string">&quot;warn&quot;</span>,
+            <span class="hljs-string">&quot;no-undef&quot;</span>: <span class="hljs-string">&quot;warn&quot;</span>,
+        },
+    },
+]);</code></pre></div>
+</li>
+<li><p>Lint code using the ESLint CLI:</p>
+</li>
+</ol>
+<div class="code"><pre><code class="hljs lang-bash">npx eslint project-dir/ file.js</code></pre></div>
+<p>For more information on the available CLI options, refer to <a href="command-line-interface.html">Command Line Interface</a>.</p>
+<hr>
+<h2 id="next-steps"><a class="anchor" href="#next-steps">#</a>Next Steps</h2>
+<ul>
+<li>Learn about <a href="configure/index.html">advanced configuration</a> of ESLint.</li>
+<li>Get familiar with the <a href="command-line-interface.html">command line options</a>.</li>
+<li>Explore <a href="integrations.html">ESLint integrations</a> into other tools like editors, build systems, and more.</li>
+<li>Can&#39;t find just the right rule? Make your own <a href="https://eslint.org/docs/latest/extend/custom-rules" class="ext" title="lien en ligne (non disponible hors-ligne)">custom rule</a>.</li>
+<li>Make ESLint even better by <a href="https://eslint.org/docs/latest/contribute/" class="ext" title="lien en ligne (non disponible hors-ligne)">contributing</a>.</li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#prerequisites">Prerequisites</a><a class="toc-2" href="#quick-start">Quick start</a><a class="toc-2" href="#configuration">Configuration</a><a class="toc-2" href="#global-install">Global Install</a><a class="toc-2" href="#manual-set-up">Manual Set Up</a><a class="toc-2" href="#next-steps">Next Steps</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

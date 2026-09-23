@@ -1,0 +1,1049 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vi (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › api/vi  <a class="ext small" href="https://vitest.dev/api/vi">version en ligne</a></div>
+<h1 id="vi"><a class="anchor" href="#vi">#</a>Vi</h1>
+<p>Vitest provides utility functions to help you out through its <code>vi</code> helper. You can access it globally (when <a href="../config/globals.html">globals configuration</a> is enabled), or import it from <code>vitest</code> directly:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span></code></pre></div>
+<h2 id="mock-modules"><a class="anchor" href="#mock-modules">#</a>Mock Modules</h2>
+<p>This section describes the API that you can use when <a href="../guide/mocking/modules.html">mocking a module</a>. Beware that Vitest doesn&#39;t support mocking modules imported using <code>require()</code>.</p>
+<h3 id="vi-mock"><a class="anchor" href="#vi-mock">#</a>vi.mock</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">MockOptions</span> {
+  <span class="hljs-attr">spy</span>?: <span class="hljs-built_in">boolean</span>
+}
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">MockFactory</span>&lt;T&gt; {
+  (<span class="hljs-attr">importOriginal</span>: <span class="hljs-function">() =&gt;</span> T): <span class="hljs-built_in">unknown</span>
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">mock</span>(<span class="hljs-params">
+  <span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">factory</span>?: <span class="hljs-title class_">MockOptions</span> | <span class="hljs-title class_">MockFactory</span>&lt;<span class="hljs-built_in">unknown</span>&gt;
+</span>): <span class="hljs-built_in">void</span>
+<span class="hljs-keyword">function</span> mock&lt;T&gt;(
+  <span class="hljs-attr">module</span>: <span class="hljs-title class_">Promise</span>&lt;T&gt;,
+  <span class="hljs-attr">factory</span>?: <span class="hljs-title class_">MockOptions</span> | <span class="hljs-title class_">MockFactory</span>&lt;T&gt;
+): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Substitutes all imported modules from provided <code>path</code> with another module. You can use configured Vite aliases inside a path. The call to <code>vi.mock</code> is hoisted, so it doesn&#39;t matter where you call it. It will always be executed before all imports. If you need to reference some variables outside of its scope, you can define them inside <a href="#vi-hoisted"><code>vi.hoisted</code></a> and reference them inside <code>vi.mock</code>.</p>
+<p>It is recommended to use <code>vi.mock</code> or <code>vi.hoisted</code> only inside test files. If Vite&#39;s <a href="../config/experimental.html#experimental-vitemodulerunner">module runner</a> is disabled, they will not be hoisted. This is a performance optimisation to avoid ready unnecessary files.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p><code>vi.mock</code> works only for modules that were imported with the <code>import</code> keyword. It doesn&#39;t work with <code>require</code>.</p>
+<p>In order to hoist <code>vi.mock</code>, Vitest statically analyzes your files. It indicates that <code>vi</code> that was not directly imported from the <code>vitest</code> package (for example, from some utility file) cannot be used. Use <code>vi.mock</code> with <code>vi</code> imported from <code>vitest</code>, or enable <a href="../config/globals.html"><code>globals</code></a> config option.</p>
+<p>Vitest will not mock modules that were imported inside a <a href="../config/setupfiles.html">setup file</a> because they are cached by the time a test file is running. You can call <a href="#vi-resetmodules"><code>vi.resetModules()</code></a> inside <a href="#vi-hoisted"><code>vi.hoisted</code></a> to clear all module caches before running a test file.</p>
+</div><p>If the <code>factory</code> function is defined, all imports will return its result. Vitest calls factory only once and caches results for all subsequent imports until <a href="#vi-unmock"><code>vi.unmock</code></a> or <a href="#vi-dounmock"><code>vi.doUnmock</code></a> is called.</p>
+<p>Unlike in <code>jest</code>, the factory can be asynchronous. You can use <a href="#vi-importactual"><code>vi.importActual</code></a> or a helper with the factory passed in as the first argument, and get the original module inside.</p>
+<p>You can also provide an object with a <code>spy</code> property instead of a factory function. If <code>spy</code> is <code>true</code>, then Vitest will automock the module as usual, but it won&#39;t override the implementation of exports. This is useful if you just want to assert that the exported method was called correctly by another method.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { calculator } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./src/calculator.ts&#x27;</span>
+
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;./src/calculator.ts&#x27;</span>, { <span class="hljs-attr">spy</span>: <span class="hljs-literal">true</span> })
+
+<span class="hljs-comment">// calls the original implementation,</span>
+<span class="hljs-comment">// but allows asserting the behaviour later</span>
+<span class="hljs-keyword">const</span> result = <span class="hljs-title function_">calculator</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+
+<span class="hljs-title function_">expect</span>(result).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">3</span>)
+<span class="hljs-title function_">expect</span>(calculator).<span class="hljs-title function_">toHaveBeenCalledWith</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+<span class="hljs-title function_">expect</span>(calculator).<span class="hljs-title function_">toHaveReturnedWith</span>(<span class="hljs-number">3</span>)</code></pre></div>
+<p>Vitest also supports a module promise instead of a string in the <code>vi.mock</code> and <code>vi.doMock</code> methods for better IDE support. When the file is moved, the path will be updated, and <code>importOriginal</code> inherits the type automatically. Using this signature will also enforce factory return type to be compatible with the original module (keeping exports optional).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">declare</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">total</span>(<span class="hljs-params">...<span class="hljs-attr">numbers</span>: <span class="hljs-built_in">number</span>[]</span>): <span class="hljs-built_in">number</span>
+<span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./path/to/module.js&#x27;</span>), <span class="hljs-title function_">async</span> (importOriginal) =&gt; {
+  <span class="hljs-keyword">const</span> mod = <span class="hljs-keyword">await</span> <span class="hljs-title function_">importOriginal</span>() <span class="hljs-comment">// type is inferred</span>
+  <span class="hljs-keyword">return</span> {
+    ...mod,
+    <span class="hljs-comment">// replace some exports</span>
+    <span class="hljs-attr">total</span>: vi.<span class="hljs-title function_">fn</span>(),
+  }
+})</code></pre></div>
+<p>Under the hood, Vitest still operates on a string and not a module object.</p>
+<p>If you are using TypeScript with <code>paths</code> aliases configured in <code>tsconfig.json</code> however, the compiler won&#39;t be able to correctly resolve import types.
+In order to make it work, make sure to replace all aliased imports, with their corresponding relative paths.
+Eg. use <code>import(&#39;./path/to/module.js&#39;)</code> instead of <code>import(&#39;@/module&#39;)</code>.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p><code>vi.mock</code> is hoisted (in other words, <em>moved</em>) to <strong>top of the file</strong>. It means that whenever you write it (be it inside <code>beforeEach</code> or <code>test</code>), it will actually be called before that.</p>
+<p>This also means that you cannot use any variables inside the factory that are defined outside the factory.</p>
+<p>If you need to use variables inside the factory, try <a href="#vi-domock"><code>vi.doMock</code></a>. It works the same way but isn&#39;t hoisted. Beware that it only mocks subsequent imports.</p>
+<p>You can also reference variables defined by <code>vi.hoisted</code> method if it was declared before <code>vi.mock</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { namedExport } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./path/to/module.js&#x27;</span>
+
+<span class="hljs-keyword">const</span> mocks = vi.<span class="hljs-title function_">hoisted</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">namedExport</span>: vi.<span class="hljs-title function_">fn</span>(),
+  }
+})
+
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;./path/to/module.js&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">namedExport</span>: mocks.<span class="hljs-property">namedExport</span>,
+  }
+})
+
+vi.<span class="hljs-title function_">mocked</span>(namedExport).<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-number">100</span>)
+
+<span class="hljs-title function_">expect</span>(<span class="hljs-title function_">namedExport</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">100</span>)
+<span class="hljs-title function_">expect</span>(namedExport).<span class="hljs-title function_">toBe</span>(mocks.<span class="hljs-property">namedExport</span>)</code></pre></div>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If you are mocking a module with default export, you will need to provide a <code>default</code> key within the returned factory function object. This is an ES module-specific caveat; therefore, <code>jest</code> documentation may differ as <code>jest</code> uses CommonJS modules. For example,</p>
+<div class="code"><pre><code class="hljs lang-ts">vi.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;./path/to/module.js&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">default</span>: { <span class="hljs-attr">myDefaultKey</span>: vi.<span class="hljs-title function_">fn</span>() },
+    <span class="hljs-attr">namedExport</span>: vi.<span class="hljs-title function_">fn</span>(),
+    <span class="hljs-comment">// etc...</span>
+  }
+})</code></pre></div>
+</div><p>If there is a <code>__mocks__</code> folder alongside a file that you are mocking, and the factory is not provided, Vitest will try to find a file with the same name in the <code>__mocks__</code> subfolder and use it as an actual module. If you are mocking a dependency, Vitest will try to find a <code>__mocks__</code> folder in the <a href="../config/root.html">root</a> of the project (default is <code>process.cwd()</code>). You can tell Vitest where the dependencies are located through the <a href="../config/deps.html#deps-moduledirectories"><code>deps.moduleDirectories</code></a> config option.</p>
+<p>For example, you have this file structure:</p>
+<div class="code"><pre><code class="hljs lang-txt">- __mocks__
+  - axios.js
+- src
+  __mocks__
+    - increment.js
+  - increment.js
+- tests
+  - increment.test.js</code></pre></div>
+<p>If you call <code>vi.mock</code> in a test file without a factory or options provided, it will find a file in the <code>__mocks__</code> folder to use as a module:</p>
+<div class="code"><div class="code-title">increment.test.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// axios is a default export from `__mocks__/axios.js`</span>
+<span class="hljs-keyword">import</span> axios <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;axios&#x27;</span>
+
+<span class="hljs-comment">// increment is a named export from `src/__mocks__/increment.js`</span>
+<span class="hljs-keyword">import</span> { increment } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;../increment.js&#x27;</span>
+
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;axios&#x27;</span>)
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;../increment.js&#x27;</span>)
+
+axios.<span class="hljs-title function_">get</span>(<span class="hljs-string">`/apples/<span class="hljs-subst">${increment(<span class="hljs-number">1</span>)}</span>`</span>)</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Beware that if you don&#39;t call <code>vi.mock</code>, modules <strong>are not</strong> mocked automatically. To replicate Jest&#39;s automocking behaviour, you can call <code>vi.mock</code> for each required module inside <a href="../config/setupfiles.html"><code>setupFiles</code></a>.</p>
+</div><p>If there is no <code>__mocks__</code> folder or a factory provided, Vitest will import the original module and auto-mock all its exports. For the rules applied, see <a href="../guide/mocking/modules.html#automocking-algorithm">algorithm</a>.</p>
+<h3 id="vi-domock"><a class="anchor" href="#vi-domock">#</a>vi.doMock</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">doMock</span>(<span class="hljs-params">
+  <span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">factory</span>?: <span class="hljs-title class_">MockOptions</span> | <span class="hljs-title class_">MockFactory</span>&lt;<span class="hljs-built_in">unknown</span>&gt;
+</span>): <span class="hljs-title class_">Disposable</span>
+<span class="hljs-keyword">function</span> doMock&lt;T&gt;(
+  <span class="hljs-attr">module</span>: <span class="hljs-title class_">Promise</span>&lt;T&gt;,
+  <span class="hljs-attr">factory</span>?: <span class="hljs-title class_">MockOptions</span> | <span class="hljs-title class_">MockFactory</span>&lt;T&gt;
+): <span class="hljs-title class_">Disposable</span></code></pre></div>
+<p>The same as <a href="#vi-mock"><code>vi.mock</code></a>, but it&#39;s not hoisted to the top of the file, so you can reference variables in the global file scope. The next <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import">dynamic import</a> of the module will be mocked.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This will not mock modules that were imported before this was called. Don&#39;t forget that all static imports in ESM are always <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#hoisting">hoisted</a>, so putting this before static import will not force it to be called before the import:</p>
+<div class="code"><pre><code class="hljs lang-ts">vi.<span class="hljs-title function_">doMock</span>(<span class="hljs-string">&#x27;./increment.js&#x27;</span>) <span class="hljs-comment">// this will be called _after_ the import statement</span>
+
+<span class="hljs-keyword">import</span> { increment } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./increment.js&#x27;</span></code></pre></div>
+</div><div class="code"><div class="code-title">increment.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">increment</span>(<span class="hljs-params"><span class="hljs-built_in">number</span></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-built_in">number</span> + <span class="hljs-number">1</span>
+}</code></pre></div>
+<div class="code"><div class="code-title">increment.test.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { beforeEach, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { increment } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./increment.js&#x27;</span>
+
+<span class="hljs-comment">// the module is not mocked, because vi.doMock is not called yet</span>
+<span class="hljs-title function_">increment</span>(<span class="hljs-number">1</span>) === <span class="hljs-number">2</span>
+
+<span class="hljs-keyword">let</span> mockedIncrement = <span class="hljs-number">100</span>
+
+<span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// you can access variables inside a factory</span>
+  vi.<span class="hljs-title function_">doMock</span>(<span class="hljs-string">&#x27;./increment.js&#x27;</span>, <span class="hljs-function">() =&gt;</span> ({ <span class="hljs-attr">increment</span>: <span class="hljs-function">() =&gt;</span> ++mockedIncrement }))
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;importing the next module imports mocked one&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// original import WAS NOT MOCKED, because vi.doMock is evaluated AFTER imports</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">increment</span>(<span class="hljs-number">1</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">2</span>)
+  <span class="hljs-keyword">const</span> { <span class="hljs-attr">increment</span>: mockedIncrement } = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./increment.js&#x27;</span>)
+  <span class="hljs-comment">// new dynamic import returns mocked module</span>
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">mockedIncrement</span>(<span class="hljs-number">1</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">101</span>)
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">mockedIncrement</span>(<span class="hljs-number">1</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">102</span>)
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">mockedIncrement</span>(<span class="hljs-number">1</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">103</span>)
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>In environments that support <a href="https://github.com/tc39/proposal-explicit-resource-management">Explicit Resource Management</a>, you can use <code>using</code> on the value returned from <code>vi.doMock()</code> to automatically call <a href="#vi-dounmock"><code>vi.doUnmock()</code></a> on the mocked module when the containing block is exited. This is especially useful when mocking a dynamically imported module for a single test case.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;uses a mocked version of my-module&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">using</span> _mockDisposable = vi.<span class="hljs-title function_">doMock</span>(<span class="hljs-string">&#x27;my-module&#x27;</span>)
+
+  <span class="hljs-keyword">const</span> myModule = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;my-module&#x27;</span>) <span class="hljs-comment">// mocked</span>
+
+  <span class="hljs-comment">// my-module is restored here</span>
+})
+
+<span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;uses the normal version of my-module again&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> myModule = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;my-module&#x27;</span>) <span class="hljs-comment">// not mocked</span>
+})</code></pre></div>
+</div><h3 id="vi-mocked"><a class="anchor" href="#vi-mocked">#</a>vi.mocked</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> mocked&lt;T&gt;(
+  <span class="hljs-attr">object</span>: T,
+  <span class="hljs-attr">deep</span>?: <span class="hljs-built_in">boolean</span>
+): <span class="hljs-title class_">MaybeMockedDeep</span>&lt;T&gt;
+<span class="hljs-keyword">function</span> mocked&lt;T&gt;(
+  <span class="hljs-attr">object</span>: T,
+  <span class="hljs-attr">options</span>?: { <span class="hljs-attr">partial</span>?: <span class="hljs-built_in">boolean</span>; <span class="hljs-attr">deep</span>?: <span class="hljs-built_in">boolean</span> }
+): <span class="hljs-title class_">MaybePartiallyMockedDeep</span>&lt;T&gt;</code></pre></div>
+<p>Type helper for TypeScript. Just returns the object that was passed.</p>
+<p>When <code>partial</code> is <code>true</code> it will expect a <code>Partial&lt;T&gt;</code> as a return value. By default, this will only make TypeScript believe that the first level values are mocked. You can pass down <code>{ deep: true }</code> as a second argument to tell TypeScript that the whole object is mocked, if it actually is. You can pass down <code>{ partial: true, deep: true }</code> to make nested objects also partial recursively.</p>
+<div class="code"><div class="code-title">example.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params"><span class="hljs-attr">x</span>: <span class="hljs-built_in">number</span>, <span class="hljs-attr">y</span>: <span class="hljs-built_in">number</span></span>): <span class="hljs-built_in">number</span> {
+  <span class="hljs-keyword">return</span> x + y
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">fetchSomething</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Response</span>&gt; {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">&#x27;https://vitest.dev/&#x27;</span>)
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">getUser</span>(<span class="hljs-params"></span>): { <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">address</span>: { <span class="hljs-attr">city</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">zip</span>: <span class="hljs-built_in">string</span> } } {
+  <span class="hljs-keyword">return</span> { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;John&#x27;</span>, <span class="hljs-attr">address</span>: { <span class="hljs-attr">city</span>: <span class="hljs-string">&#x27;New York&#x27;</span>, <span class="hljs-attr">zip</span>: <span class="hljs-string">&#x27;10001&#x27;</span> } }
+}</code></pre></div>
+<div class="code"><div class="code-title">example.test.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> example <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example&#x27;</span>
+
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;./example&#x27;</span>)
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;1 + 1 equals 10&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  vi.<span class="hljs-title function_">mocked</span>(example.<span class="hljs-property">add</span>).<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-number">10</span>)
+  <span class="hljs-title function_">expect</span>(example.<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">10</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;mock return value with only partially correct typing&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  vi.<span class="hljs-title function_">mocked</span>(example.<span class="hljs-property">fetchSomething</span>).<span class="hljs-title function_">mockResolvedValue</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Response</span>(<span class="hljs-string">&#x27;hello&#x27;</span>))
+  vi.<span class="hljs-title function_">mocked</span>(example.<span class="hljs-property">fetchSomething</span>, { <span class="hljs-attr">partial</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">mockResolvedValue</span>({ <span class="hljs-attr">ok</span>: <span class="hljs-literal">false</span> })
+  <span class="hljs-comment">// vi.mocked(example.someFn).mockResolvedValue({ ok: false }) // this is a type error</span>
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;mock return value with deep partial typing&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  vi.<span class="hljs-title function_">mocked</span>(example.<span class="hljs-property">getUser</span>, { <span class="hljs-attr">partial</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">deep</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">mockReturnValue</span>({
+    <span class="hljs-attr">address</span>: { <span class="hljs-attr">city</span>: <span class="hljs-string">&#x27;Los Angeles&#x27;</span> },
+  })
+  <span class="hljs-title function_">expect</span>(example.<span class="hljs-title function_">getUser</span>().<span class="hljs-property">address</span>.<span class="hljs-property">city</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Los Angeles&#x27;</span>)
+})</code></pre></div>
+<h3 id="vi-importactual"><a class="anchor" href="#vi-importactual">#</a>vi.importActual</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> importActual&lt;T&gt;(<span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Promise</span>&lt;T&gt;</code></pre></div>
+<p>Imports module, bypassing all checks if it should be mocked. Can be useful if you want to mock module partially.</p>
+<div class="code"><pre><code class="hljs lang-ts">vi.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;./example.js&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> originalModule = <span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">importActual</span>(<span class="hljs-string">&#x27;./example.js&#x27;</span>)
+
+  <span class="hljs-keyword">return</span> { ...originalModule, <span class="hljs-attr">get</span>: vi.<span class="hljs-title function_">fn</span>() }
+})</code></pre></div>
+<h3 id="vi-importmock"><a class="anchor" href="#vi-importmock">#</a>vi.importMock</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> importMock&lt;T&gt;(<span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">MaybeMockedDeep</span>&lt;T&gt;&gt;</code></pre></div>
+<p>Imports a module with all of its properties (including nested properties) mocked. Follows the same rules that <a href="#vi-mock"><code>vi.mock</code></a> does. For the rules applied, see <a href="../guide/mocking/modules.html#automocking-algorithm">algorithm</a>.</p>
+<h3 id="vi-unmock"><a class="anchor" href="#vi-unmock">#</a>vi.unmock</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">unmock</span>(<span class="hljs-params"><span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Module</span>&gt;</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Removes module from the mocked registry. All calls to import will return the original module even if it was mocked before. This call is hoisted to the top of the file, so it will only unmock modules that were defined in <code>setupFiles</code>, for example.</p>
+<h3 id="vi-dounmock"><a class="anchor" href="#vi-dounmock">#</a>vi.doUnmock</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">doUnmock</span>(<span class="hljs-params"><span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Module</span>&gt;</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>The same as <a href="#vi-unmock"><code>vi.unmock</code></a>, but is not hoisted to the top of the file. The next import of the module will import the original module instead of the mock. This will not unmock previously imported modules.</p>
+<div class="code"><div class="code-title">increment.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">increment</span>(<span class="hljs-params"><span class="hljs-built_in">number</span></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-built_in">number</span> + <span class="hljs-number">1</span>
+}</code></pre></div>
+<div class="code"><div class="code-title">increment.test.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { increment } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./increment.js&#x27;</span>
+
+<span class="hljs-comment">// increment is already mocked, because vi.mock is hoisted</span>
+<span class="hljs-title function_">increment</span>(<span class="hljs-number">1</span>) === <span class="hljs-number">100</span>
+
+<span class="hljs-comment">// this is hoisted, and factory is called before the import on line 1</span>
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;./increment.js&#x27;</span>, <span class="hljs-function">() =&gt;</span> ({ <span class="hljs-attr">increment</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-number">100</span> }))
+
+<span class="hljs-comment">// all calls are mocked, and `increment` always returns 100</span>
+<span class="hljs-title function_">increment</span>(<span class="hljs-number">1</span>) === <span class="hljs-number">100</span>
+<span class="hljs-title function_">increment</span>(<span class="hljs-number">30</span>) === <span class="hljs-number">100</span>
+
+<span class="hljs-comment">// this is not hoisted, so other import will return unmocked module</span>
+vi.<span class="hljs-title function_">doUnmock</span>(<span class="hljs-string">&#x27;./increment.js&#x27;</span>)
+
+<span class="hljs-comment">// this STILL returns 100, because `vi.doUnmock` doesn&#x27;t reevaluate a module</span>
+<span class="hljs-title function_">increment</span>(<span class="hljs-number">1</span>) === <span class="hljs-number">100</span>
+<span class="hljs-title function_">increment</span>(<span class="hljs-number">30</span>) === <span class="hljs-number">100</span>
+
+<span class="hljs-comment">// the next import is unmocked, now `increment` is the original function that returns count + 1</span>
+<span class="hljs-keyword">const</span> { <span class="hljs-attr">increment</span>: unmockedIncrement } = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./increment.js&#x27;</span>)
+
+<span class="hljs-title function_">unmockedIncrement</span>(<span class="hljs-number">1</span>) === <span class="hljs-number">2</span>
+<span class="hljs-title function_">unmockedIncrement</span>(<span class="hljs-number">30</span>) === <span class="hljs-number">31</span></code></pre></div>
+<h3 id="vi-resetmodules"><a class="anchor" href="#vi-resetmodules">#</a>vi.resetModules</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">resetModules</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>Resets modules registry by clearing the cache of all modules. This allows modules to be reevaluated when reimported. Top-level imports cannot be re-evaluated. Might be useful to isolate modules where local state conflicts between tests.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">import</span> { data } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./data.js&#x27;</span> <span class="hljs-comment">// Will not get reevaluated beforeEach test</span>
+
+<span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> {
+  vi.<span class="hljs-title function_">resetModules</span>()
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;change state&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> mod = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./some/path.js&#x27;</span>) <span class="hljs-comment">// Will get reevaluated</span>
+  mod.<span class="hljs-title function_">changeLocalState</span>(<span class="hljs-string">&#x27;new value&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(mod.<span class="hljs-title function_">getLocalState</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;new value&#x27;</span>)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;module has old state&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> mod = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./some/path.js&#x27;</span>) <span class="hljs-comment">// Will get reevaluated</span>
+  <span class="hljs-title function_">expect</span>(mod.<span class="hljs-title function_">getLocalState</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;old value&#x27;</span>)
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Does not reset mocks registry. To clear mocks registry, use <a href="#vi-unmock"><code>vi.unmock</code></a> or <a href="#vi-dounmock"><code>vi.doUnmock</code></a>.</p>
+</div><h3 id="vi-dynamicimportsettled"><a class="anchor" href="#vi-dynamicimportsettled">#</a>vi.dynamicImportSettled</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">dynamicImportSettled</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Wait for all imports to load. Useful, if you have a synchronous call that starts importing a module that you cannot wait otherwise.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// cannot track import because Promise is not returned</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">renderComponent</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./component.js&#x27;</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">{ render }</span>) =&gt;</span> {
+    <span class="hljs-title function_">render</span>()
+  })
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;operations are resolved&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-title function_">renderComponent</span>()
+  <span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">dynamicImportSettled</span>()
+  <span class="hljs-title function_">expect</span>(<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;.component&#x27;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeNull</span>()
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If during a dynamic import another dynamic import is initiated, this method will wait until all of them are resolved.</p>
+<p>This method will also wait for the next <code>setTimeout</code> tick after the import is resolved so all synchronous operations should be completed by the time it&#39;s resolved.</p>
+</div><h2 id="mocking-functions-and-objects"><a class="anchor" href="#mocking-functions-and-objects">#</a>Mocking Functions and Objects</h2>
+<p>This section describes how to work with <a href="mock.html">method mocks</a> and replace environmental and global variables.</p>
+<h3 id="vi-fn"><a class="anchor" href="#vi-fn">#</a>vi.fn</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">fn</span>(<span class="hljs-params"><span class="hljs-attr">fn</span>?: <span class="hljs-title class_">Procedure</span> | <span class="hljs-title class_">Constructable</span></span>): <span class="hljs-title class_">Mock</span></code></pre></div>
+<p>Creates a spy on a function, but can also be initiated without one. Every time a function is invoked, it stores its call arguments, returns, and instances. Additionally, you can manipulate its behavior with <a href="mock.html">methods</a>.
+If no function is given, mock will return <code>undefined</code> when invoked.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> getApples = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-number">0</span>)
+
+<span class="hljs-title function_">getApples</span>()
+
+<span class="hljs-title function_">expect</span>(getApples).<span class="hljs-title function_">toHaveBeenCalled</span>()
+<span class="hljs-title function_">expect</span>(getApples).<span class="hljs-title function_">toHaveReturnedWith</span>(<span class="hljs-number">0</span>)
+
+getApples.<span class="hljs-title function_">mockReturnValueOnce</span>(<span class="hljs-number">5</span>)
+
+<span class="hljs-keyword">const</span> res = <span class="hljs-title function_">getApples</span>()
+<span class="hljs-title function_">expect</span>(res).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">5</span>)
+<span class="hljs-title function_">expect</span>(getApples).<span class="hljs-title function_">toHaveNthReturnedWith</span>(<span class="hljs-number">2</span>, <span class="hljs-number">5</span>)</code></pre></div>
+<p>You can also pass down a class to <code>vi.fn</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> <span class="hljs-title class_">Cart</span> = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-keyword">class</span> {
+  <span class="hljs-title function_">get</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+  }
+})
+
+<span class="hljs-keyword">const</span> cart = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Cart</span>()
+<span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Cart</span>).<span class="hljs-title function_">toHaveBeenCalled</span>()
+<span class="hljs-title function_">expect</span>(cart.<span class="hljs-title function_">get</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">0</span>)</code></pre></div>
+<p>Instances keep the prototype chain of the implementation class, so its prototype methods are available on instances, and <code>instanceof</code> checks against the implementation class pass. See <a href="../guide/mocking/classes.html">Mocking Classes</a> for details.</p>
+<h3 id="vi-mockobject-3-2-0"><a class="anchor" href="#vi-mockobject-3-2-0">#</a>vi.mockObject <Version>3.2.0</Version></h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> mockObject&lt;T&gt;(<span class="hljs-attr">value</span>: T, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">MockOptions</span>): <span class="hljs-title class_">MaybeMockedDeep</span>&lt;T&gt;</code></pre></div>
+<p>Deeply mocks properties and methods of a given object in the same way as <code>vi.mock()</code> mocks module exports. See <a href="../guide/mocking.html#automocking-algorithm">automocking</a> for the detail.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> original = {
+  <span class="hljs-attr">simple</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;value&#x27;</span>,
+  <span class="hljs-attr">nested</span>: {
+    <span class="hljs-attr">method</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;real&#x27;</span>
+  },
+  <span class="hljs-attr">prop</span>: <span class="hljs-string">&#x27;foo&#x27;</span>,
+}
+
+<span class="hljs-keyword">const</span> mocked = vi.<span class="hljs-title function_">mockObject</span>(original)
+<span class="hljs-title function_">expect</span>(mocked.<span class="hljs-title function_">simple</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">undefined</span>)
+<span class="hljs-title function_">expect</span>(mocked.<span class="hljs-property">nested</span>.<span class="hljs-title function_">method</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">undefined</span>)
+<span class="hljs-title function_">expect</span>(mocked.<span class="hljs-property">prop</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;foo&#x27;</span>)
+
+mocked.<span class="hljs-property">simple</span>.<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-string">&#x27;mocked&#x27;</span>)
+mocked.<span class="hljs-property">nested</span>.<span class="hljs-property">method</span>.<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-string">&#x27;mocked nested&#x27;</span>)
+
+<span class="hljs-title function_">expect</span>(mocked.<span class="hljs-title function_">simple</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;mocked&#x27;</span>)
+<span class="hljs-title function_">expect</span>(mocked.<span class="hljs-property">nested</span>.<span class="hljs-title function_">method</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;mocked nested&#x27;</span>)</code></pre></div>
+<p>Just like <code>vi.mock()</code>, you can pass <code>{ spy: true }</code> as a second argument to keep function implementations:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> spied = vi.<span class="hljs-title function_">mockObject</span>(original, { <span class="hljs-attr">spy</span>: <span class="hljs-literal">true</span> })
+<span class="hljs-title function_">expect</span>(spied.<span class="hljs-title function_">simple</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;value&#x27;</span>)
+<span class="hljs-title function_">expect</span>(spied.<span class="hljs-property">simple</span>).<span class="hljs-title function_">toHaveBeenCalled</span>()
+<span class="hljs-title function_">expect</span>(spied.<span class="hljs-property">simple</span>.<span class="hljs-property">mock</span>.<span class="hljs-property">results</span>[<span class="hljs-number">0</span>]).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;return&#x27;</span>, <span class="hljs-attr">value</span>: <span class="hljs-string">&#x27;value&#x27;</span> })</code></pre></div>
+<h3 id="vi-ismockfunction"><a class="anchor" href="#vi-ismockfunction">#</a>vi.isMockFunction</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">isMockFunction</span>(<span class="hljs-params"><span class="hljs-attr">fn</span>: <span class="hljs-built_in">unknown</span></span>): asserts fn is <span class="hljs-title class_">Mock</span></code></pre></div>
+<p>Checks that a given parameter is a mock function. If you are using TypeScript, it will also narrow down its type.</p>
+<h3 id="vi-clearallmocks"><a class="anchor" href="#vi-clearallmocks">#</a>vi.clearAllMocks</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">clearAllMocks</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>Calls <a href="mock.html#mockclear"><code>.mockClear()</code></a> on all spies.
+This will clear mock history without affecting mock implementations.</p>
+<h3 id="vi-resetallmocks"><a class="anchor" href="#vi-resetallmocks">#</a>vi.resetAllMocks</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">resetAllMocks</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>Calls <a href="mock.html#mockreset"><code>.mockReset()</code></a> on all spies.
+This will clear mock history and reset each mock&#39;s implementation.</p>
+<h3 id="vi-restoreallmocks"><a class="anchor" href="#vi-restoreallmocks">#</a>vi.restoreAllMocks</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">restoreAllMocks</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>This restores all original implementations on spies created with <a href="#vi-spyon"><code>vi.spyOn</code></a>.</p>
+<p>After the mock was restored, you can spy on it again.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This method also does not affect mocks created during <a href="../guide/mocking/modules.html#mocking-a-module">automocking</a>.</p>
+<p>Note that unlike <a href="mock.html#mockrestore"><code>mock.mockRestore</code></a>, <code>vi.restoreAllMocks</code> will not clear mock history or reset the mock implementation</p>
+</div><h3 id="vi-spyon"><a class="anchor" href="#vi-spyon">#</a>vi.spyOn</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> spyOn&lt;T, K <span class="hljs-keyword">extends</span> keyof T&gt;(
+  <span class="hljs-attr">object</span>: T,
+  <span class="hljs-attr">key</span>: K,
+  <span class="hljs-attr">accessor</span>?: <span class="hljs-string">&#x27;get&#x27;</span> | <span class="hljs-string">&#x27;set&#x27;</span>
+): <span class="hljs-title class_">Mock</span>&lt;T[K]&gt;</code></pre></div>
+<p>Creates a spy on a method or getter/setter of an object similar to <a href="#vi-fn"><code>vi.fn()</code></a>. It returns a <a href="mock.html">mock function</a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">let</span> apples = <span class="hljs-number">0</span>
+<span class="hljs-keyword">const</span> cart = {
+  <span class="hljs-attr">getApples</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-number">42</span>,
+}
+
+<span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">spyOn</span>(cart, <span class="hljs-string">&#x27;getApples&#x27;</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> apples)
+apples = <span class="hljs-number">1</span>
+
+<span class="hljs-title function_">expect</span>(cart.<span class="hljs-title function_">getApples</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">1</span>)
+
+<span class="hljs-title function_">expect</span>(spy).<span class="hljs-title function_">toHaveBeenCalled</span>()
+<span class="hljs-title function_">expect</span>(spy).<span class="hljs-title function_">toHaveReturnedWith</span>(<span class="hljs-number">1</span>)</code></pre></div>
+<p>If the spying method is a class definition, the mock implementations have to use the <code>function</code> or the <code>class</code> keyword:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> cart = {
+  <span class="hljs-title class_">Apples</span>: <span class="hljs-keyword">class</span> <span class="hljs-title class_">Apples</span> {
+    <span class="hljs-title function_">getApples</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-keyword">return</span> <span class="hljs-number">42</span>
+    }
+  }
+}
+
+<span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">spyOn</span>(cart, <span class="hljs-string">&#x27;Apples&#x27;</span>)
+  .<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> ({ <span class="hljs-attr">getApples</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-number">0</span> }))
+  <span class="hljs-comment">// with a function keyword</span>
+  .<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">getApples</span> = <span class="hljs-function">() =&gt;</span> <span class="hljs-number">0</span>
+  })
+  <span class="hljs-comment">// with a custom class</span>
+  .<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-keyword">class</span> <span class="hljs-title class_">MockApples</span> {
+    <span class="hljs-title function_">getApples</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+    }
+  })</code></pre></div>
+<p>If you provide an arrow function, you will get <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Not_a_constructor"><code>&lt;anonymous&gt; is not a constructor</code> error</a> when the mock is called.</p>
+<p>With a class implementation, instances keep the prototype chain of that class: prototype methods like <code>getApples</code> are available on instances, and <code>instanceof</code> checks against the implementation class pass. See <a href="../guide/mocking/classes.html">Mocking Classes</a> for details.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>In environments that support <a href="https://github.com/tc39/proposal-explicit-resource-management">Explicit Resource Management</a>, you can use <code>using</code> instead of <code>const</code> to automatically call <code>mockRestore</code> on any mocked function when the containing block is exited. This is especially useful for spied methods:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;calls console.log&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">using</span> spy = vi.<span class="hljs-title function_">spyOn</span>(<span class="hljs-variable language_">console</span>, <span class="hljs-string">&#x27;log&#x27;</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> {})
+  <span class="hljs-title function_">debug</span>(<span class="hljs-string">&#x27;message&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(spy).<span class="hljs-title function_">toHaveBeenCalled</span>()
+})
+<span class="hljs-comment">// console.log is restored here</span></code></pre></div>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You can call <a href="#vi-restoreallmocks"><code>vi.restoreAllMocks</code></a> inside <a href="hooks.html#aftereach"><code>afterEach</code></a> (or enable <a href="../config/restoremocks.html"><code>test.restoreMocks</code></a>) to restore all methods to their original implementations after every test. This will restore the original <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty">object descriptor</a>, so you won&#39;t be able to change method&#39;s implementation anymore, unless you spy again:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> cart = {
+  <span class="hljs-attr">getApples</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-number">42</span>,
+}
+
+<span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">spyOn</span>(cart, <span class="hljs-string">&#x27;getApples&#x27;</span>).<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-number">10</span>)
+
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(cart.<span class="hljs-title function_">getApples</span>()) <span class="hljs-comment">// 10</span>
+vi.<span class="hljs-title function_">restoreAllMocks</span>()
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(cart.<span class="hljs-title function_">getApples</span>()) <span class="hljs-comment">// 42</span>
+spy.<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-number">10</span>)
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(cart.<span class="hljs-title function_">getApples</span>()) <span class="hljs-comment">// still 42!</span></code></pre></div>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>It is not possible to spy on exported methods in <a href="../guide/browser/index.html">Browser Mode</a>. Instead, you can spy on every exported method by calling <code>vi.mock(&quot;./file-path.js&quot;, { spy: true })</code>. This will mock every export but keep its implementation intact, allowing you to assert if the method was called correctly.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { calculator } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./src/calculator.ts&#x27;</span>
+
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;./src/calculator.ts&#x27;</span>, { <span class="hljs-attr">spy</span>: <span class="hljs-literal">true</span> })
+
+<span class="hljs-title function_">calculator</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+
+<span class="hljs-title function_">expect</span>(calculator).<span class="hljs-title function_">toHaveBeenCalledWith</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+<span class="hljs-title function_">expect</span>(calculator).<span class="hljs-title function_">toHaveReturned</span>(<span class="hljs-number">3</span>)</code></pre></div>
+<p>And while it is possible to spy on exports in <code>jsdom</code> or other Node.js environments, this might change in the future.</p>
+</div><h3 id="vi-stubenv"><a class="anchor" href="#vi-stubenv">#</a>vi.stubEnv</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> stubEnv&lt;T <span class="hljs-keyword">extends</span> <span class="hljs-built_in">string</span>&gt;(
+  <span class="hljs-attr">name</span>: T,
+  <span class="hljs-attr">value</span>: T <span class="hljs-keyword">extends</span> <span class="hljs-string">&#x27;PROD&#x27;</span> | <span class="hljs-string">&#x27;DEV&#x27;</span> | <span class="hljs-string">&#x27;SSR&#x27;</span> ? <span class="hljs-built_in">boolean</span> : <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>
+): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>Changes the value of environmental variable on <code>process.env</code> and <code>import.meta.env</code>. You can restore its value by calling <code>vi.unstubAllEnvs</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// `process.env.NODE_ENV` and `import.meta.env.NODE_ENV`</span>
+<span class="hljs-comment">// are &quot;development&quot; before calling &quot;vi.stubEnv&quot;</span>
+
+vi.<span class="hljs-title function_">stubEnv</span>(<span class="hljs-string">&#x27;NODE_ENV&#x27;</span>, <span class="hljs-string">&#x27;production&#x27;</span>)
+
+process.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-string">&#x27;production&#x27;</span>
+<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-string">&#x27;production&#x27;</span>
+
+vi.<span class="hljs-title function_">stubEnv</span>(<span class="hljs-string">&#x27;NODE_ENV&#x27;</span>, <span class="hljs-literal">undefined</span>)
+
+process.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-literal">undefined</span>
+<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-literal">undefined</span>
+
+<span class="hljs-comment">// doesn&#x27;t change other envs</span>
+<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">MODE</span> === <span class="hljs-string">&#x27;development&#x27;</span></code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You can also change the value by simply assigning it, but you won&#39;t be able to use <code>vi.unstubAllEnvs</code> to restore previous value:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">MODE</span> = <span class="hljs-string">&#x27;test&#x27;</span></code></pre></div>
+</div><h3 id="vi-unstuballenvs"><a class="anchor" href="#vi-unstuballenvs">#</a>vi.unstubAllEnvs</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">unstubAllEnvs</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>Restores all <code>import.meta.env</code> and <code>process.env</code> values that were changed with <code>vi.stubEnv</code>. When it&#39;s called for the first time, Vitest remembers the original value and will store it, until <code>unstubAllEnvs</code> is called again.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// `process.env.NODE_ENV` and `import.meta.env.NODE_ENV`</span>
+<span class="hljs-comment">// are &quot;development&quot; before calling stubEnv</span>
+
+vi.<span class="hljs-title function_">stubEnv</span>(<span class="hljs-string">&#x27;NODE_ENV&#x27;</span>, <span class="hljs-string">&#x27;production&#x27;</span>)
+
+process.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-string">&#x27;production&#x27;</span>
+<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-string">&#x27;production&#x27;</span>
+
+vi.<span class="hljs-title function_">stubEnv</span>(<span class="hljs-string">&#x27;NODE_ENV&#x27;</span>, <span class="hljs-string">&#x27;staging&#x27;</span>)
+
+process.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-string">&#x27;staging&#x27;</span>
+<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-string">&#x27;staging&#x27;</span>
+
+vi.<span class="hljs-title function_">unstubAllEnvs</span>()
+
+<span class="hljs-comment">// restores to the value that were stored before the first &quot;stubEnv&quot; call</span>
+process.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-string">&#x27;development&#x27;</span>
+<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-string">&#x27;development&#x27;</span></code></pre></div>
+<h3 id="vi-stubglobal"><a class="anchor" href="#vi-stubglobal">#</a>vi.stubGlobal</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">stubGlobal</span>(<span class="hljs-params">
+  <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span> | <span class="hljs-built_in">number</span> | <span class="hljs-built_in">symbol</span>,
+  <span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span>
+</span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>Changes the value of global variable. You can restore its original value by calling <code>vi.unstubAllGlobals</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// `innerWidth` is &quot;0&quot; before calling stubGlobal</span>
+
+vi.<span class="hljs-title function_">stubGlobal</span>(<span class="hljs-string">&#x27;innerWidth&#x27;</span>, <span class="hljs-number">100</span>)
+
+innerWidth === <span class="hljs-number">100</span>
+globalThis.<span class="hljs-property">innerWidth</span> === <span class="hljs-number">100</span>
+<span class="hljs-comment">// if you are using jsdom or happy-dom</span>
+<span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span> === <span class="hljs-number">100</span></code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>You can also change the value by simply assigning it to <code>globalThis</code> or <code>window</code> (if you are using <code>jsdom</code> or <code>happy-dom</code> environment), but you won&#39;t be able to use <code>vi.unstubAllGlobals</code> to restore original value:</p>
+<div class="code"><pre><code class="hljs lang-ts">globalThis.<span class="hljs-property">innerWidth</span> = <span class="hljs-number">100</span>
+<span class="hljs-comment">// if you are using jsdom or happy-dom</span>
+<span class="hljs-variable language_">window</span>.<span class="hljs-property">innerWidth</span> = <span class="hljs-number">100</span></code></pre></div>
+</div><h3 id="vi-unstuballglobals"><a class="anchor" href="#vi-unstuballglobals">#</a>vi.unstubAllGlobals</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">unstubAllGlobals</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>Restores all global values on <code>globalThis</code>/<code>global</code> (and <code>window</code>/<code>top</code>/<code>self</code>/<code>parent</code>, if you are using <code>jsdom</code> or <code>happy-dom</code> environment) that were changed with <code>vi.stubGlobal</code>. When it&#39;s called for the first time, Vitest remembers the original value and will store it, until <code>unstubAllGlobals</code> is called again.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Mock</span> = vi.<span class="hljs-title function_">fn</span>()
+
+<span class="hljs-comment">// IntersectionObserver is &quot;undefined&quot; before calling &quot;stubGlobal&quot;</span>
+
+vi.<span class="hljs-title function_">stubGlobal</span>(<span class="hljs-string">&#x27;IntersectionObserver&#x27;</span>, <span class="hljs-title class_">Mock</span>)
+
+<span class="hljs-title class_">IntersectionObserver</span> === <span class="hljs-title class_">Mock</span>
+<span class="hljs-variable language_">global</span>.<span class="hljs-property">IntersectionObserver</span> === <span class="hljs-title class_">Mock</span>
+globalThis.<span class="hljs-property">IntersectionObserver</span> === <span class="hljs-title class_">Mock</span>
+<span class="hljs-comment">// if you are using jsdom or happy-dom</span>
+<span class="hljs-variable language_">window</span>.<span class="hljs-property">IntersectionObserver</span> === <span class="hljs-title class_">Mock</span>
+
+vi.<span class="hljs-title function_">unstubAllGlobals</span>()
+
+globalThis.<span class="hljs-property">IntersectionObserver</span> === <span class="hljs-literal">undefined</span>
+<span class="hljs-string">&#x27;IntersectionObserver&#x27;</span> <span class="hljs-keyword">in</span> globalThis === <span class="hljs-literal">false</span>
+<span class="hljs-comment">// throws ReferenceError, because it&#x27;s not defined</span>
+<span class="hljs-title class_">IntersectionObserver</span> === <span class="hljs-literal">undefined</span></code></pre></div>
+<h3 id="vi-when"><a class="anchor" href="#vi-when">#</a>vi.when <Version>5.0.0</Version></h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">WhenOptions</span> {
+  <span class="hljs-attr">onUnmatched</span>?: <span class="hljs-string">&#x27;throw&#x27;</span> | <span class="hljs-string">&#x27;passthrough&#x27;</span> | (<span class="hljs-function">(<span class="hljs-params">...<span class="hljs-attr">args</span>: <span class="hljs-built_in">unknown</span>[]</span>) =&gt;</span> <span class="hljs-built_in">unknown</span>)
+}
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">BehaviorOptions</span> {
+  <span class="hljs-attr">times</span>?: <span class="hljs-built_in">number</span>
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">when</span>(<span class="hljs-params"><span class="hljs-attr">spy</span>: <span class="hljs-title class_">Mock</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">WhenOptions</span></span>): <span class="hljs-title class_">When</span></code></pre></div>
+<p>Defines per-argument behaviors on a spy, replacing its implementation for the duration of the <code>when</code> chain.</p>
+<p>Call <code>.calledWith(...args)</code> on the returned object to specify which call arguments to match, then chain one or more <code>then*</code> methods to declare what the spy should return, throw, or resolve when invoked with those arguments. Arguments are matched with deep equality and support asymmetric matchers such as <code>expect.any()</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+
+vi.<span class="hljs-title function_">when</span>(spy)
+  .<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">1</span>)
+  .<span class="hljs-title function_">thenReturn</span>(<span class="hljs-string">&#x27;one&#x27;</span>)
+  .<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">2</span>)
+  .<span class="hljs-title function_">thenReturn</span>(<span class="hljs-string">&#x27;two&#x27;</span>)
+
+<span class="hljs-title function_">expect</span>(<span class="hljs-title function_">spy</span>(<span class="hljs-number">1</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;one&#x27;</span>)
+<span class="hljs-title function_">expect</span>(<span class="hljs-title function_">spy</span>(<span class="hljs-number">2</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;two&#x27;</span>)</code></pre></div>
+<p>Available <code>then*</code> methods:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>thenReturn(value, options?)</code></td>
+<td>Returns <code>value</code>.</td>
+</tr>
+<tr>
+<td><code>thenReturnOnce(value)</code></td>
+<td>Returns <code>value</code> once, then falls back.</td>
+</tr>
+<tr>
+<td><code>thenThrow(error, options?)</code></td>
+<td>Throws <code>error</code>.</td>
+</tr>
+<tr>
+<td><code>thenThrowOnce(error)</code></td>
+<td>Throws <code>error</code> once, then falls back.</td>
+</tr>
+<tr>
+<td><code>thenResolve(value, options?)</code></td>
+<td>Returns a resolved <code>Promise</code> with <code>value</code>.</td>
+</tr>
+<tr>
+<td><code>thenResolveOnce(value)</code></td>
+<td>Resolves once, then falls back.</td>
+</tr>
+<tr>
+<td><code>thenReject(error, options?)</code></td>
+<td>Returns a rejected <code>Promise</code> with <code>error</code>.</td>
+</tr>
+<tr>
+<td><code>thenRejectOnce(error)</code></td>
+<td>Rejects once, then falls back.</td>
+</tr>
+</tbody></table></div>
+<p>The optional <code>times</code> option limits how many times a behavior applies before being exhausted. Behaviors registered for the same arguments are consumed last-in-first-out: the most recently registered behavior is tried first, and once exhausted, earlier ones act as fallbacks.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> spy = vi.<span class="hljs-property">fn</span>&lt;<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">key</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-built_in">string</span>&gt;()
+
+vi.<span class="hljs-title function_">when</span>(spy)
+  .<span class="hljs-title function_">calledWith</span>(<span class="hljs-string">&#x27;theme&#x27;</span>)
+  .<span class="hljs-title function_">thenReturn</span>(<span class="hljs-string">&#x27;light&#x27;</span>) <span class="hljs-comment">// fallback, applies indefinitely</span>
+  .<span class="hljs-title function_">thenReturn</span>(<span class="hljs-string">&#x27;dark&#x27;</span>, { <span class="hljs-attr">times</span>: <span class="hljs-number">2</span> }) <span class="hljs-comment">// applied first for the next 2 calls</span>
+
+<span class="hljs-title function_">expect</span>(<span class="hljs-title function_">spy</span>(<span class="hljs-string">&#x27;theme&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;dark&#x27;</span>)
+<span class="hljs-title function_">expect</span>(<span class="hljs-title function_">spy</span>(<span class="hljs-string">&#x27;theme&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;dark&#x27;</span>)
+<span class="hljs-title function_">expect</span>(<span class="hljs-title function_">spy</span>(<span class="hljs-string">&#x27;theme&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;light&#x27;</span>) <span class="hljs-comment">// falls back</span></code></pre></div>
+<p>When called with arguments that match no registered behavior, the spy falls through to its original implementation by default. Use the <code>onUnmatched</code> option to change this:</p>
+<ul>
+<li><code>&#39;passthrough&#39;</code> (<strong>default</strong>): delegates to the spy&#39;s original implementation</li>
+<li><code>&#39;throw&#39;</code>: throws an error listing the unmatched arguments</li>
+<li>a function: called with the unmatched arguments; its return value is used</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> spy = vi.<span class="hljs-property">fn</span>&lt;<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">id</span>: <span class="hljs-built_in">number</span></span>) =&gt;</span> <span class="hljs-built_in">string</span>&gt;()
+
+vi.<span class="hljs-title function_">when</span>(spy, { <span class="hljs-attr">onUnmatched</span>: <span class="hljs-string">&#x27;throw&#x27;</span> })
+  .<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">1</span>)
+  .<span class="hljs-title function_">thenReturn</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)
+
+<span class="hljs-title function_">expect</span>(<span class="hljs-title function_">spy</span>(<span class="hljs-number">1</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)
+<span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">spy</span>(<span class="hljs-number">99</span>)).<span class="hljs-title function_">toThrow</span>() <span class="hljs-comment">// no behavior defined for 99</span></code></pre></div>
+<p>The <code>When</code> object returned by <code>vi.when</code> supports the <a href="expect.html#tohavebeenexhausted"><code>toHaveBeenExhausted</code> assertion</a>, which passes once every registered behavior has been consumed.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+<span class="hljs-keyword">const</span> w = vi.<span class="hljs-title function_">when</span>(spy)
+  .<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">1</span>)
+  .<span class="hljs-title function_">thenReturnOnce</span>(<span class="hljs-string">&#x27;once&#x27;</span>)
+  .<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">2</span>)
+  .<span class="hljs-title function_">thenReturn</span>(<span class="hljs-string">&#x27;always&#x27;</span>)
+
+<span class="hljs-title function_">expect</span>(w).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveBeenExhausted</span>()
+
+<span class="hljs-title function_">spy</span>(<span class="hljs-number">1</span>) <span class="hljs-comment">// consumes the `thenReturnOnce` behavior</span>
+<span class="hljs-title function_">spy</span>(<span class="hljs-number">2</span>) <span class="hljs-comment">// satisfies `thenReturn` (called at least once)</span>
+
+<span class="hljs-title function_">expect</span>(w).<span class="hljs-title function_">toHaveBeenExhausted</span>()</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>In environments that support <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Resource_management">Explicit Resource Management</a>, you can use <code>using</code> instead of <code>const</code> to automatically restore the spy&#39;s original implementation when the containing block exits:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-params">() =&gt; <span class="hljs-string">&#x27;original&#x27;</span></span>)
+
+{
+  <span class="hljs-keyword">using</span> w = vi.<span class="hljs-title function_">when</span>(spy)
+    .<span class="hljs-title function_">calledWith</span>(<span class="hljs-string">&#x27;hello&#x27;</span>)
+    .<span class="hljs-title function_">thenReturn</span>(<span class="hljs-string">&#x27;mocked&#x27;</span>)
+
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">spy</span>(<span class="hljs-string">&#x27;hello&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;mocked&#x27;</span>)
+} <span class="hljs-comment">// ← spy&#x27;s original implementation is restored here</span>
+
+<span class="hljs-title function_">expect</span>(<span class="hljs-title function_">spy</span>(<span class="hljs-string">&#x27;hello&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;original&#x27;</span>)</code></pre></div>
+</div><h3 id="vi-iswhenchain"><a class="anchor" href="#vi-iswhenchain">#</a>vi.isWhenChain <Version>5.0.0</Version></h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">isWhenChain</span>(<span class="hljs-params"><span class="hljs-attr">input</span>: <span class="hljs-built_in">object</span></span>): input is <span class="hljs-title class_">When</span></code></pre></div>
+<p>Returns <code>true</code> if the given value is a <code>When</code> chain created by <a href="#vi-when"><code>vi.when</code></a>. If you are using TypeScript, it will also narrow down its type.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+<span class="hljs-keyword">const</span> w = vi.<span class="hljs-title function_">when</span>(spy).<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">1</span>).<span class="hljs-title function_">thenReturn</span>(<span class="hljs-number">0</span>)
+
+<span class="hljs-title function_">expect</span>(vi.<span class="hljs-title function_">isWhenChain</span>(w)).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">true</span>)
+<span class="hljs-title function_">expect</span>(vi.<span class="hljs-title function_">isWhenChain</span>(spy)).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">false</span>)</code></pre></div>
+<h2 id="fake-timers"><a class="anchor" href="#fake-timers">#</a>Fake Timers</h2>
+<p>This sections describes how to work with <a href="../guide/mocking/timers.html">fake timers</a>.</p>
+<h3 id="vi-advancetimersbytime"><a class="anchor" href="#vi-advancetimersbytime">#</a>vi.advanceTimersByTime</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">advanceTimersByTime</span>(<span class="hljs-params"><span class="hljs-attr">ms</span>: <span class="hljs-built_in">number</span></span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>This method will invoke every initiated timer until the specified number of milliseconds is passed or the queue is empty - whatever comes first.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>
+<span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(++i), <span class="hljs-number">50</span>)
+
+vi.<span class="hljs-title function_">advanceTimersByTime</span>(<span class="hljs-number">150</span>)
+
+<span class="hljs-comment">// log: 1</span>
+<span class="hljs-comment">// log: 2</span>
+<span class="hljs-comment">// log: 3</span></code></pre></div>
+<h3 id="vi-advancetimersbytimeasync"><a class="anchor" href="#vi-advancetimersbytimeasync">#</a>vi.advanceTimersByTimeAsync</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">advanceTimersByTimeAsync</span>(<span class="hljs-params"><span class="hljs-attr">ms</span>: <span class="hljs-built_in">number</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Vitest</span>&gt;</code></pre></div>
+<p>This method will invoke every initiated timer until the specified number of milliseconds is passed or the queue is empty - whatever comes first. This will include asynchronously set timers.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>
+<span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>().<span class="hljs-title function_">then</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(++i)), <span class="hljs-number">50</span>)
+
+<span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">advanceTimersByTimeAsync</span>(<span class="hljs-number">150</span>)
+
+<span class="hljs-comment">// log: 1</span>
+<span class="hljs-comment">// log: 2</span>
+<span class="hljs-comment">// log: 3</span></code></pre></div>
+<h3 id="vi-advancetimerstonexttimer"><a class="anchor" href="#vi-advancetimerstonexttimer">#</a>vi.advanceTimersToNextTimer</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">advanceTimersToNextTimer</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>Will call next available timer. Useful to make assertions between each timer call. You can chain call it to manage timers by yourself.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>
+<span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(++i), <span class="hljs-number">50</span>)
+
+vi.<span class="hljs-title function_">advanceTimersToNextTimer</span>() <span class="hljs-comment">// log: 1</span>
+  .<span class="hljs-title function_">advanceTimersToNextTimer</span>() <span class="hljs-comment">// log: 2</span>
+  .<span class="hljs-title function_">advanceTimersToNextTimer</span>() <span class="hljs-comment">// log: 3</span></code></pre></div>
+<h3 id="vi-advancetimerstonexttimerasync"><a class="anchor" href="#vi-advancetimerstonexttimerasync">#</a>vi.advanceTimersToNextTimerAsync</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">advanceTimersToNextTimerAsync</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Vitest</span>&gt;</code></pre></div>
+<p>Will call next available timer and wait until it&#39;s resolved if it was set asynchronously. Useful to make assertions between each timer call.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>
+<span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>().<span class="hljs-title function_">then</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(++i)), <span class="hljs-number">50</span>)
+
+<span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">advanceTimersToNextTimerAsync</span>() <span class="hljs-comment">// log: 1</span>
+<span class="hljs-title function_">expect</span>(<span class="hljs-variable language_">console</span>.<span class="hljs-property">log</span>).<span class="hljs-title function_">toHaveBeenCalledWith</span>(<span class="hljs-number">1</span>)
+
+<span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">advanceTimersToNextTimerAsync</span>() <span class="hljs-comment">// log: 2</span>
+<span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">advanceTimersToNextTimerAsync</span>() <span class="hljs-comment">// log: 3</span></code></pre></div>
+<h3 id="vi-advancetimerstonextframe"><a class="anchor" href="#vi-advancetimerstonextframe">#</a>vi.advanceTimersToNextFrame</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">advanceTimersToNextFrame</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>Similar to <a href="vi.html#vi-advancetimersbytime"><code>vi.advanceTimersByTime</code></a>, but will advance timers by the milliseconds needed to execute callbacks currently scheduled with <code>requestAnimationFrame</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">let</span> frameRendered = <span class="hljs-literal">false</span>
+
+<span class="hljs-title function_">requestAnimationFrame</span>(<span class="hljs-function">() =&gt;</span> {
+  frameRendered = <span class="hljs-literal">true</span>
+})
+
+vi.<span class="hljs-title function_">advanceTimersToNextFrame</span>()
+
+<span class="hljs-title function_">expect</span>(frameRendered).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">true</span>)</code></pre></div>
+<h3 id="vi-gettimercount"><a class="anchor" href="#vi-gettimercount">#</a>vi.getTimerCount</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getTimerCount</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">number</span></code></pre></div>
+<p>Get the number of waiting timers.</p>
+<h3 id="vi-clearalltimers"><a class="anchor" href="#vi-clearalltimers">#</a>vi.clearAllTimers</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">clearAllTimers</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Removes all timers that are scheduled to run. These timers will never run in the future.</p>
+<h3 id="vi-getmockedsystemtime"><a class="anchor" href="#vi-getmockedsystemtime">#</a>vi.getMockedSystemTime</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getMockedSystemTime</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Date</span> | <span class="hljs-literal">null</span></code></pre></div>
+<p>Returns mocked current date. If date is not mocked the method will return <code>null</code>.</p>
+<h3 id="vi-getrealsystemtime"><a class="anchor" href="#vi-getrealsystemtime">#</a>vi.getRealSystemTime</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getRealSystemTime</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">number</span></code></pre></div>
+<p>When using <code>vi.useFakeTimers</code>, <code>Date.now</code> calls are mocked. If you need to get real time in milliseconds, you can call this function.</p>
+<h3 id="vi-runallticks"><a class="anchor" href="#vi-runallticks">#</a>vi.runAllTicks</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">runAllTicks</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>Calls every microtask that was queued by <code>process.nextTick</code>. This will also run all microtasks scheduled by themselves.</p>
+<h3 id="vi-runalltimers"><a class="anchor" href="#vi-runalltimers">#</a>vi.runAllTimers</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">runAllTimers</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>This method will invoke every initiated timer until the timer queue is empty. It means that every timer called during <code>runAllTimers</code> will be fired. If you have an infinite interval, it will throw after 10 000 tries (can be configured with <a href="../config/faketimers.html#faketimers-looplimit"><code>fakeTimers.loopLimit</code></a>).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>
+<span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(++i))
+<span class="hljs-keyword">const</span> interval = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(++i)
+  <span class="hljs-keyword">if</span> (i === <span class="hljs-number">3</span>) {
+    <span class="hljs-built_in">clearInterval</span>(interval)
+  }
+}, <span class="hljs-number">50</span>)
+
+vi.<span class="hljs-title function_">runAllTimers</span>()
+
+<span class="hljs-comment">// log: 1</span>
+<span class="hljs-comment">// log: 2</span>
+<span class="hljs-comment">// log: 3</span></code></pre></div>
+<h3 id="vi-runalltimersasync"><a class="anchor" href="#vi-runalltimersasync">#</a>vi.runAllTimersAsync</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">runAllTimersAsync</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Vitest</span>&gt;</code></pre></div>
+<p>This method will asynchronously invoke every initiated timer until the timer queue is empty. It means that every timer called during <code>runAllTimersAsync</code> will be fired even asynchronous timers. If you have an infinite interval,
+it will throw after 10 000 tries (can be configured with <a href="../config/faketimers.html#faketimers-looplimit"><code>fakeTimers.loopLimit</code></a>).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-built_in">setTimeout</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>(<span class="hljs-string">&#x27;result&#x27;</span>))
+}, <span class="hljs-number">100</span>)
+
+<span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">runAllTimersAsync</span>()
+
+<span class="hljs-comment">// log: result</span></code></pre></div>
+<h3 id="vi-runonlypendingtimers"><a class="anchor" href="#vi-runonlypendingtimers">#</a>vi.runOnlyPendingTimers</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">runOnlyPendingTimers</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>This method will call every timer that was initiated after <a href="#vi-usefaketimers"><code>vi.useFakeTimers</code></a> call. It will not fire any timer that was initiated during its call.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>
+<span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(++i), <span class="hljs-number">50</span>)
+
+vi.<span class="hljs-title function_">runOnlyPendingTimers</span>()
+
+<span class="hljs-comment">// log: 1</span></code></pre></div>
+<h3 id="vi-runonlypendingtimersasync"><a class="anchor" href="#vi-runonlypendingtimersasync">#</a>vi.runOnlyPendingTimersAsync</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">runOnlyPendingTimersAsync</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Vitest</span>&gt;</code></pre></div>
+<p>This method will asynchronously call every timer that was initiated after <a href="#vi-usefaketimers"><code>vi.useFakeTimers</code></a> call, even asynchronous ones. It will not fire any timer that was initiated during its call.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-number">1</span>)
+}, <span class="hljs-number">100</span>)
+<span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>().<span class="hljs-title function_">then</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-number">2</span>)
+    <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-number">3</span>)
+    }, <span class="hljs-number">40</span>)
+  })
+}, <span class="hljs-number">10</span>)
+
+<span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">runOnlyPendingTimersAsync</span>()
+
+<span class="hljs-comment">// log: 2</span>
+<span class="hljs-comment">// log: 3</span>
+<span class="hljs-comment">// log: 3</span>
+<span class="hljs-comment">// log: 1</span></code></pre></div>
+<h3 id="vi-setsystemtime"><a class="anchor" href="#vi-setsystemtime">#</a>vi.setSystemTime</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">setSystemTime</span>(<span class="hljs-params"><span class="hljs-attr">date</span>: <span class="hljs-built_in">string</span> | <span class="hljs-built_in">number</span> | <span class="hljs-title class_">Date</span></span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>If fake timers are enabled, this method simulates a user changing the system clock (will affect date related API like <code>hrtime</code>, <code>performance.now</code> or <code>new Date()</code>) - however, it will not fire any timers. If fake timers are not enabled, this method will only mock <code>Date.*</code> and <code>Temporal.Now.*</code> calls.</p>
+<p>Useful if you need to test anything that depends on the current date - for example <a href="https://github.com/moment/luxon/">Luxon</a> calls inside your code.</p>
+<p>Accepts the same string and number arguments as the <code>Date</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> date = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-number">1998</span>, <span class="hljs-number">11</span>, <span class="hljs-number">19</span>)
+
+vi.<span class="hljs-title function_">useFakeTimers</span>()
+vi.<span class="hljs-title function_">setSystemTime</span>(date)
+
+<span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Date</span>.<span class="hljs-title function_">now</span>()).<span class="hljs-title function_">toBe</span>(date.<span class="hljs-title function_">valueOf</span>())
+
+vi.<span class="hljs-title function_">useRealTimers</span>()</code></pre></div>
+<h3 id="vi-usefaketimers"><a class="anchor" href="#vi-usefaketimers">#</a>vi.useFakeTimers</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">useFakeTimers</span>(<span class="hljs-params"><span class="hljs-attr">config</span>?: <span class="hljs-title class_">FakeTimersConfig</span></span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>To enable mocking timers, you need to call this method. It will wrap all further calls to timers (such as <code>setTimeout</code>, <code>setInterval</code>, <code>clearTimeout</code>, <code>clearInterval</code>, <code>setImmediate</code>, <code>clearImmediate</code>, and <code>Date</code>) until <a href="#vi-userealtimers"><code>vi.useRealTimers()</code></a> is called.</p>
+<p>Mocking <code>nextTick</code> is not supported when running Vitest inside <code>node:child_process</code> by using <code>--pool=forks</code>. NodeJS uses <code>process.nextTick</code> internally in <code>node:child_process</code> and hangs when it is mocked. Mocking <code>nextTick</code> is supported when running Vitest with <code>--pool=threads</code>.</p>
+<p>The implementation is based internally on <a href="https://github.com/sinonjs/fake-timers"><code>@sinonjs/fake-timers</code></a>.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p><code>vi.useFakeTimers()</code> does not automatically mock <code>process.nextTick</code> and <code>queueMicrotask</code>.
+But you can enable it by specifying the option in <code>toFake</code> argument: <code>vi.useFakeTimers({ toFake: [&#39;nextTick&#39;, &#39;queueMicrotask&#39;] })</code>.</p>
+</div><p>You can use <code>toFake</code> to specify which timers to mock, or <code>toNotFake</code> to specify which timers to keep native. Note that <code>toFake</code> and <code>toNotFake</code> cannot be specified together.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// only mock setTimeout and clearTimeout</span>
+vi.<span class="hljs-title function_">useFakeTimers</span>({ <span class="hljs-attr">toFake</span>: [<span class="hljs-string">&#x27;setTimeout&#x27;</span>, <span class="hljs-string">&#x27;clearTimeout&#x27;</span>] })
+
+<span class="hljs-comment">// mock all timers except setInterval</span>
+vi.<span class="hljs-title function_">useFakeTimers</span>({ <span class="hljs-attr">toNotFake</span>: [<span class="hljs-string">&#x27;setInterval&#x27;</span>] })</code></pre></div>
+<h3 id="vi-settimertickmode"><a class="anchor" href="#vi-settimertickmode">#</a>vi.setTimerTickMode <Version>4.1.0</Version></h3>
+<ul>
+<li><strong>Type:</strong> <code>(mode: &#39;manual&#39; | &#39;nextTimerAsync&#39;) =&gt; Vitest | (mode: &#39;interval&#39;, interval?: number) =&gt; Vitest</code></li>
+</ul>
+<p>Controls how fake timers are advanced.</p>
+<ul>
+<li><code>manual</code>: The default behavior. Timers will only advance when you call one of <code>vi.advanceTimers...()</code> methods.</li>
+<li><code>nextTimerAsync</code>: Timers will be advanced automatically to the next available timer after each macrotask.</li>
+<li><code>interval</code>: Timers are advanced automatically by a specified interval.</li>
+</ul>
+<p>When <code>mode</code> is <code>&#39;interval&#39;</code>, you can also provide an <code>interval</code> in milliseconds.</p>
+<p><strong>Example:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+vi.<span class="hljs-title function_">useFakeTimers</span>()
+
+<span class="hljs-comment">// Manual mode (default)</span>
+vi.<span class="hljs-title function_">setTimerTickMode</span>(<span class="hljs-string">&#x27;manual&#x27;</span>)
+
+<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>
+<span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(++i), <span class="hljs-number">50</span>)
+
+vi.<span class="hljs-title function_">advanceTimersByTime</span>(<span class="hljs-number">150</span>) <span class="hljs-comment">// logs 1, 2, 3</span>
+
+<span class="hljs-comment">// nextTimerAsync mode</span>
+vi.<span class="hljs-title function_">setTimerTickMode</span>(<span class="hljs-string">&#x27;nextTimerAsync&#x27;</span>)
+
+<span class="hljs-comment">// Timers will advance automatically after each macrotask</span>
+<span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> <span class="hljs-built_in">setTimeout</span>(resolve, <span class="hljs-number">150</span>)) <span class="hljs-comment">// logs 4, 5, 6</span>
+
+<span class="hljs-comment">// interval mode (default when &#x27;fakeTimers.shouldAdvanceTime&#x27; is `true`)</span>
+vi.<span class="hljs-title function_">setTimerTickMode</span>(<span class="hljs-string">&#x27;interval&#x27;</span>, <span class="hljs-number">50</span>)
+
+<span class="hljs-comment">// Timers will advance automatically every 50ms</span>
+<span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> <span class="hljs-built_in">setTimeout</span>(resolve, <span class="hljs-number">150</span>)) <span class="hljs-comment">// logs 7, 8, 9</span></code></pre></div>
+<h3 id="vi-isfaketimers"><a class="anchor" href="#vi-isfaketimers">#</a>vi.isFakeTimers</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">isFakeTimers</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">boolean</span></code></pre></div>
+<p>Returns <code>true</code> if fake timers are enabled.</p>
+<h3 id="vi-userealtimers"><a class="anchor" href="#vi-userealtimers">#</a>vi.useRealTimers</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">useRealTimers</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Vitest</span></code></pre></div>
+<p>When timers have run out, you may call this method to return mocked timers to its original implementations. All timers that were scheduled before will be discarded.</p>
+<h2 id="miscellaneous"><a class="anchor" href="#miscellaneous">#</a>Miscellaneous</h2>
+<p>A set of useful helper functions that Vitest provides.</p>
+<h3 id="vi-waitfor"><a class="anchor" href="#vi-waitfor">#</a>vi.waitFor</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> waitFor&lt;T&gt;(
+  <span class="hljs-attr">callback</span>: <span class="hljs-title class_">WaitForCallback</span>&lt;T&gt;,
+  <span class="hljs-attr">options</span>?: <span class="hljs-built_in">number</span> | <span class="hljs-title class_">WaitForOptions</span>
+): <span class="hljs-title class_">Promise</span>&lt;T&gt;</code></pre></div>
+<p>Wait for the callback to execute successfully. If the callback throws an error or returns a rejected promise it will continue to wait until it succeeds or times out.</p>
+<p>If options is set to a number, the effect is equivalent to setting <code>{ timeout: options }</code>.</p>
+<p>This is very useful when you need to wait for some asynchronous action to complete, for example, when you start a server and need to wait for it to start.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { createServer } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./server.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;Server started successfully&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> server = <span class="hljs-title function_">createServer</span>()
+
+  <span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">waitFor</span>(
+    <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-keyword">if</span> (!server.<span class="hljs-property">isReady</span>) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;Server not started&#x27;</span>)
+      }
+
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Server started&#x27;</span>)
+    },
+    {
+      <span class="hljs-attr">timeout</span>: <span class="hljs-number">500</span>, <span class="hljs-comment">// default is 1000</span>
+      <span class="hljs-attr">interval</span>: <span class="hljs-number">20</span>, <span class="hljs-comment">// default is 50</span>
+    }
+  )
+  <span class="hljs-title function_">expect</span>(server.<span class="hljs-property">isReady</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">true</span>)
+})</code></pre></div>
+<p>It also works for asynchronous callbacks</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// @vitest-environment jsdom</span>
+
+<span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { getDOMElementAsync, populateDOMAsync } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./dom.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;Element exists in a DOM&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-comment">// start populating DOM</span>
+  <span class="hljs-title function_">populateDOMAsync</span>()
+
+  <span class="hljs-keyword">const</span> element = <span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">waitFor</span>(<span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-comment">// try to get the element until it exists</span>
+    <span class="hljs-keyword">const</span> element = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getDOMElementAsync</span>() <span class="hljs-keyword">as</span> <span class="hljs-title class_">HTMLElement</span> | <span class="hljs-literal">null</span>
+    <span class="hljs-title function_">expect</span>(element).<span class="hljs-title function_">toBeTruthy</span>()
+    <span class="hljs-title function_">expect</span>(element.<span class="hljs-property">dataset</span>.<span class="hljs-property">initialized</span>).<span class="hljs-title function_">toBeTruthy</span>()
+    <span class="hljs-keyword">return</span> element
+  }, {
+    <span class="hljs-attr">timeout</span>: <span class="hljs-number">500</span>, <span class="hljs-comment">// default is 1000</span>
+    <span class="hljs-attr">interval</span>: <span class="hljs-number">20</span>, <span class="hljs-comment">// default is 50</span>
+  })
+  <span class="hljs-title function_">expect</span>(element).<span class="hljs-title function_">toBeInstanceOf</span>(<span class="hljs-title class_">HTMLElement</span>)
+})</code></pre></div>
+<p>If <code>vi.useFakeTimers</code> is used, <code>vi.waitFor</code> automatically calls <code>vi.advanceTimersByTime(interval)</code> in every check callback.</p>
+<h3 id="vi-waituntil"><a class="anchor" href="#vi-waituntil">#</a>vi.waitUntil</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> waitUntil&lt;T&gt;(
+  <span class="hljs-attr">callback</span>: <span class="hljs-title class_">WaitUntilCallback</span>&lt;T&gt;,
+  <span class="hljs-attr">options</span>?: <span class="hljs-built_in">number</span> | <span class="hljs-title class_">WaitUntilOptions</span>
+): <span class="hljs-title class_">Promise</span>&lt;T&gt;</code></pre></div>
+<p>This is similar to <code>vi.waitFor</code>, but if the callback throws any errors, execution is immediately interrupted and an error message is received. If the callback returns falsy value, the next check will continue until truthy value is returned. This is useful when you need to wait for something to exist before taking the next step.</p>
+<p>Look at the example below. We can use <code>vi.waitUntil</code> to wait for the element to appear on the page, and then we can do something with the element.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;Element render correctly&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> element = <span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">waitUntil</span>(
+    <span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;.element&#x27;</span>),
+    {
+      <span class="hljs-attr">timeout</span>: <span class="hljs-number">500</span>, <span class="hljs-comment">// default is 1000</span>
+      <span class="hljs-attr">interval</span>: <span class="hljs-number">20</span>, <span class="hljs-comment">// default is 50</span>
+    }
+  )
+
+  <span class="hljs-comment">// do something with the element</span>
+  <span class="hljs-title function_">expect</span>(element.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&#x27;.element-child&#x27;</span>)).<span class="hljs-title function_">toBeTruthy</span>()
+})</code></pre></div>
+<h3 id="vi-hoisted"><a class="anchor" href="#vi-hoisted">#</a>vi.hoisted</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> hoisted&lt;T&gt;(<span class="hljs-attr">factory</span>: <span class="hljs-function">() =&gt;</span> T): T</code></pre></div>
+<p>All static <code>import</code> statements in ES modules are hoisted to the top of the file, so any code that is defined before the imports will actually be executed after imports are evaluated.</p>
+<p>However, it can be useful to invoke some side effects like mocking dates before importing a module.</p>
+<p>To bypass this limitation, you can rewrite static imports into dynamic ones like this:</p>
+<div class="code"><pre><code class="hljs lang-diff">callFunctionWithSideEffect()
+<span class="hljs-deletion">- import { value } from &#x27;./some/module.js&#x27;</span>
+<span class="hljs-addition">+ const { value } = await import(&#x27;./some/module.js&#x27;)</span></code></pre></div>
+<p>When running <code>vitest</code>, you can do this automatically by using <code>vi.hoisted</code> method. Under the hood, Vitest will convert static imports into dynamic ones with preserved live-bindings.</p>
+<div class="code"><pre><code class="hljs lang-diff"><span class="hljs-deletion">- callFunctionWithSideEffect()</span>
+import { value } from &#x27;./some/module.js&#x27;
+<span class="hljs-addition">+ vi.hoisted(() =&gt; callFunctionWithSideEffect())</span></code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : IMPORTS ARE NOT AVAILABLE</div><p>Running code before the imports means that you cannot access imported variables because they are not defined yet:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { value } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./some/module.js&#x27;</span>
+
+vi.<span class="hljs-title function_">hoisted</span>(<span class="hljs-function">() =&gt;</span> { value }) <span class="hljs-comment">// throws an error</span></code></pre></div>
+<p>This code will produce an error:</p>
+<div class="code"><pre><code class="hljs lang-txt">Cannot access '__vi_import_0__' before initialization</code></pre></div>
+<p>If you need to access a variable from another module inside of <code>vi.hoisted</code>, use dynamic import:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">hoisted</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> { value } = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./some/module.js&#x27;</span>)
+})</code></pre></div>
+<p>However, it is discourage to import anything inside of <code>vi.hoisted</code> because imports are already hoisted - if you need to execute something before the tests are running, just execute it in the imported module itself.</p>
+</div><p>This method returns the value that was returned from the factory. You can use that value in your <code>vi.mock</code> factories if you need easy access to locally defined variables:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { originalMethod } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./path/to/module.js&#x27;</span>
+
+<span class="hljs-keyword">const</span> { mockedMethod } = vi.<span class="hljs-title function_">hoisted</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">return</span> { <span class="hljs-attr">mockedMethod</span>: vi.<span class="hljs-title function_">fn</span>() }
+})
+
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;./path/to/module.js&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">return</span> { <span class="hljs-attr">originalMethod</span>: mockedMethod }
+})
+
+mockedMethod.<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-number">100</span>)
+<span class="hljs-title function_">expect</span>(<span class="hljs-title function_">originalMethod</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">100</span>)</code></pre></div>
+<p>Note that this method can also be called asynchronously even if your environment doesn&#39;t support top-level await:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> json = <span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">hoisted</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">&#x27;https://jsonplaceholder.typicode.com/posts&#x27;</span>)
+  <span class="hljs-keyword">return</span> response.<span class="hljs-title function_">json</span>()
+})</code></pre></div>
+<h3 id="vi-setconfig"><a class="anchor" href="#vi-setconfig">#</a>vi.setConfig</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">setConfig</span>(<span class="hljs-params"><span class="hljs-attr">config</span>: <span class="hljs-title class_">RuntimeOptions</span></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Updates config for the current test file. This method supports only config options that will affect the current test file:</p>
+<div class="code"><pre><code class="hljs lang-ts">vi.<span class="hljs-title function_">setConfig</span>({
+  <span class="hljs-attr">allowOnly</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">testTimeout</span>: <span class="hljs-number">10_000</span>,
+  <span class="hljs-attr">hookTimeout</span>: <span class="hljs-number">10_000</span>,
+  <span class="hljs-attr">clearMocks</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">restoreMocks</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">fakeTimers</span>: {
+    <span class="hljs-attr">now</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-number">2021</span>, <span class="hljs-number">11</span>, <span class="hljs-number">19</span>),
+    <span class="hljs-comment">// supports the whole object</span>
+  },
+  <span class="hljs-attr">maxConcurrency</span>: <span class="hljs-number">10</span>,
+  <span class="hljs-attr">sequence</span>: {
+    <span class="hljs-attr">hooks</span>: <span class="hljs-string">&#x27;stack&#x27;</span>
+    <span class="hljs-comment">// supports only &quot;sequence.hooks&quot;</span>
+  }
+})</code></pre></div>
+<h3 id="vi-resetconfig"><a class="anchor" href="#vi-resetconfig">#</a>vi.resetConfig</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">resetConfig</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>If <a href="#vi-setconfig"><code>vi.setConfig</code></a> was called before, this will reset config to the original state.</p>
+<h3 id="vi-definehelper"><a class="anchor" href="#vi-definehelper">#</a>vi.defineHelper <Version>4.1.0</Version></h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> defineHelper&lt;F <span class="hljs-title function_">extends</span> (...<span class="hljs-attr">args</span>: <span class="hljs-built_in">any</span>) =&gt; <span class="hljs-built_in">any</span>&gt;(<span class="hljs-attr">fn</span>: F): F</code></pre></div>
+<p>Wraps a function to create an assertion helper. When an assertion fails inside the helper, the error stack trace will point to where the helper was called, not inside the helper itself. This makes it easier to identify the source of test failures when using custom assertion functions.</p>
+<p>Works with both synchronous and asynchronous functions, and supports <code>expect.soft()</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> assertPair = vi.<span class="hljs-title function_">defineHelper</span>(<span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(a).<span class="hljs-title function_">toEqual</span>(b)
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;example&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">assertPair</span>(<span class="hljs-string">&#x27;left&#x27;</span>, <span class="hljs-string">&#x27;right&#x27;</span>) <span class="hljs-comment">// Error points to this line</span>
+})</code></pre></div>
+<p>Example output:</p>
+<!-- eslint-skip -->
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-variable constant_">FAIL</span>  example.<span class="hljs-property">test</span>.<span class="hljs-property">ts</span> &gt; example
+<span class="hljs-title class_">AssertionError</span>: expected <span class="hljs-string">&#x27;left&#x27;</span> to deeply equal <span class="hljs-string">&#x27;right&#x27;</span>
+
+<span class="hljs-title class_">Expected</span>: <span class="hljs-string">&quot;right&quot;</span>
+<span class="hljs-title class_">Received</span>: <span class="hljs-string">&quot;left&quot;</span>
+
+ ❯ example.<span class="hljs-property">test</span>.<span class="hljs-property">ts</span>:<span class="hljs-number">8</span>:<span class="hljs-number">3</span>
+      <span class="hljs-number">7</span>| <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;example&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-number">8</span>|   <span class="hljs-title function_">assertPair</span>(<span class="hljs-string">&#x27;left&#x27;</span>, <span class="hljs-string">&#x27;right&#x27;</span>)
+       |   ^
+      <span class="hljs-number">9</span>| })</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#mock-modules">Mock Modules</a><a class="toc-3" href="#vi-mock">vi.mock</a><a class="toc-3" href="#vi-domock">vi.doMock</a><a class="toc-3" href="#vi-mocked">vi.mocked</a><a class="toc-3" href="#vi-importactual">vi.importActual</a><a class="toc-3" href="#vi-importmock">vi.importMock</a><a class="toc-3" href="#vi-unmock">vi.unmock</a><a class="toc-3" href="#vi-dounmock">vi.doUnmock</a><a class="toc-3" href="#vi-resetmodules">vi.resetModules</a><a class="toc-3" href="#vi-dynamicimportsettled">vi.dynamicImportSettled</a><a class="toc-2" href="#mocking-functions-and-objects">Mocking Functions and Objects</a><a class="toc-3" href="#vi-fn">vi.fn</a><a class="toc-3" href="#vi-mockobject-3-2-0">vi.mockObject 3.2.0</a><a class="toc-3" href="#vi-ismockfunction">vi.isMockFunction</a><a class="toc-3" href="#vi-clearallmocks">vi.clearAllMocks</a><a class="toc-3" href="#vi-resetallmocks">vi.resetAllMocks</a><a class="toc-3" href="#vi-restoreallmocks">vi.restoreAllMocks</a><a class="toc-3" href="#vi-spyon">vi.spyOn</a><a class="toc-3" href="#vi-stubenv">vi.stubEnv</a><a class="toc-3" href="#vi-unstuballenvs">vi.unstubAllEnvs</a><a class="toc-3" href="#vi-stubglobal">vi.stubGlobal</a><a class="toc-3" href="#vi-unstuballglobals">vi.unstubAllGlobals</a><a class="toc-3" href="#vi-when">vi.when 5.0.0</a><a class="toc-3" href="#vi-iswhenchain">vi.isWhenChain 5.0.0</a><a class="toc-2" href="#fake-timers">Fake Timers</a><a class="toc-3" href="#vi-advancetimersbytime">vi.advanceTimersByTime</a><a class="toc-3" href="#vi-advancetimersbytimeasync">vi.advanceTimersByTimeAsync</a><a class="toc-3" href="#vi-advancetimerstonexttimer">vi.advanceTimersToNextTimer</a><a class="toc-3" href="#vi-advancetimerstonexttimerasync">vi.advanceTimersToNextTimerAsync</a><a class="toc-3" href="#vi-advancetimerstonextframe">vi.advanceTimersToNextFrame</a><a class="toc-3" href="#vi-gettimercount">vi.getTimerCount</a><a class="toc-3" href="#vi-clearalltimers">vi.clearAllTimers</a><a class="toc-3" href="#vi-getmockedsystemtime">vi.getMockedSystemTime</a><a class="toc-3" href="#vi-getrealsystemtime">vi.getRealSystemTime</a><a class="toc-3" href="#vi-runallticks">vi.runAllTicks</a><a class="toc-3" href="#vi-runalltimers">vi.runAllTimers</a><a class="toc-3" href="#vi-runalltimersasync">vi.runAllTimersAsync</a><a class="toc-3" href="#vi-runonlypendingtimers">vi.runOnlyPendingTimers</a><a class="toc-3" href="#vi-runonlypendingtimersasync">vi.runOnlyPendingTimersAsync</a><a class="toc-3" href="#vi-setsystemtime">vi.setSystemTime</a><a class="toc-3" href="#vi-usefaketimers">vi.useFakeTimers</a><a class="toc-3" href="#vi-settimertickmode">vi.setTimerTickMode 4.1.0</a><a class="toc-3" href="#vi-isfaketimers">vi.isFakeTimers</a><a class="toc-3" href="#vi-userealtimers">vi.useRealTimers</a><a class="toc-2" href="#miscellaneous">Miscellaneous</a><a class="toc-3" href="#vi-waitfor">vi.waitFor</a><a class="toc-3" href="#vi-waituntil">vi.waitUntil</a><a class="toc-3" href="#vi-hoisted">vi.hoisted</a><a class="toc-3" href="#vi-setconfig">vi.setConfig</a><a class="toc-3" href="#vi-resetconfig">vi.resetConfig</a><a class="toc-3" href="#vi-definehelper">vi.defineHelper 4.1.0</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

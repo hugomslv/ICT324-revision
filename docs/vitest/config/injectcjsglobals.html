@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>injectCjsGlobals | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/injectcjsglobals  <a class="ext small" href="https://vitest.dev/config/injectcjsglobals">version en ligne</a></div>
+<h1 id="injectcjsglobals"><a class="anchor" href="#injectcjsglobals">#</a>injectCjsGlobals</h1>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+<li><strong>CLI:</strong> <code>--no-inject-cjs-globals</code>, <code>--injectCjsGlobals=false</code></li>
+</ul>
+<p>Inject CommonJS module variables (<code>module</code>, <code>exports</code>, <code>require</code>, <code>__filename</code>, <code>__dirname</code>) into every module processed by Vitest.</p>
+<p>By default, every file that Vitest transforms has access to these variables even if it is written using ESM syntax. This doesn&#39;t reflect how modules work in the wild: browsers do not support CommonJS variables, and Node.js doesn&#39;t expose them in ES modules.</p>
+<p>To make the module environment stricter and closer to the target runtime, you can disable this behaviour:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">injectCjsGlobals</span>: <span class="hljs-literal">false</span>,
+  },
+})</code></pre></div>
+<p>When this option is disabled, only modules that are detected to be CommonJS receive these variables. CommonJS modules always keep them because they are part of the module scope, without them the module cannot be evaluated at all. The module type is detected the same way Node.js does it:</p>
+<ol>
+<li>The file extension: <code>.cjs</code> and <code>.cts</code> files are always CommonJS, <code>.mjs</code> and <code>.mts</code> files are always ES modules.</li>
+<li>The <code>type</code> field in the nearest <code>package.json</code>: <code>&quot;module&quot;</code> means ES module, <code>&quot;commonjs&quot;</code> means CommonJS. Same as in Node.js, the lookup stops at the first <code>package.json</code> and never crosses a <code>node_modules</code> boundary, so dependencies don&#39;t inherit the <code>type</code> of your project.</li>
+<li>The presence of ESM syntax in the file: if the file has no static <code>import</code>/<code>export</code> declarations and doesn&#39;t reference <code>import.meta</code>, it is treated as CommonJS. Syntax inside comments and strings doesn&#39;t affect the detection. Dynamic imports are allowed in CommonJS modules, so they don&#39;t count as ESM syntax; type-only TypeScript imports are erased during the transform, so they don&#39;t count either.</li>
+</ol>
+<p>The syntax detection is always enabled: Vitest doesn&#39;t respect Node.js CLI flags that modify the module type resolution, like <code>--no-experimental-detect-module</code>, <code>--input-type</code> (it only applies to the string input in Node.js), or the <code>--experimental-default-type</code> flag removed in Node.js 23.</p>
+<p>Referencing a CommonJS variable in an ES module throws a <code>ReferenceError</code>, just like outside of Vitest:</p>
+<div class="code"><pre><code class="hljs lang-txt">ReferenceError: __dirname is not defined
+
+&quot;__dirname&quot; is a CommonJS variable that is not available in ES modules, and &quot;injectCjsGlobals&quot; is disabled. If this module is meant to be an ES module, use &quot;import.meta.dirname&quot; instead of &quot;__dirname&quot;. If it is meant to be a CommonJS module, use the &quot;.cjs&quot; file extension, set &quot;type&quot;: &quot;commonjs&quot; in the nearest package.json, or externalize it with &quot;server.deps.external&quot;.</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This option doesn&#39;t affect externalized modules which are always executed by the native runtime. Node.js provides CommonJS variables to externalized CommonJS modules on its own.</p>
+<p>Note that inlined CommonJS modules are not processed by Vite plugins even when this option is enabled: <code>require</code> calls always leave the module runner, so features like mocking do not apply to them. See <a href="../guide/common-errors.html#commonjs-source-code-is-not-fully-supported">CommonJS source code is not fully supported</a> for configuration alternatives.</p>
+</div>
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-extra-boolean-cast (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-extra-boolean-cast <span class="badge badge-suggestion">suggestion</span> <span class="badge badge-reco">✅ dans js/recommended</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-extra-boolean-cast">version en ligne</a></div>
+<h1>no-extra-boolean-cast</h1><p>In contexts such as an <code>if</code> statement&#39;s test where the result of the expression will already be coerced to a Boolean, casting to a Boolean via double negation (<code>!!</code>) or a <code>Boolean</code> call is unnecessary. For example, these <code>if</code> statements are equivalent:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">if</span> (!!foo) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (<span class="hljs-title class_">Boolean</span>(foo)) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (foo) {
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule disallows unnecessary boolean casts.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-extra-boolean-cast: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> foo = !!!bar;
+
+<span class="hljs-keyword">const</span> foo1 = !!bar ? baz : bat;
+
+<span class="hljs-keyword">const</span> foo2 = <span class="hljs-title class_">Boolean</span>(!!bar);
+
+<span class="hljs-keyword">const</span> foo3 = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Boolean</span>(!!bar);
+
+<span class="hljs-keyword">if</span> (!!foo) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> (<span class="hljs-title class_">Boolean</span>(foo)) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">while</span> (!!foo) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">do</span> {
+    <span class="hljs-comment">// ...</span>
+} <span class="hljs-keyword">while</span> (<span class="hljs-title class_">Boolean</span>(foo));
+
+<span class="hljs-keyword">for</span> (; !!foo; ) {
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-extra-boolean-cast: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> foo = !!bar;
+<span class="hljs-keyword">const</span> foo1 = <span class="hljs-title class_">Boolean</span>(bar);
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">qux</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> !!bar;
+}
+
+foo = bar ? !!baz : !!bat;</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has an object option:</p>
+<ul>
+<li><code>&quot;enforceForInnerExpressions&quot;</code> when set to <code>true</code>, in addition to checking default contexts, checks whether extra boolean casts are present in expressions whose result is used in a boolean context. See examples below. Default is <code>false</code>, meaning that this rule by default does not warn about extra booleans cast inside inner expressions.</li>
+</ul>
+<p><strong>Deprecated:</strong> The object property <code>enforceForLogicalOperands</code> is deprecated (<a href="https://github.com/eslint/eslint/pull/18222">eslint#18222</a>). Please use <code>enforceForInnerExpressions</code> instead.</p>
+<h3 id="enforceforinnerexpressions"><a class="anchor" href="#enforceforinnerexpressions">#</a>enforceForInnerExpressions</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with <code>&quot;enforceForInnerExpressions&quot;</code> option set to <code>true</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-extra-boolean-cast: [&quot;error&quot;, {&quot;enforceForInnerExpressions&quot;: true}]*/</span>
+
+<span class="hljs-keyword">if</span> (!!foo || bar) {
+    <span class="hljs-comment">//...</span>
+}
+
+<span class="hljs-keyword">while</span> (!!foo &amp;&amp; bar) {
+    <span class="hljs-comment">//...</span>
+}
+
+<span class="hljs-keyword">if</span> ((!!foo || bar) &amp;&amp; !!baz) {
+    <span class="hljs-comment">//...</span>
+}
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Boolean</span>(!!bar || baz);
+
+foo &amp;&amp; <span class="hljs-title class_">Boolean</span>(bar) ? baz : bat;
+
+<span class="hljs-keyword">const</span> ternaryBranches = <span class="hljs-title class_">Boolean</span>(bar ? !!baz : bat);
+
+<span class="hljs-keyword">const</span> nullishCoalescingOperator = <span class="hljs-title class_">Boolean</span>(bar ?? <span class="hljs-title class_">Boolean</span>(baz));
+
+<span class="hljs-keyword">const</span> commaOperator = <span class="hljs-title class_">Boolean</span>((bar, baz, !!bat));
+
+<span class="hljs-comment">// another comma operator example</span>
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(i), <span class="hljs-title class_">Boolean</span>(i &lt; <span class="hljs-number">10</span>); i++) {
+    <span class="hljs-comment">// ...</span>
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with <code>&quot;enforceForInnerExpressions&quot;</code> option set to <code>true</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-extra-boolean-cast: [&quot;error&quot;, {&quot;enforceForInnerExpressions&quot;: true}]*/</span>
+
+<span class="hljs-comment">// Note that `||` and `&amp;&amp;` alone aren&#x27;t a boolean context for either operand</span>
+<span class="hljs-comment">// since the resultant value need not be a boolean without casting.</span>
+<span class="hljs-keyword">const</span> foo = !!bar || baz;
+
+<span class="hljs-keyword">if</span> (foo || bar) {
+    <span class="hljs-comment">//...</span>
+}
+
+<span class="hljs-keyword">while</span> (foo &amp;&amp; bar) {
+    <span class="hljs-comment">//...</span>
+}
+
+<span class="hljs-keyword">if</span> ((foo || bar) &amp;&amp; baz) {
+    <span class="hljs-comment">//...</span>
+}
+
+<span class="hljs-keyword">const</span> foo1 = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Boolean</span>(bar || baz);
+
+foo &amp;&amp; bar ? baz : bat;
+
+<span class="hljs-keyword">const</span> ternaryBranches = <span class="hljs-title class_">Boolean</span>(bar ? baz : bat);
+
+<span class="hljs-keyword">const</span> nullishCoalescingOperator = <span class="hljs-title class_">Boolean</span>(bar ?? baz);
+
+<span class="hljs-keyword">const</span> commaOperator = <span class="hljs-title class_">Boolean</span>((bar, baz, bat));
+
+<span class="hljs-comment">// another comma operator example</span>
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(i), i &lt; <span class="hljs-number">10</span>; i++) {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-comment">// comma operator in non-final position</span>
+<span class="hljs-title class_">Boolean</span>((<span class="hljs-title class_">Boolean</span>(bar), baz, bat));</code></pre></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#enforceforinnerexpressions">enforceForInnerExpressions</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Advanced API (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/advanced/index  <a class="ext small" href="https://vitest.dev/guide/advanced/">version en ligne</a></div>
+<h1 id="getting-started"><a class="anchor" href="#getting-started">#</a>Getting Started <Badge type="danger">advanced</Badge></h1>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This guide lists advanced APIs to run tests via a Node.js script. If you just want to <a href="../index.html">run tests</a>, you probably don&#39;t need this. It is primarily used by library authors.</p>
+</div><p>You can import any method from the <code>vitest/node</code> entry-point.</p>
+<h2 id="startvitest"><a class="anchor" href="#startvitest">#</a>startVitest</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">startVitest</span>(<span class="hljs-params">
+  <span class="hljs-attr">cliFilters</span>: <span class="hljs-built_in">string</span>[] = [],
+  <span class="hljs-attr">options</span>: <span class="hljs-title class_">CliOptions</span> = {},
+  <span class="hljs-attr">viteOverrides</span>?: <span class="hljs-title class_">ViteUserConfig</span>,
+  <span class="hljs-attr">vitestOptions</span>?: <span class="hljs-title class_">VitestOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Vitest</span>&gt;</code></pre></div>
+<p>You can start running Vitest tests using its Node API:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { startVitest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> vitest = <span class="hljs-keyword">await</span> <span class="hljs-title function_">startVitest</span>()
+
+<span class="hljs-keyword">await</span> vitest.<span class="hljs-title function_">close</span>()</code></pre></div>
+<p><code>startVitest</code> function returns <a href="../../api/advanced/vitest.html"><code>Vitest</code></a> instance if tests can be started.</p>
+<p>If watch mode is not enabled, Vitest will call <code>close</code> method automatically.</p>
+<p>If watch mode is enabled and the terminal supports TTY, Vitest will register console shortcuts.</p>
+<p>You can pass down a list of filters as a second argument. Vitest will run only tests that contain at least one of the passed-down strings in their file path.</p>
+<p>Additionally, you can use the third argument to pass in CLI arguments, which will override any test config options. Alternatively, you can pass in the complete Vite config as the fourth argument, which will take precedence over any other user-defined options.</p>
+<p>After running the tests, you can get the results from the <a href="../../api/advanced/test-module.html"><code>state.getTestModules</code></a> API:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">TestModule</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> vitest = <span class="hljs-keyword">await</span> <span class="hljs-title function_">startVitest</span>()
+
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(vitest.<span class="hljs-property">state</span>.<span class="hljs-title function_">getTestModules</span>()) <span class="hljs-comment">// [TestModule]</span></code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>The <a href="tests.html#startvitest">&quot;Running Tests&quot;</a> guide has a usage example.</p>
+</div><h2 id="createvitest"><a class="anchor" href="#createvitest">#</a>createVitest</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createVitest</span>(<span class="hljs-params">
+  <span class="hljs-attr">options</span>: <span class="hljs-title class_">CliOptions</span>,
+  <span class="hljs-attr">viteOverrides</span>: <span class="hljs-title class_">ViteUserConfig</span> = {},
+  <span class="hljs-attr">vitestOptions</span>: <span class="hljs-title class_">VitestOptions</span> = {},
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Vitest</span>&gt;</code></pre></div>
+<p>You can create Vitest instance by using <code>createVitest</code> function. It returns the same <a href="../../api/advanced/vitest.html"><code>Vitest</code></a> instance as <code>startVitest</code>, but it doesn&#39;t start tests and doesn&#39;t validate installed packages.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { createVitest } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> vitest = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createVitest</span>(<span class="hljs-string">&#x27;test&#x27;</span>, {
+  <span class="hljs-attr">watch</span>: <span class="hljs-literal">false</span>,
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>The <a href="tests.html#createvitest">&quot;Running Tests&quot;</a> guide has a usage example.</p>
+</div><h2 id="resolveconfig"><a class="anchor" href="#resolveconfig">#</a>resolveConfig</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">resolveConfig</span>(<span class="hljs-params">
+  <span class="hljs-attr">options</span>: <span class="hljs-title class_">UserConfig</span> = {},
+  <span class="hljs-attr">viteOverrides</span>: <span class="hljs-title class_">ViteUserConfig</span> = {},
+  <span class="hljs-attr">harness</span>?: <span class="hljs-title class_">PluginHarness</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">ResolvedViteConfig</span>&gt;</code></pre></div>
+<p>This method resolves the config with custom parameters, without creating a Vite server. If no parameters are given, the <code>root</code> will be <code>process.cwd()</code>.</p>
+<p>It returns the resolved Vite config. The fully resolved Vitest config, including every project, lives on its <code>test</code> property.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { resolveConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> viteConfig = <span class="hljs-keyword">await</span> <span class="hljs-title function_">resolveConfig</span>({
+  <span class="hljs-attr">mode</span>: <span class="hljs-string">&#x27;custom&#x27;</span>,
+  <span class="hljs-attr">configFile</span>: <span class="hljs-literal">false</span>,
+  <span class="hljs-attr">resolve</span>: {
+    <span class="hljs-attr">conditions</span>: [<span class="hljs-string">&#x27;custom&#x27;</span>]
+  },
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">setupFiles</span>: [<span class="hljs-string">&#x27;/my-setup-file.js&#x27;</span>],
+    <span class="hljs-attr">pool</span>: <span class="hljs-string">&#x27;threads&#x27;</span>,
+  },
+})
+
+viteConfig.<span class="hljs-property">test</span>.<span class="hljs-property">pool</span> <span class="hljs-comment">// &#x27;threads&#x27;</span></code></pre></div>
+<div class="box box-info"><div class="box-title">ℹ️ Info</div><p>This is the same method Vitest uses internally to resolve the config before creating the server. If you pass the options down to <code>startVitest</code> or <code>createVitest</code>, Vitest resolves them again.</p>
+<p>You can pass a shared <a href="#pluginharness"><code>PluginHarness</code></a> as the third argument to reuse a logger and package installer across calls.</p>
+</div><h2 id="project-configuration-resolution"><a class="anchor" href="#project-configuration-resolution">#</a>Project Configuration Resolution</h2>
+<p>This section describes how the arguments of <code>startVitest</code>, <code>createVitest</code>, and <code>resolveConfig</code> interact with <a href="../projects.html">test projects</a>. Without projects, all resolved options apply to the single root project and none of this matters.</p>
+<p>The root configuration is resolved from three inputs, in ascending priority:</p>
+<ol>
+<li>the root config file</li>
+<li><code>viteOverrides</code>, merged on top of the config file values</li>
+<li>CLI options (<code>options</code>), applied on top of everything else</li>
+</ol>
+<p>Every project then resolves its own Vite config independently:</p>
+<ul>
+<li>A project referenced as a config file or a directory resolves only its own file. It does not inherit any options from the root configuration.</li>
+<li>An inline project inherits the root configuration by default (see <a href="../projects.html#configuration"><code>extends</code></a>): the root config file is re-executed for the project, <code>viteOverrides</code> are merged on top of it, and the project&#39;s own options are merged last. Inheritance works even when there is no root config file, because <code>viteOverrides</code> are part of the effective root configuration.</li>
+<li>With <code>extends: false</code>, an inline project resolves only its own options. With <code>extends: &#39;./path&#39;</code>, the referenced file is re-executed instead of the root config file, and <code>viteOverrides</code> are not merged.</li>
+</ul>
+<p>A few options are excluded from inheritance:</p>
+<ul>
+<li><code>plugins</code> from <code>viteOverrides</code> are never inherited. A config file is re-executed for every project, which creates fresh plugin instances, but plugin instances passed in <code>viteOverrides</code> belong to the root Vite server and cannot be shared with project servers.</li>
+<li><code>test.browser</code> and <code>test.tagsFilter</code> from <code>viteOverrides</code> are never inherited: <code>browser</code> describes the instances of a single project, and <code>tagsFilter</code> applies to the whole run.</li>
+<li><code>name</code> and <code>projects</code> are never inherited; the root <code>globalSetup</code> is not inherited because it already runs once per test run.</li>
+<li>The project&#39;s own <code>tags</code> always replace the <code>tags</code> array merged from an extended config instead of being concatenated with it, so the same tag names can be redefined.</li>
+</ul>
+<p>Independently of <code>extends</code>, two groups of options reach every project:</p>
+<ul>
+<li>A fixed subset of CLI options that configure how tests run (<code>--testTimeout</code>, <code>--retry</code>, <code>--pool</code>, and similar) is applied to every project at the highest priority, mirroring the root resolution.</li>
+<li>Run-level options only make sense for the test run as a whole: every project receives the root&#39;s resolved <code>coverage</code>, <code>attachmentsDir</code>, and <code>mergeReportsLabel</code> values.</li>
+</ul>
+<h2 id="parsecli"><a class="anchor" href="#parsecli">#</a>parseCLI</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">parseCLI</span>(<span class="hljs-params"><span class="hljs-attr">argv</span>: <span class="hljs-built_in">string</span> | <span class="hljs-built_in">string</span>[], <span class="hljs-attr">config</span>: <span class="hljs-title class_">CliParseOptions</span> = {}</span>): {
+  <span class="hljs-attr">filter</span>: <span class="hljs-built_in">string</span>[]
+  <span class="hljs-attr">options</span>: <span class="hljs-title class_">CliOptions</span>
+}</code></pre></div>
+<p>You can use this method to parse CLI arguments. It accepts a string (where arguments are split by a single space) or a strings array of CLI arguments in the same format that Vitest CLI uses. It returns a filter and <code>options</code> that you can later pass down to <code>createVitest</code> or <code>startVitest</code> methods.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { parseCLI } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> result = <span class="hljs-title function_">parseCLI</span>(<span class="hljs-string">&#x27;vitest ./files.ts --coverage --browser=chrome&#x27;</span>)
+
+result.<span class="hljs-property">options</span>
+<span class="hljs-comment">// {</span>
+<span class="hljs-comment">//   coverage: { enabled: true },</span>
+<span class="hljs-comment">//   browser: { name: &#x27;chrome&#x27;, enabled: true }</span>
+<span class="hljs-comment">// }</span>
+
+result.<span class="hljs-property">filter</span>
+<span class="hljs-comment">// [&#x27;./files.ts&#x27;]</span></code></pre></div>
+<h2 id="createcli"><a class="anchor" href="#createcli">#</a>createCLI</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createCLI</span>(<span class="hljs-params"><span class="hljs-attr">options</span>?: <span class="hljs-title class_">CliParseOptions</span></span>): <span class="hljs-variable constant_">CAC</span></code></pre></div>
+<p>Creates the Vitest command-line interface: a <a href="https://github.com/cacjs/cac"><code>cac</code></a> instance with all of Vitest&#39;s commands and options registered. <a href="#parsecli"><code>parseCLI</code></a> is built on top of it; use <code>createCLI</code> directly if you need the raw parser.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { createCLI } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> cli = <span class="hljs-title function_">createCLI</span>()</code></pre></div>
+<h2 id="pluginharness"><a class="anchor" href="#pluginharness">#</a>PluginHarness</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">class</span> <span class="hljs-title class_">PluginHarness</span> {
+  <span class="hljs-attr">vitest</span>?: <span class="hljs-title class_">Vitest</span>
+  <span class="hljs-attr">version</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">logger</span>: <span class="hljs-title class_">Logger</span>
+  <span class="hljs-attr">packageInstaller</span>: <span class="hljs-title class_">VitestPackageInstaller</span>
+  <span class="hljs-title function_">getVitest</span>(): <span class="hljs-title class_">Vitest</span>
+}</code></pre></div>
+<p>A container that Vitest passes to its internal plugins while the config is being resolved, before a <a href="../../api/advanced/vitest.html"><code>Vitest</code></a> instance exists. It holds the <a href="#logger"><code>Logger</code></a>, the package installer and the resolved version, and exposes the <code>Vitest</code> instance via <code>getVitest()</code> once it has been created (calling it earlier throws).</p>
+<p>This is an advanced, plugin-facing API. You rarely construct one directly, but you can pass a shared instance to <a href="#resolveconfig"><code>resolveConfig</code></a> to reuse a logger and package installer.</p>
+<h2 id="logger"><a class="anchor" href="#logger">#</a>Logger</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Logger</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params">
+    <span class="hljs-attr">outputStream</span>?: <span class="hljs-title class_">Writable</span>,
+    <span class="hljs-attr">errorStream</span>?: <span class="hljs-title class_">Writable</span>,
+  </span>)
+}</code></pre></div>
+<p>Vitest&#39;s terminal logger, exposed as <a href="../../api/advanced/vitest.html"><code>vitest.logger</code></a>. It handles formatted output, the error summary, the run banner and screen clearing. Construct one with custom <code>stdout</code>/<code>stderr</code> streams to capture or redirect Vitest&#39;s output when running it programmatically.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">Logger</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">const</span> logger = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Logger</span>(process.<span class="hljs-property">stdout</span>, process.<span class="hljs-property">stderr</span>)</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#startvitest">startVitest</a><a class="toc-2" href="#createvitest">createVitest</a><a class="toc-2" href="#resolveconfig">resolveConfig</a><a class="toc-2" href="#project-configuration-resolution">Project Configuration Resolution</a><a class="toc-2" href="#parsecli">parseCLI</a><a class="toc-2" href="#createcli">createCLI</a><a class="toc-2" href="#pluginharness">PluginHarness</a><a class="toc-2" href="#logger">Logger</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

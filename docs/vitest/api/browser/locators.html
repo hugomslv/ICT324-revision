@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Locators | Browser Mode (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/browser/locators  <a class="ext small" href="https://vitest.dev/api/browser/locators">version en ligne</a></div>
+<h1 id="locators"><a class="anchor" href="#locators">#</a>Locators</h1>
+<p>A locator is a representation of an element or a number of elements. Every locator is defined by a string called a selector. Vitest abstracts this selector by providing convenient methods that generate them behind the scenes.</p>
+<p>The locator API uses a fork of <a href="https://playwright.dev/docs/api/class-locator">Playwright&#39;s locators</a> called <a href="https://npmx.dev/ivya">Ivya</a>. However, Vitest provides this API to every <a href="../../config/browser/provider.html">provider</a>, not just playwright.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This page covers API usage. To better understand locators and their usage, read <a href="https://playwright.dev/docs/locators">Playwright&#39;s &quot;Locators&quot; documentation</a>.</p>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce : Difference from <code>testing-library</code></div><p>Vitest&#39;s <code>page.getBy*</code> methods return a locator object, not a DOM element. This makes locator queries composable and allows Vitest to retry interactions and assertions when needed.</p>
+<p>Compared to testing-library queries:</p>
+<ul>
+<li>Use locator chaining (<code>.getBy*</code>, <code>.filter</code>, <code>.nth</code>) instead of <code>within(...)</code>.</li>
+<li>Keep locators around and interact with them later (<code>await locator.click()</code>), instead of resolving elements up front.</li>
+<li>Single-element escape hatches like <code>.element()</code> and <code>.query()</code> are strict and throw if multiple elements match.</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">const</span> deleteButton = page
+  .<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;row&#x27;</span>)
+  .<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">hasText</span>: <span class="hljs-string">&#x27;Vitest&#x27;</span> })
+  .<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/delete/i</span> })
+
+<span class="hljs-keyword">await</span> deleteButton.<span class="hljs-title function_">click</span>()
+<span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(deleteButton).<span class="hljs-title function_">toBeEnabled</span>()</code></pre></div>
+</div><h2 id="getbyrole"><a class="anchor" href="#getbyrole">#</a>getByRole</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getByRole</span>(<span class="hljs-params">
+  <span class="hljs-attr">role</span>: <span class="hljs-title class_">ARIARole</span> | <span class="hljs-built_in">string</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">LocatorByRoleOptions</span>,
+</span>): <span class="hljs-title class_">Locator</span></code></pre></div>
+<p>Creates a way to locate an element by its <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles">ARIA role</a>, <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes">ARIA attributes</a> and <a href="https://developer.mozilla.org/en-US/docs/Glossary/Accessible_name">accessible name</a>.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If you only query for a single element with <code>getByText(&#39;The name&#39;)</code> it&#39;s oftentimes better to use <code>getByRole(expectedRole, { name: &#39;The name&#39; })</code>. The accessible name query does not replace other queries such as <code>*ByAltText</code> or <code>*ByTitle</code>. While the accessible name can be equal to these attributes, it does not replace the functionality of these attributes.</p>
+</div><p>Consider the following DOM structure.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>Sign up<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>
+  Login
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>
+  Password
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;password&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">br</span>/&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>Submit<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></code></pre></div>
+<p>You can locate each element by its implicit role:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(
+  page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;heading&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Sign up&#x27;</span> })
+).<span class="hljs-title function_">toBeVisible</span>()
+
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Login&#x27;</span> }).<span class="hljs-title function_">fill</span>(<span class="hljs-string">&#x27;admin&#x27;</span>)
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Password&#x27;</span> }).<span class="hljs-title function_">fill</span>(<span class="hljs-string">&#x27;admin&#x27;</span>)
+
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/submit/i</span> }).<span class="hljs-title function_">click</span>()</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Roles are matched by string equality, without inheriting from the ARIA role hierarchy. As a result, querying a superclass role like <code>checkbox</code> will not include elements with a subclass role like <code>switch</code>.</p>
+<p>By default, many semantic elements in HTML have a role; for example, <code>&lt;input type=&quot;radio&quot;&gt;</code> has the &quot;radio&quot; role. Non-semantic elements in HTML do not have a role; <code>&lt;div&gt;</code> and <code>&lt;span&gt;</code> without added semantics return <code>null</code>. The <code>role</code> attribute can provide semantics.</p>
+<p>Providing roles via <code>role</code> or <code>aria-*</code> attributes to built-in elements that already have an implicit role is <strong>highly discouraged</strong> by ARIA guidelines.</p>
+</div><p><strong>Options</strong></p>
+<ul>
+<li><p><code>exact: boolean</code></p>
+<p>Whether the <code>name</code> is matched exactly: case-sensitive and whole-string. Disabled by default. This option is ignored if <code>name</code> is a regular expression. Note that exact match still trims whitespace.</p>
+<div class="code"><pre><code class="hljs lang-tsx">&lt;button&gt;<span class="hljs-title class_">Hello</span> <span class="hljs-title class_">World</span>&lt;/button&gt;
+
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;hello world&#x27;</span> }) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;hello world&#x27;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }) <span class="hljs-comment">// ❌</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Hello World&#x27;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }) <span class="hljs-comment">// ✅</span></code></pre></div>
+</li>
+<li><p><code>checked: boolean</code></p>
+<p>Should checked elements (set by <code>aria-checked</code> or <code>&lt;input type=&quot;checkbox&quot;/&gt;</code>) be included or not. By default, the filter is not applied.</p>
+<p>See <a href="https://www.w3.org/TR/wai-aria-1.2/#aria-checked"><code>aria-checked</code></a> for more information</p>
+<div class="code"><pre><code class="hljs lang-tsx">&lt;&gt;
+  <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">aria-checked</span>=<span class="hljs-string">&quot;true&quot;</span> /&gt;</span></span>
+  <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">checked</span> /&gt;</span></span>
+&lt;/&gt;
+
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;checkbox&#x27;</span>, { <span class="hljs-attr">checked</span>: <span class="hljs-literal">true</span> }) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;checkbox&#x27;</span>, { <span class="hljs-attr">checked</span>: <span class="hljs-literal">false</span> }) <span class="hljs-comment">// ❌</span></code></pre></div>
+</li>
+<li><p><code>disabled: boolean</code></p>
+<p>Should disabled elements be included or not. By default, the filter is not applied. Note that unlike other attributes, <code>disable</code> state is inherited.</p>
+<p>See <a href="https://www.w3.org/TR/wai-aria-1.2/#aria-disabled"><code>aria-disabled</code></a> for more information</p>
+<div class="code"><pre><code class="hljs lang-tsx">&lt;input <span class="hljs-keyword">type</span>=<span class="hljs-string">&quot;text&quot;</span> disabled /&gt;
+
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>, { <span class="hljs-attr">disabled</span>: <span class="hljs-literal">true</span> }) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>, { <span class="hljs-attr">disabled</span>: <span class="hljs-literal">false</span> }) <span class="hljs-comment">// ❌</span></code></pre></div>
+</li>
+<li><p><code>expanded: boolean</code></p>
+<p>Should expanded elements be included or not. By default, the filter is not applied.</p>
+<p>See <a href="https://www.w3.org/TR/wai-aria-1.2/#aria-expanded"><code>aria-expanded</code></a> for more information</p>
+<div class="code"><pre><code class="hljs lang-tsx">&lt;a aria-expanded=<span class="hljs-string">&quot;true&quot;</span> href=<span class="hljs-string">&quot;example.com&quot;</span>&gt;<span class="hljs-title class_">Link</span>&lt;/a&gt;
+
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;link&#x27;</span>, { <span class="hljs-attr">expanded</span>: <span class="hljs-literal">true</span> }) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;link&#x27;</span>, { <span class="hljs-attr">expanded</span>: <span class="hljs-literal">false</span> }) <span class="hljs-comment">// ❌</span></code></pre></div>
+</li>
+<li><p><code>includeHidden: boolean</code></p>
+<p>Should elements that are <a href="https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion">normally excluded</a> from the accessibility tree be queried. By default, only non-hidden elements are matched by role selector.</p>
+<p>Note that roles <code>none</code> and <code>presentation</code> are always included.</p>
+<div class="code"><pre><code class="hljs lang-tsx">&lt;button style=<span class="hljs-string">&quot;display: none&quot;</span> /&gt;
+
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>) <span class="hljs-comment">// ❌</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">includeHidden</span>: <span class="hljs-literal">false</span> }) <span class="hljs-comment">// ❌</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">includeHidden</span>: <span class="hljs-literal">true</span> }) <span class="hljs-comment">// ✅</span></code></pre></div>
+</li>
+<li><p><code>level: number</code></p>
+<p>A number attribute that is usually present for <code>heading</code>, <code>listitem</code>, <code>row</code>, <code>treeitem</code> roles with default values for <code>&lt;h1&gt;-&lt;h6&gt;</code> elements. By default, the filter is not applied.</p>
+<p>See <a href="https://www.w3.org/TR/wai-aria-1.2/#aria-level"><code>aria-level</code></a> for more information</p>
+<div class="code"><pre><code class="hljs lang-tsx">&lt;&gt;
+  <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Heading Level One<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>
+  <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;heading&quot;</span> <span class="hljs-attr">aria-level</span>=<span class="hljs-string">&quot;1&quot;</span>&gt;</span>Second Heading Level One<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+&lt;/&gt;
+
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;heading&#x27;</span>, { <span class="hljs-attr">level</span>: <span class="hljs-number">1</span> }) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;heading&#x27;</span>, { <span class="hljs-attr">level</span>: <span class="hljs-number">2</span> }) <span class="hljs-comment">// ❌</span></code></pre></div>
+</li>
+<li><p><code>name: string | RegExp</code></p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Glossary/Accessible_name">An accessible name</a>. By default, matching is case-insensitive and searches for a substring. Use <code>exact</code> option to control this behavior.</p>
+<div class="code"><pre><code class="hljs lang-tsx">&lt;button&gt;<span class="hljs-title class_">Click</span> <span class="hljs-title class_">Me</span>!&lt;/button&gt;
+
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Click Me!&#x27;</span> }) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;click me!&#x27;</span> }) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Click Me?&#x27;</span> }) <span class="hljs-comment">// ❌</span></code></pre></div>
+</li>
+<li><p><code>pressed: boolean</code></p>
+<p>Should pressed elements be included or not. By default, the filter is not applied.</p>
+<p>See <a href="https://www.w3.org/TR/wai-aria-1.2/#aria-pressed"><code>aria-pressed</code></a> for more information</p>
+<div class="code"><pre><code class="hljs lang-tsx">&lt;button aria-pressed=<span class="hljs-string">&quot;true&quot;</span>&gt;👍&lt;/button&gt;
+
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">pressed</span>: <span class="hljs-literal">true</span> }) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">pressed</span>: <span class="hljs-literal">false</span> }) <span class="hljs-comment">// ❌</span></code></pre></div>
+</li>
+<li><p><code>selected: boolean</code></p>
+<p>Should selected elements be included or not. By default, the filter is not applied.</p>
+<p>See <a href="https://www.w3.org/TR/wai-aria-1.2/#aria-selected"><code>aria-selected</code></a> for more information</p>
+<div class="code"><pre><code class="hljs lang-tsx">&lt;button role=<span class="hljs-string">&quot;tab&quot;</span> aria-selected=<span class="hljs-string">&quot;true&quot;</span>&gt;<span class="hljs-title class_">Vue</span>&lt;/button&gt;
+
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">selected</span>: <span class="hljs-literal">true</span> }) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">selected</span>: <span class="hljs-literal">false</span> }) <span class="hljs-comment">// ❌</span></code></pre></div>
+</li>
+</ul>
+<p><strong>See also</strong></p>
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles">List of ARIA roles at MDN</a></li>
+<li><a href="https://www.w3.org/TR/wai-aria-1.2/#role_definitions">List of ARIA roles at w3.org</a></li>
+<li><a href="https://testing-library.com/docs/queries/byrole/">testing-library&#39;s <code>ByRole</code></a></li>
+</ul>
+<h2 id="getbyalttext"><a class="anchor" href="#getbyalttext">#</a>getByAltText</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getByAltText</span>(<span class="hljs-params">
+  <span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">LocatorOptions</span>,
+</span>): <span class="hljs-title class_">Locator</span></code></pre></div>
+<p>Creates a locator capable of finding an element with an <code>alt</code> attribute that matches the text. Unlike testing-library&#39;s implementation, Vitest will match any element that has a matching <code>alt</code> attribute.</p>
+<div class="code"><pre><code class="hljs lang-tsx">&lt;img alt=<span class="hljs-string">&quot;Incredibles 2 Poster&quot;</span> src=<span class="hljs-string">&quot;/incredibles-2.png&quot;</span> /&gt;
+
+page.<span class="hljs-title function_">getByAltText</span>(<span class="hljs-regexp">/incredibles.*? poster/i</span>) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByAltText</span>(<span class="hljs-string">&#x27;non existing alt text&#x27;</span>) <span class="hljs-comment">// ❌</span></code></pre></div>
+<p><strong>Options</strong></p>
+<ul>
+<li><p><code>exact: boolean</code></p>
+<p>Whether the <code>text</code> is matched exactly: case-sensitive and whole-string. Disabled by default. This option is ignored if <code>text</code> is a regular expression. Note that exact match still trims whitespace.</p>
+</li>
+</ul>
+<p><strong>See also</strong></p>
+<ul>
+<li><a href="https://testing-library.com/docs/queries/byalttext/">testing-library&#39;s <code>ByAltText</code></a></li>
+</ul>
+<h2 id="getbylabeltext"><a class="anchor" href="#getbylabeltext">#</a>getByLabelText</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getByLabelText</span>(<span class="hljs-params">
+  <span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">LocatorOptions</span>,
+</span>): <span class="hljs-title class_">Locator</span></code></pre></div>
+<p>Creates a locator capable of finding an element that has an associated label.</p>
+<p>The <code>page.getByLabelText(&#39;Username&#39;)</code> locator will find every input in the example below:</p>
+<div class="code"><pre><code class="hljs lang-html">// for/htmlFor relationship between label and form element id
+<span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">&quot;username-input&quot;</span>&gt;</span>Username<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;username-input&quot;</span> /&gt;</span>
+
+// The aria-labelledby attribute with form elements
+<span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;username-label&quot;</span>&gt;</span>Username<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">aria-labelledby</span>=<span class="hljs-string">&quot;username-label&quot;</span> /&gt;</span>
+
+// Wrapper labels
+<span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>Username <span class="hljs-tag">&lt;<span class="hljs-name">input</span> /&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+
+// Wrapper labels where the label text is in another child element
+<span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span>Username<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">input</span> /&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+
+// aria-label attributes
+// Take care because this is not a label that users can see on the page,
+// so the purpose of your input must be obvious to visual users.
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Username&quot;</span> /&gt;</span></code></pre></div>
+<p><strong>Options</strong></p>
+<ul>
+<li><p><code>exact: boolean</code></p>
+<p>Whether the <code>text</code> is matched exactly: case-sensitive and whole-string. Disabled by default. This option is ignored if <code>text</code> is a regular expression. Note that exact match still trims whitespace.</p>
+</li>
+</ul>
+<p><strong>See also</strong></p>
+<ul>
+<li><a href="https://testing-library.com/docs/queries/bylabeltext/">testing-library&#39;s <code>ByLabelText</code></a></li>
+</ul>
+<h2 id="getbyplaceholder"><a class="anchor" href="#getbyplaceholder">#</a>getByPlaceholder</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-params">
+  <span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">LocatorOptions</span>,
+</span>): <span class="hljs-title class_">Locator</span></code></pre></div>
+<p>Creates a locator capable of finding an element that has the specified <code>placeholder</code> attribute. Vitest will match any element that has a matching <code>placeholder</code> attribute, not just <code>input</code>.</p>
+<div class="code"><pre><code class="hljs lang-tsx">&lt;input placeholder=<span class="hljs-string">&quot;Username&quot;</span> /&gt;
+
+page.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&#x27;Username&#x27;</span>) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&#x27;not found&#x27;</span>) <span class="hljs-comment">// ❌</span></code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>It is generally better to rely on a label using <a href="#getbylabeltext"><code>getByLabelText</code></a> than a placeholder.</p>
+</div><p><strong>Options</strong></p>
+<ul>
+<li><p><code>exact: boolean</code></p>
+<p>Whether the <code>text</code> is matched exactly: case-sensitive and whole-string. Disabled by default. This option is ignored if <code>text</code> is a regular expression. Note that exact match still trims whitespace.</p>
+</li>
+</ul>
+<p><strong>See also</strong></p>
+<ul>
+<li><a href="https://testing-library.com/docs/queries/byplaceholdertext/">testing-library&#39;s <code>ByPlaceholderText</code></a></li>
+</ul>
+<h2 id="getbytext"><a class="anchor" href="#getbytext">#</a>getByText</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getByText</span>(<span class="hljs-params">
+  <span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">LocatorOptions</span>,
+</span>): <span class="hljs-title class_">Locator</span></code></pre></div>
+<p>Creates a locator capable of finding an element that contains the specified text. The text will be matched against TextNode&#39;s <a href="https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeValue"><code>nodeValue</code></a> or input&#39;s value if the type is <code>button</code> or <code>reset</code>. Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into one, turns line breaks into spaces and ignores leading and trailing whitespace.</p>
+<div class="code"><pre><code class="hljs lang-tsx">&lt;a href=<span class="hljs-string">&quot;/about&quot;</span>&gt;<span class="hljs-title class_">About</span> ℹ️&lt;/a&gt;
+
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/about/i</span>) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;about&#x27;</span>, { <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }) <span class="hljs-comment">// ❌</span></code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This locator is useful for locating non-interactive elements. If you need to locate an interactive element, like a button or an input, prefer <a href="#getbyrole"><code>getByRole</code></a>.</p>
+</div><p><strong>Options</strong></p>
+<ul>
+<li><p><code>exact: boolean</code></p>
+<p>Whether the <code>text</code> is matched exactly: case-sensitive and whole-string. Disabled by default. This option is ignored if <code>text</code> is a regular expression. Note that exact match still trims whitespace.</p>
+</li>
+</ul>
+<p><strong>See also</strong></p>
+<ul>
+<li><a href="https://testing-library.com/docs/queries/bytext/">testing-library&#39;s <code>ByText</code></a></li>
+</ul>
+<h2 id="getbytitle"><a class="anchor" href="#getbytitle">#</a>getByTitle</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getByTitle</span>(<span class="hljs-params">
+  <span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">LocatorOptions</span>,
+</span>): <span class="hljs-title class_">Locator</span></code></pre></div>
+<p>Creates a locator capable of finding an element that has the specified <code>title</code> attribute. Unlike testing-library&#39;s <code>getByTitle</code>, Vitest cannot find <code>title</code> elements within an SVG.</p>
+<div class="code"><pre><code class="hljs lang-tsx">&lt;span title=<span class="hljs-string">&quot;Delete&quot;</span> id=<span class="hljs-string">&quot;2&quot;</span>&gt;&lt;/span&gt;
+
+page.<span class="hljs-title function_">getByTitle</span>(<span class="hljs-string">&#x27;Delete&#x27;</span>) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByTitle</span>(<span class="hljs-string">&#x27;Create&#x27;</span>) <span class="hljs-comment">// ❌</span></code></pre></div>
+<p><strong>Options</strong></p>
+<ul>
+<li><p><code>exact: boolean</code></p>
+<p>Whether the <code>text</code> is matched exactly: case-sensitive and whole-string. Disabled by default. This option is ignored if <code>text</code> is a regular expression. Note that exact match still trims whitespace.</p>
+</li>
+</ul>
+<p><strong>See also</strong></p>
+<ul>
+<li><a href="https://testing-library.com/docs/queries/bytitle/">testing-library&#39;s <code>ByTitle</code></a></li>
+</ul>
+<h2 id="getbytestid"><a class="anchor" href="#getbytestid">#</a>getByTestId</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getByTestId</span>(<span class="hljs-params"><span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">RegExp</span></span>): <span class="hljs-title class_">Locator</span></code></pre></div>
+<p>Creates a locator capable of finding an element that matches the specified test id attribute. You can configure the attribute name with <a href="../../config/browser/locators.html#testidattribute"><code>browser.locators.testIdAttribute</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-tsx">&lt;div data-testid=<span class="hljs-string">&quot;custom-element&quot;</span> /&gt;
+
+page.<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;custom-element&#x27;</span>) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByTestId</span>(<span class="hljs-string">&#x27;non-existing-element&#x27;</span>) <span class="hljs-comment">// ❌</span></code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>It is recommended to use this only after the other locators don&#39;t work for your use case. Using <code>data-testid</code> attributes does not resemble how your software is used and should be avoided if possible.</p>
+</div><p><strong>Options</strong></p>
+<ul>
+<li><p><code>exact: boolean</code></p>
+<p>Whether the <code>text</code> is matched exactly: case-sensitive and whole-string. Disabled by default. This option is ignored if <code>text</code> is a regular expression. Note that exact match still trims whitespace.</p>
+</li>
+</ul>
+<p><strong>See also</strong></p>
+<ul>
+<li><a href="https://testing-library.com/docs/queries/bytestid/">testing-library&#39;s <code>ByTestId</code></a></li>
+</ul>
+<h2 id="nth"><a class="anchor" href="#nth">#</a>nth</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">nth</span>(<span class="hljs-params"><span class="hljs-attr">index</span>: <span class="hljs-built_in">number</span></span>): <span class="hljs-title class_">Locator</span></code></pre></div>
+<p>This method returns a new locator that matches only a specific index within a multi-element query result. It&#39;s zero based, <code>nth(0)</code> selects the first element. Unlike <code>elements()[n]</code>, the <code>nth</code> locator will be retried until the element is present.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;one&quot;</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;two&quot;</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-tsx">page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>).<span class="hljs-title function_">nth</span>(<span class="hljs-number">0</span>) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>).<span class="hljs-title function_">nth</span>(<span class="hljs-number">4</span>) <span class="hljs-comment">// ❌</span></code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Before resorting to <code>nth</code>, you may find it useful to use chained locators to narrow down your search.
+Sometimes there is no better way to distinguish than by element position; although this can lead to flake, it&#39;s better than nothing.</p>
+</div><div class="code"><pre><code class="hljs lang-tsx">page.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&#x27;two&#x27;</span>).<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;input&#x27;</span>) <span class="hljs-comment">// ✅ better alternative to page.getByRole(&#x27;textbox&#x27;).nth(3)</span>
+page.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&#x27;one&#x27;</span>).<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;input&#x27;</span>) <span class="hljs-comment">// ❌ too ambiguous</span>
+page.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&#x27;one&#x27;</span>).<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;input&#x27;</span>).<span class="hljs-title function_">nth</span>(<span class="hljs-number">1</span>) <span class="hljs-comment">// ✅ pragmatic compromise</span></code></pre></div>
+<h2 id="first"><a class="anchor" href="#first">#</a>first</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">first</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Locator</span></code></pre></div>
+<p>This method returns a new locator that matches only the first index of a multi-element query result.
+It is sugar for <code>nth(0)</code>.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-tsx">page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>).<span class="hljs-title function_">first</span>() <span class="hljs-comment">// ✅</span></code></pre></div>
+<h2 id="last"><a class="anchor" href="#last">#</a>last</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">last</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Locator</span></code></pre></div>
+<p>This method returns a new locator that matches only the last index of a multi-element query result.
+It is sugar for <code>nth(-1)</code>.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-name">input</span>/&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-tsx">page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>).<span class="hljs-title function_">last</span>() <span class="hljs-comment">// ✅</span></code></pre></div>
+<h2 id="and"><a class="anchor" href="#and">#</a>and</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">and</span>(<span class="hljs-params"><span class="hljs-attr">locator</span>: <span class="hljs-title class_">Locator</span></span>): <span class="hljs-title class_">Locator</span></code></pre></div>
+<p>This method creates a new locator that matches both the parent and provided locator. The following example finds a button with a specific title:</p>
+<div class="code"><pre><code class="hljs lang-ts">page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>).<span class="hljs-title function_">and</span>(page.<span class="hljs-title function_">getByTitle</span>(<span class="hljs-string">&#x27;Subscribe&#x27;</span>))</code></pre></div>
+<h2 id="or"><a class="anchor" href="#or">#</a>or</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">or</span>(<span class="hljs-params"><span class="hljs-attr">locator</span>: <span class="hljs-title class_">Locator</span></span>): <span class="hljs-title class_">Locator</span></code></pre></div>
+<p>This method creates a new locator that matches either one or both locators.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that if locator matches more than a single element, calling another method might throw an error if it expects a single element:</p>
+<div class="code"><pre><code class="hljs lang-tsx">&lt;&gt;
+  <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>Click me<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></span>
+  <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://vitest.dev&quot;</span>&gt;</span>Error happened!<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></span>
+&lt;/&gt;
+
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>)
+  .<span class="hljs-title function_">or</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;link&#x27;</span>))
+  .<span class="hljs-title function_">click</span>() <span class="hljs-comment">// ❌ matches multiple elements</span></code></pre></div>
+</div><h2 id="filter"><a class="anchor" href="#filter">#</a>filter</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">filter</span>(<span class="hljs-params"><span class="hljs-attr">options</span>: <span class="hljs-title class_">LocatorFilterOptions</span></span>): <span class="hljs-title class_">Locator</span></code></pre></div>
+<p>This methods narrows down the locator according to the options, such as filtering by text. It can be chained to apply multiple filters.</p>
+<h3 id="has"><a class="anchor" href="#has">#</a>has</h3>
+<ul>
+<li><strong>Type:</strong> <code>Locator</code></li>
+</ul>
+<p>This options narrows down the selector to match elements that contain other elements matching provided locator. For example, with this HTML:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">article</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Vitest<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">article</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">article</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Rolldown<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">article</span>&gt;</span></code></pre></div>
+<p>We can narrow down the locator to only find the <code>article</code> with <code>Vitest</code> text inside:</p>
+<div class="code"><pre><code class="hljs lang-ts">page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;article&#x27;</span>).<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">has</span>: page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Vitest&#x27;</span>) }) <span class="hljs-comment">// ✅</span></code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Provided locator (<code>page.getByText(&#39;Vitest&#39;)</code> in the example) must be relative to the parent locator (<code>page.getByRole(&#39;article&#39;)</code> in the example). It will be queried starting with the parent locator, not the document root.</p>
+<p>Meaning, you cannot pass down a locator that queries the element outside of the parent locator:</p>
+<div class="code"><pre><code class="hljs lang-ts">page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Vitest&#x27;</span>).<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">has</span>: page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;article&#x27;</span>) }) <span class="hljs-comment">// ❌</span></code></pre></div>
+<p>This example will fail because the <code>article</code> element is outside the element with <code>Vitest</code> text.</p>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This method can be chained to narrow down the element even further:</p>
+<div class="code"><pre><code class="hljs lang-ts">page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;article&#x27;</span>)
+  .<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">has</span>: page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;delete row&#x27;</span> }) })
+  .<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">has</span>: page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Vitest&#x27;</span>) })</code></pre></div>
+</div><h3 id="hasnot"><a class="anchor" href="#hasnot">#</a>hasNot</h3>
+<ul>
+<li><strong>Type:</strong> <code>Locator</code></li>
+</ul>
+<p>This option narrows down the selector to match elements that do not contain other elements matching provided locator. For example, with this HTML:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">article</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Vitest<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">article</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">article</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Rolldown<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">article</span>&gt;</span></code></pre></div>
+<p>We can narrow down the locator to only find the <code>article</code> that doesn&#39;t have <code>Rolldown</code> inside.</p>
+<div class="code"><pre><code class="hljs lang-ts">page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;article&#x27;</span>)
+  .<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">hasNot</span>: page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Rolldown&#x27;</span>) }) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;article&#x27;</span>)
+  .<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">hasNot</span>: page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Vitest&#x27;</span>) }) <span class="hljs-comment">// ❌</span></code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that provided locator is queried against the parent, not the document root, just like <a href="#has"><code>has</code></a> option.</p>
+</div><h3 id="hastext"><a class="anchor" href="#hastext">#</a>hasText</h3>
+<ul>
+<li><strong>Type:</strong> <code>string | RegExp</code></li>
+</ul>
+<p>This options narrows down the selector to only match elements that contain provided text somewhere inside. When the <code>string</code> is passed, matching is case-insensitive and searches for a substring.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">article</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Vitest<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">article</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">article</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Rolldown<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">article</span>&gt;</span></code></pre></div>
+<p>Both locators will find the same element because the search is case-insensitive:</p>
+<div class="code"><pre><code class="hljs lang-ts">page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;article&#x27;</span>).<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">hasText</span>: <span class="hljs-string">&#x27;Vitest&#x27;</span> }) <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;article&#x27;</span>).<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">hasText</span>: <span class="hljs-string">&#x27;Vite&#x27;</span> }) <span class="hljs-comment">// ✅</span></code></pre></div>
+<h3 id="hasnottext"><a class="anchor" href="#hasnottext">#</a>hasNotText</h3>
+<ul>
+<li><strong>Type:</strong> <code>string | RegExp</code></li>
+</ul>
+<p>This options narrows down the selector to only match elements that do not contain provided text somewhere inside. When the <code>string</code> is passed, matching is case-insensitive and searches for a substring.</p>
+<h2 id="methods"><a class="anchor" href="#methods">#</a>Methods</h2>
+<p>All methods are asynchronous and must be awaited. Since Vitest 3, tests will fail if a method is not awaited.</p>
+<h3 id="click"><a class="anchor" href="#click">#</a>click</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">click</span>(<span class="hljs-params"><span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventClickOptions</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Click on an element. You can use the options to set the cursor position.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;img&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Rose&#x27;</span> }).<span class="hljs-title function_">click</span>()</code></pre></div>
+<ul>
+<li><a href="interactivity.html#userevent-click">See more at <code>userEvent.click</code></a></li>
+</ul>
+<h3 id="dblclick"><a class="anchor" href="#dblclick">#</a>dblClick</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">dblClick</span>(<span class="hljs-params"><span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventDoubleClickOptions</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Triggers a double click event on an element. You can use the options to set the cursor position.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;img&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Rose&#x27;</span> }).<span class="hljs-title function_">dblClick</span>()</code></pre></div>
+<ul>
+<li><a href="interactivity.html#userevent-dblclick">See more at <code>userEvent.dblClick</code></a></li>
+</ul>
+<h3 id="tripleclick"><a class="anchor" href="#tripleclick">#</a>tripleClick</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">tripleClick</span>(<span class="hljs-params"><span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventTripleClickOptions</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Triggers a triple click event on an element. Since there is no <code>tripleclick</code> in browser api, this method will fire three click events in a row.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;img&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Rose&#x27;</span> }).<span class="hljs-title function_">tripleClick</span>()</code></pre></div>
+<ul>
+<li><a href="interactivity.html#userevent-tripleclick">See more at <code>userEvent.tripleClick</code></a></li>
+</ul>
+<h3 id="wheel"><a class="anchor" href="#wheel">#</a>wheel <Version>4.1.0</Version></h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">wheel</span>(<span class="hljs-params"><span class="hljs-attr">options</span>: <span class="hljs-title class_">UserEventWheelOptions</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Triggers a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/wheel_event"><code>wheel</code> event</a> on an element. You can use the options to choose a general scroll <code>direction</code> or a precise <code>delta</code> value.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-comment">// Scroll right</span>
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;tablist&#x27;</span>).<span class="hljs-title function_">wheel</span>({ <span class="hljs-attr">direction</span>: <span class="hljs-string">&#x27;right&#x27;</span> })</code></pre></div>
+<ul>
+<li><a href="interactivity.html#userevent-wheel">See more at <code>userEvent.wheel</code></a></li>
+</ul>
+<h3 id="clear"><a class="anchor" href="#clear">#</a>clear</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">clear</span>(<span class="hljs-params"><span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventClearOptions</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Clears the input element content.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;textbox&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Full Name&#x27;</span> }).<span class="hljs-title function_">clear</span>()</code></pre></div>
+<ul>
+<li><a href="interactivity.html#userevent-clear">See more at <code>userEvent.clear</code></a></li>
+</ul>
+<h3 id="hover"><a class="anchor" href="#hover">#</a>hover</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">hover</span>(<span class="hljs-params"><span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventHoverOptions</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Moves the cursor position to the selected element.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;img&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Rose&#x27;</span> }).<span class="hljs-title function_">hover</span>()</code></pre></div>
+<ul>
+<li><a href="interactivity.html#userevent-hover">See more at <code>userEvent.hover</code></a></li>
+</ul>
+<h3 id="unhover"><a class="anchor" href="#unhover">#</a>unhover</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">unhover</span>(<span class="hljs-params"><span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventHoverOptions</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>This works the same as <a href="#hover"><code>locator.hover</code></a>, but moves the cursor to the <code>document.body</code> element instead.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;img&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Rose&#x27;</span> }).<span class="hljs-title function_">unhover</span>()</code></pre></div>
+<ul>
+<li><a href="interactivity.html#userevent-unhover">See more at <code>userEvent.unhover</code></a></li>
+</ul>
+<h3 id="fill"><a class="anchor" href="#fill">#</a>fill</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">fill</span>(<span class="hljs-params"><span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventFillOptions</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Sets the value of the current <code>input</code>, <code>textarea</code> or <code>contenteditable</code> element.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;input&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Full Name&#x27;</span> }).<span class="hljs-title function_">fill</span>(<span class="hljs-string">&#x27;Mr. Bean&#x27;</span>)</code></pre></div>
+<ul>
+<li><a href="interactivity.html#userevent-fill">See more at <code>userEvent.fill</code></a></li>
+</ul>
+<h3 id="dropto"><a class="anchor" href="#dropto">#</a>dropTo</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">dropTo</span>(<span class="hljs-params">
+  <span class="hljs-attr">target</span>: <span class="hljs-title class_">Locator</span>,
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventDragAndDropOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Drags the current element to the target location.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">const</span> paris = page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Paris&#x27;</span>)
+<span class="hljs-keyword">const</span> france = page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;France&#x27;</span>)
+
+<span class="hljs-keyword">await</span> paris.<span class="hljs-title function_">dropTo</span>(france)</code></pre></div>
+<ul>
+<li><a href="interactivity.html#userevent-draganddrop">See more at <code>userEvent.dragAndDrop</code></a></li>
+</ul>
+<h3 id="selectoptions"><a class="anchor" href="#selectoptions">#</a>selectOptions</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">selectOptions</span>(<span class="hljs-params">
+  <span class="hljs-attr">values</span>:
+    | <span class="hljs-title class_">HTMLElement</span>
+    | <span class="hljs-title class_">HTMLElement</span>[]
+    | <span class="hljs-title class_">Locator</span>
+    | <span class="hljs-title class_">Locator</span>[]
+    | <span class="hljs-built_in">string</span>
+    | <span class="hljs-built_in">string</span>[],
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">UserEventSelectOptions</span>,
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Choose one or more values from a <code>&lt;select&gt;</code> element.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">const</span> languages = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;select&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Languages&#x27;</span> })
+
+<span class="hljs-keyword">await</span> languages.<span class="hljs-title function_">selectOptions</span>(<span class="hljs-string">&#x27;EN&#x27;</span>)
+<span class="hljs-keyword">await</span> languages.<span class="hljs-title function_">selectOptions</span>([<span class="hljs-string">&#x27;ES&#x27;</span>, <span class="hljs-string">&#x27;FR&#x27;</span>])
+<span class="hljs-keyword">await</span> languages.<span class="hljs-title function_">selectOptions</span>([
+  languages.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;option&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Spanish&#x27;</span> }),
+  languages.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;option&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;French&#x27;</span> }),
+])</code></pre></div>
+<ul>
+<li><a href="interactivity.html#userevent-selectoptions">See more at <code>userEvent.selectOptions</code></a></li>
+</ul>
+<h3 id="screenshot"><a class="anchor" href="#screenshot">#</a>screenshot</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">screenshot</span>(<span class="hljs-params"><span class="hljs-attr">options</span>: <span class="hljs-title class_">LocatorScreenshotOptions</span> &amp; { save: <span class="hljs-literal">false</span> }</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">string</span>&gt;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">screenshot</span>(<span class="hljs-params"><span class="hljs-attr">options</span>: <span class="hljs-title class_">LocatorScreenshotOptions</span> &amp; { base64: <span class="hljs-literal">true</span> }</span>): <span class="hljs-title class_">Promise</span>&lt;{
+  <span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">base64</span>: <span class="hljs-built_in">string</span>
+}&gt;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">screenshot</span>(<span class="hljs-params"><span class="hljs-attr">options</span>?: <span class="hljs-title class_">LocatorScreenshotOptions</span> &amp; { base64?: <span class="hljs-literal">false</span> }</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">string</span>&gt;</code></pre></div>
+<p>Creates a screenshot of the element matching the locator&#39;s selector.</p>
+<p>You can specify the save location for the screenshot using the <code>path</code> option, which is relative to the current test file. If the <code>path</code> option is not set, Vitest will default to using <a href="../../config/browser/screenshotdirectory.html"><code>browser.screenshotDirectory</code></a> (<code>__screenshot__</code> by default), along with the names of the file and the test to determine the screenshot&#39;s filepath.</p>
+<p>If you also need the content of the screenshot, you can specify <code>base64: true</code> to return it alongside the filepath where the screenshot is saved.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">const</span> button = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Click Me!&#x27;</span> })
+
+<span class="hljs-keyword">const</span> path = <span class="hljs-keyword">await</span> button.<span class="hljs-title function_">screenshot</span>()
+
+<span class="hljs-keyword">const</span> { path, base64 } = <span class="hljs-keyword">await</span> button.<span class="hljs-title function_">screenshot</span>({
+  <span class="hljs-attr">path</span>: <span class="hljs-string">&#x27;./button-click-me.png&#x27;</span>,
+  <span class="hljs-attr">base64</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// also return base64 string</span>
+})
+<span class="hljs-comment">// path - fullpath to the screenshot</span>
+<span class="hljs-comment">// bas64 - base64 encoded string of the screenshot</span></code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : WARNING &lt;Version&gt;3.2.0&lt;/Version&gt;</div><p>Note that <code>screenshot</code> will always return a base64 string if <code>save</code> is set to <code>false</code>.
+The <code>path</code> is also ignored in that case.</p>
+</div><h3 id="mark"><a class="anchor" href="#mark">#</a>mark</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mark</span>(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">options</span>?: { stack?: <span class="hljs-built_in">string</span>; kind?: BrowserTraceEntryKind }</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;</code></pre></div>
+<p>Adds a named marker to the trace timeline and uses the current locator as marker context.</p>
+<p>Pass <code>options.stack</code> to override the callsite location in trace metadata. This is useful for wrapper libraries that need to preserve the end-user source location.</p>
+<p>Pass <code>options.kind</code> to categorize your marker as specific type, for example as <code>&#39;action&#39;</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">const</span> submitButton = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Submit&#x27;</span> })
+
+<span class="hljs-keyword">await</span> submitButton.<span class="hljs-title function_">mark</span>(<span class="hljs-string">&#x27;before submit&#x27;</span>)
+<span class="hljs-keyword">await</span> submitButton.<span class="hljs-title function_">click</span>()
+<span class="hljs-keyword">await</span> submitButton.<span class="hljs-title function_">mark</span>(<span class="hljs-string">&#x27;after submit&#x27;</span>)</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This method is useful only when <a href="../../config/browser/trace.html"><code>browser.trace</code></a> is enabled.</p>
+</div><h3 id="query"><a class="anchor" href="#query">#</a>query</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">query</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Element</span> | <span class="hljs-literal">null</span></code></pre></div>
+<p>This method returns a single element matching the locator&#39;s selector or <code>null</code> if no element is found.</p>
+<p>If multiple elements match the selector, this method will throw an error.  Use <a href="#elements"><code>.elements()</code></a> when you need all matching DOM Elements or <a href="#all"><code>.all()</code></a> if you need an array of locators matching the selector.</p>
+<div class="box box-danger"><div class="box-title">🛑 Danger</div><p>This is an escape hatch for external APIs that do not support locators. Prefer using locator methods instead.</p>
+</div><p>Consider the following DOM structure:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Hello <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span>World<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Hello<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre></div>
+<p>These locators will not throw an error:</p>
+<div class="code"><pre><code class="hljs lang-ts">page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello World&#x27;</span>).<span class="hljs-title function_">query</span>() <span class="hljs-comment">// ✅ HTMLDivElement</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello Germany&#x27;</span>).<span class="hljs-title function_">query</span>() <span class="hljs-comment">// ✅ null</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;World&#x27;</span>).<span class="hljs-title function_">query</span>() <span class="hljs-comment">// ✅ HTMLSpanElement</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello&#x27;</span>, { <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">query</span>() <span class="hljs-comment">// ✅ HTMLSpanElement</span></code></pre></div>
+<p>These locators will throw an error:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// returns multiple elements</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello&#x27;</span>).<span class="hljs-title function_">query</span>() <span class="hljs-comment">// ❌</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/^Hello/</span>).<span class="hljs-title function_">query</span>() <span class="hljs-comment">// ❌</span></code></pre></div>
+<h3 id="element"><a class="anchor" href="#element">#</a>element</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">element</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Element</span></code></pre></div>
+<p>This method returns a single element matching the locator&#39;s selector.</p>
+<p>If <em>no element</em> matches the selector, an error is thrown. Consider using <a href="#query"><code>.query()</code></a> when you just need to check if the element exists.</p>
+<p>If <em>multiple elements</em> match the selector, an error is thrown. Use <a href="#elements"><code>.elements()</code></a> when you need all matching DOM Elements or <a href="#all"><code>.all()</code></a> if you need an array of locators matching the selector.</p>
+<div class="box box-danger"><div class="box-title">🛑 Danger</div><p>This is an escape hatch for external APIs that do not support locators. Prefer using locator methods instead.</p>
+<p>It is called automatically when locator is used with <code>expect.element</code> every time the assertion is <a href="assertions.html">retried</a>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">element</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>)).<span class="hljs-title function_">toBeDisabled</span>()</code></pre></div>
+</div><p>Consider the following DOM structure:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Hello <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span>World<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Hello Germany<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Hello<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre></div>
+<p>These locators will not throw an error:</p>
+<div class="code"><pre><code class="hljs lang-ts">page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello World&#x27;</span>).<span class="hljs-title function_">element</span>() <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello Germany&#x27;</span>).<span class="hljs-title function_">element</span>() <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;World&#x27;</span>).<span class="hljs-title function_">element</span>() <span class="hljs-comment">// ✅</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello&#x27;</span>, { <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">element</span>() <span class="hljs-comment">// ✅</span></code></pre></div>
+<p>These locators will throw an error:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// returns multiple elements</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello&#x27;</span>).<span class="hljs-title function_">element</span>() <span class="hljs-comment">// ❌</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/^Hello/</span>).<span class="hljs-title function_">element</span>() <span class="hljs-comment">// ❌</span>
+
+<span class="hljs-comment">// returns no elements</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello USA&#x27;</span>).<span class="hljs-title function_">element</span>() <span class="hljs-comment">// ❌</span></code></pre></div>
+<h3 id="elements"><a class="anchor" href="#elements">#</a>elements</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">elements</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Element</span>[]</code></pre></div>
+<p>This method returns an array of elements matching the locator&#39;s selector.</p>
+<p>This function never throws an error. If there are no elements matching the selector, this method will return an empty array.</p>
+<p>Consider the following DOM structure:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Hello <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span>World<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Hello<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre></div>
+<p>These locators will always succeed:</p>
+<div class="code"><pre><code class="hljs lang-ts">page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello World&#x27;</span>).<span class="hljs-title function_">elements</span>() <span class="hljs-comment">// ✅ [HTMLElement]</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;World&#x27;</span>).<span class="hljs-title function_">elements</span>() <span class="hljs-comment">// ✅ [HTMLElement]</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello&#x27;</span>, { <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">elements</span>() <span class="hljs-comment">// ✅ [HTMLElement]</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello&#x27;</span>).<span class="hljs-title function_">elements</span>() <span class="hljs-comment">// ✅ [HTMLElement, HTMLElement]</span>
+page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello USA&#x27;</span>).<span class="hljs-title function_">elements</span>() <span class="hljs-comment">// ✅ []</span></code></pre></div>
+<h3 id="findelement"><a class="anchor" href="#findelement">#</a>findElement <Version>4.1.0</Version></h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">findElement</span>(<span class="hljs-params">
+  <span class="hljs-attr">options</span>?: <span class="hljs-title class_">SelectorOptions</span>
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">HTMLElement</span> | <span class="hljs-title class_">SVGElement</span>&gt;</code></pre></div>
+<div class="box box-danger"><div class="box-title">🛑 Danger : WARNING</div><p>This is an escape hatch for cases where you need the raw DOM element — for example, to pass it to a third-party library like FormKit that doesn&#39;t accept Vitest locators. If you are interacting with the element yourself, use other <a href="#methods">builtin methods</a> instead.</p>
+</div><p>This method returns an element matching the locator. Unlike <a href="#element"><code>.element()</code></a>, this method will wait and retry until a matching element appears in the DOM, using increasing intervals (0, 20, 50, 100, 100, 500ms).</p>
+<p>If <em>no element</em> is found before the timeout, an error is thrown. By default, the timeout matches the test timeout.</p>
+<p>If <em>multiple elements</em> match the selector and <code>strict</code> is <code>true</code> (the default), an error is thrown immediately without retrying. Set <code>strict</code> to <code>false</code> to return the first matching element instead.</p>
+<p>It accepts options:</p>
+<ul>
+<li><code>timeout: number</code> - How long to wait in milliseconds until at least one element is found. By default, this shares timeout with the test.</li>
+<li><code>strict: boolean</code> - When <code>true</code> (default), throws an error if multiple elements match the locator. When <code>false</code>, returns the first matching element.</li>
+</ul>
+<p>Consider the following DOM structure:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Hello <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span>World<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Hello Germany<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Hello<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre></div>
+<p>These locators will resolve successfully:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello World&#x27;</span>).<span class="hljs-title function_">findElement</span>() <span class="hljs-comment">// ✅ HTMLDivElement</span>
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;World&#x27;</span>).<span class="hljs-title function_">findElement</span>() <span class="hljs-comment">// ✅ HTMLSpanElement</span>
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello Germany&#x27;</span>).<span class="hljs-title function_">findElement</span>() <span class="hljs-comment">// ✅ HTMLDivElement</span></code></pre></div>
+<p>These locators will throw an error:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// multiple elements match, strict mode rejects</span>
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello&#x27;</span>).<span class="hljs-title function_">findElement</span>() <span class="hljs-comment">// ❌</span>
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/^Hello/</span>).<span class="hljs-title function_">findElement</span>() <span class="hljs-comment">// ❌</span>
+
+<span class="hljs-comment">// no matching element before timeout</span>
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello USA&#x27;</span>).<span class="hljs-title function_">findElement</span>() <span class="hljs-comment">// ❌</span></code></pre></div>
+<p>Using <code>strict: false</code> to allow multiple matches:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// returns the first matching element instead of throwing</span>
+<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello&#x27;</span>).<span class="hljs-title function_">findElement</span>({ <span class="hljs-attr">strict</span>: <span class="hljs-literal">false</span> }) <span class="hljs-comment">// ✅ HTMLDivElement</span></code></pre></div>
+<h3 id="all"><a class="anchor" href="#all">#</a>all</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">all</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Locator</span>[]</code></pre></div>
+<p>This method returns an array of new locators that match the selector.</p>
+<p>Internally, this method calls <code>.elements</code> and wraps every element using <a href="context.html#page"><code>page.elementLocator</code></a>.</p>
+<ul>
+<li><a href="#elements">See <code>locator.elements()</code></a></li>
+</ul>
+<h3 id="serialize"><a class="anchor" href="#serialize">#</a>serialize</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">serialize</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">SerializedLocator</span></code></pre></div>
+<p>Returns a JSON-serializable representation of the locator. The returned object has two fields:</p>
+<ul>
+<li><a href="#selector"><code>selector</code></a>: the provider-specific selector string used to query the element at runtime.</li>
+<li><code>locator</code>: a human-readable description of the locator (e.g. <code>getByRole(&#39;button&#39;)</code>), used for error messages and tracing. Equivalent to calling <a href="#aslocator"><code>asLocator()</code></a>.</li>
+</ul>
+<p>This is primarily intended for forwarding a locator to a <a href="commands.html">browser command</a>, which runs in Node and cannot receive a live <code>Locator</code> instance:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { commands, page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">await</span> commands.<span class="hljs-title function_">myCommand</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>).<span class="hljs-title function_">serialize</span>())</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Vitest automatically serializes any <code>Locator</code> argument passed to a command, so calling <code>serialize()</code> explicitly is rarely necessary. You can also use <code>JSON.stringify(locator)</code> (it calls <a href="#tojson"><code>toJSON</code></a> internally), which produces the same result.</p>
+</div><h3 id="tojson"><a class="anchor" href="#tojson">#</a>toJSON</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toJSON</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">SerializedLocator</span></code></pre></div>
+<p>Alias of <a href="#serialize"><code>serialize</code></a>. Defined so that <code>JSON.stringify(locator)</code> and structured-clone-based transports return a <code>SerializedLocator</code> object.</p>
+<h3 id="aslocator"><a class="anchor" href="#aslocator">#</a>asLocator</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">asLocator</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">string</span></code></pre></div>
+<p>Returns a human-readable description of the locator using the JavaScript locator syntax (e.g. <code>getByRole(&#39;button&#39;, { name: &#39;Submit&#39; })</code>). This is the same string exposed as the <code>locator</code> field of <a href="#serialize"><code>serialize()</code></a> and is used in error messages and traces.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">const</span> button = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Submit&#x27;</span> })
+button.<span class="hljs-title function_">asLocator</span>() <span class="hljs-comment">// &quot;getByRole(&#x27;button&#x27;, { name: &#x27;Submit&#x27; })&quot;</span></code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Use <a href="#selector"><code>selector</code></a> when you need the provider-specific string to forward to a <a href="commands.html">browser command</a>. Use <code>asLocator()</code> only for diagnostic output. The returned string is not meant to be re-used to query elements.</p>
+</div><h2 id="properties"><a class="anchor" href="#properties">#</a>Properties</h2>
+<h3 id="selector"><a class="anchor" href="#selector">#</a>selector</h3>
+<p>The <code>selector</code> is a string that will be used to locate the element by the browser provider. Playwright will use a <code>playwright</code> locator syntax, and <code>preview</code> and <code>webdriverio</code> will use CSS.</p>
+<div class="box box-danger"><div class="box-title">🛑 Danger</div><p>You should not use this string in your test code. The <code>selector</code> string should only be used when working with the Commands API:</p>
+<div class="code"><div class="code-title">commands.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">BrowserCommand</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">SerializedLocator</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitest/browser&#x27;</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">test</span>: <span class="hljs-title class_">BrowserCommand</span>&lt;<span class="hljs-title class_">SerializedLocator</span>&gt; = <span class="hljs-keyword">function</span> <span class="hljs-title function_">test</span>(<span class="hljs-params">context, { selector }</span>) {
+  <span class="hljs-comment">// playwright</span>
+  <span class="hljs-keyword">await</span> context.<span class="hljs-property">iframe</span>.<span class="hljs-title function_">locator</span>(selector).<span class="hljs-title function_">click</span>()
+  <span class="hljs-comment">// webdriverio</span>
+  <span class="hljs-keyword">await</span> context.<span class="hljs-property">browser</span>.$(selector).<span class="hljs-title function_">click</span>()
+}</code></pre></div>
+<div class="code"><div class="code-title">example.test.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { commands, page } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;works correctly&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> commands.<span class="hljs-title function_">test</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello&#x27;</span>).<span class="hljs-title function_">serialize</span>()) <span class="hljs-comment">// ✅</span>
+  <span class="hljs-comment">// vitest will automatically unwrap it to a SerializedLocator</span>
+  <span class="hljs-keyword">await</span> commands.<span class="hljs-title function_">test</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&#x27;Hello&#x27;</span>)) <span class="hljs-comment">// ✅</span>
+})</code></pre></div>
+</div><h3 id="length"><a class="anchor" href="#length">#</a>length</h3>
+<p>This getter returns a number of elements that this locator is matching. It is equivalent to calling <code>locator.elements().length</code>.</p>
+<p>Consider the following DOM structure:</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>Click Me!<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>Don&#x27;t click me!<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></code></pre></div>
+<p>This property will always succeed:</p>
+<div class="code"><pre><code class="hljs lang-ts">page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>).<span class="hljs-property">length</span> <span class="hljs-comment">// ✅ 2</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;button&#x27;</span>, { <span class="hljs-attr">title</span>: <span class="hljs-string">&#x27;Click Me!&#x27;</span> }).<span class="hljs-property">length</span> <span class="hljs-comment">// ✅ 1</span>
+page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;alert&#x27;</span>).<span class="hljs-property">length</span> <span class="hljs-comment">// ✅ 0</span></code></pre></div>
+<h2 id="custom-locators"><a class="anchor" href="#custom-locators">#</a>Custom Locators <Version>3.2.0</Version> <Badge type="danger">advanced</Badge></h2>
+<p>You can extend built-in locators API by defining an object of locator factories. These methods will exist as methods on the <code>page</code> object and any created locator.</p>
+<p>These locators can be useful if built-in locators are not enough. For example, when you use a custom framework for your UI.</p>
+<p>The locator factory needs to return a selector string or a locator itself.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>The selector syntax is identical to Playwright locators. Please, read <a href="https://playwright.dev/docs/other-locators">their guide</a> to better understand how to work with them.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { locators } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span>
+
+locators.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-title function_">getByArticleTitle</span>(<span class="hljs-params">title</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`[data-title=&quot;<span class="hljs-subst">${title}</span>&quot;]`</span>
+  },
+  <span class="hljs-title function_">getByArticleCommentsCount</span>(<span class="hljs-params">count</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">`.comments :text(&quot;<span class="hljs-subst">${count}</span> comments&quot;)`</span>
+  },
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">previewComments</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// you have access to the current locator via &quot;this&quot;</span>
+    <span class="hljs-comment">// beware that if the method was called on `page`, `this` will be `page`,</span>
+    <span class="hljs-comment">// not the locator!</span>
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span> !== page) {
+      <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">click</span>()
+    }
+    <span class="hljs-comment">// ...</span>
+  }
+})
+
+<span class="hljs-comment">// if you are using typescript, you can extend LocatorSelectors interface</span>
+<span class="hljs-comment">// to have the autocompletion in locators.extend, page.* and locator.* methods</span>
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">LocatorSelectors</span> {
+    <span class="hljs-comment">// if the custom method returns a string, it will be converted into a locator</span>
+    <span class="hljs-comment">// if it returns anything else, then it will be returned as usual</span>
+    <span class="hljs-title function_">getByArticleTitle</span>(<span class="hljs-attr">title</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Locator</span>
+    <span class="hljs-title function_">getByArticleCommentsCount</span>(<span class="hljs-attr">count</span>: <span class="hljs-built_in">number</span>): <span class="hljs-title class_">Locator</span>
+
+    <span class="hljs-comment">// Vitest will return a promise and won&#x27;t try to convert it into a locator</span>
+    <span class="hljs-title function_">previewComments</span>(<span class="hljs-attr">this</span>: <span class="hljs-title class_">Locator</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+  }
+}</code></pre></div>
+<p>If the method is called on the global <code>page</code> object, then selector will be applied to the whole page. In the example below, <code>getByArticleTitle</code> will find all elements with an attribute <code>data-title</code> with the value of <code>title</code>. However, if the method is called on the locator, then it will be scoped to that locator.</p>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">article</span> <span class="hljs-attr">data-title</span>=<span class="hljs-string">&quot;Hello, World!&quot;</span>&gt;</span>
+  Hello, World!
+  <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;comments&quot;</span>&gt;</span>2 comments<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">article</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">article</span> <span class="hljs-attr">data-title</span>=<span class="hljs-string">&quot;Hello, Vitest!&quot;</span>&gt;</span>
+  Hello, Vitest!
+  <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;comments&quot;</span>&gt;</span>0 comments<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">article</span>&gt;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> articles = page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&#x27;article&#x27;</span>)
+<span class="hljs-keyword">const</span> worldArticle = page.<span class="hljs-title function_">getByArticleTitle</span>(<span class="hljs-string">&#x27;Hello, World!&#x27;</span>) <span class="hljs-comment">// ✅</span>
+<span class="hljs-keyword">const</span> commentsElement = worldArticle.<span class="hljs-title function_">getByArticleCommentsCount</span>(<span class="hljs-number">2</span>) <span class="hljs-comment">// ✅</span>
+<span class="hljs-keyword">const</span> wrongCommentsElement = worldArticle.<span class="hljs-title function_">getByArticleCommentsCount</span>(<span class="hljs-number">0</span>) <span class="hljs-comment">// ❌</span>
+<span class="hljs-keyword">const</span> wrongElement = page.<span class="hljs-title function_">getByArticleTitle</span>(<span class="hljs-string">&#x27;No Article!&#x27;</span>) <span class="hljs-comment">// ❌</span>
+
+<span class="hljs-keyword">await</span> commentsElement.<span class="hljs-title function_">previewComments</span>() <span class="hljs-comment">// ✅</span>
+<span class="hljs-keyword">await</span> wrongCommentsElement.<span class="hljs-title function_">previewComments</span>() <span class="hljs-comment">// ❌</span></code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#getbyrole">getByRole</a><a class="toc-2" href="#getbyalttext">getByAltText</a><a class="toc-2" href="#getbylabeltext">getByLabelText</a><a class="toc-2" href="#getbyplaceholder">getByPlaceholder</a><a class="toc-2" href="#getbytext">getByText</a><a class="toc-2" href="#getbytitle">getByTitle</a><a class="toc-2" href="#getbytestid">getByTestId</a><a class="toc-2" href="#nth">nth</a><a class="toc-2" href="#first">first</a><a class="toc-2" href="#last">last</a><a class="toc-2" href="#and">and</a><a class="toc-2" href="#or">or</a><a class="toc-2" href="#filter">filter</a><a class="toc-3" href="#has">has</a><a class="toc-3" href="#hasnot">hasNot</a><a class="toc-3" href="#hastext">hasText</a><a class="toc-3" href="#hasnottext">hasNotText</a><a class="toc-2" href="#methods">Methods</a><a class="toc-3" href="#click">click</a><a class="toc-3" href="#dblclick">dblClick</a><a class="toc-3" href="#tripleclick">tripleClick</a><a class="toc-3" href="#wheel">wheel 4.1.0</a><a class="toc-3" href="#clear">clear</a><a class="toc-3" href="#hover">hover</a><a class="toc-3" href="#unhover">unhover</a><a class="toc-3" href="#fill">fill</a><a class="toc-3" href="#dropto">dropTo</a><a class="toc-3" href="#selectoptions">selectOptions</a><a class="toc-3" href="#screenshot">screenshot</a><a class="toc-3" href="#mark">mark</a><a class="toc-3" href="#query">query</a><a class="toc-3" href="#element">element</a><a class="toc-3" href="#elements">elements</a><a class="toc-3" href="#findelement">findElement 4.1.0</a><a class="toc-3" href="#all">all</a><a class="toc-3" href="#serialize">serialize</a><a class="toc-3" href="#tojson">toJSON</a><a class="toc-3" href="#aslocator">asLocator</a><a class="toc-2" href="#properties">Properties</a><a class="toc-3" href="#selector">selector</a><a class="toc-3" href="#length">length</a><a class="toc-2" href="#custom-locators">Custom Locators 3.2.0 advanced</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

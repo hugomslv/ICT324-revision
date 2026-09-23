@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-use-before-define (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-use-before-define <span class="badge badge-problem">problème</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-use-before-define">version en ligne</a></div>
+<h1>no-use-before-define</h1><p>In JavaScript, prior to ES6, variable and function declarations are hoisted to the top of a scope, so it&#39;s possible to use identifiers before their formal declarations in code. This can be confusing and some believe it is best to always declare variables and functions before using them.</p>
+<p>In ES6, block-level bindings (<code>let</code> and <code>const</code>) introduce a &quot;temporal dead zone&quot; where a <code>ReferenceError</code> will be thrown with any attempt to access the variable before its declaration.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule will warn when it encounters a reference to an identifier that has not yet been declared.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-use-before-define: &quot;error&quot;*/</span>
+
+<span class="hljs-title function_">alert</span>(a);
+<span class="hljs-keyword">var</span> a = <span class="hljs-number">10</span>;
+
+<span class="hljs-title function_">f</span>();
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">f</span>(<span class="hljs-params"></span>) {}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">g</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> b;
+}
+<span class="hljs-keyword">var</span> b = <span class="hljs-number">1</span>;
+
+{
+    <span class="hljs-title function_">alert</span>(c);
+    <span class="hljs-keyword">let</span> c = <span class="hljs-number">1</span>;
+}
+
+{
+    <span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">C</span> {}
+}
+
+{
+    <span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+        <span class="hljs-keyword">static</span> x = <span class="hljs-string">&quot;foo&quot;</span>;
+        [C.<span class="hljs-property">x</span>]() {}
+    }
+}
+
+{
+    <span class="hljs-keyword">const</span> C = <span class="hljs-keyword">class</span> {
+        <span class="hljs-keyword">static</span> x = C;
+    }
+}
+
+{
+    <span class="hljs-keyword">const</span> C = <span class="hljs-keyword">class</span> {
+        <span class="hljs-keyword">static</span> {
+            C.<span class="hljs-property">x</span> = <span class="hljs-string">&quot;foo&quot;</span>;
+        }
+    }
+}
+
+<span class="hljs-keyword">export</span> { foo };
+<span class="hljs-keyword">const</span> foo = <span class="hljs-number">1</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-use-before-define: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">var</span> a;
+a = <span class="hljs-number">10</span>;
+<span class="hljs-title function_">alert</span>(a);
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">f</span>(<span class="hljs-params"></span>) {}
+<span class="hljs-title function_">f</span>(<span class="hljs-number">1</span>);
+
+<span class="hljs-keyword">var</span> b = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">g</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> b;
+}
+
+{
+    <span class="hljs-keyword">let</span> c;
+    c++;
+}
+
+{
+    <span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+        <span class="hljs-keyword">static</span> x = C;
+    }
+}
+
+{
+    <span class="hljs-keyword">const</span> C = <span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+        <span class="hljs-keyword">static</span> x = C;
+    }
+}
+
+{
+    <span class="hljs-keyword">const</span> C = <span class="hljs-keyword">class</span> {
+        x = C;
+    }
+}
+
+{
+    <span class="hljs-keyword">const</span> C = <span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+        <span class="hljs-keyword">static</span> {
+            C.<span class="hljs-property">x</span> = <span class="hljs-string">&quot;foo&quot;</span>;
+        }
+    }
+}
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">export</span> { foo };</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;no-use-before-define&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;functions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;classes&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;variables&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;allowNamedExports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;enums&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;typedefs&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;ignoreTypeReferences&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<ul>
+<li><code>functions</code> (<code>boolean</code>) -
+This flag determines whether or not the rule checks function declarations.
+If this is <code>true</code>, the rule warns on every reference to a function before the function declaration.
+Otherwise, the rule ignores those references.
+Function declarations are hoisted, so it&#39;s safe to disable this option (note that some idiomatic patterns, such as <a href="https://en.wikipedia.org/wiki/Mutual_recursion">mutual recursion</a>, are incompatible with enabling this option).
+Default is <code>true</code>.</li>
+<li><code>classes</code> (<code>boolean</code>) -
+This flag determines whether or not the rule checks class declarations of upper scopes.
+If this is <code>true</code>, the rule warns on every reference to a class before the class declaration.
+Otherwise, the rule ignores such references, provided the declaration is in an upper function scope.
+Class declarations are not hoisted, so it might be dangerous to disable this option.
+Default is <code>true</code>.</li>
+<li><code>variables</code> (<code>boolean</code>) -
+This flag determines whether or not the rule checks variable declarations in upper scopes.
+If this is <code>true</code>, the rule warns on every reference to a variable before the variable declaration.
+Otherwise, the rule ignores a reference if the declaration is in an upper scope, while still reporting the reference if it&#39;s in the same scope as the declaration.
+Default is <code>true</code>.</li>
+<li><code>allowNamedExports</code> (<code>boolean</code>) -
+If this flag is set to <code>true</code>, the rule always allows references in <code>export {};</code> declarations.
+These references are safe even if the variables are declared later in the code.
+Default is <code>false</code>.</li>
+</ul>
+<p>This rule additionally supports TypeScript type syntax. The following options enable checking for the references to <code>type</code>, <code>interface</code> and <code>enum</code> declarations:</p>
+<ul>
+<li><code>enums</code> (<code>boolean</code>) -
+If it is <code>true</code>, the rule warns every reference to an <code>enum</code> before it is defined.
+Default is <code>true</code>.</li>
+<li><code>typedefs</code> (<code>boolean</code>) -
+If it is <code>true</code>, this rule warns every reference to a type <code>alias</code> or <code>interface</code> before its declaration. If <code>false</code>, the rule allows using type <code>alias</code>es and <code>interface</code>s before they are defined.
+Default is <code>true</code>.</li>
+<li><code>ignoreTypeReferences</code> (<code>boolean</code>) -
+If it is <code>true</code>, rule will ignore all type references, such as in type annotations and assertions.
+Default is <code>true</code>.</li>
+</ul>
+<p>This rule accepts <code>&quot;nofunc&quot;</code> string as an option.
+<code>&quot;nofunc&quot;</code> is the same as <code>{ &quot;functions&quot;: false, &quot;classes&quot;: true, &quot;variables&quot;: true, &quot;allowNamedExports&quot;: false, &quot;enums&quot;: true, &quot;typedefs&quot;: true, &quot;ignoreTypeReferences&quot;: true }</code>.</p>
+<h3 id="functions"><a class="anchor" href="#functions">#</a>functions</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;functions&quot;: false }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, { &quot;functions&quot;: false }]*/</span>
+
+<span class="hljs-title function_">f</span>();
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">f</span>(<span class="hljs-params"></span>) {}</code></pre></div>
+</div><p>This option allows references to function declarations. For function expressions and arrow functions, please see the <a href="#variables"><code>variables</code></a> option.</p>
+<h3 id="classes"><a class="anchor" href="#classes">#</a>classes</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;classes&quot;: false }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, { &quot;classes&quot;: false }]*/</span>
+
+<span class="hljs-keyword">new</span> <span class="hljs-title function_">A</span>();
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+}
+
+{
+    <span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">C</span> {}
+}
+
+{
+    <span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">D</span> {}
+    <span class="hljs-keyword">class</span> <span class="hljs-title class_">D</span> {}
+}
+
+{
+    <span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+        <span class="hljs-keyword">static</span> x = <span class="hljs-string">&quot;foo&quot;</span>;
+        [C.<span class="hljs-property">x</span>]() {}
+    }
+}
+
+{
+    <span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+        <span class="hljs-keyword">static</span> {
+            <span class="hljs-keyword">new</span> <span class="hljs-title function_">D</span>();
+        }
+    }
+    <span class="hljs-keyword">class</span> <span class="hljs-title class_">D</span> {}
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;classes&quot;: false }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, { &quot;classes&quot;: false }]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title function_">A</span>();
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+}</code></pre></div>
+</div><h3 id="variables"><a class="anchor" href="#variables">#</a>variables</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;variables&quot;: false }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, { &quot;variables&quot;: false }]*/</span>
+
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(foo);
+<span class="hljs-keyword">var</span> foo = <span class="hljs-number">1</span>;
+
+<span class="hljs-title function_">f</span>();
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">f</span> = (<span class="hljs-params"></span>) =&gt; {};
+
+<span class="hljs-title function_">g</span>();
+<span class="hljs-keyword">const</span> g = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+
+{
+    <span class="hljs-keyword">const</span> C = <span class="hljs-keyword">class</span> {
+        <span class="hljs-keyword">static</span> x = C;
+    }
+}
+
+{
+    <span class="hljs-keyword">const</span> C = <span class="hljs-keyword">class</span> {
+        <span class="hljs-keyword">static</span> x = foo;
+    }
+    <span class="hljs-keyword">const</span> foo = <span class="hljs-number">1</span>;
+}
+
+{
+    <span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+        <span class="hljs-keyword">static</span> {
+            <span class="hljs-variable language_">this</span>.<span class="hljs-property">x</span> = foo;
+        }
+    }
+    <span class="hljs-keyword">const</span> foo = <span class="hljs-number">1</span>;
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;variables&quot;: false }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, { &quot;variables&quot;: false }]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">baz</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(foo);
+}
+<span class="hljs-keyword">var</span> foo = <span class="hljs-number">1</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">a</span> = (<span class="hljs-params"></span>) =&gt; <span class="hljs-title function_">f</span>();
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">b</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-title function_">f</span>(); }
+<span class="hljs-keyword">const</span> c = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-title function_">f</span>(); }
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">f</span> = (<span class="hljs-params"></span>) =&gt; {};
+
+<span class="hljs-keyword">const</span> e = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-title function_">g</span>(); }
+<span class="hljs-keyword">const</span> g = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}
+
+{
+    <span class="hljs-keyword">const</span> C = <span class="hljs-keyword">class</span> {
+        x = foo;
+    }
+    <span class="hljs-keyword">const</span> foo = <span class="hljs-number">1</span>;
+}</code></pre></div>
+</div><h3 id="allownamedexports"><a class="anchor" href="#allownamedexports">#</a>allowNamedExports</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;allowNamedExports&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, { &quot;allowNamedExports&quot;: true }]*/</span>
+
+<span class="hljs-keyword">export</span> { a, b, f, C };
+
+<span class="hljs-keyword">const</span> a = <span class="hljs-number">1</span>;
+
+<span class="hljs-keyword">let</span> b;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">f</span> (<span class="hljs-params"></span>) {}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {}</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;allowNamedExports&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, { &quot;allowNamedExports&quot;: true }]*/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> a;
+<span class="hljs-keyword">const</span> a = <span class="hljs-number">1</span>;
+
+<span class="hljs-keyword">const</span> b = c;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> c = <span class="hljs-number">1</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> d;
+}
+<span class="hljs-keyword">const</span> d = <span class="hljs-number">1</span>;</code></pre></div>
+</div><h3 id="enums-typescript-only"><a class="anchor" href="#enums-typescript-only">#</a>enums (TypeScript only)</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;enums&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, { &quot;enums&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> x = <span class="hljs-title class_">Foo</span>.<span class="hljs-property">FOO</span>;
+
+<span class="hljs-keyword">enum</span> <span class="hljs-title class_">Foo</span> {
+  <span class="hljs-variable constant_">FOO</span>,
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;enums&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, { &quot;enums&quot;: true }]*/</span>
+
+<span class="hljs-keyword">enum</span> <span class="hljs-title class_">Foo</span> {
+  <span class="hljs-variable constant_">FOO</span>,
+}
+
+<span class="hljs-keyword">const</span> x = <span class="hljs-title class_">Foo</span>.<span class="hljs-property">FOO</span>;</code></pre></div>
+</div><h3 id="typedefs-typescript-only"><a class="anchor" href="#typedefs-typescript-only">#</a>typedefs (TypeScript only)</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;enums&quot;: true }</code> with <code>{ &quot;ignoreTypeReferences&quot;: false }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, { &quot;typedefs&quot;: true, &quot;ignoreTypeReferences&quot;: false }]*/</span>
+
+<span class="hljs-keyword">let</span> <span class="hljs-attr">myVar</span>: <span class="hljs-title class_">StringOrNumber</span>;
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">StringOrNumber</span> = <span class="hljs-built_in">string</span> | <span class="hljs-built_in">number</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">x</span>: <span class="hljs-title class_">Foo</span> = {};
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Foo</span> {}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;typedefs&quot;: true }</code> with <code>{ &quot;ignoreTypeReferences&quot;: false }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, { &quot;typedefs&quot;: true, &quot;ignoreTypeReferences&quot;: false }]*/</span>
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">StringOrNumber</span> = <span class="hljs-built_in">string</span> | <span class="hljs-built_in">number</span>;
+
+<span class="hljs-keyword">let</span> <span class="hljs-attr">myVar</span>: <span class="hljs-title class_">StringOrNumber</span>;
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Foo</span> {}
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">x</span>: <span class="hljs-title class_">Foo</span> = {};</code></pre></div>
+</div><h3 id="ignoretypereferences-typescript-only"><a class="anchor" href="#ignoretypereferences-typescript-only">#</a>ignoreTypeReferences (TypeScript only)</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;ignoreTypeReferences&quot;: false }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, { &quot;ignoreTypeReferences&quot;: false }]*/</span>
+
+<span class="hljs-keyword">let</span> <span class="hljs-attr">var1</span>: <span class="hljs-title class_">StringOrNumber</span>;
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">StringOrNumber</span> = <span class="hljs-built_in">string</span> | <span class="hljs-built_in">number</span>;
+
+<span class="hljs-keyword">let</span> <span class="hljs-attr">var2</span>: <span class="hljs-title class_">Enum</span>;
+
+<span class="hljs-keyword">enum</span> <span class="hljs-title class_">Enum</span> {}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;ignoreTypeReferences&quot;: false }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, { &quot;ignoreTypeReferences&quot;: false }]*/</span>
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">StringOrNumber</span> = <span class="hljs-built_in">string</span> | <span class="hljs-built_in">number</span>;
+
+<span class="hljs-keyword">let</span> <span class="hljs-attr">myVar</span>: <span class="hljs-title class_">StringOrNumber</span>;
+
+<span class="hljs-keyword">enum</span> <span class="hljs-title class_">Enum</span> {}
+
+<span class="hljs-keyword">let</span> <span class="hljs-attr">var2</span>: <span class="hljs-title class_">Enum</span>;</code></pre></div>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;ignoreTypeReferences&quot;: false }</code> with <code>{ &quot;typedefs&quot;: false }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, { &quot;ignoreTypeReferences&quot;: false, &quot;typedefs&quot;: false, }]*/</span>
+
+<span class="hljs-keyword">let</span> <span class="hljs-attr">myVar</span>: <span class="hljs-title class_">StringOrNumber</span>;
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">StringOrNumber</span> = <span class="hljs-built_in">string</span> | <span class="hljs-built_in">number</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">x</span>: <span class="hljs-title class_">Foo</span> = {};
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Foo</span> {}</code></pre></div>
+</div><h3 id="nofunc"><a class="anchor" href="#nofunc">#</a>nofunc</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>&quot;nofunc&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, &quot;nofunc&quot;]*/</span>
+
+<span class="hljs-title function_">a</span>();
+<span class="hljs-keyword">var</span> a = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(foo);
+<span class="hljs-keyword">var</span> foo = <span class="hljs-number">1</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">f</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> b;
+}
+<span class="hljs-keyword">var</span> b = <span class="hljs-number">1</span>;
+
+<span class="hljs-keyword">new</span> <span class="hljs-title function_">A</span>();
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">g</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title function_">B</span>();
+}
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">B</span> {
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> bar;
+<span class="hljs-keyword">const</span> bar = <span class="hljs-number">1</span>;
+
+<span class="hljs-keyword">export</span> { baz };
+<span class="hljs-keyword">const</span> baz = <span class="hljs-number">1</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, &quot;nofunc&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Foo</span> {
+	<span class="hljs-keyword">return</span> <span class="hljs-title class_">Foo</span>.<span class="hljs-property">FOO</span>;
+}
+	
+<span class="hljs-keyword">enum</span> <span class="hljs-title class_">Foo</span> {
+	<span class="hljs-variable constant_">FOO</span>,
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>&quot;nofunc&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, &quot;nofunc&quot;]*/</span>
+
+<span class="hljs-title function_">f</span>();
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">f</span>(<span class="hljs-params"></span>) {}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> {
+}
+<span class="hljs-keyword">new</span> <span class="hljs-title function_">A</span>();
+
+<span class="hljs-keyword">var</span> a = <span class="hljs-number">10</span>;
+<span class="hljs-title function_">alert</span>(a);
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">export</span> { foo };
+
+<span class="hljs-keyword">const</span> bar = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> bar;</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-use-before-define: [&quot;error&quot;, &quot;nofunc&quot;]*/</span>
+	
+<span class="hljs-keyword">enum</span> <span class="hljs-title class_">Foo</span> {
+	<span class="hljs-variable constant_">FOO</span>,
+}
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-title class_">Foo</span>.<span class="hljs-property">Foo</span>;</code></pre></div>
+</div></div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#functions">functions</a><a class="toc-3" href="#classes">classes</a><a class="toc-3" href="#variables">variables</a><a class="toc-3" href="#allownamedexports">allowNamedExports</a><a class="toc-3" href="#enums-typescript-only">enums (TypeScript only)</a><a class="toc-3" href="#typedefs-typescript-only">typedefs (TypeScript only)</a><a class="toc-3" href="#ignoretypereferences-typescript-only">ignoreTypeReferences (TypeScript only)</a><a class="toc-3" href="#nofunc">nofunc</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

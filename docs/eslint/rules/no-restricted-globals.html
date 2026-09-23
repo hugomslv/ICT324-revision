@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-restricted-globals (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-restricted-globals <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-restricted-globals">version en ligne</a></div>
+<h1>no-restricted-globals</h1><p>Disallowing usage of specific global variables can be useful if you want to allow a set of global
+variables, but still want to disallow some of those.</p>
+<p>For instance, early Internet Explorer versions exposed the current DOM event as a global variable
+<code>event</code>, but using this variable has been considered as a bad practice for a long time. Restricting
+this will make sure this variable isn&#39;t used in browser code.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule allows you to specify global variable names that you don&#39;t want to use in your application.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has both string and object options to specify the global variables to restrict.</p>
+<p>Using the string option, you can specify the name of a global variable that you want to restrict as a value in the rule options array:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;rules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;no-restricted-globals&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;event&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;fdescribe&quot;</span><span class="hljs-punctuation">]</span>
+    <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Alternatively, the rule also accepts objects, where the global name and an optional custom message are specified:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;rules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;no-restricted-globals&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+            <span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;event&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Use local parameter instead.&quot;</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;fdescribe&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Do not commit fdescribe. Use describe instead.&quot;</span>
+            <span class="hljs-punctuation">}</span>
+        <span class="hljs-punctuation">]</span>
+    <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Examples of <strong>incorrect</strong> code for sample <code>&quot;event&quot;, &quot;fdescribe&quot;</code> global variable names:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*global event, fdescribe*/</span>
+<span class="hljs-comment">/*eslint no-restricted-globals: [&quot;error&quot;, &quot;event&quot;, &quot;fdescribe&quot;]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">onClick</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(event);
+}
+
+<span class="hljs-title function_">fdescribe</span>(<span class="hljs-string">&quot;foo&quot;</span>, <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+});</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for a sample <code>&quot;event&quot;</code> global variable name:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*global event*/</span>
+<span class="hljs-comment">/*eslint no-restricted-globals: [&quot;error&quot;, &quot;event&quot;]*/</span>
+
+<span class="hljs-keyword">import</span> event <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;event-module&quot;</span>;</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*global event*/</span>
+<span class="hljs-comment">/*eslint no-restricted-globals: [&quot;error&quot;, &quot;event&quot;]*/</span>
+
+<span class="hljs-keyword">const</span> event = <span class="hljs-number">1</span>;</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for a sample <code>&quot;event&quot;</code> global variable name, along with a custom error message:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*global event*/</span>
+<span class="hljs-comment">/* eslint no-restricted-globals: [&quot;error&quot;, { name: &quot;event&quot;, message: &quot;Use local parameter instead.&quot; }] */</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">onClick</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(event);    <span class="hljs-comment">// Unexpected global variable &#x27;event&#x27;. Use local parameter instead.</span>
+}</code></pre></div>
+</div><h3 id="globals"><a class="anchor" href="#globals">#</a>globals</h3>
+<p>An object option whose value is an array containing the names of the globals you want to restrict.</p>
+<p>Examples of <strong>incorrect</strong> code for <code>&quot;event&quot;</code> and <code>&quot;fdescribe&quot;</code> global variable names:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*global event, fdescribe*/</span>
+<span class="hljs-comment">/*eslint no-restricted-globals: [&quot;error&quot;, { globals: [&quot;event&quot;, &quot;fdescribe&quot;] }]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">onClick</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(event);
+}
+
+<span class="hljs-title function_">fdescribe</span>(<span class="hljs-string">&quot;foo&quot;</span>, <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+});</code></pre></div>
+</div><p>Custom messages for a particular global can also be specified in <code>globals</code> array using objects with <code>name</code> and <code>message</code>:</p>
+<p>Examples of <strong>incorrect</strong> code for an <code>&quot;event&quot;</code> global variable name, along with a custom error message:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*global event*/</span>
+<span class="hljs-comment">/* eslint no-restricted-globals: [&quot;error&quot;, { globals: [{ name: &quot;event&quot;, message: &quot;Use local parameter instead.&quot; }] }] */</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">onClick</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(event);
+}</code></pre></div>
+</div><h3 id="checkglobalobject"><a class="anchor" href="#checkglobalobject">#</a>checkGlobalObject</h3>
+<p>A boolean option that enables detection of restricted globals accessed via global objects. Default is <code>false</code>.</p>
+<p>Examples of <strong>incorrect</strong> code for <code>checkGlobalObject: true</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*global globalThis, self, window*/</span>
+<span class="hljs-comment">/*eslint no-restricted-globals: [&quot;error&quot;, { globals: [&quot;Promise&quot;], checkGlobalObject: true }]*/</span>
+
+globalThis.<span class="hljs-property">Promise</span>
+<span class="hljs-variable language_">self</span>.<span class="hljs-property">Promise</span>
+<span class="hljs-variable language_">window</span>.<span class="hljs-property">Promise</span></code></pre></div>
+</div><h3 id="globalobjects"><a class="anchor" href="#globalobjects">#</a>globalObjects</h3>
+<p>An array option that specifies additional global object names to check when <code>checkGlobalObject</code> is enabled. By default, the rule checks these global objects: <code>globalThis</code>, <code>self</code>, and <code>window</code>.</p>
+<p>Examples of <strong>incorrect</strong> code for <code>globalObjects</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*global globalThis, self, window, myGlobal*/</span>
+<span class="hljs-comment">/*eslint no-restricted-globals: [&quot;error&quot;, {
+    globals: [&quot;Promise&quot;],
+    checkGlobalObject: true,
+    globalObjects: [&quot;myGlobal&quot;]
+}]*/</span>
+
+globalThis.<span class="hljs-property">Promise</span>
+<span class="hljs-variable language_">self</span>.<span class="hljs-property">Promise</span>
+<span class="hljs-variable language_">window</span>.<span class="hljs-property">Promise</span>
+myGlobal.<span class="hljs-property">Promise</span>;</code></pre></div>
+</div><p>Restricted globals used in TypeScript type annotations—such as type references, interface inheritance, or class implementations—are ignored by this rule.</p>
+<p>Examples of <strong>correct</strong> TypeScript code for &quot;Promise&quot;, &quot;Event&quot;, and &quot;Window&quot; global variable names:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-restricted-globals: [&quot;error&quot;, &quot;Promise&quot;, &quot;Event&quot;, &quot;Window&quot;]*/</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">fetchData</span>: <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">string</span>&gt; = <span class="hljs-title function_">fetchString</span>();
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">CustomEvent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Event</span> {}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">CustomWindow</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Window</span> {}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">handleClick</span>(<span class="hljs-params"><span class="hljs-attr">event</span>: <span class="hljs-title class_">Event</span></span>) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(event);
+}</code></pre></div>
+</div><div class="box box-info"><div class="box-title">Règles liées</div><p><a href="no-restricted-properties.html"><code>no-restricted-properties</code></a>, <a href="no-restricted-syntax.html"><code>no-restricted-syntax</code></a></p></div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#globals">globals</a><a class="toc-3" href="#checkglobalobject">checkGlobalObject</a><a class="toc-3" href="#globalobjects">globalObjects</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

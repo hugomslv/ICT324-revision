@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>diff | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/diff  <a class="ext small" href="https://vitest.dev/config/diff">version en ligne</a></div>
+<h1 id="diff"><a class="anchor" href="#diff">#</a>diff</h1>
+<ul>
+<li><strong>Type:</strong> <code>string</code></li>
+<li><strong>CLI:</strong> <code>--diff=&lt;path&gt;</code></li>
+</ul>
+<p><code>DiffOptions</code> object or a path to a module which exports <code>DiffOptions</code>. Useful if you want to customize diff display.</p>
+<p>Vitest diff rendering uses <a href="https://npmx.dev/package/@vitest/pretty-format"><code>@vitest/pretty-format</code></a> under the hood and a part of <code>DiffOptions</code> is forwarded to the pretty-format configuration, while the rest affects diff rendering itself.</p>
+<p>For example, as a config object:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> c <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;picocolors&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">diff</span>: {
+      <span class="hljs-attr">aIndicator</span>: c.<span class="hljs-title function_">bold</span>(<span class="hljs-string">&#x27;--&#x27;</span>),
+      <span class="hljs-attr">bIndicator</span>: c.<span class="hljs-title function_">bold</span>(<span class="hljs-string">&#x27;++&#x27;</span>),
+      <span class="hljs-attr">omitAnnotationLines</span>: <span class="hljs-literal">true</span>,
+    },
+  },
+})</code></pre></div>
+<p>Or as a module:</p>
+<div class="code-group"><div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">diff</span>: <span class="hljs-string">&#x27;./vitest.diff.ts&#x27;</span>,
+  },
+})</code></pre></div>
+<div class="code"><div class="code-title">vitest.diff.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">DiffOptions</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> c <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;picocolors&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+  <span class="hljs-attr">aIndicator</span>: c.<span class="hljs-title function_">bold</span>(<span class="hljs-string">&#x27;--&#x27;</span>),
+  <span class="hljs-attr">bIndicator</span>: c.<span class="hljs-title function_">bold</span>(<span class="hljs-string">&#x27;++&#x27;</span>),
+  <span class="hljs-attr">omitAnnotationLines</span>: <span class="hljs-literal">true</span>,
+} <span class="hljs-keyword">satisfies</span> <span class="hljs-title class_">DiffOptions</span></code></pre></div>
+</div><h2 id="diff-expand"><a class="anchor" href="#diff-expand">#</a>diff.expand</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+<li><strong>CLI:</strong> <code>--diff.expand=false</code></li>
+</ul>
+<p>Expand all common lines.</p>
+<h2 id="diff-truncatethreshold"><a class="anchor" href="#diff-truncatethreshold">#</a>diff.truncateThreshold</h2>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Default:</strong> <code>0</code></li>
+<li><strong>CLI:</strong> <code>--diff.truncateThreshold=&lt;path&gt;</code></li>
+</ul>
+<p>The maximum length of diff result to be displayed. Diffs above this threshold will be truncated.
+Truncation won&#39;t take effect with default value 0.</p>
+<h2 id="diff-truncateannotation"><a class="anchor" href="#diff-truncateannotation">#</a>diff.truncateAnnotation</h2>
+<ul>
+<li><strong>Type:</strong> <code>string</code></li>
+<li><strong>Default:</strong> <code>&#39;... Diff result is truncated&#39;</code></li>
+<li><strong>CLI:</strong> <code>--diff.truncateAnnotation=&lt;annotation&gt;</code></li>
+</ul>
+<p>Annotation that is output at the end of diff result if it&#39;s truncated.</p>
+<h2 id="diff-truncateannotationcolor"><a class="anchor" href="#diff-truncateannotationcolor">#</a>diff.truncateAnnotationColor</h2>
+<ul>
+<li><strong>Type:</strong> <code>DiffOptionsColor = (arg: string) =&gt; string</code></li>
+<li><strong>Default:</strong> <code>noColor = (string: string): string =&gt; string</code></li>
+</ul>
+<p>Color of truncate annotation, default is output with no color.</p>
+<h2 id="diff-printbasicprototype"><a class="anchor" href="#diff-printbasicprototype">#</a>diff.printBasicPrototype</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+</ul>
+<p>Print basic prototype <code>Object</code> and <code>Array</code> in diff output.</p>
+<h2 id="diff-maxdepth"><a class="anchor" href="#diff-maxdepth">#</a>diff.maxDepth</h2>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Default:</strong> <code>20</code> (or <code>8</code> when comparing different types)</li>
+</ul>
+<p>Limit the depth to recurse when printing nested objects.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#diff-expand">diff.expand</a><a class="toc-2" href="#diff-truncatethreshold">diff.truncateThreshold</a><a class="toc-2" href="#diff-truncateannotation">diff.truncateAnnotation</a><a class="toc-2" href="#diff-truncateannotationcolor">diff.truncateAnnotationColor</a><a class="toc-2" href="#diff-printbasicprototype">diff.printBasicPrototype</a><a class="toc-2" href="#diff-maxdepth">diff.maxDepth</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

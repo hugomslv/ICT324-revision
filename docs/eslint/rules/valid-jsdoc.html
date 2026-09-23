@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>valid-jsdoc (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/valid-jsdoc <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/valid-jsdoc">version en ligne</a></div>
+<h1>valid-jsdoc</h1><div class="box box-important"><div class="box-title">❗ Important</div><p>This rule was removed in ESLint v9.0.0 and replaced by the <a href="https://github.com/gajus/eslint-plugin-jsdoc"><code>eslint-plugin-jsdoc</code></a> equivalent.</p>
+</div><p><a href="https://jsdoc.app">JSDoc</a> generates application programming interface (API) documentation from specially-formatted comments in JavaScript code. For example, this is a JSDoc comment for a function:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Add two numbers.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} num1 The first number.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} num2 The second number.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number</span>} The sum of the two numbers.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">num1, num2</span>) {
+    <span class="hljs-keyword">return</span> num1 + num2;
+}</code></pre></div>
+<p>If comments are invalid because of typing mistakes, then documentation will be incomplete.</p>
+<p>If comments are inconsistent because they are not updated when function definitions are modified, then readers might become confused.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule enforces valid and consistent JSDoc comments. It reports any of the following problems:</p>
+<ul>
+<li>missing parameter tag: <code>@arg</code>, <code>@argument</code>, or <code>@param</code></li>
+<li>inconsistent order of parameter names in a comment compared to the function or method</li>
+<li>missing return tag: <code>@return</code> or <code>@returns</code></li>
+<li>missing parameter or return type</li>
+<li>missing parameter or return description</li>
+<li>syntax error</li>
+</ul>
+<p>This rule does not report missing JSDoc comments for classes, functions, or methods.</p>
+<p><strong>Note:</strong> This rule does not support all of the Google Closure documentation tool&#39;s use cases. As such, some code such as <code>(/**number*/ n =&gt; n * 2);</code> will be flagged as missing appropriate function JSDoc comments even though <code>/**number*/</code> is intended to be a type hint and not a documentation block for the function. We don&#39;t recommend using this rule if you use type hints in this way.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint valid-jsdoc: &quot;error&quot;*/</span>
+
+<span class="hljs-comment">// expected @param tag for parameter num1 but found num instead</span>
+<span class="hljs-comment">// missing @param tag for parameter num2</span>
+<span class="hljs-comment">// missing return type</span>
+<span class="hljs-comment">/**
+ * Add two numbers.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} num The first number.
+ * <span class="hljs-doctag">@returns</span> The sum of the two numbers.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">num1, num2</span>) {
+    <span class="hljs-keyword">return</span> num1 + num2;
+}
+
+<span class="hljs-comment">// missing brace</span>
+<span class="hljs-comment">// missing @returns tag</span>
+<span class="hljs-comment">/**
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string name Whom to greet.
+ */
+function greet(name) {
+    console.log(&quot;Hello &quot; + name);
+</span>}
+
+// missing parameter type for num1
+// missing parameter description for num2
+/**
+ * Represents a sum.
+ * <span class="hljs-doctag">@constructor</span>
+ * <span class="hljs-doctag">@param</span> num1 The first number.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">num2</span>
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">sum</span>(<span class="hljs-params">num1, num2</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">num1</span> = num1;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">num2</span> = num2;
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint valid-jsdoc: &quot;error&quot;*/</span>
+
+<span class="hljs-comment">/**
+ * Add two numbers.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} num1 The first number.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} num2 The second number.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number</span>} The sum of the two numbers.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">num1, num2</span>) {
+    <span class="hljs-keyword">return</span> num1 + num2;
+}
+
+<span class="hljs-comment">// default options allow missing function description</span>
+<span class="hljs-comment">// return type `void` means the function has no `return` statement</span>
+<span class="hljs-comment">/**
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} name Whom to greet.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">void</span>}
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">greet</span>(<span class="hljs-params">name</span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;Hello &quot;</span> + name);
+}
+
+<span class="hljs-comment">// @constructor tag allows missing @returns tag</span>
+<span class="hljs-comment">/**
+ * Represents a sum.
+ * <span class="hljs-doctag">@constructor</span>
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} num1 The first number.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} num2 The second number.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">sum</span>(<span class="hljs-params">num1, num2</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">num1</span> = num1;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">num2</span> = num2;
+}
+
+<span class="hljs-comment">// class constructor allows missing @returns tag</span>
+<span class="hljs-comment">/**
+ * Represents a sum.
+ */</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Sum</span> {
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} num1 The first number.
+     * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} num2 The second number.
+     */</span>
+    <span class="hljs-title function_">constructor</span>(<span class="hljs-params">num1, num2</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">num1</span> = num1;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">num2</span> = num2;
+    }
+}
+
+<span class="hljs-comment">// @abstract tag allows @returns tag without `return` statement</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Widget</span> {
+    <span class="hljs-comment">/**
+    * When the state changes, does it affect the rendered appearance?
+    * <span class="hljs-doctag">@abstract</span>
+    * <span class="hljs-doctag">@param</span> {<span class="hljs-type">Object</span>} state The new state of the widget.
+    * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">boolean</span>} Is current appearance inconsistent with new state?
+    */</span>
+    <span class="hljs-title function_">mustRender</span> (state) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Widget subclass did not implement mustRender&quot;</span>);
+    }
+}
+
+<span class="hljs-comment">// @override tag allows missing @param and @returns tags</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">WonderfulWidget</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Widget</span> {
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@override</span>
+     */</span>
+    <span class="hljs-title function_">mustRender</span> (state) {
+        <span class="hljs-keyword">return</span> state !== <span class="hljs-variable language_">this</span>.<span class="hljs-property">state</span>; <span class="hljs-comment">// shallow comparison</span>
+    }
+}</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has an object option:</p>
+<ul>
+<li><code>&quot;prefer&quot;</code> enforces consistent documentation tags specified by an object whose properties mean instead of key use value (for example, <code>&quot;return&quot;: &quot;returns&quot;</code> means instead of <code>@return</code> use <code>@returns</code>)</li>
+<li><code>&quot;preferType&quot;</code> enforces consistent type strings specified by an object whose properties mean instead of key use value (for example, <code>&quot;object&quot;: &quot;Object&quot;</code> means instead of <code>object</code> use <code>Object</code>)</li>
+<li><code>&quot;requireReturn&quot;</code> requires a return tag:<ul>
+<li><code>true</code> (default) <strong>even if</strong> the function or method does not have a <code>return</code> statement (this option value does not apply to constructors)</li>
+<li><code>false</code> <strong>if and only if</strong> the function or method has a <code>return</code> statement or returns a value e.g. <code>async</code> function (this option value does apply to constructors)</li>
+</ul>
+</li>
+<li><code>&quot;requireReturnType&quot;: false</code> allows missing type in return tags</li>
+<li><code>&quot;matchDescription&quot;</code> specifies (as a string) a regular expression to match the description in each JSDoc comment (for example, <code>&quot;.+&quot;</code> requires a description; this option does not apply to descriptions in parameter or return tags)</li>
+<li><code>&quot;requireParamDescription&quot;: false</code> allows missing description in parameter tags</li>
+<li><code>&quot;requireReturnDescription&quot;: false</code> allows missing description in return tags</li>
+<li><code>&quot;requireParamType&quot;: false</code> allows missing type in parameter tags</li>
+</ul>
+<h3 id="prefer"><a class="anchor" href="#prefer">#</a>prefer</h3>
+<p>Examples of additional <strong>incorrect</strong> code for this rule with sample <code>&quot;prefer&quot;: { &quot;arg&quot;: &quot;param&quot;, &quot;argument&quot;: &quot;param&quot;, &quot;class&quot;: &quot;constructor&quot;, &quot;return&quot;: &quot;returns&quot;, &quot;virtual&quot;: &quot;abstract&quot; }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint valid-jsdoc: [&quot;error&quot;, { &quot;prefer&quot;: { &quot;arg&quot;: &quot;param&quot;, &quot;argument&quot;: &quot;param&quot;, &quot;class&quot;: &quot;constructor&quot;, &quot;return&quot;: &quot;returns&quot;, &quot;virtual&quot;: &quot;abstract&quot; } }]*/</span>
+
+<span class="hljs-comment">/**
+ * Add two numbers.
+ * <span class="hljs-doctag">@arg</span> {<span class="hljs-type">number</span>} num1 The first number.
+ * <span class="hljs-doctag">@arg</span> {<span class="hljs-type">number</span>} num2 The second number.
+ * <span class="hljs-doctag">@return</span> {<span class="hljs-type">number</span>} The sum of the two numbers.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">num1, num2</span>) {
+    <span class="hljs-keyword">return</span> num1 + num2;
+}
+
+<span class="hljs-comment">/**
+ * Represents a sum.
+ * <span class="hljs-doctag">@class</span>
+ * <span class="hljs-doctag">@argument</span> {<span class="hljs-type">number</span>} num1 The first number.
+ * <span class="hljs-doctag">@argument</span> {<span class="hljs-type">number</span>} num2 The second number.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">sum</span>(<span class="hljs-params">num1, num2</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">num1</span> = num1;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">num2</span> = num2;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Widget</span> {
+    <span class="hljs-comment">/**
+     * When the state changes, does it affect the rendered appearance?
+     * <span class="hljs-doctag">@virtual</span>
+     * <span class="hljs-doctag">@argument</span> {<span class="hljs-type">Object</span>} state The new state of the widget.
+     * <span class="hljs-doctag">@return</span> {<span class="hljs-type">boolean</span>} Is current appearance inconsistent with new state?
+     */</span>
+    <span class="hljs-title function_">mustRender</span> (state) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Widget subclass did not implement mustRender&quot;</span>);
+    }
+}</code></pre></div>
+</div><h3 id="prefertype"><a class="anchor" href="#prefertype">#</a>preferType</h3>
+<p>Examples of additional <strong>incorrect</strong> code for this rule with sample <code>&quot;preferType&quot;: { &quot;Boolean&quot;: &quot;boolean&quot;, &quot;Number&quot;: &quot;number&quot;, &quot;object&quot;: &quot;Object&quot;, &quot;String&quot;: &quot;string&quot; }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint valid-jsdoc: [&quot;error&quot;, { &quot;preferType&quot;: { &quot;Boolean&quot;: &quot;boolean&quot;, &quot;Number&quot;: &quot;number&quot;, &quot;object&quot;: &quot;Object&quot;, &quot;String&quot;: &quot;string&quot; } }]*/</span>
+
+<span class="hljs-comment">/**
+ * Add two numbers.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">Number</span>} num1 The first number.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">Number</span>} num2 The second number.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">Number</span>} The sum of the two numbers.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">num1, num2</span>) {
+    <span class="hljs-keyword">return</span> num1 + num2;
+}
+
+<span class="hljs-comment">/**
+ * Output a greeting as a side effect.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">String</span>} name Whom to greet.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">void</span>}
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">greet</span>(<span class="hljs-params">name</span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;Hello &quot;</span> + name);
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Widget</span> {
+    <span class="hljs-comment">/**
+     * When the state changes, does it affect the rendered appearance?
+     * <span class="hljs-doctag">@abstract</span>
+     * <span class="hljs-doctag">@param</span> {<span class="hljs-type">object</span>} state The new state of the widget.
+     * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">Boolean</span>} Is current appearance inconsistent with new state?
+     */</span>
+    <span class="hljs-title function_">mustRender</span> (state) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Widget subclass did not implement mustRender&quot;</span>);
+    }
+}</code></pre></div>
+</div><h3 id="requirereturn"><a class="anchor" href="#requirereturn">#</a>requireReturn</h3>
+<p>Examples of additional <strong>incorrect</strong> code for this rule with the <code>&quot;requireReturn&quot;: false</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint valid-jsdoc: [&quot;error&quot;, { &quot;requireReturn&quot;: false }]*/</span>
+
+<span class="hljs-comment">// unexpected @returns tag because function has no `return` statement</span>
+<span class="hljs-comment">/**
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} name Whom to greet.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">string</span>} The greeting.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">greet</span>(<span class="hljs-params">name</span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;Hello &quot;</span> + name);
+}
+
+<span class="hljs-comment">// add @abstract tag to allow @returns tag without `return` statement</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Widget</span> {
+    <span class="hljs-comment">/**
+     * When the state changes, does it affect the rendered appearance?
+     * <span class="hljs-doctag">@param</span> {<span class="hljs-type">Object</span>} state The new state of the widget.
+     * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">boolean</span>} Is current appearance inconsistent with new state?
+     */</span>
+    <span class="hljs-title function_">mustRender</span> (state) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Widget subclass did not implement mustRender&quot;</span>);
+    }
+}</code></pre></div>
+</div><p>Example of additional <strong>correct</strong> code for this rule with the <code>&quot;requireReturn&quot;: false</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint valid-jsdoc: [&quot;error&quot;, { &quot;requireReturn&quot;: false }]*/</span>
+
+<span class="hljs-comment">/**
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} name Whom to greet.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">greet</span>(<span class="hljs-params">name</span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;Hello &quot;</span> + name);
+}</code></pre></div>
+</div><h3 id="requirereturntype"><a class="anchor" href="#requirereturntype">#</a>requireReturnType</h3>
+<p>Example of additional <strong>correct</strong> code for this rule with the <code>&quot;requireReturnType&quot;: false</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint valid-jsdoc: [&quot;error&quot;, { &quot;requireReturnType&quot;: false }]*/</span>
+
+<span class="hljs-comment">/**
+ * Add two numbers.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} num1 The first number.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} num2 The second number.
+ * <span class="hljs-doctag">@returns</span> The sum of the two numbers.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">num1, num2</span>) {
+    <span class="hljs-keyword">return</span> num1 + num2;
+}</code></pre></div>
+</div><h3 id="requireparamtype"><a class="anchor" href="#requireparamtype">#</a>requireParamType</h3>
+<p>Example of additional <strong>correct</strong> code for this rule with the <code>&quot;requireParamType&quot;: false</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint valid-jsdoc: [&quot;error&quot;, { &quot;requireParamType&quot;: false }]*/</span>
+
+<span class="hljs-comment">/**
+ * Add two numbers.
+ * <span class="hljs-doctag">@param</span> num1 The first number.
+ * <span class="hljs-doctag">@param</span> num2 The second number.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number</span>} The sum of the two numbers.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">num1, num2</span>) {
+    <span class="hljs-keyword">return</span> num1 + num2;
+}</code></pre></div>
+</div><h3 id="matchdescription"><a class="anchor" href="#matchdescription">#</a>matchDescription</h3>
+<p>Example of additional <strong>incorrect</strong> code for this rule with a sample <code>&quot;matchDescription&quot;: &quot;.+&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint valid-jsdoc: [&quot;error&quot;, { &quot;matchDescription&quot;: &quot;.+&quot; }]*/</span>
+
+<span class="hljs-comment">// missing function description</span>
+<span class="hljs-comment">/**
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} name Whom to greet.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">void</span>}
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">greet</span>(<span class="hljs-params">name</span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;Hello &quot;</span> + name);
+}</code></pre></div>
+</div><h3 id="requireparamdescription"><a class="anchor" href="#requireparamdescription">#</a>requireParamDescription</h3>
+<p>Example of additional <strong>correct</strong> code for this rule with the <code>&quot;requireParamDescription&quot;: false</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint valid-jsdoc: [&quot;error&quot;, { &quot;requireParamDescription&quot;: false }]*/</span>
+
+<span class="hljs-comment">/**
+ * Add two numbers.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">num1</span>
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">num2</span>
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number</span>} The sum of the two numbers.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">num1, num2</span>) {
+    <span class="hljs-keyword">return</span> num1 + num2;
+}</code></pre></div>
+</div><h3 id="requirereturndescription"><a class="anchor" href="#requirereturndescription">#</a>requireReturnDescription</h3>
+<p>Example of additional <strong>correct</strong> code for this rule with the <code>&quot;requireReturnDescription&quot;: false</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint valid-jsdoc: [&quot;error&quot;, { &quot;requireReturnDescription&quot;: false }]*/</span>
+
+<span class="hljs-comment">/**
+ * Add two numbers.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} num1 The first number.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} num2 The second number.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number</span>}
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">num1, num2</span>) {
+    <span class="hljs-keyword">return</span> num1 + num2;
+}</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you aren&#39;t using JSDoc, then you can safely turn this rule off.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="require-jsdoc.html"><code>require-jsdoc</code></a></p></div><h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://jsdoc.app">https://jsdoc.app</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#prefer">prefer</a><a class="toc-3" href="#prefertype">preferType</a><a class="toc-3" href="#requirereturn">requireReturn</a><a class="toc-3" href="#requirereturntype">requireReturnType</a><a class="toc-3" href="#requireparamtype">requireParamType</a><a class="toc-3" href="#matchdescription">matchDescription</a><a class="toc-3" href="#requireparamdescription">requireParamDescription</a><a class="toc-3" href="#requirereturndescription">requireReturnDescription</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

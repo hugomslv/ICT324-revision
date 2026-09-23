@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plugin API (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/advanced/plugin  <a class="ext small" href="https://vitest.dev/api/advanced/plugin">version en ligne</a></div>
+<h1 id="plugin-api"><a class="anchor" href="#plugin-api">#</a>Plugin API <Version>3.1.0</Version></h1>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This is an advanced API. If you just want to <a href="../../guide/index.html">run tests</a>, you probably don&#39;t need this. It is primarily used by library authors.</p>
+<p>This guide assumes you know how to work with <a href="https://vite.dev/guide/api-plugin.html">Vite plugins</a>.</p>
+</div><p>Vitest supports a <code>configureVitest</code> <a href="https://vite.dev/guide/api-plugin.html">plugin</a> hook since version 3.1.</p>
+<div class="code-group"><div class="code"><div class="code-title">only vitest</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">Vite</span>, <span class="hljs-title class_">VitestPluginContext</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/node&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">plugin</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Vite</span>.<span class="hljs-property">Plugin</span> {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;vitest:my-plugin&#x27;</span>,
+    <span class="hljs-title function_">configureVitest</span>(<span class="hljs-params"><span class="hljs-attr">context</span>: <span class="hljs-title class_">VitestPluginContext</span></span>) {
+      <span class="hljs-comment">// ...</span>
+    }
+  }
+}</code></pre></div>
+<div class="code"><div class="code-title">vite and vitest</div><pre><code class="hljs lang-ts"><span class="hljs-comment">/// &lt;reference types=&quot;vitest/config&quot; /&gt;</span>
+
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">Plugin</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">plugin</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Plugin</span> {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;vitest:my-plugin&#x27;</span>,
+    <span class="hljs-title function_">transform</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-comment">// ...</span>
+    },
+    <span class="hljs-title function_">configureVitest</span>(<span class="hljs-params">context</span>) {
+      <span class="hljs-comment">// ...</span>
+    }
+  }
+}</code></pre></div>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce : TypeScript</div><p>Vitest re-exports all Vite type-only imports via a <code>Vite</code> namespace, which you can use to keep your versions in sync. However, if you are writing a plugin for both Vite and Vitest, you can continue using the <code>Plugin</code> type from the <code>vite</code> entrypoint. Just make sure you have <code>vitest/config</code> referenced somewhere so that <code>configureVitest</code> is augmented correctly:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/// &lt;reference types=&quot;vitest/config&quot; /&gt;</span></code></pre></div>
+</div><p>Unlike <a href="reporters.html#oninit"><code>reporter.onInit</code></a>, this hooks runs early in Vitest lifecycle allowing you to make changes to configuration like <code>coverage</code> and <code>reporters</code>. A more notable change is that you can manipulate the global config from a <a href="../../guide/projects.html">test project</a> if your plugin is defined in the project and not in the global config.</p>
+<h2 id="context"><a class="anchor" href="#context">#</a>Context</h2>
+<h3 id="project"><a class="anchor" href="#project">#</a>project</h3>
+<p>The current <a href="test-project.html">test project</a> that the plugin belongs to.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Browser Mode</div><p>Note that if you are relying on a browser feature, the <code>project.browser</code> field is not set yet. Use <a href="reporters.html#onbrowserinit"><code>reporter.onBrowserInit</code></a> event instead.</p>
+</div><h3 id="vitest"><a class="anchor" href="#vitest">#</a>vitest</h3>
+<p>The global <a href="vitest.html">Vitest</a> instance. You can change the global configuration by directly mutating the <code>vitest.config</code> property:</p>
+<div class="code"><pre><code class="hljs lang-ts">vitest.<span class="hljs-property">config</span>.<span class="hljs-property">coverage</span>.<span class="hljs-property">enabled</span> = <span class="hljs-literal">false</span>
+vitest.<span class="hljs-property">config</span>.<span class="hljs-property">reporters</span>.<span class="hljs-title function_">push</span>([[<span class="hljs-string">&#x27;my-reporter&#x27;</span>, {}]])</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Config is Resolved</div><p>Note that Vitest already resolved the config, so some types might be different from the usual user configuration. This also means that some properties will not be resolved again, like <code>setupFile</code>. If you are adding new files, make sure to resolve it first.</p>
+<p>At this point reporters are not created yet, so modifying <code>vitest.reporters</code> will have no effect because it will be overwritten. If you need to inject your own reporter, modify the config instead.</p>
+</div><h3 id="injecttestprojects"><a class="anchor" href="#injecttestprojects">#</a>injectTestProjects</h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">injectTestProjects</span>(<span class="hljs-params">
+  <span class="hljs-attr">config</span>: <span class="hljs-title class_">TestProjectConfiguration</span> | <span class="hljs-title class_">TestProjectConfiguration</span>[]
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TestProject</span>[]&gt;</code></pre></div>
+<p>This methods accepts a config glob pattern, a filepath to the config or an inline configuration. It returns an array of resolved <a href="test-project.html">test projects</a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// inject a single project with a custom alias</span>
+<span class="hljs-keyword">const</span> newProjects = <span class="hljs-keyword">await</span> <span class="hljs-title function_">injectTestProjects</span>({
+  <span class="hljs-comment">// you can inherit the current project config by referencing `extends`</span>
+  <span class="hljs-comment">// note that you cannot have a project with the name that already exists,</span>
+  <span class="hljs-comment">// so it&#x27;s a good practice to define a custom name</span>
+  <span class="hljs-attr">extends</span>: project.<span class="hljs-property">vite</span>.<span class="hljs-property">config</span>.<span class="hljs-property">configFile</span>,
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;my-custom-alias&#x27;</span>,
+    <span class="hljs-attr">alias</span>: {
+      <span class="hljs-attr">customAlias</span>: <span class="hljs-title function_">resolve</span>(<span class="hljs-string">&#x27;./custom-path.js&#x27;</span>),
+    },
+  },
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Projects are Filtered</div><p>Vitest filters projects during the config resolution, so if the user defined a filter, injected project might not be resolved unless it <a href="vitest.html#matchesprojectfilter">matches the filter</a>. You can update the filter via the <code>vitest.config.project</code> option to always include your test project:</p>
+<div class="code"><pre><code class="hljs lang-ts">vitest.<span class="hljs-property">config</span>.<span class="hljs-property">project</span>.<span class="hljs-title function_">push</span>(<span class="hljs-string">&#x27;my-project-name&#x27;</span>)</code></pre></div>
+<p>Note that this will only affect projects injected with <a href="#injecttestprojects"><code>injectTestProjects</code></a> method.</p>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce : Referencing the Current Config</div><p>Inline configurations inherit the root config by default. If you want to inherit a specific configuration file instead, set the <code>extends</code> property to its path. All other properties will be merged with the user defined config.</p>
+<p>The project&#39;s <code>configFile</code> can be accessed in Vite&#39;s config: <code>project.vite.config.configFile</code>.</p>
+<p>Note that the <code>name</code> is never inherited because Vitest doesn&#39;t allow multiple projects with the same name. Make sure every project has a unique name. You can access the current name via the <code>project.name</code> property and all used names are available in the <code>vitest.projects</code> array.</p>
+</div><h3 id="definecachekeygenerator"><a class="anchor" href="#definecachekeygenerator">#</a>defineCacheKeyGenerator <Version>5.0.0</Version></h3>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">CacheKeyIdGeneratorContext</span> {
+  <span class="hljs-attr">environment</span>: <span class="hljs-title class_">DevEnvironment</span>
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">sourceCode</span>: <span class="hljs-built_in">string</span>
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">defineCacheKeyGenerator</span>(<span class="hljs-params">
+  <span class="hljs-attr">callback</span>: (context: CacheKeyIdGeneratorContext) =&gt; <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span> | <span class="hljs-literal">null</span> | <span class="hljs-literal">false</span>
+</span>): <span class="hljs-built_in">void</span></code></pre></div>
+<p>Define a generator that will be applied before hashing the cache key.</p>
+<p>Use this to make sure Vitest generates correct hash. It is a good idea to define this function if your plugin can be registered with different options.</p>
+<p>This is called only if <a href="../../config/fsmodulecache.html"><code>fsModuleCache</code></a> is enabled.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">PluginOptions</span> {
+  <span class="hljs-attr">replacePropertyKey</span>: <span class="hljs-built_in">string</span>
+  <span class="hljs-attr">replacePropertyValue</span>: <span class="hljs-built_in">string</span>
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">plugin</span>(<span class="hljs-params"><span class="hljs-attr">options</span>: <span class="hljs-title class_">PluginOptions</span></span>) {
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;plugin-that-replaces-property&#x27;</span>,
+    <span class="hljs-title function_">transform</span>(<span class="hljs-params">code</span>) {
+      <span class="hljs-keyword">return</span> code.<span class="hljs-title function_">replace</span>(
+        options.<span class="hljs-property">replacePropertyKey</span>,
+        options.<span class="hljs-property">replacePropertyValue</span>
+      )
+    },
+    <span class="hljs-title function_">configureVitest</span>(<span class="hljs-params">{ defineCacheKeyGenerator }</span>) {
+      <span class="hljs-title function_">defineCacheKeyGenerator</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-comment">// since these options affect the transform result,</span>
+        <span class="hljs-comment">// return them together as a unique string</span>
+        <span class="hljs-keyword">return</span> options.<span class="hljs-property">replacePropertyKey</span> + options.<span class="hljs-property">replacePropertyValue</span>
+      })
+    }
+  }
+}</code></pre></div>
+<p>If <code>false</code> is returned, the module will not be cached on the file system.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#context">Context</a><a class="toc-3" href="#project">project</a><a class="toc-3" href="#vitest">vitest</a><a class="toc-3" href="#injecttestprojects">injectTestProjects</a><a class="toc-3" href="#definecachekeygenerator">defineCacheKeyGenerator 5.0.0</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

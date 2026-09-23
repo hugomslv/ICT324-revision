@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conditional Mocking with vi.when | Recipes (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/recipes/conditional-mocking  <a class="ext small" href="https://vitest.dev/guide/recipes/conditional-mocking">version en ligne</a></div>
+<h1 id="conditional-mocking-with-vi-when"><a class="anchor" href="#conditional-mocking-with-vi-when">#</a>Conditional Mocking with <code>vi.when</code></h1>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Prerequisites</div><p>This recipe assumes you already have some familiarity with <a href="../mocking.html">mocking</a> in Vitest.</p>
+</div><p>When a mock needs to return different values depending on the arguments it receives, <a href="../../api/mock.html#mockreturnvalue"><code>mockReturnValue</code></a> doesn&#39;t help because it always returns the same value. The standard approach would be to use <a href="../../api/mock.html#mockimplementation"><code>mockImplementation</code></a> with a <code>switch</code> or a series of <code>if/else</code> statements:</p>
+<div class="code"><pre><code class="hljs lang-ts">db.<span class="hljs-property">findById</span>.<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
+  <span class="hljs-keyword">if</span> (id === <span class="hljs-number">1</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>({ <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Ella&#x27;</span> })
+  }
+
+  <span class="hljs-keyword">if</span> (id === <span class="hljs-number">2</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>({ <span class="hljs-attr">id</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Gracie&#x27;</span> })
+  }
+
+  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>(<span class="hljs-literal">undefined</span>)
+})</code></pre></div>
+<p>This works, but it becomes tedious because you have to write the argument-matching logic yourself. This is something that Vitest can handle for you when using the <a href="../../api/vi.html#vi-when"><code>vi.when</code></a> <Version>5.0.0</Version> API.</p>
+<h2 id="pattern"><a class="anchor" href="#pattern">#</a>Pattern</h2>
+<p><code>vi.when</code> takes a spy and lets you define argument-specific behaviors.</p>
+<p>Call <code>.calledWith(...args)</code> to declare which arguments to match. This creates a <em>behavior</em>.</p>
+<p>Then attach an <em>action</em> by calling a <code>then*</code> method. The action determines what happens when the behavior matches.</p>
+<p>Multiple behaviors can be chained on the same spy:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { getUserById } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./user.ts&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;returns user data&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> db = { <span class="hljs-attr">findById</span>: vi.<span class="hljs-property">fn</span>&lt;<span class="hljs-title class_">FindById</span>&gt;() }
+
+  vi.<span class="hljs-title function_">when</span>(db.<span class="hljs-property">findById</span>)
+    .<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">1</span>)
+    .<span class="hljs-title function_">thenResolve</span>({ <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Ella&#x27;</span> })
+    .<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">2</span>)
+    .<span class="hljs-title function_">thenResolve</span>({ <span class="hljs-attr">id</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Gracie&#x27;</span> })
+
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">getUserById</span>(db, <span class="hljs-number">1</span>)).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Ella&#x27;</span> })
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">getUserById</span>(db, <span class="hljs-number">2</span>)).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Gracie&#x27;</span> })
+})</code></pre></div>
+<p>The same approach works across all mock outcome types. Here is the full set of actions and their equivalents:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Equivalent to</th>
+<th>Equivalent code</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>thenReturn(value)</code></td>
+<td><code>mockReturnValue(value)</code></td>
+<td><code>return value</code></td>
+</tr>
+<tr>
+<td><code>thenThrow(error)</code></td>
+<td><code>mockThrow(error)</code></td>
+<td><code>throw error</code></td>
+</tr>
+<tr>
+<td><code>thenResolve(value)</code></td>
+<td><code>mockResolvedValue(value)</code></td>
+<td><code>return Promise.resolve(value)</code></td>
+</tr>
+<tr>
+<td><code>thenReject(error)</code></td>
+<td><code>mockRejectedValue(error)</code></td>
+<td><code>return Promise.reject(error)</code></td>
+</tr>
+</tbody></table></div>
+<h2 id="stacking-actions"><a class="anchor" href="#stacking-actions">#</a>Stacking actions</h2>
+<p>A single behavior can have multiple actions attached to it. When the behavior matches, actions are <em>consumed</em> in <strong>last-in-first-out</strong> order: the most recently registered action runs first. Once that action has been consumed, Vitest falls back to the previous one. Use the <code>times</code> option to limit how many calls an action handles before falling through to the next action. An action with no <code>times</code> limit runs indefinitely.</p>
+<p>Because actions are evaluated in reverse registration order, indefinite actions should be registered first so that later finite actions can temporarily override them.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { readConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./config.ts&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;retries after an initial failure&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> fetchInstance = vi.<span class="hljs-property">fn</span>&lt;<span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">unknown</span>&gt;&gt;()
+
+  vi.<span class="hljs-title function_">when</span>(fetchInstance)
+    .<span class="hljs-title function_">calledWith</span>(<span class="hljs-string">&#x27;/data/config.json&#x27;</span>)
+    .<span class="hljs-title function_">thenResolve</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Response</span>(<span class="hljs-string">&#x27;{ debug: true }&#x27;</span>))
+    <span class="hljs-comment">// ↳ indefinite fallback</span>
+    .<span class="hljs-title function_">thenReject</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;network error&#x27;</span>), { <span class="hljs-attr">times</span>: <span class="hljs-number">1</span> })
+    <span class="hljs-comment">// ↳ applied first and consumed after one call</span>
+
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">readConfig</span>(fetchInstance)).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">debug</span>: <span class="hljs-literal">true</span> })
+
+  <span class="hljs-title function_">expect</span>(fetchInstance).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(<span class="hljs-number">2</span>)
+})</code></pre></div>
+<p>For convenience, <code>then*Once</code> shorthands are available and equivalent to <code>{ times: 1 }</code>: <code>thenReturnOnce</code>, <code>thenResolveOnce</code>, <code>thenThrowOnce</code>, <code>thenRejectOnce</code>.</p>
+<h2 id="asymmetric-matchers"><a class="anchor" href="#asymmetric-matchers">#</a>Asymmetric matchers</h2>
+<p><code>calledWith</code> supports <a href="../learn/matchers.html#asymmetric-matchers">asymmetric matchers</a>. This is useful when you care about the shape or type of an argument rather than its exact value:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;sends email to each recipient&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  vi.<span class="hljs-title function_">when</span>(sendEmail)
+    .<span class="hljs-title function_">calledWith</span>(expect.<span class="hljs-title function_">stringContaining</span>(<span class="hljs-string">&#x27;@&#x27;</span>))
+    .<span class="hljs-title function_">thenReturn</span>({ <span class="hljs-attr">ok</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">message</span>: <span class="hljs-string">&#x27;sent via external relay&#x27;</span> })
+})</code></pre></div>
+<p>Behaviors, unlike actions, are matched in <strong>first-in-first-out</strong> order. The first behavior whose arguments match the call wins, just like a chain of <code>if/else</code> statements. Specific matchers must therefore be registered before broad ones.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;sends email to each recipient&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  vi.<span class="hljs-title function_">when</span>(sendEmail)
+    .<span class="hljs-title function_">calledWith</span>(expect.<span class="hljs-title function_">stringContaining</span>(<span class="hljs-string">&#x27;@internal.example.com&#x27;</span>))
+    .<span class="hljs-title function_">thenReturn</span>({ <span class="hljs-attr">ok</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">message</span>: <span class="hljs-string">&#x27;sent via internal relay&#x27;</span> })
+    .<span class="hljs-title function_">calledWith</span>(expect.<span class="hljs-title function_">stringContaining</span>(<span class="hljs-string">&#x27;@&#x27;</span>))
+    .<span class="hljs-title function_">thenReturn</span>({ <span class="hljs-attr">ok</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">message</span>: <span class="hljs-string">&#x27;sent via external relay&#x27;</span> })
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Behavior Merging</div><p>When registering a new behavior, Vitest checks existing behaviors in registration order. If the new arguments already match an existing behavior, the new action is merged into that behavior instead of creating a new one.</p>
+<p>This is especially important with broad asymmetric matchers:</p>
+<div class="code"><pre><code class="hljs lang-ts">vi.<span class="hljs-title function_">when</span>(getRole)
+  .<span class="hljs-title function_">calledWith</span>(expect.<span class="hljs-title function_">any</span>(<span class="hljs-title class_">String</span>))
+  .<span class="hljs-title function_">thenReturn</span>(<span class="hljs-string">&#x27;user&#x27;</span>)
+  .<span class="hljs-title function_">calledWith</span>(<span class="hljs-string">&#x27;admin@example.com&#x27;</span>)
+  .<span class="hljs-title function_">thenReturnOnce</span>(<span class="hljs-string">&#x27;admin&#x27;</span>)</code></pre></div>
+<p>Because the second registration is merged into the existing behavior, the <code>&#39;admin&#39;</code> action is not scoped to <code>&#39;admin@example.com&#39;</code>. Instead, it becomes the next action for the entire <code>expect.any(String)</code> behavior. The resulting behavior acts as if it had been written like this:</p>
+<div class="code"><pre><code class="hljs lang-ts">vi.<span class="hljs-title function_">when</span>(getRole)
+  .<span class="hljs-title function_">calledWith</span>(expect.<span class="hljs-title function_">any</span>(<span class="hljs-title class_">String</span>))
+  .<span class="hljs-title function_">thenReturn</span>(<span class="hljs-string">&#x27;user&#x27;</span>)
+  .<span class="hljs-title function_">thenReturnOnce</span>(<span class="hljs-string">&#x27;admin&#x27;</span>)</code></pre></div>
+<p>As a result, the first call with any string returns <code>&#39;admin&#39;</code>, while later calls return <code>&#39;user&#39;</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">expect</span>(<span class="hljs-title function_">getRole</span>(<span class="hljs-string">&#x27;user@example.com&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;admin&#x27;</span>)
+<span class="hljs-title function_">expect</span>(<span class="hljs-title function_">getRole</span>(<span class="hljs-string">&#x27;user@example.com&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;user&#x27;</span>)</code></pre></div>
+</div><h2 id="handling-unmatched-calls"><a class="anchor" href="#handling-unmatched-calls">#</a>Handling unmatched calls</h2>
+<p>By default, when the spy is called with arguments that match no registered behavior, it falls back to the spy&#39;s original implementation. If the spy has no original implementation, it returns <code>undefined</code>.</p>
+<p>There are three ways to handle this differently:</p>
+<ol>
+<li><a href="#onunmatched-throw">throwing an error</a>;</li>
+<li><a href="#onunmatched-fn">running a custom function</a>;</li>
+<li><a href="#asymmetric-matcher-as-catch-all">using asymmetric matchers as catch-all behaviors</a>.</li>
+</ol>
+<h3 id="onunmatched-throw"><a class="anchor" href="#onunmatched-throw">#</a><code>onUnmatched: &#39;throw&#39;</code></h3>
+<p>Pass <code>{ onUnmatched: &#39;throw&#39; }</code> to throw whenever the spy is called with unregistered arguments:</p>
+<div class="code"><pre><code class="hljs lang-ts">vi.<span class="hljs-title function_">when</span>(db.<span class="hljs-property">findById</span>, { <span class="hljs-attr">onUnmatched</span>: <span class="hljs-string">&#x27;throw&#x27;</span> })
+  .<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">1</span>)
+  .<span class="hljs-title function_">thenResolve</span>({ <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Ella&#x27;</span> })
+
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(db.<span class="hljs-title function_">findById</span>(<span class="hljs-number">1</span>)).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toMatchObject</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Ella&#x27;</span> })
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(db.<span class="hljs-title function_">findById</span>(<span class="hljs-number">3</span>)).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toThrow</span>(
+  <span class="hljs-string">&#x27;vi.when: no behavior defined when called with [3]&#x27;</span>,
+)</code></pre></div>
+<p>The error message includes the unmatched arguments. The error type and message are fixed and cannot be customized.</p>
+<h3 id="onunmatched-fn"><a class="anchor" href="#onunmatched-fn">#</a><code>onUnmatched: fn</code></h3>
+<p>Pass a function to handle unmatched calls with custom logic, for example when a shared mock needs a different fallback per test.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> db = { <span class="hljs-attr">findById</span>: vi.<span class="hljs-property">fn</span>&lt;<span class="hljs-title class_">FindById</span>&gt;() }
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;returns a placeholder for unknown ids&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  vi.<span class="hljs-title function_">when</span>(
+    db.<span class="hljs-property">findById</span>,
+    { <span class="hljs-attr">onUnmatched</span>: <span class="hljs-function"><span class="hljs-params">id</span> =&gt;</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>({ id, <span class="hljs-attr">name</span>: <span class="hljs-string">`User <span class="hljs-subst">${id}</span>`</span> }) }
+  )
+    .<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">1</span>)
+    .<span class="hljs-title function_">thenResolve</span>({ <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Ella&#x27;</span> })
+
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(db.<span class="hljs-title function_">findById</span>(<span class="hljs-number">1</span>)).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toMatchObject</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Ella&#x27;</span> })
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(db.<span class="hljs-title function_">findById</span>(<span class="hljs-number">42</span>)).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toMatchObject</span>({ <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;User 42&#x27;</span> })
+})</code></pre></div>
+<p>The function is called with the same arguments as the spy and its return value is used directly as the spy&#39;s result. If it throws or returns a rejected promise, that error propagates to the caller just as it would from any action.</p>
+<h3 id="asymmetric-matcher-as-catch-all"><a class="anchor" href="#asymmetric-matcher-as-catch-all">#</a>Asymmetric matcher as catch-all</h3>
+<p>Registering a broad <code>calledWith</code> last acts as a fallback for calls that do not match any earlier, more specific behavior. The fallback behavior can return a specific value, resolve or reject a promise, or throw a typed error.</p>
+<div class="code"><pre><code class="hljs lang-ts">vi.<span class="hljs-title function_">when</span>(db.<span class="hljs-property">findById</span>)
+  .<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">1</span>)
+  .<span class="hljs-title function_">thenResolve</span>({ <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Ella&#x27;</span> })
+  .<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">2</span>)
+  .<span class="hljs-title function_">thenResolve</span>({ <span class="hljs-attr">id</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Gracie&#x27;</span> })
+  .<span class="hljs-title function_">calledWith</span>(expect.<span class="hljs-title function_">any</span>(<span class="hljs-title class_">Number</span>))
+  .<span class="hljs-title function_">thenReject</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;user not found&#x27;</span>))</code></pre></div>
+<h2 id="asserting-that-all-behaviors-were-called"><a class="anchor" href="#asserting-that-all-behaviors-were-called">#</a>Asserting that all behaviors were called</h2>
+<p>To check that all registered behaviors were actually matched and their actions consumed, the object returned by <code>vi.when</code> supports the <a href="../../api/expect.html#tohavebeenexhausted"><code>toHaveBeenExhausted</code></a> assertion:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;loads both users&#x27;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> db = { <span class="hljs-attr">findById</span>: vi.<span class="hljs-property">fn</span>&lt;<span class="hljs-title class_">FindById</span>&gt;() }
+
+  <span class="hljs-keyword">const</span> w = vi.<span class="hljs-title function_">when</span>(db.<span class="hljs-property">findById</span>)
+    .<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">1</span>)
+    .<span class="hljs-title function_">thenResolveOnce</span>({ <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Ella&#x27;</span> })
+    .<span class="hljs-title function_">calledWith</span>(<span class="hljs-number">2</span>)
+    .<span class="hljs-title function_">thenResolveOnce</span>({ <span class="hljs-attr">id</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;Gracie&#x27;</span> })
+
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadDashboard</span>(db)
+
+  <span class="hljs-title function_">expect</span>(w).<span class="hljs-title function_">toHaveBeenExhausted</span>()
+})</code></pre></div>
+<p>In this example, if <code>loadDashboard</code> only calls <code>findById(1)</code>, the test fails with a message listing the behaviors that were never matched:</p>
+<div class="code"><pre><code class="hljs lang-txt">AssertionError: expected all behaviors to have been exhausted, but some remain:
+
+  calledWith(2)
+    ✗ thenReturn({ id: 2, name: 'Gracie' })  never called</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Caveat</div><p>A <code>vi.when</code> chain with no behaviors is never considered exhausted. The same applies to a bare <code>.calledWith()</code> with no <code>then*</code> action attached. Both will always cause <code>toHaveBeenExhausted</code> to fail.</p>
+<p>Indefinite actions (no <code>times</code> limit) satisfy exhaustion checks after being used at least once. The actions keep responding after that, but the assertion is satisfied.</p>
+</div><h2 id="automatic-cleanup-with-using"><a class="anchor" href="#automatic-cleanup-with-using">#</a>Automatic cleanup with <code>using</code></h2>
+<p><code>vi.when</code> supports the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Resource_management">Explicit Resource Management</a> protocol.</p>
+<p>Declare the chain with <code>using</code> to scope behaviors to the current block and restore the spy automatically when execution leaves it.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;original&#x27;</span>)
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;with mocked behavior&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">using</span> w = vi.<span class="hljs-title function_">when</span>(spy).<span class="hljs-title function_">calledWith</span>(<span class="hljs-string">&#x27;hello&#x27;</span>).<span class="hljs-title function_">thenReturn</span>(<span class="hljs-string">&#x27;mocked&#x27;</span>)
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">spy</span>(<span class="hljs-string">&#x27;hello&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;mocked&#x27;</span>)
+}) <span class="hljs-comment">// ← restored here</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;without mocked behavior&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">spy</span>(<span class="hljs-string">&#x27;hello&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;original&#x27;</span>)
+})</code></pre></div>
+<h2 id="see-also"><a class="anchor" href="#see-also">#</a>See also</h2>
+<ul>
+<li><a href="../../api/vi.html#vi-when"><code>vi.when</code></a></li>
+<li><a href="../../api/expect.html#tohavebeenexhausted"><code>toHaveBeenExhausted</code></a></li>
+<li><a href="../../api/vi.html#vi-iswhenchain"><code>vi.isWhenChain</code></a></li>
+<li><a href="explicit-resources.html">Auto-Cleanup with <code>using</code></a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#pattern">Pattern</a><a class="toc-2" href="#stacking-actions">Stacking actions</a><a class="toc-2" href="#asymmetric-matchers">Asymmetric matchers</a><a class="toc-2" href="#handling-unmatched-calls">Handling unmatched calls</a><a class="toc-3" href="#onunmatched-throw">onUnmatched: 'throw'</a><a class="toc-3" href="#onunmatched-fn">onUnmatched: fn</a><a class="toc-3" href="#asymmetric-matcher-as-catch-all">Asymmetric matcher as catch-all</a><a class="toc-2" href="#asserting-that-all-behaviors-were-called">Asserting that all behaviors were called</a><a class="toc-2" href="#automatic-cleanup-with-using">Automatic cleanup with using</a><a class="toc-2" href="#see-also">See also</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

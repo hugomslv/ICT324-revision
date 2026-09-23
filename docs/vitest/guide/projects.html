@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test Projects | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/projects  <a class="ext small" href="https://vitest.dev/guide/projects">version en ligne</a></div>
+<h1 id="test-projects"><a class="anchor" href="#test-projects">#</a>Test Projects</h1>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Sample Project</div><p><a href="https://github.com/vitest-dev/vitest/tree/main/examples/projects">GitHub</a> - <a href="https://stackblitz.com/fork/github/vitest-dev/vitest/tree/main/examples/projects?initialPath=__vitest__/">Play Online</a></p>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This feature is also known as a <code>workspace</code>. The <code>workspace</code> is deprecated since 3.2 and replaced with the <code>projects</code> configuration. They are functionally the same.</p>
+</div><p>Vitest provides a way to define multiple project configurations within a single Vitest process. This feature is particularly useful for monorepo setups but can also be used to run tests with different configurations, such as <code>resolve.alias</code>, <code>plugins</code>, or <code>test.browser</code> and more.</p>
+<h2 id="defining-projects"><a class="anchor" href="#defining-projects">#</a>Defining Projects</h2>
+<p>You can define projects in your root <a href="../config/index.html">config</a>:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [<span class="hljs-string">&#x27;packages/*&#x27;</span>],
+  },
+})</code></pre></div>
+<p>Project configurations are inlined configs, files, or glob patterns referencing your projects. For example, if you have a folder named <code>packages</code> that contains your projects, you can define an array in your root Vitest config:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [<span class="hljs-string">&#x27;packages/*&#x27;</span>],
+  },
+})</code></pre></div>
+<p>Vitest will treat every folder in <code>packages</code> as a separate project even if it doesn&#39;t have a config file inside. If a project entry resolves to a file (either from a glob pattern or a direct file path), Vitest will validate that the name either:</p>
+<ul>
+<li>starts with <code>vitest.config</code> or <code>vite.config</code> (for example, <code>vitest.config.unit.ts</code>)</li>
+<li>or matches <code>vitest.&lt;name&gt;.config.*</code> / <code>vite.&lt;name&gt;.config.*</code>, where <code>&lt;name&gt;</code> can contain letters, numbers, <code>_</code>, and <code>-</code></li>
+</ul>
+<p>For example, these config files are valid:</p>
+<ul>
+<li><code>vitest.config.ts</code></li>
+<li><code>vite.config.js</code></li>
+<li><code>vitest.unit.config.ts</code></li>
+<li><code>vitest.e2e-node.config.ts</code></li>
+<li><code>vite.e2e.config.js</code></li>
+<li><code>vitest.config.unit.js</code></li>
+<li><code>vite.config.e2e.js</code></li>
+</ul>
+<p>To exclude folders and files, you can use the negation pattern:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-comment">// include all folders inside &quot;packages&quot; except &quot;excluded&quot;</span>
+    <span class="hljs-attr">projects</span>: [
+      <span class="hljs-string">&#x27;packages/*&#x27;</span>,
+      <span class="hljs-string">&#x27;!packages/excluded&#x27;</span>
+    ],
+  },
+})</code></pre></div>
+<p>If you have a nested structure where some folders need to be projects, but other folders have their own subfolders, you have to use brackets to avoid matching the parent folder:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-comment">// For example, this will create projects:</span>
+<span class="hljs-comment">// packages/a</span>
+<span class="hljs-comment">// packages/b</span>
+<span class="hljs-comment">// packages/business/c</span>
+<span class="hljs-comment">// packages/business/d</span>
+<span class="hljs-comment">// Notice that &quot;packages/business&quot; is not a project itself</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [
+      <span class="hljs-comment">// matches every folder inside &quot;packages&quot; except &quot;business&quot;</span>
+      <span class="hljs-string">&#x27;packages/!(business)&#x27;</span>,
+      <span class="hljs-comment">// matches every folder inside &quot;packages/business&quot;</span>
+      <span class="hljs-string">&#x27;packages/business/*&#x27;</span>,
+    ],
+  },
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Vitest does not treat the root <code>vitest.config</code> file as a project unless it is explicitly specified in the configuration. Consequently, the root configuration will only influence global options such as <code>reporters</code> and <code>coverage</code>. Note that Vitest will always run certain plugin hooks, like <code>apply</code>, <code>config</code>, <code>configResolved</code> or <code>configureServer</code>, specified in the root config file. Vitest also uses the same plugins to execute global setups and custom coverage provider.</p>
+</div><p>You can also reference projects with their config files:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [<span class="hljs-string">&#x27;packages/*/vitest.config.{e2e,unit}.ts&#x27;</span>],
+  },
+})</code></pre></div>
+<p>This pattern will only include projects with a <code>vitest.config</code> file that contains <code>e2e</code> or <code>unit</code> before the extension.</p>
+<p>You can also define projects using inline configuration. The configuration supports both syntaxes simultaneously.</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [
+      <span class="hljs-comment">// matches every folder and file inside the `packages` folder</span>
+      <span class="hljs-string">&#x27;packages/*&#x27;</span>,
+      {
+        <span class="hljs-comment">// inline projects inherit the options</span>
+        <span class="hljs-comment">// from this config file by default</span>
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;tests/**/*.{browser}.test.{ts,js}&#x27;</span>],
+          <span class="hljs-comment">// it is recommended to define a name when using inline configs</span>
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;happy-dom&#x27;</span>,
+          <span class="hljs-attr">environment</span>: <span class="hljs-string">&#x27;happy-dom&#x27;</span>,
+        }
+      },
+      {
+        <span class="hljs-comment">// add &quot;extends: false&quot; to ignore</span>
+        <span class="hljs-comment">// the options defined in this config file</span>
+        <span class="hljs-attr">extends</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;tests/**/*.{node}.test.{ts,js}&#x27;</span>],
+          <span class="hljs-comment">// color of the name label can be changed</span>
+          <span class="hljs-attr">name</span>: { <span class="hljs-attr">label</span>: <span class="hljs-string">&#x27;node&#x27;</span>, <span class="hljs-attr">color</span>: <span class="hljs-string">&#x27;green&#x27;</span> },
+          <span class="hljs-attr">environment</span>: <span class="hljs-string">&#x27;node&#x27;</span>,
+        }
+      }
+    ]
+  }
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>All projects must have unique names; otherwise, Vitest will throw an error. If a name is not provided in the inline configuration, Vitest will assign a number. For project configurations defined with glob syntax, Vitest will default to using the &quot;name&quot; property in the nearest <code>package.json</code> file or, if none exists, the folder name.</p>
+</div><p>Projects do not support all configuration properties. For better type safety, use the <code>defineProject</code> method instead of <code>defineConfig</code> within project configuration files:</p>
+<div class="code"><div class="code-title">packages/a/vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineProject } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineProject</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">environment</span>: <span class="hljs-string">&#x27;jsdom&#x27;</span>,
+    <span class="hljs-comment">// &quot;reporters&quot; is not supported in a project config,</span>
+    <span class="hljs-comment">// so it will show an error</span>
+    <span class="hljs-attr">reporters</span>: [<span class="hljs-string">&#x27;json&#x27;</span>]
+  }
+})</code></pre></div>
+<h2 id="running-tests"><a class="anchor" href="#running-tests">#</a>Running Tests</h2>
+<p>To run tests, define a script in your root <code>package.json</code>:</p>
+<div class="code"><div class="code-title">package.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;test&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Now tests can be run using your package manager:</p>
+<div class="code-group"><div class="code"><div class="code-title">npm</div><pre><code class="hljs lang-bash">npm run <span class="hljs-built_in">test</span></code></pre></div>
+<div class="code"><div class="code-title">yarn</div><pre><code class="hljs lang-bash">yarn <span class="hljs-built_in">test</span></code></pre></div>
+<div class="code"><div class="code-title">pnpm</div><pre><code class="hljs lang-bash">pnpm run <span class="hljs-built_in">test</span></code></pre></div>
+<div class="code"><div class="code-title">bun</div><pre><code class="hljs lang-bash">bun run <span class="hljs-built_in">test</span></code></pre></div>
+</div><p>If you need to run tests only inside a single project, use the <code>--project</code> CLI option:</p>
+<div class="code-group"><div class="code"><div class="code-title">npm</div><pre><code class="hljs lang-bash">npm run <span class="hljs-built_in">test</span> --project e2e</code></pre></div>
+<div class="code"><div class="code-title">yarn</div><pre><code class="hljs lang-bash">yarn <span class="hljs-built_in">test</span> --project e2e</code></pre></div>
+<div class="code"><div class="code-title">pnpm</div><pre><code class="hljs lang-bash">pnpm run <span class="hljs-built_in">test</span> --project e2e</code></pre></div>
+<div class="code"><div class="code-title">bun</div><pre><code class="hljs lang-bash">bun run <span class="hljs-built_in">test</span> --project e2e</code></pre></div>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>CLI option <code>--project</code> can be used multiple times to filter out several projects:</p>
+<div class="code-group"><div class="code"><div class="code-title">npm</div><pre><code class="hljs lang-bash">npm run <span class="hljs-built_in">test</span> --project e2e --project unit</code></pre></div>
+<div class="code"><div class="code-title">yarn</div><pre><code class="hljs lang-bash">yarn <span class="hljs-built_in">test</span> --project e2e --project unit</code></pre></div>
+<div class="code"><div class="code-title">pnpm</div><pre><code class="hljs lang-bash">pnpm run <span class="hljs-built_in">test</span> --project e2e --project unit</code></pre></div>
+<div class="code"><div class="code-title">bun</div><pre><code class="hljs lang-bash">bun run <span class="hljs-built_in">test</span> --project e2e --project unit</code></pre></div>
+</div></div><p>The filter supports <code>*</code> wildcards and <code>!</code> exclusions. A project runs if it matches no negated pattern and, when regular patterns are also given, matches at least one of them:</p>
+<div class="code"><pre><code class="hljs lang-bash"><span class="hljs-comment"># run every project except &quot;e2e&quot;</span>
+vitest --project <span class="hljs-string">&#x27;!e2e&#x27;</span>
+<span class="hljs-comment"># run every project starting with &quot;unit&quot;, except &quot;unit (browser)&quot;</span>
+vitest --project <span class="hljs-string">&#x27;unit*&#x27;</span> --project <span class="hljs-string">&#x27;!unit (browser)&#x27;</span></code></pre></div>
+<h2 id="configuration"><a class="anchor" href="#configuration">#</a>Configuration</h2>
+<p>Projects defined with an inline configuration inherit all options from the root-level configuration. This is controlled by the <code>extends</code> option, which is enabled by default since Vitest 5.0:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> react <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@vitejs/plugin-react&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [<span class="hljs-title function_">react</span>()],
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">pool</span>: <span class="hljs-string">&#x27;threads&#x27;</span>,
+    <span class="hljs-attr">projects</span>: [
+      {
+        <span class="hljs-comment">// inherits options from this config like plugins and pool</span>
+        <span class="hljs-comment">// (`extends: true` is the default)</span>
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;unit&#x27;</span>,
+          <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;**/*.unit.test.ts&#x27;</span>],
+        },
+      },
+      {
+        <span class="hljs-comment">// won&#x27;t inherit any options from this config</span>
+        <span class="hljs-attr">extends</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;integration&#x27;</span>,
+          <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;**/*.integration.test.ts&#x27;</span>],
+        },
+      },
+    ],
+  },
+})</code></pre></div>
+<p>The <code>extends</code> option also accepts a path to another config file if you want to inherit options from a config file other than the root config:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [
+      {
+        <span class="hljs-attr">extends</span>: <span class="hljs-string">&#x27;./vitest.shared.ts&#x27;</span>,
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;unit&#x27;</span>,
+          <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;**/*.unit.test.ts&#x27;</span>],
+        },
+      },
+    ],
+  },
+})</code></pre></div>
+<p>All options from the extended config are merged with the project&#39;s own options. Note that arrays like <code>setupFiles</code> are concatenated, not overridden. A few options are treated specially:</p>
+<ul>
+<li><code>name</code> and <code>projects</code> are never inherited.</li>
+<li><code>globalSetup</code> is not inherited from the root config: the root-level <code>globalSetup</code> already runs once per test run, so inheriting it would run the same files again for every project. It is still inherited when extending a non-root config file.</li>
+<li>The project&#39;s own <code>tags</code> replace the inherited array instead of being merged with it.</li>
+</ul>
+<p>If you run Vitest through the <a href="advanced/index.html">advanced API</a>, see <a href="advanced/index.html#project-configuration-resolution">Project Configuration Resolution</a> for how the programmatic configuration participates in inheritance.</p>
+<p>Projects referenced as config files or directories do not inherit any options from the root config. You can create a shared config file and merge it with the project config yourself:</p>
+<div class="code"><div class="code-title">packages/a/vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineProject, mergeConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+<span class="hljs-keyword">import</span> configShared <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;../vitest.shared.js&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">mergeConfig</span>(
+  configShared,
+  <span class="hljs-title function_">defineProject</span>({
+    <span class="hljs-attr">test</span>: {
+      <span class="hljs-attr">environment</span>: <span class="hljs-string">&#x27;jsdom&#x27;</span>,
+    }
+  })
+)</code></pre></div>
+<div class="box box-danger"><div class="box-title">🛑 Danger : Unsupported Options</div><p>Some of the configuration options are not allowed in a project config. Most notably:</p>
+<ul>
+<li><code>coverage</code>: coverage is done for the whole process</li>
+<li><code>reporters</code>: only root-level reporters can be supported</li>
+<li><code>resolveSnapshotPath</code>: only root-level resolver is respected</li>
+<li><code>attachmentsDir</code>: attachments are stored in one root-level directory shared by all projects</li>
+<li>all other options that don&#39;t affect test runners</li>
+</ul>
+<p>All configuration options that are not supported inside a project configuration are marked with a <CRoot /> icon next to their name. They can only be defined once in the root config file.</p>
+</div><h2 id="nested-projects"><a class="anchor" href="#nested-projects">#</a>Nested Projects</h2>
+<p>A project referenced as a config file (or a directory containing one) can declare <code>projects</code> itself. Such a config behaves like the root config: it doesn&#39;t run any tests on its own, it only provides the projects that do. This makes it possible to reference a workspace that already defines its own projects:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">projects</span>: [<span class="hljs-string">&#x27;./packages/app/vitest.config.ts&#x27;</span>],
+  },
+})</code></pre></div>
+<div class="code"><div class="code-title">packages/app/vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineProject } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineProject</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;app&#x27;</span>,
+    <span class="hljs-attr">projects</span>: [
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;unit&#x27;</span>,
+          <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;**/*.unit.test.ts&#x27;</span>],
+        },
+      },
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;e2e&#x27;</span>,
+          <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;**/*.e2e.test.ts&#x27;</span>],
+        },
+      },
+    ],
+  },
+})</code></pre></div>
+<p>Nested projects work the same way as projects defined in the root config: inline configurations extend the config that declares them (the <code>app</code> config here, not the root one), <code>extends</code> paths are resolved relative to it, and its own <code>globalSetup</code> is inherited by the extending projects <a href="#configuration">like any other non-root config</a>.</p>
+<p>The names of nested projects are prefixed with the name of the config that declares them, so the example above creates the <code>app (unit)</code> and <code>app (e2e)</code> projects. The <code>--project</code> filter matches the prefix as well: <code>--project app</code> runs every project of the <code>app</code> config, while <code>--project &quot;app (unit)&quot;</code> runs only one of them.</p>
+<p>To also run the tests of the config that declares <code>projects</code>, reference its own config file:</p>
+<div class="code"><div class="code-title">packages/app/vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineProject } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineProject</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;app&#x27;</span>,
+    <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;**/*.test.ts&#x27;</span>],
+    <span class="hljs-attr">projects</span>: [
+      <span class="hljs-comment">// the &quot;app&quot; project runs its own &quot;include&quot; alongside &quot;app (unit)&quot;</span>
+      <span class="hljs-string">&#x27;./vitest.config.ts&#x27;</span>,
+      {
+        <span class="hljs-attr">test</span>: {
+          <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;unit&#x27;</span>,
+          <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;**/*.unit.test.ts&#x27;</span>],
+        },
+      },
+    ],
+  },
+})</code></pre></div>
+<p>Note that only config files can define nested projects. The <code>projects</code> option inside an inline configuration is not supported.</p>
+<h2 id="debugging-project-resolution"><a class="anchor" href="#debugging-project-resolution">#</a>Debugging Project Resolution</h2>
+<p>If projects are not resolved the way you expect, run Vitest with the <code>DEBUG=vitest:projects</code> environment variable:</p>
+<div class="code"><pre><code class="hljs lang-bash">DEBUG=vitest:projects vitest</code></pre></div>
+<p>Vitest will log how every project was resolved: which files a glob pattern matched, how browser instances and benchmark projects were expanded, why a project was dropped by the <code>--project</code> filter, and whether a project creates its own Vite server or <a href="../config/sharedviteserver.html">shares one</a> with another project:</p>
+<div class="code"><pre><code class="hljs lang-txt">vitest:projects resolving 3 project definitions declared by &lt;root&gt;/vitest.config.ts
+vitest:projects projects glob &quot;packages/*&quot; matched 2 paths
+vitest:projects inline project &quot;unit&quot; shares the Vite server of &lt;root&gt;/vitest.config.ts
+vitest:projects project &quot;e2e&quot; is dropped by the --project filter: unit
+vitest:projects resolved projects: &quot;unit&quot;, &quot;pkg-a&quot;, &quot;pkg-b&quot;
+vitest:projects creating a Vite server for project &quot;pkg-a&quot;</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#defining-projects">Defining Projects</a><a class="toc-2" href="#running-tests">Running Tests</a><a class="toc-2" href="#configuration">Configuration</a><a class="toc-2" href="#nested-projects">Nested Projects</a><a class="toc-2" href="#debugging-project-resolution">Debugging Project Resolution</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

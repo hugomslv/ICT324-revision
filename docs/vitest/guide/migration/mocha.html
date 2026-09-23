@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Migrating from Mocha + Chai + Sinon | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/migration/mocha  <a class="ext small" href="https://vitest.dev/guide/migration/mocha">version en ligne</a></div>
+<h1 id="mocha-chai-sinon"><a class="anchor" href="#mocha-chai-sinon">#</a>Migrating from Mocha + Chai + Sinon</h1>
+<p>Vitest provides excellent support for migrating from Mocha+Chai+Sinon test suites. While Vitest uses a Jest-compatible API by default, it also provides Chai-style assertions for spy/mock testing, making migration easier.</p>
+<h2 id="test-structure"><a class="anchor" href="#test-structure">#</a>Test Structure</h2>
+<p>Mocha and Vitest have similar test structures, but with some differences:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// Mocha</span>
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">before</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* setup */</span> })
+  <span class="hljs-title function_">after</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* teardown */</span> })
+  <span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* setup */</span> })
+  <span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* teardown */</span> })
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// test code</span>
+  })
+})
+
+<span class="hljs-comment">// Vitest - same structure works!</span>
+<span class="hljs-keyword">import</span> { afterAll, afterEach, beforeAll, beforeEach, describe, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* setup */</span> })
+  <span class="hljs-title function_">afterAll</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* teardown */</span> })
+  <span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* setup */</span> })
+  <span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-comment">/* teardown */</span> })
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// test code</span>
+  })
+})</code></pre></div>
+<h2 id="assertions"><a class="anchor" href="#assertions">#</a>Assertions</h2>
+<p>Vitest includes Chai assertions by default, so Chai assertions work without changes:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// Both Mocha+Chai and Vitest</span>
+<span class="hljs-keyword">import</span> { expect } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span> <span class="hljs-comment">// or &#x27;chai&#x27; in Mocha</span>
+
+<span class="hljs-title function_">expect</span>(value).<span class="hljs-property">to</span>.<span class="hljs-title function_">equal</span>(<span class="hljs-number">42</span>)
+<span class="hljs-title function_">expect</span>(value).<span class="hljs-property">to</span>.<span class="hljs-property">be</span>.<span class="hljs-property">true</span>
+<span class="hljs-title function_">expect</span>(array).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-title function_">lengthOf</span>(<span class="hljs-number">3</span>)
+<span class="hljs-title function_">expect</span>(obj).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-title function_">property</span>(<span class="hljs-string">&#x27;key&#x27;</span>)</code></pre></div>
+<h2 id="spy-mock-assertions"><a class="anchor" href="#spy-mock-assertions">#</a>Spy/Mock Assertions</h2>
+<p>Vitest provides <strong>Chai-style assertions</strong> for spies and mocks, allowing you to migrate from Sinon without rewriting assertions:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// Before (Mocha + Chai + Sinon)</span>
+<span class="hljs-keyword">const</span> sinon = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;sinon&#x27;</span>)
+<span class="hljs-keyword">const</span> chai = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;chai&#x27;</span>)
+<span class="hljs-keyword">const</span> sinonChai = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;sinon-chai&#x27;</span>)
+chai.<span class="hljs-title function_">use</span>(sinonChai)
+
+<span class="hljs-keyword">const</span> spy = sinon.<span class="hljs-title function_">spy</span>(obj, <span class="hljs-string">&#x27;method&#x27;</span>)
+obj.<span class="hljs-title function_">method</span>(<span class="hljs-string">&#x27;arg1&#x27;</span>, <span class="hljs-string">&#x27;arg2&#x27;</span>)
+
+<span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-property">called</span>
+<span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-property">calledOnce</span>
+<span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-title function_">calledWith</span>(<span class="hljs-string">&#x27;arg1&#x27;</span>, <span class="hljs-string">&#x27;arg2&#x27;</span>)
+
+<span class="hljs-comment">// After (Vitest) - same assertion syntax!</span>
+<span class="hljs-keyword">import</span> { expect, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">spyOn</span>(obj, <span class="hljs-string">&#x27;method&#x27;</span>)
+obj.<span class="hljs-title function_">method</span>(<span class="hljs-string">&#x27;arg1&#x27;</span>, <span class="hljs-string">&#x27;arg2&#x27;</span>)
+
+<span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-property">called</span>
+<span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-property">calledOnce</span>
+<span class="hljs-title function_">expect</span>(spy).<span class="hljs-property">to</span>.<span class="hljs-property">have</span>.<span class="hljs-property">been</span>.<span class="hljs-title function_">calledWith</span>(<span class="hljs-string">&#x27;arg1&#x27;</span>, <span class="hljs-string">&#x27;arg2&#x27;</span>)</code></pre></div>
+<h3 id="complete-chai-style-assertion-support"><a class="anchor" href="#complete-chai-style-assertion-support">#</a>Complete Chai-Style Assertion Support</h3>
+<p>Vitest supports all common sinon-chai assertions:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Sinon-Chai</th>
+<th>Vitest</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>spy.called</code></td>
+<td><code>called</code></td>
+<td>Spy was called at least once</td>
+</tr>
+<tr>
+<td><code>spy.calledOnce</code></td>
+<td><code>calledOnce</code></td>
+<td>Spy was called exactly once</td>
+</tr>
+<tr>
+<td><code>spy.calledTwice</code></td>
+<td><code>calledTwice</code></td>
+<td>Spy was called exactly twice</td>
+</tr>
+<tr>
+<td><code>spy.calledThrice</code></td>
+<td><code>calledThrice</code></td>
+<td>Spy was called exactly three times</td>
+</tr>
+<tr>
+<td><code>spy.callCount(n)</code></td>
+<td><code>callCount(n)</code></td>
+<td>Spy was called n times</td>
+</tr>
+<tr>
+<td><code>spy.calledWith(...)</code></td>
+<td><code>calledWith(...)</code></td>
+<td>Spy was called with specific args</td>
+</tr>
+<tr>
+<td><code>spy.calledOnceWith(...)</code></td>
+<td><code>calledOnceWith(...)</code></td>
+<td>Spy was called once with specific args</td>
+</tr>
+<tr>
+<td><code>spy.returned(value)</code></td>
+<td><code>returned</code></td>
+<td>Spy returned specific value</td>
+</tr>
+</tbody></table></div>
+<p>See the <a href="../../api/expect.html#chai-style-spy-assertions">Chai-Style Spy Assertions</a> documentation for the complete list.</p>
+<h2 id="creating-spies-and-mocks"><a class="anchor" href="#creating-spies-and-mocks">#</a>Creating Spies and Mocks</h2>
+<p>Replace Sinon&#39;s spy/stub/mock creation with Vitest&#39;s <code>vi</code> utilities:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// Sinon</span>
+<span class="hljs-keyword">const</span> sinon = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;sinon&#x27;</span>)
+<span class="hljs-keyword">const</span> spy = sinon.<span class="hljs-title function_">spy</span>()
+<span class="hljs-keyword">const</span> stub = sinon.<span class="hljs-title function_">stub</span>(obj, <span class="hljs-string">&#x27;method&#x27;</span>)
+<span class="hljs-keyword">const</span> mock = sinon.<span class="hljs-title function_">mock</span>(obj)
+
+<span class="hljs-comment">// Vitest</span>
+<span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">fn</span>()
+<span class="hljs-keyword">const</span> stub = vi.<span class="hljs-title function_">spyOn</span>(obj, <span class="hljs-string">&#x27;method&#x27;</span>)
+<span class="hljs-comment">// Vitest doesn&#x27;t have &quot;mocks&quot; - use spies instead</span></code></pre></div>
+<h2 id="stubbing-return-values"><a class="anchor" href="#stubbing-return-values">#</a>Stubbing Return Values</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// Sinon</span>
+stub.<span class="hljs-title function_">returns</span>(<span class="hljs-number">42</span>)
+stub.<span class="hljs-title function_">onFirstCall</span>().<span class="hljs-title function_">returns</span>(<span class="hljs-number">1</span>)
+stub.<span class="hljs-title function_">onSecondCall</span>().<span class="hljs-title function_">returns</span>(<span class="hljs-number">2</span>)
+
+<span class="hljs-comment">// Vitest</span>
+stub.<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-number">42</span>)
+stub.<span class="hljs-title function_">mockReturnValueOnce</span>(<span class="hljs-number">1</span>)
+stub.<span class="hljs-title function_">mockReturnValueOnce</span>(<span class="hljs-number">2</span>)</code></pre></div>
+<h2 id="stubbing-implementations"><a class="anchor" href="#stubbing-implementations">#</a>Stubbing Implementations</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// Sinon</span>
+stub.<span class="hljs-title function_">callsFake</span>(<span class="hljs-function"><span class="hljs-params">arg</span> =&gt;</span> arg * <span class="hljs-number">2</span>)
+
+<span class="hljs-comment">// Vitest</span>
+stub.<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function"><span class="hljs-params">arg</span> =&gt;</span> arg * <span class="hljs-number">2</span>)</code></pre></div>
+<h2 id="restoring-spies"><a class="anchor" href="#restoring-spies">#</a>Restoring Spies</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// Sinon</span>
+spy.<span class="hljs-title function_">restore</span>()
+sinon.<span class="hljs-title function_">restore</span>() <span class="hljs-comment">// restore all</span>
+
+<span class="hljs-comment">// Vitest</span>
+spy.<span class="hljs-title function_">mockRestore</span>()
+vi.<span class="hljs-title function_">restoreAllMocks</span>() <span class="hljs-comment">// restore all</span></code></pre></div>
+<h2 id="timers"><a class="anchor" href="#timers">#</a>Timers</h2>
+<p>Both Sinon and Vitest use <code>@sinonjs/fake-timers</code> internally:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// Sinon</span>
+<span class="hljs-keyword">const</span> clock = sinon.<span class="hljs-title function_">useFakeTimers</span>()
+clock.<span class="hljs-title function_">tick</span>(<span class="hljs-number">1000</span>)
+clock.<span class="hljs-title function_">restore</span>()
+
+<span class="hljs-comment">// Vitest</span>
+<span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+vi.<span class="hljs-title function_">useFakeTimers</span>()
+vi.<span class="hljs-title function_">advanceTimersByTime</span>(<span class="hljs-number">1000</span>)
+vi.<span class="hljs-title function_">useRealTimers</span>()</code></pre></div>
+<h2 id="key-differences"><a class="anchor" href="#key-differences">#</a>Key Differences</h2>
+<ol>
+<li><strong>Globals</strong>: Mocha provides globals by default. In Vitest, either import from <code>vitest</code> or enable <a href="../../config/globals.html"><code>globals</code></a> config</li>
+<li><strong>Assertion style</strong>: You can use both Chai-style (<code>expect(spy).to.have.been.called</code>) and Jest-style (<code>expect(spy).toHaveBeenCalled()</code>)</li>
+<li><strong>Parallel execution</strong>: Vitest runs tests in parallel by default, Mocha runs sequentially</li>
+</ol>
+<p>For more information, see:</p>
+<ul>
+<li><a href="../../api/expect.html#chai-style-spy-assertions">Chai-Style Spy Assertions</a></li>
+<li><a href="../mocking.html">Mocking Guide</a></li>
+<li><a href="../../api/vi.html">Vi API</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#test-structure">Test Structure</a><a class="toc-2" href="#assertions">Assertions</a><a class="toc-2" href="#spy-mock-assertions">Spy/Mock Assertions</a><a class="toc-3" href="#complete-chai-style-assertion-support">Complete Chai-Style Assertion Support</a><a class="toc-2" href="#creating-spies-and-mocks">Creating Spies and Mocks</a><a class="toc-2" href="#stubbing-return-values">Stubbing Return Values</a><a class="toc-2" href="#stubbing-implementations">Stubbing Implementations</a><a class="toc-2" href="#restoring-spies">Restoring Spies</a><a class="toc-2" href="#timers">Timers</a><a class="toc-2" href="#key-differences">Key Differences</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

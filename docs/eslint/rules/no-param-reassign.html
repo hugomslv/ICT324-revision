@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-param-reassign (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-param-reassign <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-param-reassign">version en ligne</a></div>
+<h1>no-param-reassign</h1><p>Assignment to variables declared as function parameters can be misleading and lead to confusing behavior, as modifying function parameters will also mutate the <code>arguments</code> object when not in <code>strict</code> mode (see <a href="#when-not-to-use-it">When Not To Use It</a> below). Often, assignment to function parameters is unintended and indicative of a mistake or programmer error.</p>
+<p>This rule can be also configured to fail when function parameters are modified. Side effects on parameters can cause counter-intuitive execution flow and make errors difficult to track down.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule aims to prevent unintended behavior caused by modification or reassignment of function parameters.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-param-reassign: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    bar = <span class="hljs-number">13</span>;
+}
+
+<span class="hljs-keyword">const</span> foo1 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    bar++;
+}
+
+<span class="hljs-keyword">const</span> foo2 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    <span class="hljs-keyword">for</span> (bar <span class="hljs-keyword">in</span> baz) {}
+}
+
+<span class="hljs-keyword">const</span> foo3 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    <span class="hljs-keyword">for</span> (bar <span class="hljs-keyword">of</span> baz) {}
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-param-reassign: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    <span class="hljs-keyword">const</span> baz = bar;
+}</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule takes one option, an object, with a boolean property <code>&quot;props&quot;</code>, and  arrays <code>&quot;ignorePropertyModificationsFor&quot;</code> and <code>&quot;ignorePropertyModificationsForRegex&quot;</code>. <code>&quot;props&quot;</code> is <code>false</code> by default. If <code>&quot;props&quot;</code> is set to <code>true</code>, this rule warns against the modification of parameter properties unless they&#39;re included in <code>&quot;ignorePropertyModificationsFor&quot;</code> or <code>&quot;ignorePropertyModificationsForRegex&quot;</code>, which is an empty array by default.</p>
+<h3 id="props"><a class="anchor" href="#props">#</a>props</h3>
+<p>Examples of <strong>correct</strong> code for the default <code>{ &quot;props&quot;: false }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-param-reassign: [&quot;error&quot;, { &quot;props&quot;: false }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    bar.<span class="hljs-property">prop</span> = <span class="hljs-string">&quot;value&quot;</span>;
+}
+
+<span class="hljs-keyword">const</span> foo1 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    <span class="hljs-keyword">delete</span> bar.<span class="hljs-property">aaa</span>;
+}
+
+<span class="hljs-keyword">const</span> foo2 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    bar.<span class="hljs-property">aaa</span>++;
+}
+
+<span class="hljs-keyword">const</span> foo3 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    <span class="hljs-keyword">for</span> (bar.<span class="hljs-property">aaa</span> <span class="hljs-keyword">in</span> baz) {}
+}
+
+<span class="hljs-keyword">const</span> foo4 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    <span class="hljs-keyword">for</span> (bar.<span class="hljs-property">aaa</span> <span class="hljs-keyword">of</span> baz) {}
+}</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;props&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-param-reassign: [&quot;error&quot;, { &quot;props&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    bar.<span class="hljs-property">prop</span> = <span class="hljs-string">&quot;value&quot;</span>;
+}
+
+<span class="hljs-keyword">const</span> foo1 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    <span class="hljs-keyword">delete</span> bar.<span class="hljs-property">aaa</span>;
+}
+
+<span class="hljs-keyword">const</span> foo2 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    bar.<span class="hljs-property">aaa</span>++;
+}
+
+<span class="hljs-keyword">const</span> foo3 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    <span class="hljs-keyword">for</span> (bar.<span class="hljs-property">aaa</span> <span class="hljs-keyword">in</span> baz) {}
+}
+
+<span class="hljs-keyword">const</span> foo4 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    <span class="hljs-keyword">for</span> (bar.<span class="hljs-property">aaa</span> <span class="hljs-keyword">of</span> baz) {}
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;props&quot;: true }</code> option with <code>&quot;ignorePropertyModificationsFor&quot;</code> set:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-param-reassign: [&quot;error&quot;, { &quot;props&quot;: true, &quot;ignorePropertyModificationsFor&quot;: [&quot;bar&quot;] }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    bar.<span class="hljs-property">prop</span> = <span class="hljs-string">&quot;value&quot;</span>;
+}
+
+<span class="hljs-keyword">const</span> foo1 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    <span class="hljs-keyword">delete</span> bar.<span class="hljs-property">aaa</span>;
+}
+
+<span class="hljs-keyword">const</span> foo2 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    bar.<span class="hljs-property">aaa</span>++;
+}
+
+<span class="hljs-keyword">const</span> foo3 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    <span class="hljs-keyword">for</span> (bar.<span class="hljs-property">aaa</span> <span class="hljs-keyword">in</span> baz) {}
+}
+
+<span class="hljs-keyword">const</span> foo4 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar</span>) {
+    <span class="hljs-keyword">for</span> (bar.<span class="hljs-property">aaa</span> <span class="hljs-keyword">of</span> baz) {}
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;props&quot;: true }</code> option with <code>&quot;ignorePropertyModificationsForRegex&quot;</code> set:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-param-reassign: [&quot;error&quot;, { &quot;props&quot;: true, &quot;ignorePropertyModificationsForRegex&quot;: [&quot;^bar&quot;] }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span>(<span class="hljs-params">barVar</span>) {
+    barVar.<span class="hljs-property">prop</span> = <span class="hljs-string">&quot;value&quot;</span>;
+}
+
+<span class="hljs-keyword">const</span> foo1 = <span class="hljs-keyword">function</span>(<span class="hljs-params">barrito</span>) {
+    <span class="hljs-keyword">delete</span> barrito.<span class="hljs-property">aaa</span>;
+}
+
+<span class="hljs-keyword">const</span> foo2 = <span class="hljs-keyword">function</span>(<span class="hljs-params">bar_</span>) {
+    bar_.<span class="hljs-property">aaa</span>++;
+}
+
+<span class="hljs-keyword">const</span> foo3 = <span class="hljs-keyword">function</span>(<span class="hljs-params">barBaz</span>) {
+    <span class="hljs-keyword">for</span> (barBaz.<span class="hljs-property">aaa</span> <span class="hljs-keyword">in</span> baz) {}
+}
+
+<span class="hljs-keyword">const</span> foo4 = <span class="hljs-keyword">function</span>(<span class="hljs-params">barBaz</span>) {
+    <span class="hljs-keyword">for</span> (barBaz.<span class="hljs-property">aaa</span> <span class="hljs-keyword">of</span> baz) {}
+}</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you want to allow assignment to function parameters, then you can safely disable this rule.</p>
+<p><code>strict</code> mode code doesn&#39;t sync indices of the arguments object with each parameter binding. Therefore, this rule is not necessary to protect against arguments object mutation in ESM modules or other <code>strict</code> mode functions.</p>
+<h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://spin.atomicobject.com/2011/04/10/javascript-don-t-reassign-your-function-arguments/">https://spin.atomicobject.com/2011/04/10/javascript-don-t-reassign-your-function-arguments/</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#props">props</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

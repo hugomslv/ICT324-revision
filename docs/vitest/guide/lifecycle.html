@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test Run Lifecycle | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/lifecycle  <a class="ext small" href="https://vitest.dev/guide/lifecycle">version en ligne</a></div>
+<h1 id="test-run-lifecycle"><a class="anchor" href="#test-run-lifecycle">#</a>Test Run Lifecycle</h1>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Looking for a practical introduction to <code>beforeEach</code>, <code>afterEach</code>, and other hooks? See the <a href="learn/setup-teardown.html">Setup and Teardown</a> tutorial.</p>
+</div><p>Understanding the test run lifecycle is essential for writing effective tests, debugging issues, and optimizing your test suite. This guide explains when and in what order different lifecycle phases occur in Vitest, from initialization to teardown.</p>
+<h2 id="overview"><a class="anchor" href="#overview">#</a>Overview</h2>
+<p>A typical Vitest test run goes through these main phases:</p>
+<ol>
+<li><strong>Initialization:</strong> Configuration loading and project setup</li>
+<li><strong>Global Setup:</strong> One-time setup before any tests run</li>
+<li><strong>Worker Creation:</strong> Test workers are spawned based on the <a href="../config/pool.html">pool</a> configuration</li>
+<li><strong>Test File Collection:</strong> Test files are discovered and organized</li>
+<li><strong>Test Execution:</strong> Tests run with their hooks and assertions</li>
+<li><strong>Reporting:</strong> Results are collected and reported</li>
+<li><strong>Global Teardown:</strong> Final cleanup after all tests complete</li>
+</ol>
+<p>Phases 4–6 run once for each test file, so across your test suite they will execute multiple times and may also run in parallel across different files when you use more than <a href="../config/maxworkers.html">1 worker</a>.</p>
+<h2 id="detailed-lifecycle-phases"><a class="anchor" href="#detailed-lifecycle-phases">#</a>Detailed Lifecycle Phases</h2>
+<h3 id="1-initialization-phase"><a class="anchor" href="#1-initialization-phase">#</a>1. Initialization Phase</h3>
+<p>When you run <code>vitest</code>, the framework first loads your configuration and prepares the test environment.</p>
+<p><strong>What happens:</strong></p>
+<ul>
+<li><a href="cli.html">Command-line</a> arguments are parsed</li>
+<li><a href="../config/index.html">Configuration file</a> is loaded</li>
+<li>Project structure is validated</li>
+</ul>
+<p>This phase can run again if the config file or one of its imports changes.</p>
+<p><strong>Scope:</strong> Main process (before any test workers are created)</p>
+<h3 id="2-global-setup-phase"><a class="anchor" href="#2-global-setup-phase">#</a>2. Global Setup Phase</h3>
+<p>If you have configured <a href="../config/globalsetup.html"><code>globalSetup</code></a> files, they run once before any test workers are created.</p>
+<p><strong>What happens:</strong></p>
+<ul>
+<li><code>setup()</code> functions (or exported <code>default</code> function) from global setup files execute sequentially</li>
+<li>Multiple global setup files run in the order they are defined</li>
+</ul>
+<p><strong>Scope:</strong> Main process (separate from test workers)</p>
+<p><strong>Important notes:</strong></p>
+<ul>
+<li>Global setup runs in a <strong>different global scope</strong> from your tests</li>
+<li>Tests cannot access variables defined in global setup (use <a href="../config/provide.html"><code>provide</code>/<code>inject</code></a> instead)</li>
+<li>Global setup only runs if there is at least one test queued</li>
+</ul>
+<div class="code"><div class="code-title">globalSetup.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">setup</span>(<span class="hljs-params">project</span>) {
+  <span class="hljs-comment">// Runs once before all tests</span>
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Global setup&#x27;</span>)
+
+  <span class="hljs-comment">// Share data with tests</span>
+  project.<span class="hljs-title function_">provide</span>(<span class="hljs-string">&#x27;apiUrl&#x27;</span>, <span class="hljs-string">&#x27;http://localhost:3000&#x27;</span>)
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">teardown</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-comment">// Runs once after all tests</span>
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Global teardown&#x27;</span>)
+}</code></pre></div>
+<h3 id="3-worker-creation-phase"><a class="anchor" href="#3-worker-creation-phase">#</a>3. Worker Creation Phase</h3>
+<p>After global setup completes, Vitest creates test workers based on your <a href="../config/pool.html">pool configuration</a>.</p>
+<p><strong>What happens:</strong></p>
+<ul>
+<li>Workers are spawned according to the <code>browser.enabled</code> or <code>pool</code> setting (<code>threads</code>, <code>forks</code>, <code>vmThreads</code>, or <code>vmForks</code>)</li>
+<li>Each worker gets its own isolated environment (unless <a href="../config/isolate.html">isolation</a> is disabled)</li>
+<li>By default, workers are not reused to provide isolation. Workers are reused only if:<ul>
+<li><a href="../config/isolate.html">isolation</a> is disabled</li>
+<li>OR pool is <code>vmThreads</code> or <code>vmForks</code> because <a href="https://nodejs.org/api/vm.html">VM</a> provides enough isolation</li>
+</ul>
+</li>
+</ul>
+<p><strong>Scope:</strong> Worker processes/threads</p>
+<h3 id="4-test-file-setup-phase"><a class="anchor" href="#4-test-file-setup-phase">#</a>4. Test File Setup Phase</h3>
+<p>Before each test file runs, <a href="../config/setupfiles.html">setup files</a> are executed.</p>
+<p><strong>What happens:</strong></p>
+<ul>
+<li>Setup files run in the same process as your tests</li>
+<li>By default, setup files run in <strong>parallel</strong> (configurable via <a href="../config/sequence.html#sequence-setupfiles"><code>sequence.setupFiles</code></a>)</li>
+<li>Setup files execute before <strong>each test file</strong></li>
+<li>Any global <em>state</em> or configuration can be initialized here</li>
+</ul>
+<p><strong>Scope:</strong> Worker process (same as your tests)</p>
+<p><strong>Important notes:</strong></p>
+<ul>
+<li>If <a href="../config/isolate.html">isolation</a> is disabled, setup files still rerun before each test file to trigger side effects, but imported modules are cached</li>
+<li>Editing a setup file triggers a rerun of all tests in watch mode</li>
+</ul>
+<div class="code"><div class="code-title">setupFile.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { afterEach } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-comment">// Runs before each test file</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Setup file executing&#x27;</span>)
+
+<span class="hljs-comment">// Register hooks that apply to all tests</span>
+<span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">cleanup</span>()
+})</code></pre></div>
+<h3 id="5-test-collection-and-execution-phase"><a class="anchor" href="#5-test-collection-and-execution-phase">#</a>5. Test Collection and Execution Phase</h3>
+<p>This is the main phase where your tests actually run.</p>
+<h4 id="test-file-execution-order"><a class="anchor" href="#test-file-execution-order">#</a>Test File Execution Order</h4>
+<p>Test files are executed based on your configuration:</p>
+<ul>
+<li><strong>Sequential by default</strong> within a worker</li>
+<li>Files will run in <strong>parallel</strong> across different workers, configured by <a href="../config/maxworkers.html"><code>maxWorkers</code></a></li>
+<li>Order can be randomized with <a href="../config/sequence.html#sequence-shuffle"><code>sequence.shuffle</code></a> or fine-tuned with <a href="../config/sequence.html#sequence-sequencer"><code>sequence.sequencer</code></a></li>
+<li>Long-running tests typically start earlier (based on cache) unless shuffle is enabled</li>
+</ul>
+<h4 id="within-each-test-file"><a class="anchor" href="#within-each-test-file">#</a>Within Each Test File</h4>
+<p>The execution follows this order:</p>
+<ol>
+<li><strong>File-level code:</strong> All code outside <code>describe</code> blocks runs immediately</li>
+<li><strong>Test collection:</strong> <code>describe</code> blocks are processed, and tests are registered as side effects of importing the test file</li>
+<li><strong><a href="../api/hooks.html#aroundall"><code>aroundAll</code></a> hooks:</strong> Wrap around all tests in the suite (must call <code>runSuite()</code>)</li>
+<li><strong><a href="../api/hooks.html#beforeall"><code>beforeAll</code></a> hooks:</strong> Run once before any tests in the suite</li>
+<li><strong>For each test:</strong><ul>
+<li><a href="../api/hooks.html#aroundeach"><code>aroundEach</code></a> hooks wrap around the test (must call <code>runTest()</code>)</li>
+<li><code>beforeEach</code> hooks execute (in order defined, or based on <a href="../config/sequence.html#sequence-hooks"><code>sequence.hooks</code></a>)</li>
+<li>Test function executes</li>
+<li><code>afterEach</code> hooks execute (reverse order by default with <code>sequence.hooks: &#39;stack&#39;</code>)</li>
+<li>Cleanup functions returned from <code>beforeEach</code> hooks execute (reverse order by default with <code>sequence.hooks: &#39;stack&#39;</code>)</li>
+<li><a href="../api/hooks.html#ontestfinished"><code>onTestFinished</code></a> callbacks run (always in reverse order)</li>
+<li>If test failed: <a href="../api/hooks.html#ontestfailed"><code>onTestFailed</code></a> callbacks run</li>
+<li>Note: if <code>repeats</code> or <code>retry</code> are set, all of these steps are executed again</li>
+</ul>
+</li>
+<li><strong><a href="../api/hooks.html#afterall"><code>afterAll</code></a> hooks:</strong> Run once after all tests in the suite complete</li>
+<li><strong>Cleanup functions returned from <code>beforeAll</code> hooks:</strong> Run once after all tests in the suite complete</li>
+</ol>
+<p><strong>Example execution flow:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// This runs immediately (collection phase)</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;File loaded&#x27;</span>)
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;User API&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">// This runs immediately (collection phase)</span>
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Suite defined&#x27;</span>)
+
+  <span class="hljs-title function_">aroundAll</span>(<span class="hljs-title function_">async</span> (runSuite) =&gt; {
+    <span class="hljs-comment">// Wraps around all tests in this suite</span>
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;aroundAll before&#x27;</span>)
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">runSuite</span>()
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;aroundAll after&#x27;</span>)
+  })
+
+  <span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// Runs once before all tests in this suite</span>
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;beforeAll&#x27;</span>)
+
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">beforeAllCleanup</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-comment">// Runs once afterAll hooks have run</span>
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;beforeAllCleanup&#x27;</span>)
+    }
+  })
+
+  <span class="hljs-title function_">aroundEach</span>(<span class="hljs-title function_">async</span> (runTest) =&gt; {
+    <span class="hljs-comment">// Wraps around each test</span>
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;aroundEach before&#x27;</span>)
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">runTest</span>()
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;aroundEach after&#x27;</span>)
+  })
+
+  <span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// Runs before each test</span>
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;beforeEach&#x27;</span>)
+
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">beforeEachCleanup</span>(<span class="hljs-params"></span>) {
+      <span class="hljs-comment">// Runs after afterEach hooks have run</span>
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;beforeEachCleanup&#x27;</span>)
+    }
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;creates user&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// Test executes</span>
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;test 1&#x27;</span>)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;updates user&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// Test executes</span>
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;test 2&#x27;</span>)
+  })
+
+  <span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// Runs after each test</span>
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;afterEach&#x27;</span>)
+  })
+
+  <span class="hljs-title function_">afterAll</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// Runs once after all tests in this suite</span>
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;afterAll&#x27;</span>)
+  })
+})
+
+<span class="hljs-comment">// Output:</span>
+<span class="hljs-comment">// File loaded</span>
+<span class="hljs-comment">// Suite defined</span>
+<span class="hljs-comment">// aroundAll before</span>
+<span class="hljs-comment">//   beforeAll</span>
+<span class="hljs-comment">//   aroundEach before</span>
+<span class="hljs-comment">//     beforeEach</span>
+<span class="hljs-comment">//       test 1</span>
+<span class="hljs-comment">//     afterEach</span>
+<span class="hljs-comment">//     beforeEachCleanup</span>
+<span class="hljs-comment">//   aroundEach after</span>
+<span class="hljs-comment">//   aroundEach before</span>
+<span class="hljs-comment">//     beforeEach</span>
+<span class="hljs-comment">//       test 2</span>
+<span class="hljs-comment">//     afterEach</span>
+<span class="hljs-comment">//     beforeEachCleanup</span>
+<span class="hljs-comment">//   aroundEach after</span>
+<span class="hljs-comment">//   afterAll</span>
+<span class="hljs-comment">//   beforeAllCleanup</span>
+<span class="hljs-comment">// aroundAll after</span></code></pre></div>
+<h4 id="nested-suites"><a class="anchor" href="#nested-suites">#</a>Nested Suites</h4>
+<p>When using nested <code>describe</code> blocks, hooks follow a hierarchical pattern. The <code>aroundAll</code> and <code>aroundEach</code> hooks wrap around their respective scopes, with parent hooks wrapping child hooks:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;outer&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">aroundAll</span>(<span class="hljs-title function_">async</span> (runSuite) =&gt; {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;outer aroundAll before&#x27;</span>)
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">runSuite</span>()
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;outer aroundAll after&#x27;</span>)
+  })
+
+  <span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;outer beforeAll&#x27;</span>))
+
+  <span class="hljs-title function_">aroundEach</span>(<span class="hljs-title function_">async</span> (runTest) =&gt; {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;outer aroundEach before&#x27;</span>)
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">runTest</span>()
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;outer aroundEach after&#x27;</span>)
+  })
+
+  <span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;outer beforeEach&#x27;</span>))
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;outer test&#x27;</span>, <span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;outer test&#x27;</span>))
+
+  <span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;inner&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">aroundAll</span>(<span class="hljs-title function_">async</span> (runSuite) =&gt; {
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;inner aroundAll before&#x27;</span>)
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">runSuite</span>()
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;inner aroundAll after&#x27;</span>)
+    })
+
+    <span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;inner beforeAll&#x27;</span>))
+
+    <span class="hljs-title function_">aroundEach</span>(<span class="hljs-title function_">async</span> (runTest) =&gt; {
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;inner aroundEach before&#x27;</span>)
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">runTest</span>()
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;inner aroundEach after&#x27;</span>)
+    })
+
+    <span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;inner beforeEach&#x27;</span>))
+
+    <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;inner test&#x27;</span>, <span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;inner test&#x27;</span>))
+
+    <span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;inner afterEach&#x27;</span>))
+    <span class="hljs-title function_">afterAll</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;inner afterAll&#x27;</span>))
+  })
+
+  <span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;outer afterEach&#x27;</span>))
+  <span class="hljs-title function_">afterAll</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;outer afterAll&#x27;</span>))
+})
+
+<span class="hljs-comment">// Output:</span>
+<span class="hljs-comment">// outer aroundAll before</span>
+<span class="hljs-comment">//   outer beforeAll</span>
+<span class="hljs-comment">//   outer aroundEach before</span>
+<span class="hljs-comment">//     outer beforeEach</span>
+<span class="hljs-comment">//       outer test</span>
+<span class="hljs-comment">//     outer afterEach</span>
+<span class="hljs-comment">//   outer aroundEach after</span>
+<span class="hljs-comment">//   inner aroundAll before</span>
+<span class="hljs-comment">//     inner beforeAll</span>
+<span class="hljs-comment">//     outer aroundEach before</span>
+<span class="hljs-comment">//       inner aroundEach before</span>
+<span class="hljs-comment">//         outer beforeEach</span>
+<span class="hljs-comment">//           inner beforeEach</span>
+<span class="hljs-comment">//             inner test</span>
+<span class="hljs-comment">//           inner afterEach</span>
+<span class="hljs-comment">//         outer afterEach</span>
+<span class="hljs-comment">//       inner aroundEach after</span>
+<span class="hljs-comment">//     outer aroundEach after</span>
+<span class="hljs-comment">//     inner afterAll</span>
+<span class="hljs-comment">//   inner aroundAll after</span>
+<span class="hljs-comment">//   outer afterAll</span>
+<span class="hljs-comment">// outer aroundAll after</span></code></pre></div>
+<h4 id="concurrent-tests"><a class="anchor" href="#concurrent-tests">#</a>Concurrent Tests</h4>
+<p>When using <code>test.concurrent</code> or <a href="../config/sequence.html#sequence-concurrent"><code>sequence.concurrent</code></a>:</p>
+<ul>
+<li>Tests within the same file can run in parallel</li>
+<li>Each concurrent test still runs its own <code>beforeEach</code> and <code>afterEach</code> hooks</li>
+<li>Use <a href="test-context.html">test context</a> for concurrent snapshots: <code>test.concurrent(&#39;name&#39;, async ({ expect }) =&gt; {})</code></li>
+</ul>
+<h3 id="6-reporting-phase"><a class="anchor" href="#6-reporting-phase">#</a>6. Reporting Phase</h3>
+<p>Throughout the test run, reporters receive lifecycle events and display results.</p>
+<p><strong>What happens:</strong></p>
+<ul>
+<li>Reporters receive events as tests progress</li>
+<li>Results are collected and formatted</li>
+<li>Test summaries are generated</li>
+<li>Coverage reports are generated (if enabled)</li>
+</ul>
+<p>For detailed information about the reporter lifecycle, see the <a href="../api/advanced/reporters.html">Reporters</a> guide.</p>
+<h3 id="7-global-teardown-phase"><a class="anchor" href="#7-global-teardown-phase">#</a>7. Global Teardown Phase</h3>
+<p>After all tests complete, global teardown functions execute.</p>
+<p><strong>What happens:</strong></p>
+<ul>
+<li><code>teardown()</code> functions from <a href="../config/globalsetup.html"><code>globalSetup</code></a> files run</li>
+<li>Multiple teardown functions run in <strong>reverse order</strong> of their setup</li>
+<li>In watch mode, teardown runs before process exit, not between test reruns</li>
+</ul>
+<p><strong>Scope:</strong> Main process</p>
+<div class="code"><div class="code-title">globalSetup.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">teardown</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-comment">// Clean up global resources</span>
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Global teardown complete&#x27;</span>)
+}</code></pre></div>
+<h2 id="lifecycle-in-different-scopes"><a class="anchor" href="#lifecycle-in-different-scopes">#</a>Lifecycle in Different Scopes</h2>
+<p>Understanding where code executes is crucial for avoiding common pitfalls:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Scope</th>
+<th>Access to Test Context</th>
+<th>Runs</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Config File</td>
+<td>Main process</td>
+<td>❌ No</td>
+<td>Once per Vitest run</td>
+</tr>
+<tr>
+<td>Global Setup</td>
+<td>Main process</td>
+<td>❌ No (use <code>provide</code>/<code>inject</code>)</td>
+<td>Once per Vitest run</td>
+</tr>
+<tr>
+<td>Setup Files</td>
+<td>Worker (same as tests)</td>
+<td>✅ Yes</td>
+<td>Before each test file</td>
+</tr>
+<tr>
+<td>File-level code</td>
+<td>Worker</td>
+<td>✅ Yes</td>
+<td>Once per test file</td>
+</tr>
+<tr>
+<td><code>aroundAll</code></td>
+<td>Worker</td>
+<td>✅ Yes</td>
+<td>Once per suite (wraps all tests)</td>
+</tr>
+<tr>
+<td><code>beforeAll</code> / <code>afterAll</code></td>
+<td>Worker</td>
+<td>✅ Yes</td>
+<td>Once per suite</td>
+</tr>
+<tr>
+<td><code>aroundEach</code></td>
+<td>Worker</td>
+<td>✅ Yes</td>
+<td>Per test (wraps each test)</td>
+</tr>
+<tr>
+<td><code>beforeEach</code> / <code>afterEach</code></td>
+<td>Worker</td>
+<td>✅ Yes</td>
+<td>Per test</td>
+</tr>
+<tr>
+<td>Test function</td>
+<td>Worker</td>
+<td>✅ Yes</td>
+<td>Once (or more with retries/repeats)</td>
+</tr>
+<tr>
+<td>Global Teardown</td>
+<td>Main process</td>
+<td>❌ No</td>
+<td>Once per Vitest run</td>
+</tr>
+</tbody></table></div>
+<h2 id="watch-mode-lifecycle"><a class="anchor" href="#watch-mode-lifecycle">#</a>Watch Mode Lifecycle</h2>
+<p>In watch mode, the lifecycle repeats with some differences:</p>
+<ol>
+<li><strong>Initial run:</strong> Full lifecycle as described above</li>
+<li><strong>On file change:</strong><ul>
+<li>New <a href="../api/advanced/reporters.html#ontestrunstart">test run</a> starts</li>
+<li>Only affected test files are re-run</li>
+<li><a href="../config/setupfiles.html">Setup files</a> run again for those test files</li>
+<li><a href="../config/globalsetup.html">Global setup</a> does <strong>not</strong> re-run (use <a href="../config/globalsetup.html#handling-test-reruns"><code>project.onTestsRerun</code></a> for rerun-specific logic)</li>
+</ul>
+</li>
+<li><strong>On exit:</strong><ul>
+<li>Global teardown executes</li>
+<li>Process terminates</li>
+</ul>
+</li>
+</ol>
+<h2 id="performance-considerations"><a class="anchor" href="#performance-considerations">#</a>Performance Considerations</h2>
+<p>Understanding the lifecycle helps optimize test performance:</p>
+<ul>
+<li><strong>Global setup</strong> is ideal for expensive one-time operations (database seeding, server startup)</li>
+<li><strong>Setup files</strong> run before each test file - avoid heavy operations here if you have many test files</li>
+<li><strong><code>beforeAll</code></strong> is better than <code>beforeEach</code> for expensive setup that doesn&#39;t need isolation</li>
+<li><strong>Disabling <a href="../config/isolate.html">isolation</a></strong> improves performance, but setup files still execute before each file</li>
+<li><strong><a href="../config/pool.html">Pool configuration</a></strong> affects parallelization and available APIs</li>
+</ul>
+<p>For tips on how to improve performance, read the <a href="improving-performance.html">Improving Performance</a> guide.</p>
+<h2 id="related-documentation"><a class="anchor" href="#related-documentation">#</a>Related Documentation</h2>
+<ul>
+<li><a href="../config/globalsetup.html">Global Setup Configuration</a></li>
+<li><a href="../config/setupfiles.html">Setup Files Configuration</a></li>
+<li><a href="../config/sequence.html">Test Sequencing Options</a></li>
+<li><a href="../config/isolate.html">Isolation Configuration</a></li>
+<li><a href="../config/pool.html">Pool Configuration</a></li>
+<li><a href="advanced/reporters.html">Extending Reporters</a> - for reporter lifecycle events</li>
+<li><a href="../api/hooks.html">Test API Reference</a> - for hook APIs</li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#overview">Overview</a><a class="toc-2" href="#detailed-lifecycle-phases">Detailed Lifecycle Phases</a><a class="toc-3" href="#1-initialization-phase">1. Initialization Phase</a><a class="toc-3" href="#2-global-setup-phase">2. Global Setup Phase</a><a class="toc-3" href="#3-worker-creation-phase">3. Worker Creation Phase</a><a class="toc-3" href="#4-test-file-setup-phase">4. Test File Setup Phase</a><a class="toc-3" href="#5-test-collection-and-execution-phase">5. Test Collection and Execution Phase</a><a class="toc-3" href="#6-reporting-phase">6. Reporting Phase</a><a class="toc-3" href="#7-global-teardown-phase">7. Global Teardown Phase</a><a class="toc-2" href="#lifecycle-in-different-scopes">Lifecycle in Different Scopes</a><a class="toc-2" href="#watch-mode-lifecycle">Watch Mode Lifecycle</a><a class="toc-2" href="#performance-considerations">Performance Considerations</a><a class="toc-2" href="#related-documentation">Related Documentation</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

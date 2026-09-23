@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deploying a Static Site (Vite) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link active" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vite</a> › guide/static-deploy  <a class="ext small" href="https://vite.dev/guide/static-deploy">version en ligne</a></div>
+<!--
+  READ THIS IF YOU WANT TO ADD A NEW DEPLOYMENT PLATFORM.
+
+  Feel free to submit a PR that adds a new section with a link to your platform's
+  deployment guide, as long as it meets these criteria:
+
+  1. Users should be able to deploy their site for free.
+  2. Free tier offerings should host the site indefinitely and are not time-bound.
+     Offering a limited number of computation resource or site counts in exchange is fine.
+  3. The linked guides should not contain any malicious content.
+  4. The platform must be in operation for at least 1 year. Please show some evidence of
+     this in your PR description.
+
+  New sections should be added last in the file. Please reference the existing sections at
+  the bottom of this file for examples of how to format the new section.
+
+  The Vite team may change the criteria and audit the current list from time to time.
+  If a section is removed, we will ping the original PR authors before doing so.
+--><h1 id="deploying-a-static-site"><a class="anchor" href="#deploying-a-static-site">#</a>Deploying a Static Site</h1>
+<p>The following guides are based on some shared assumptions:</p>
+<ul>
+<li>You are using the default build output location (<code>dist</code>). This location <a href="../config/build-options.html#build-outdir">can be changed using <code>build.outDir</code></a>, and you can extrapolate instructions from these guides in that case.</li>
+<li>You are using npm. You can use equivalent commands to run the scripts if you are using Yarn or other package managers.</li>
+<li>Vite is installed as a local dev dependency in your project, and you have setup the following npm scripts:</li>
+</ul>
+<div class="code"><div class="code-title">package.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;build&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite build&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;preview&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite preview&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>It is important to note that <code>vite preview</code> is intended for previewing the build locally and not meant as a production server.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : NOTE</div><p>These guides provide instructions for performing a static deployment of your Vite site. Vite also supports Server-Side Rendering. SSR refers to front-end frameworks that support running the same application in Node.js, pre-rendering it to HTML, and finally hydrating it on the client. Check out the <a href="ssr.html">SSR Guide</a> to learn about this feature. On the other hand, if you are looking for integration with traditional server-side frameworks, check out the <a href="backend-integration.html">Backend Integration guide</a> instead.</p>
+</div><h2 id="building-the-app"><a class="anchor" href="#building-the-app">#</a>Building the App</h2>
+<p>You may run <code>npm run build</code> command to build the app.</p>
+<div class="code"><pre><code class="hljs lang-bash">$ npm run build</code></pre></div>
+<p>By default, the build output will be placed at <code>dist</code>. You may deploy this <code>dist</code> folder to any of your preferred platforms.</p>
+<h3 id="testing-the-app-locally"><a class="anchor" href="#testing-the-app-locally">#</a>Testing the App Locally</h3>
+<p>Once you&#39;ve built the app, you may test it locally by running <code>npm run preview</code> command.</p>
+<div class="code"><pre><code class="hljs lang-bash">$ npm run preview</code></pre></div>
+<p>The <code>vite preview</code> command will boot up a local static web server that serves the files from <code>dist</code> at <code>http://localhost:4173</code>. It&#39;s an easy way to check if the production build looks OK in your local environment.</p>
+<p>You may configure the port of the server by passing the <code>--port</code> flag as an argument.</p>
+<div class="code"><div class="code-title">package.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;preview&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite preview --port 8080&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Now the <code>preview</code> command will launch the server at <code>http://localhost:8080</code>.</p>
+<h2 id="github-pages"><a class="anchor" href="#github-pages">#</a>GitHub Pages</h2>
+<ol>
+<li><p><strong>Update Vite Config</strong></p>
+<p>Set the correct <code>base</code> in <code>vite.config.js</code>.</p>
+<p>If you are deploying to <code>https://&lt;USERNAME&gt;.github.io/</code>, or to a custom domain through GitHub Pages (eg. <code>www.example.com</code>), set <code>base</code> to <code>&#39;/&#39;</code>. Alternatively, you can remove <code>base</code> from the configuration, as it defaults to <code>&#39;/&#39;</code>.</p>
+<p>If you are deploying to <code>https://&lt;USERNAME&gt;.github.io/&lt;REPO&gt;/</code> (eg. your repository is at <code>https://github.com/&lt;USERNAME&gt;/&lt;REPO&gt;</code>), then set <code>base</code> to <code>&#39;/&lt;REPO&gt;/&#39;</code>.</p>
+</li>
+<li><p><strong>Enable GitHub Pages</strong></p>
+<p>In your repository, go to <strong>Settings → Pages</strong>. Under <strong>Build and deployment</strong>, open the <strong>Source</strong> dropdown, and select <strong>GitHub Actions</strong>.</p>
+<p>GitHub will now deploy your site using a GitHub Actions <a href="https://docs.github.com/en/actions/concepts/workflows-and-actions/workflows">workflow</a>, which is necessary since Vite requires a build step for deployment.</p>
+</li>
+<li><p><strong>Create a Workflow</strong></p>
+<p>Create a new file in your repository at <code>.github/workflows/deploy.yml</code>. You can also click on <strong>“create your own”</strong> from the previous step, which will generate a starter workflow file for you.</p>
+<p>Here’s a sample workflow that installs dependencies with npm, builds the site, and deploys it whenever you push changes to the <code>main</code> branch:</p>
+<p>&lt;&lt;&lt; ./static-deploy-github-pages.yaml#content [.github/workflows/deploy.yml]</p>
+</li>
+</ol>
+<h2 id="gitlab-pages-and-gitlab-ci"><a class="anchor" href="#gitlab-pages-and-gitlab-ci">#</a>GitLab Pages and GitLab CI</h2>
+<ol>
+<li><p>Set the correct <code>base</code> in <code>vite.config.js</code>.</p>
+<p>If you are deploying to <code>https://&lt;USERNAME or GROUP&gt;.gitlab.io/</code>, you can omit <code>base</code> as it defaults to <code>&#39;/&#39;</code>.</p>
+<p>If you are deploying to <code>https://&lt;USERNAME or GROUP&gt;.gitlab.io/&lt;REPO&gt;/</code>, for example your repository is at <code>https://gitlab.com/&lt;USERNAME&gt;/&lt;REPO&gt;</code>, then set <code>base</code> to <code>&#39;/&lt;REPO&gt;/&#39;</code>.</p>
+</li>
+<li><p>Create a file called <code>.gitlab-ci.yml</code> in the root of your project with the content below. This will build and deploy your site whenever you make changes to your content:</p>
+<div class="code"><div class="code-title">.gitlab-ci.yml</div><pre><code class="hljs lang-yaml"><span class="hljs-attr">image:</span> <span class="hljs-string">node:lts</span>
+<span class="hljs-attr">pages:</span>
+  <span class="hljs-attr">stage:</span> <span class="hljs-string">deploy</span>
+  <span class="hljs-attr">cache:</span>
+    <span class="hljs-attr">key:</span>
+      <span class="hljs-attr">files:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-string">package-lock.json</span>
+      <span class="hljs-attr">prefix:</span> <span class="hljs-string">npm</span>
+    <span class="hljs-attr">paths:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">node_modules/</span>
+  <span class="hljs-attr">script:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">npm</span> <span class="hljs-string">install</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">npm</span> <span class="hljs-string">run</span> <span class="hljs-string">build</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">cp</span> <span class="hljs-string">-a</span> <span class="hljs-string">dist/.</span> <span class="hljs-string">public/</span>
+  <span class="hljs-attr">artifacts:</span>
+    <span class="hljs-attr">paths:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">public</span>
+  <span class="hljs-attr">rules:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">if:</span> <span class="hljs-string">$CI_COMMIT_BRANCH</span> <span class="hljs-string">==</span> <span class="hljs-string">$CI_DEFAULT_BRANCH</span></code></pre></div>
+</li>
+</ol>
+<h2 id="netlify"><a class="anchor" href="#netlify">#</a>Netlify</h2>
+<h3 id="netlify-cli"><a class="anchor" href="#netlify-cli">#</a>Netlify CLI</h3>
+<ol>
+<li>Install the <a href="https://docs.netlify.com/api-and-cli-guides/cli-guides/get-started-with-cli/">Netlify CLI</a> via <code>npm install -g netlify-cli</code>.</li>
+<li>Create a new site using <code>netlify init</code>.</li>
+<li>Deploy using <code>netlify deploy</code>.</li>
+</ol>
+<p>The Netlify CLI will share with you a preview URL to inspect. When you are ready to go into production, use the <code>prod</code> flag: <code>netlify deploy --prod</code>.</p>
+<h3 id="netlify-with-git"><a class="anchor" href="#netlify-with-git">#</a>Netlify with Git</h3>
+<ol>
+<li>Push your code to a git repository (GitHub, GitLab, BitBucket, Azure DevOps).</li>
+<li><a href="https://app.netlify.com/start">Import the project</a> to Netlify.</li>
+<li>Choose the branch, output directory, and set up environment variables if applicable.</li>
+<li>Click on <strong>Deploy</strong>.</li>
+<li>Your Vite app is deployed!</li>
+</ol>
+<p>After your project has been imported and deployed, all subsequent pushes to branches other than the production branch along with pull requests will generate <a href="https://docs.netlify.com/deploy/deploy-types/deploy-previews/">Preview Deployments</a>, and all changes made to the Production Branch (commonly “main”) will result in a <a href="https://docs.netlify.com/deploy/deploy-overview/#definitions">Production Deployment</a>.</p>
+<h2 id="vercel"><a class="anchor" href="#vercel">#</a>Vercel</h2>
+<h3 id="vercel-cli"><a class="anchor" href="#vercel-cli">#</a>Vercel CLI</h3>
+<ol>
+<li>Install the <a href="https://vercel.com/cli">Vercel CLI</a> via <code>npm i -g vercel</code> and run <code>vercel</code> to deploy.</li>
+<li>Vercel will detect that you are using Vite and will enable the correct settings for your deployment.</li>
+<li>Your application is deployed! (e.g. <a href="https://vite-vue-template.vercel.app/">vite-vue-template.vercel.app</a>)</li>
+</ol>
+<h3 id="vercel-with-git"><a class="anchor" href="#vercel-with-git">#</a>Vercel with Git</h3>
+<ol>
+<li>Push your code to your git repository (GitHub, GitLab, Bitbucket).</li>
+<li><a href="https://vercel.com/new">Import your Vite project</a> into Vercel.</li>
+<li>Vercel will detect that you are using Vite and will enable the correct settings for your deployment.</li>
+<li>Your application is deployed! (e.g. <a href="https://vite-vue-template.vercel.app/">vite-vue-template.vercel.app</a>)</li>
+</ol>
+<p>After your project has been imported and deployed, all subsequent pushes to branches will generate <a href="https://vercel.com/docs/deployments/environments#preview-environment-pre-production">Preview Deployments</a>, and all changes made to the Production Branch (commonly “main”) will result in a <a href="https://vercel.com/docs/deployments/environments#production-environment">Production Deployment</a>.</p>
+<p>Learn more about Vercel’s <a href="https://vercel.com/docs/concepts/git">Git Integration</a>.</p>
+<h2 id="cloudflare"><a class="anchor" href="#cloudflare">#</a>Cloudflare</h2>
+<h3 id="cloudflare-workers"><a class="anchor" href="#cloudflare-workers">#</a>Cloudflare Workers</h3>
+<p>The <a href="https://developers.cloudflare.com/workers/vite-plugin/">Cloudflare Vite plugin</a> provides integration with Cloudflare Workers and uses Vite&#39;s Environment API to run your server-side code in the Cloudflare Workers runtime during development.</p>
+<p>To add Cloudflare Workers to an existing Vite project, install the plugin and add it to your config:</p>
+<div class="code"><pre><code class="hljs lang-bash">$ npm install --save-dev @cloudflare/vite-plugin</code></pre></div>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+<span class="hljs-keyword">import</span> { cloudflare } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@cloudflare/vite-plugin&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">plugins</span>: [<span class="hljs-title function_">cloudflare</span>()],
+})</code></pre></div>
+<div class="code"><div class="code-title">wrangler.jsonc</div><pre><code class="hljs lang-jsonc"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;my-vite-app&quot;</span><span class="hljs-punctuation">,</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>After running <code>npm run build</code>, your application can now be deployed with <code>npx wrangler deploy</code>.</p>
+<p>You can also easily add backend APIs to your Vite application to securely communicate with Cloudflare resources. This runs in the Workers runtime during development and deploys alongside your frontend. See the <a href="https://developers.cloudflare.com/workers/vite-plugin/tutorial/">Cloudflare Vite plugin tutorial</a> for a complete walkthrough.</p>
+<h3 id="cloudflare-pages"><a class="anchor" href="#cloudflare-pages">#</a>Cloudflare Pages</h3>
+<h4 id="cloudflare-pages-with-git"><a class="anchor" href="#cloudflare-pages-with-git">#</a>Cloudflare Pages with Git</h4>
+<p>Cloudflare Pages gives you a way to deploy directly to Cloudflare without having to manage a Wrangler file.</p>
+<ol>
+<li>Push your code to your git repository (GitHub, GitLab).</li>
+<li>Log in to the Cloudflare dashboard and select your account in <strong>Account Home</strong> &gt; <strong>Workers &amp; Pages</strong>.</li>
+<li>Select <strong>Create a new Project</strong> and the <strong>Pages</strong> option, then select Git.</li>
+<li>Select the git project you want to deploy and click <strong>Begin setup</strong></li>
+<li>Select the corresponding framework preset in the build setting depending on the Vite framework you have selected. Otherwise enter your build commands for your project and your expected output directory.</li>
+<li>Then save and deploy!</li>
+<li>Your application is deployed! (e.g <code>https://&lt;PROJECTNAME&gt;.pages.dev/</code>)</li>
+</ol>
+<p>After your project has been imported and deployed, all subsequent pushes to branches will generate <a href="https://developers.cloudflare.com/pages/platform/preview-deployments/">Preview Deployments</a> unless specified not to in your <a href="https://developers.cloudflare.com/pages/platform/branch-build-controls/">branch build controls</a>. All changes to the Production Branch (commonly &quot;main&quot;) will result in a Production Deployment.</p>
+<p>You can also add custom domains and handle custom build settings on Pages. Learn more about <a href="https://developers.cloudflare.com/pages/configuration/git-integration/">Cloudflare Pages Git Integration</a>.</p>
+<h2 id="google-firebase"><a class="anchor" href="#google-firebase">#</a>Google Firebase</h2>
+<ol>
+<li><p>Install <a href="https://www.npmjs.com/package/firebase-tools">firebase-tools</a> via <code>npm i -g firebase-tools</code>.</p>
+</li>
+<li><p>Create the following files at the root of your project:</p>
+</li>
+</ol>
+<div class="code-group"><div class="code"><div class="code-title">firebase.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;hosting&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;public&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dist&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;ignore&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;rewrites&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+      <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;source&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;**&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;destination&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;/index.html&quot;</span>
+      <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<div class="code"><div class="code-title">.firebaserc</div><pre><code class="hljs lang-js">{
+  <span class="hljs-string">&quot;projects&quot;</span>: {
+    <span class="hljs-string">&quot;default&quot;</span>: <span class="hljs-string">&quot;&lt;YOUR_FIREBASE_ID&gt;&quot;</span>
+  }
+}</code></pre></div>
+</div><ol start="3">
+<li>After running <code>npm run build</code>, deploy using the command <code>firebase deploy</code>.</li>
+</ol>
+<h2 id="surge"><a class="anchor" href="#surge">#</a>Surge</h2>
+<ol>
+<li>Install <a href="https://www.npmjs.com/package/surge">surge</a> via <code>npm i -g surge</code>.</li>
+<li>Run <code>npm run build</code>.</li>
+<li>Deploy to surge by typing <code>surge dist</code>.</li>
+</ol>
+<p>You can also deploy to a <a href="https://surge.sh/help/adding-a-custom-domain">custom domain</a> by adding <code>surge dist yourdomain.com</code>.</p>
+<h2 id="azure-static-web-apps"><a class="anchor" href="#azure-static-web-apps">#</a>Azure Static Web Apps</h2>
+<p>You can quickly deploy your Vite app with Microsoft Azure <a href="https://aka.ms/staticwebapps">Static Web Apps</a> service. You need:</p>
+<ul>
+<li>An Azure account and a subscription key. You can create a <a href="https://azure.microsoft.com/free">free Azure account here</a>.</li>
+<li>Your app code pushed to <a href="https://github.com">GitHub</a>.</li>
+<li>The <a href="https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurestaticwebapps">SWA Extension</a> in <a href="https://code.visualstudio.com">Visual Studio Code</a>.</li>
+</ul>
+<p>Install the extension in VS Code and navigate to your app root. Open the Static Web Apps extension, sign in to Azure, and click the &#39;+&#39; sign to create a new Static Web App. You will be prompted to designate which subscription key to use.</p>
+<p>Follow the wizard started by the extension to give your app a name, choose a framework preset, and designate the app root (usually <code>/</code>) and built file location <code>/dist</code>. The wizard will run and will create a GitHub action in your repo in a <code>.github</code> folder.</p>
+<p>The action will work to deploy your app (watch its progress in your repo&#39;s Actions tab) and, when successfully completed, you can view your app in the address provided in the extension&#39;s progress window by clicking the &#39;Browse Website&#39; button that appears when the GitHub action has run.</p>
+<h2 id="render"><a class="anchor" href="#render">#</a>Render</h2>
+<p>You can deploy your Vite app as a Static Site on <a href="https://render.com/">Render</a>.</p>
+<ol>
+<li><p>Create a <a href="https://dashboard.render.com/register">Render account</a>.</p>
+</li>
+<li><p>In the <a href="https://dashboard.render.com/">Dashboard</a>, click the <strong>New</strong> button and select <strong>Static Site</strong>.</p>
+</li>
+<li><p>Connect your GitHub/GitLab account or use a public repository.</p>
+</li>
+<li><p>Specify a project name and branch.</p>
+<ul>
+<li><strong>Build Command</strong>: <code>npm install &amp;&amp; npm run build</code></li>
+<li><strong>Publish Directory</strong>: <code>dist</code></li>
+</ul>
+</li>
+<li><p>Click <strong>Create Static Site</strong>. Your app should be deployed at <code>https://&lt;PROJECTNAME&gt;.onrender.com/</code>.</p>
+</li>
+</ol>
+<p>By default, any new commit pushed to the specified branch will automatically trigger a new deployment. <a href="https://render.com/docs/deploys#configuring-auto-deploys">Auto-Deploy</a> can be configured in the project settings.</p>
+<p>You can also add a <a href="https://render.com/docs/custom-domains">custom domain</a> to your project.</p>
+<h2 id="flightcontrol"><a class="anchor" href="#flightcontrol">#</a>Flightcontrol</h2>
+<p>Deploy your static site using <a href="https://www.flightcontrol.dev/?ref=docs-vite">Flightcontrol</a> by following these <a href="https://www.flightcontrol.dev/docs/reference/examples/vite?ref=docs-vite">instructions</a>.</p>
+<h2 id="xmit-static-site-hosting"><a class="anchor" href="#xmit-static-site-hosting">#</a>xmit Static Site Hosting</h2>
+<p>Deploy your static site using <a href="https://xmit.co">xmit</a> by following this <a href="https://xmit.dev/guides/vite-quickstart/">guide</a>.</p>
+<h2 id="zephyr-cloud"><a class="anchor" href="#zephyr-cloud">#</a>Zephyr Cloud</h2>
+<p><a href="https://zephyr-cloud.io">Zephyr Cloud</a> is a deployment platform that integrates directly into your build process and provides global edge distribution for module federation and other kind of applications.</p>
+<p>Zephyr follows a different approach than other cloud providers. It integrates directly with Vite build process, so every time you build or run the dev server for your application, it will be automatically deployed with Zephyr Cloud.</p>
+<p>Follow the steps in <a href="https://docs.zephyr-cloud.io/bundlers/vite">the Vite deployment guide</a> to get started.</p>
+<h2 id="edgeone-pages"><a class="anchor" href="#edgeone-pages">#</a>EdgeOne Pages</h2>
+<p>Deploy your static site using <a href="https://edgeone.ai/products/pages">EdgeOne Pages</a> by following these <a href="https://pages.edgeone.ai/document/vite">instructions</a>.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#building-the-app">Building the App</a><a class="toc-3" href="#testing-the-app-locally">Testing the App Locally</a><a class="toc-2" href="#github-pages">GitHub Pages</a><a class="toc-2" href="#gitlab-pages-and-gitlab-ci">GitLab Pages and GitLab CI</a><a class="toc-2" href="#netlify">Netlify</a><a class="toc-3" href="#netlify-cli">Netlify CLI</a><a class="toc-3" href="#netlify-with-git">Netlify with Git</a><a class="toc-2" href="#vercel">Vercel</a><a class="toc-3" href="#vercel-cli">Vercel CLI</a><a class="toc-3" href="#vercel-with-git">Vercel with Git</a><a class="toc-2" href="#cloudflare">Cloudflare</a><a class="toc-3" href="#cloudflare-workers">Cloudflare Workers</a><a class="toc-3" href="#cloudflare-pages">Cloudflare Pages</a><a class="toc-2" href="#google-firebase">Google Firebase</a><a class="toc-2" href="#surge">Surge</a><a class="toc-2" href="#azure-static-web-apps">Azure Static Web Apps</a><a class="toc-2" href="#render">Render</a><a class="toc-2" href="#flightcontrol">Flightcontrol</a><a class="toc-2" href="#xmit-static-site-hosting">xmit Static Site Hosting</a><a class="toc-2" href="#zephyr-cloud">Zephyr Cloud</a><a class="toc-2" href="#edgeone-pages">EdgeOne Pages</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-restricted-exports (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-restricted-exports <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-restricted-exports">version en ligne</a></div>
+<h1>no-restricted-exports</h1><p>In a project, certain names may be disallowed from being used as exported names for various reasons.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule disallows specified names from being used as exported names.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>By default, this rule doesn&#39;t disallow any names. Only the names you specify in the configuration will be disallowed.</p>
+<p>This rule has an object option:</p>
+<ul>
+<li><code>&quot;restrictedNamedExports&quot;</code> is an array of strings, where each string is a name to be restricted.</li>
+<li><code>&quot;restrictedNamedExportsPattern&quot;</code> is a string representing a regular expression pattern. Named exports matching this pattern will be restricted. This option does not apply to <code>default</code> named exports.</li>
+<li><code>&quot;restrictDefaultExports&quot;</code> is an object option with boolean properties to restrict certain default export declarations. The option works only if the <code>restrictedNamedExports</code> option does not contain the <code>&quot;default&quot;</code> value. The following properties are allowed:<ul>
+<li><code>direct</code>: restricts <code>export default</code> declarations.</li>
+<li><code>named</code>: restricts <code>export { foo as default };</code> declarations.</li>
+<li><code>defaultFrom</code>: restricts <code>export { default } from &#39;foo&#39;;</code> declarations.</li>
+<li><code>namedFrom</code>: restricts <code>export { foo as default } from &#39;foo&#39;;</code> declarations.</li>
+<li><code>namespaceFrom</code>: restricts <code>export * as default from &#39;foo&#39;;</code> declarations.</li>
+</ul>
+</li>
+</ul>
+<h3 id="restrictednamedexports"><a class="anchor" href="#restrictednamedexports">#</a>restrictedNamedExports</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>&quot;restrictedNamedExports&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, {
+    &quot;restrictedNamedExports&quot;: [&quot;foo&quot;, &quot;bar&quot;, &quot;Baz&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;e&quot;, &quot;👍&quot;]
+}]*/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> foo = <span class="hljs-number">1</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Baz</span> {}
+
+<span class="hljs-keyword">const</span> a = {};
+<span class="hljs-keyword">export</span> { a };
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">someFunction</span>(<span class="hljs-params"></span>) {}
+<span class="hljs-keyword">export</span> { someFunction <span class="hljs-keyword">as</span> b };
+
+<span class="hljs-keyword">export</span> { c } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;some_module&quot;</span>;
+
+<span class="hljs-keyword">export</span> { <span class="hljs-string">&quot;d&quot;</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;some_module&quot;</span>;
+
+<span class="hljs-keyword">export</span> { something <span class="hljs-keyword">as</span> e } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;some_module&quot;</span>;
+
+<span class="hljs-keyword">export</span> { <span class="hljs-string">&quot;👍&quot;</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;some_module&quot;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>&quot;restrictedNamedExports&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, {
+    &quot;restrictedNamedExports&quot;: [&quot;foo&quot;, &quot;bar&quot;, &quot;Baz&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;e&quot;, &quot;👍&quot;]
+}]*/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> quux = <span class="hljs-number">1</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">myFunction</span>(<span class="hljs-params"></span>) {}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MyClass</span> {}
+
+<span class="hljs-keyword">const</span> a = {};
+<span class="hljs-keyword">export</span> { a <span class="hljs-keyword">as</span> myObject };
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">someFunction</span>(<span class="hljs-params"></span>) {}
+<span class="hljs-keyword">export</span> { someFunction };
+
+<span class="hljs-keyword">export</span> { c <span class="hljs-keyword">as</span> someName } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;some_module&quot;</span>;
+
+<span class="hljs-keyword">export</span> { <span class="hljs-string">&quot;d&quot;</span> <span class="hljs-keyword">as</span> <span class="hljs-string">&quot; d &quot;</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;some_module&quot;</span>;
+
+<span class="hljs-keyword">export</span> { something } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;some_module&quot;</span>;
+
+<span class="hljs-keyword">export</span> { <span class="hljs-string">&quot;👍&quot;</span> <span class="hljs-keyword">as</span> thumbsUp } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;some_module&quot;</span>;</code></pre></div>
+</div><h4 id="default-exports"><a class="anchor" href="#default-exports">#</a>Default exports</h4>
+<p>By design, the <code>&quot;restrictedNamedExports&quot;</code> option doesn&#39;t disallow <code>export default</code> declarations. If you configure <code>&quot;default&quot;</code> as a restricted name, that restriction will apply only to named export declarations.</p>
+<p>Examples of additional <strong>incorrect</strong> code for the <code>&quot;restrictedNamedExports&quot;: [&quot;default&quot;]</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, { &quot;restrictedNamedExports&quot;: [&quot;default&quot;] }]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+
+<span class="hljs-keyword">export</span> { foo <span class="hljs-keyword">as</span> <span class="hljs-keyword">default</span> };</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, { &quot;restrictedNamedExports&quot;: [&quot;default&quot;] }]*/</span>
+
+<span class="hljs-keyword">export</span> { <span class="hljs-keyword">default</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;some_module&quot;</span>;</code></pre></div>
+</div><p>Examples of additional <strong>correct</strong> code for the <code>&quot;restrictedNamedExports&quot;: [&quot;default&quot;]</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, { &quot;restrictedNamedExports&quot;: [&quot;default&quot;, &quot;foo&quot;] }]*/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}</code></pre></div>
+</div><h3 id="restrictednamedexportspattern"><a class="anchor" href="#restrictednamedexportspattern">#</a>restrictedNamedExportsPattern</h3>
+<p>Example of <strong>incorrect</strong> code for the <code>&quot;restrictedNamedExportsPattern&quot;</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, {
+    &quot;restrictedNamedExportsPattern&quot;: &quot;bar$&quot;
+}]*/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> foobar = <span class="hljs-number">1</span>;</code></pre></div>
+</div><p>Example of <strong>correct</strong> code for the <code>&quot;restrictedNamedExportsPattern&quot;</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, {
+    &quot;restrictedNamedExportsPattern&quot;: &quot;bar$&quot;
+}]*/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> abc = <span class="hljs-number">1</span>;</code></pre></div>
+</div><p>Note that this option does not apply to <code>export default</code> or any <code>default</code> named exports. If you want to also restrict <code>default</code> exports, use the <code>restrictDefaultExports</code> option.</p>
+<h3 id="restrictdefaultexports"><a class="anchor" href="#restrictdefaultexports">#</a>restrictDefaultExports</h3>
+<p>This option allows you to restrict certain <code>default</code> declarations. The option works only if the <code>restrictedNamedExports</code> option does not contain the <code>&quot;default&quot;</code> value. This option accepts the following properties:</p>
+<h4 id="direct"><a class="anchor" href="#direct">#</a>direct</h4>
+<p>Examples of <strong>incorrect</strong> code for the <code>&quot;restrictDefaultExports&quot;: { &quot;direct&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, { &quot;restrictDefaultExports&quot;: { &quot;direct&quot;: true } }]*/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> foo;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, { &quot;restrictDefaultExports&quot;: { &quot;direct&quot;: true } }]*/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-number">42</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, { &quot;restrictDefaultExports&quot;: { &quot;direct&quot;: true } }]*/</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}</code></pre></div>
+</div><h4 id="named"><a class="anchor" href="#named">#</a>named</h4>
+<p>Examples of <strong>incorrect</strong> code for the <code>&quot;restrictDefaultExports&quot;: { &quot;named&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, { &quot;restrictDefaultExports&quot;: { &quot;named&quot;: true } }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-number">123</span>;
+
+<span class="hljs-keyword">export</span> { foo <span class="hljs-keyword">as</span> <span class="hljs-keyword">default</span> };</code></pre></div>
+</div><h4 id="defaultfrom"><a class="anchor" href="#defaultfrom">#</a>defaultFrom</h4>
+<p>Examples of <strong>incorrect</strong> code for the <code>&quot;restrictDefaultExports&quot;: { &quot;defaultFrom&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, { &quot;restrictDefaultExports&quot;: { &quot;defaultFrom&quot;: true } }]*/</span>
+
+<span class="hljs-keyword">export</span> { <span class="hljs-keyword">default</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo&#x27;</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, { &quot;restrictDefaultExports&quot;: { &quot;defaultFrom&quot;: true } }]*/</span>
+
+<span class="hljs-keyword">export</span> { <span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> <span class="hljs-keyword">default</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo&#x27;</span>;</code></pre></div>
+</div><h4 id="namedfrom"><a class="anchor" href="#namedfrom">#</a>namedFrom</h4>
+<p>Examples of <strong>incorrect</strong> code for the <code>&quot;restrictDefaultExports&quot;: { &quot;namedFrom&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, { &quot;restrictDefaultExports&quot;: { &quot;namedFrom&quot;: true } }]*/</span>
+
+<span class="hljs-keyword">export</span> { foo <span class="hljs-keyword">as</span> <span class="hljs-keyword">default</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo&#x27;</span>;</code></pre></div>
+</div><h4 id="namespacefrom"><a class="anchor" href="#namespacefrom">#</a>namespaceFrom</h4>
+<p>Examples of <strong>incorrect</strong> code for the <code>&quot;restrictDefaultExports&quot;: { &quot;namespaceFrom&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, { &quot;restrictDefaultExports&quot;: { &quot;namespaceFrom&quot;: true } }]*/</span>
+
+<span class="hljs-keyword">export</span> * <span class="hljs-keyword">as</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo&#x27;</span>;</code></pre></div>
+</div><h2 id="known-limitations"><a class="anchor" href="#known-limitations">#</a>Known Limitations</h2>
+<p>This rule doesn&#39;t inspect the content of source modules in re-export declarations. In particular, if you are re-exporting everything from another module&#39;s export, that export may include a restricted name. This rule cannot detect such cases.</p>
+<div class="code"><pre><code class="hljs lang-js">
+<span class="hljs-comment">//----- some_module.js -----</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}
+
+<span class="hljs-comment">//----- my_module.js -----</span>
+<span class="hljs-comment">/*eslint no-restricted-exports: [&quot;error&quot;, { &quot;restrictedNamedExports&quot;: [&quot;foo&quot;] }]*/</span>
+
+<span class="hljs-keyword">export</span> * <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;some_module&quot;</span>; <span class="hljs-comment">// allowed, although this declaration exports &quot;foo&quot; from my_module</span></code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#restrictednamedexports">restrictedNamedExports</a><a class="toc-3" href="#restrictednamedexportspattern">restrictedNamedExportsPattern</a><a class="toc-3" href="#restrictdefaultexports">restrictDefaultExports</a><a class="toc-2" href="#known-limitations">Known Limitations</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

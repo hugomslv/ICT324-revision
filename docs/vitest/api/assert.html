@@ -1,0 +1,1545 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>assert (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › api/assert  <a class="ext small" href="https://vitest.dev/api/assert">version en ligne</a></div>
+<h1 id="assert"><a class="anchor" href="#assert">#</a>assert</h1>
+<p>Vitest reexports the <code>assert</code> method from <a href="https://www.chaijs.com/api/assert/"><code>chai</code></a> for verifying invariants.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : In-Source Testing {#in-source-testing}</div><p>When using <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#assertion-functions">assertion functions</a> such as <code>assert</code> from <code>import.meta.vitest</code> in <a href="../guide/in-source.html">in-source tests</a>, TypeScript reports error <code>TS2775</code> because they must be called via an explicitly annotated name. Annotate the variable with <code>Chai.Assert</code> or call it directly:</p>
+<div class="code-group"><div class="code"><div class="code-title">Annotated variable</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">if</span> (<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">vitest</span>) {
+  <span class="hljs-keyword">const</span> { test, assert } = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">vitest</span>
+  <span class="hljs-keyword">const</span> { test } = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">vitest</span>
+  <span class="hljs-keyword">const</span> <span class="hljs-attr">assert</span>: <span class="hljs-title class_">Chai</span>.<span class="hljs-property">Assert</span> = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">vitest</span>.<span class="hljs-property">assert</span>
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">assert</span>(<span class="hljs-string">&#x27;foo&#x27;</span> !== <span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-string">&#x27;foo should not be equal to bar&#x27;</span>)
+  })
+}</code></pre></div>
+<div class="code"><div class="code-title">Direct call</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">if</span> (<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">vitest</span>) {
+  <span class="hljs-keyword">const</span> { test, assert } = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">vitest</span>
+  <span class="hljs-keyword">const</span> { test } = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">vitest</span>
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">assert</span>(<span class="hljs-string">&#x27;foo&#x27;</span> !== <span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-string">&#x27;foo should not be equal to bar&#x27;</span>)
+    <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">vitest</span>!.<span class="hljs-title function_">assert</span>(<span class="hljs-string">&#x27;foo&#x27;</span> !== <span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-string">&#x27;foo should not be equal to bar&#x27;</span>)
+  })
+}</code></pre></div>
+</div><h2 id="assert-2"><a class="anchor" href="#assert-2">#</a>assert</h2>
+<ul>
+<li><strong>Type:</strong> <code>(expression: any, message?: string) =&gt; asserts expression</code></li>
+</ul>
+<p>Assert that the given <code>expression</code> is truthy, otherwise the assertion fails.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">assert</span>(<span class="hljs-string">&#x27;foo&#x27;</span> !== <span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-string">&#x27;foo should not be equal to bar&#x27;</span>)
+})</code></pre></div>
+<h2 id="fail"><a class="anchor" href="#fail">#</a>fail</h2>
+<ul>
+<li><strong>Type:</strong><ul>
+<li><code>(message?: string) =&gt; never</code></li>
+<li><code>&lt;T&gt;(actual: T, expected: T, message?: string, operator?: string) =&gt; never</code></li>
+</ul>
+</li>
+</ul>
+<p>Force an assertion failure.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.fail&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">fail</span>(<span class="hljs-string">&#x27;error message on failure&#x27;</span>)
+  assert.<span class="hljs-title function_">fail</span>(<span class="hljs-string">&#x27;foo&#x27;</span>, <span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-string">&#x27;foo is not bar&#x27;</span>, <span class="hljs-string">&#x27;===&#x27;</span>)
+})</code></pre></div>
+<h2 id="isok"><a class="anchor" href="#isok">#</a>isOk</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; asserts value</code></li>
+<li><strong>Alias:</strong> <code>ok</code></li>
+</ul>
+<p>Assert that the given <code>value</code> is truthy.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isOk&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isOk</span>(<span class="hljs-string">&#x27;foo&#x27;</span>, <span class="hljs-string">&#x27;every truthy is ok&#x27;</span>)
+  assert.<span class="hljs-title function_">isOk</span>(<span class="hljs-literal">false</span>, <span class="hljs-string">&#x27;this will fail since false is not truthy&#x27;</span>)
+})</code></pre></div>
+<h2 id="isnotok"><a class="anchor" href="#isnotok">#</a>isNotOk</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+<li><strong>Alias:</strong> <code>notOk</code></li>
+</ul>
+<p>Assert that the given <code>value</code> is falsy.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNotOk&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isNotOk</span>(<span class="hljs-string">&#x27;foo&#x27;</span>, <span class="hljs-string">&#x27;this will fail, every truthy is not ok&#x27;</span>)
+  assert.<span class="hljs-title function_">isNotOk</span>(<span class="hljs-literal">false</span>, <span class="hljs-string">&#x27;this will pass since false is falsy&#x27;</span>)
+})</code></pre></div>
+<h2 id="equal"><a class="anchor" href="#equal">#</a>equal</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(actual: T, expected: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts non-strict equality (==) of <code>actual</code> and <code>expected</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.equal&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">equal</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>), <span class="hljs-string">&#x27;2&#x27;</span>)
+})</code></pre></div>
+<h2 id="notequal"><a class="anchor" href="#notequal">#</a>notEqual</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(actual: T, expected: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts non-strict inequality (!=) of <code>actual</code> and <code>expected</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.equal&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notEqual</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>), <span class="hljs-number">3</span>)
+})</code></pre></div>
+<h2 id="strictequal"><a class="anchor" href="#strictequal">#</a>strictEqual</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(actual: T, expected: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts strict equality (===) of <code>actual</code> and <code>expected</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.strictEqual&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">strictEqual</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(<span class="hljs-number">4</span>), <span class="hljs-number">2</span>)
+})</code></pre></div>
+<h2 id="deepequal"><a class="anchor" href="#deepequal">#</a>deepEqual</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(actual: T, expected: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>actual</code> is deeply equal to <code>expected</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.deepEqual&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">deepEqual</span>({ <span class="hljs-attr">color</span>: <span class="hljs-string">&#x27;green&#x27;</span> }, { <span class="hljs-attr">color</span>: <span class="hljs-string">&#x27;green&#x27;</span> })
+})</code></pre></div>
+<h2 id="notdeepequal"><a class="anchor" href="#notdeepequal">#</a>notDeepEqual</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(actual: T, expected: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Assert that <code>actual</code> is not deeply equal to <code>expected</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notDeepEqual&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notDeepEqual</span>({ <span class="hljs-attr">color</span>: <span class="hljs-string">&#x27;green&#x27;</span> }, { <span class="hljs-attr">color</span>: <span class="hljs-string">&#x27;red&#x27;</span> })
+})</code></pre></div>
+<h2 id="isabove"><a class="anchor" href="#isabove">#</a>isAbove</h2>
+<ul>
+<li><strong>Type:</strong> <code>(valueToCheck: number, valueToBeAbove: number, message?: string) =&gt; void</code></li>
+</ul>
+<p>Assert that <code>valueToCheck</code> is strictly greater than (&gt;) <code>valueToBeAbove</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isAbove&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isAbove</span>(<span class="hljs-number">5</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;5 is strictly greater than 2&#x27;</span>)
+})</code></pre></div>
+<h2 id="isatleast"><a class="anchor" href="#isatleast">#</a>isAtLeast</h2>
+<ul>
+<li><strong>Type:</strong> <code>(valueToCheck: number, valueToBeAtLeast: number, message?: string) =&gt; void</code></li>
+</ul>
+<p>Assert that <code>valueToCheck</code> is greater than or equal to (&gt;=) <code>valueToBeAtLeast</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isAtLeast&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isAtLeast</span>(<span class="hljs-number">5</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;5 is greater or equal to 2&#x27;</span>)
+  assert.<span class="hljs-title function_">isAtLeast</span>(<span class="hljs-number">3</span>, <span class="hljs-number">3</span>, <span class="hljs-string">&#x27;3 is greater or equal to 3&#x27;</span>)
+})</code></pre></div>
+<h2 id="isbelow"><a class="anchor" href="#isbelow">#</a>isBelow</h2>
+<ul>
+<li><strong>Type:</strong> <code>(valueToCheck: number, valueToBeBelow: number, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts <code>valueToCheck</code> is strictly less than (&lt;) <code>valueToBeBelow</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isBelow&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isBelow</span>(<span class="hljs-number">3</span>, <span class="hljs-number">6</span>, <span class="hljs-string">&#x27;3 is strictly less than 6&#x27;</span>)
+})</code></pre></div>
+<h2 id="isatmost"><a class="anchor" href="#isatmost">#</a>isAtMost</h2>
+<ul>
+<li><strong>Type:</strong> <code>(valueToCheck: number, valueToBeAtMost: number, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts <code>valueToCheck</code> is less than or equal to (&lt;=) <code>valueToBeAtMost</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isAtMost&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isAtMost</span>(<span class="hljs-number">3</span>, <span class="hljs-number">6</span>, <span class="hljs-string">&#x27;3 is less than or equal to 6&#x27;</span>)
+  assert.<span class="hljs-title function_">isAtMost</span>(<span class="hljs-number">4</span>, <span class="hljs-number">4</span>, <span class="hljs-string">&#x27;4 is less than or equal to 4&#x27;</span>)
+})</code></pre></div>
+<h2 id="istrue"><a class="anchor" href="#istrue">#</a>isTrue</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; asserts value is true</code></li>
+</ul>
+<p>Asserts that <code>value</code> is true.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> testPassed = <span class="hljs-literal">true</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isTrue&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isTrue</span>(testPassed)
+})</code></pre></div>
+<h2 id="isnottrue"><a class="anchor" href="#isnottrue">#</a>isNotTrue</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; asserts value is Exclude&lt;T, true&gt;</code></li>
+</ul>
+<p>Asserts that <code>value</code> is not true.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> testPassed = <span class="hljs-string">&#x27;ok&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNotTrue&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isNotTrue</span>(testPassed)
+})</code></pre></div>
+<h2 id="isfalse"><a class="anchor" href="#isfalse">#</a>isFalse</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; asserts value is false</code></li>
+</ul>
+<p>Asserts that <code>value</code> is false.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> testPassed = <span class="hljs-literal">false</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isFalse&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isFalse</span>(testPassed)
+})</code></pre></div>
+<h2 id="isnotfalse"><a class="anchor" href="#isnotfalse">#</a>isNotFalse</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; asserts value is Exclude&lt;T, false&gt;</code></li>
+</ul>
+<p>Asserts that <code>value</code> is not false.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> testPassed = <span class="hljs-string">&#x27;no&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNotFalse&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isNotFalse</span>(testPassed)
+})</code></pre></div>
+<h2 id="isnull"><a class="anchor" href="#isnull">#</a>isNull</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; asserts value is null</code></li>
+</ul>
+<p>Asserts that <code>value</code> is null.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> error = <span class="hljs-literal">null</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNull&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isNull</span>(error, <span class="hljs-string">&#x27;error is null&#x27;</span>)
+})</code></pre></div>
+<h2 id="isnotnull"><a class="anchor" href="#isnotnull">#</a>isNotNull</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; asserts value is Exclude&lt;T, null&gt;</code></li>
+</ul>
+<p>Asserts that <code>value</code> is not null.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> error = { <span class="hljs-attr">message</span>: <span class="hljs-string">&#x27;error was occurred&#x27;</span> }
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNotNull&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isNotNull</span>(error, <span class="hljs-string">&#x27;error is not null but object&#x27;</span>)
+})</code></pre></div>
+<h2 id="isnan"><a class="anchor" href="#isnan">#</a>isNaN</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code> is NaN.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> calculation = <span class="hljs-number">1</span> * <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNaN&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-built_in">isNaN</span>(calculation, <span class="hljs-string">&#x27;1 * &quot;vitest&quot; is NaN&#x27;</span>)
+})</code></pre></div>
+<h2 id="isnotnan"><a class="anchor" href="#isnotnan">#</a>isNotNaN</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code> is not NaN.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> calculation = <span class="hljs-number">1</span> * <span class="hljs-number">2</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNotNaN&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isNotNaN</span>(calculation, <span class="hljs-string">&#x27;1 * 2 is Not NaN but 2&#x27;</span>)
+})</code></pre></div>
+<h2 id="exists"><a class="anchor" href="#exists">#</a>exists</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; asserts value is NonNullable&lt;T&gt;</code></li>
+</ul>
+<p>Asserts that <code>value</code> is neither null nor undefined.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> name = <span class="hljs-string">&#x27;foo&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.exists&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">exists</span>(name, <span class="hljs-string">&#x27;foo is neither null nor undefined&#x27;</span>)
+})</code></pre></div>
+<h2 id="notexists"><a class="anchor" href="#notexists">#</a>notExists</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; asserts value is null | undefined</code></li>
+</ul>
+<p>Asserts that <code>value</code> is either null nor undefined.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-literal">null</span>
+<span class="hljs-keyword">const</span> bar = <span class="hljs-literal">undefined</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notExists&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notExists</span>(foo, <span class="hljs-string">&#x27;foo is null so not exist&#x27;</span>)
+  assert.<span class="hljs-title function_">notExists</span>(bar, <span class="hljs-string">&#x27;bar is undefined so not exist&#x27;</span>)
+})</code></pre></div>
+<h2 id="isundefined"><a class="anchor" href="#isundefined">#</a>isUndefined</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; asserts value is undefined</code></li>
+</ul>
+<p>Asserts that <code>value</code> is undefined.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> name = <span class="hljs-literal">undefined</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isUndefined&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isUndefined</span>(name, <span class="hljs-string">&#x27;name is undefined&#x27;</span>)
+})</code></pre></div>
+<h2 id="isdefined"><a class="anchor" href="#isdefined">#</a>isDefined</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; asserts value is Exclude&lt;T, undefined&gt;</code></li>
+</ul>
+<p>Asserts that <code>value</code> is not undefined.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> name = <span class="hljs-string">&#x27;foo&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isDefined&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isDefined</span>(name, <span class="hljs-string">&#x27;name is not undefined&#x27;</span>)
+})</code></pre></div>
+<h2 id="isfunction"><a class="anchor" href="#isfunction">#</a>isFunction</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+<li><strong>Alias:</strong> <code>isCallable</code>
+Asserts that <code>value</code> is a function.</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">name</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;foo&#x27;</span> };
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isFunction&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isFunction</span>(name, <span class="hljs-string">&#x27;name is function&#x27;</span>)
+})</code></pre></div>
+<h2 id="isnotfunction"><a class="anchor" href="#isnotfunction">#</a>isNotFunction</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+<li><strong>Alias:</strong> <code>isNotCallable</code></li>
+</ul>
+<p>Asserts that <code>value</code> is not a function.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> name = <span class="hljs-string">&#x27;foo&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNotFunction&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isNotFunction</span>(name, <span class="hljs-string">&#x27;name is not function but string&#x27;</span>)
+})</code></pre></div>
+<h2 id="isobject"><a class="anchor" href="#isobject">#</a>isObject</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code> is an object of type Object (as revealed by Object.prototype.toString). The assertion does not match subclassed objects.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> someThing = { <span class="hljs-attr">color</span>: <span class="hljs-string">&#x27;red&#x27;</span>, <span class="hljs-attr">shape</span>: <span class="hljs-string">&#x27;circle&#x27;</span> }
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isObject&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isObject</span>(someThing, <span class="hljs-string">&#x27;someThing is object&#x27;</span>)
+})</code></pre></div>
+<h2 id="isnotobject"><a class="anchor" href="#isnotobject">#</a>isNotObject</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code> is not an object of type Object (as revealed by Object.prototype.toString). The assertion does not match subclassed objects.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> someThing = <span class="hljs-string">&#x27;redCircle&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNotObject&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isNotObject</span>(someThing, <span class="hljs-string">&#x27;someThing is not object but string&#x27;</span>)
+})</code></pre></div>
+<h2 id="isarray"><a class="anchor" href="#isarray">#</a>isArray</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code> is an array.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> color = [<span class="hljs-string">&#x27;red&#x27;</span>, <span class="hljs-string">&#x27;green&#x27;</span>, <span class="hljs-string">&#x27;yellow&#x27;</span>]
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isArray&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isArray</span>(color, <span class="hljs-string">&#x27;color is array&#x27;</span>)
+})</code></pre></div>
+<h2 id="isnotarray"><a class="anchor" href="#isnotarray">#</a>isNotArray</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code> is not an array.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> color = <span class="hljs-string">&#x27;red&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNotArray&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isNotArray</span>(color, <span class="hljs-string">&#x27;color is not array but string&#x27;</span>)
+})</code></pre></div>
+<h2 id="isstring"><a class="anchor" href="#isstring">#</a>isString</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code> is a string.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> color = <span class="hljs-string">&#x27;red&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isString&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isString</span>(color, <span class="hljs-string">&#x27;color is string&#x27;</span>)
+})</code></pre></div>
+<h2 id="isnotstring"><a class="anchor" href="#isnotstring">#</a>isNotString</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code> is not a string.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> color = [<span class="hljs-string">&#x27;red&#x27;</span>, <span class="hljs-string">&#x27;green&#x27;</span>, <span class="hljs-string">&#x27;yellow&#x27;</span>]
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNotString&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isNotString</span>(color, <span class="hljs-string">&#x27;color is not string but array&#x27;</span>)
+})</code></pre></div>
+<h2 id="isnumber"><a class="anchor" href="#isnumber">#</a>isNumber</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code> is a number.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> colors = <span class="hljs-number">3</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNumber&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isNumber</span>(colors, <span class="hljs-string">&#x27;colors is number&#x27;</span>)
+})</code></pre></div>
+<h2 id="isnotnumber"><a class="anchor" href="#isnotnumber">#</a>isNotNumber</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code> is not a number.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> colors = <span class="hljs-string">&#x27;3 colors&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNotNumber&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isNotNumber</span>(colors, <span class="hljs-string">&#x27;colors is not number but strings&#x27;</span>)
+})</code></pre></div>
+<h2 id="isfinite"><a class="anchor" href="#isfinite">#</a>isFinite</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code> is a finite number (not NaN, Infinity).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> colors = <span class="hljs-number">3</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isFinite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-built_in">isFinite</span>(colors, <span class="hljs-string">&#x27;colors is number not NaN or Infinity&#x27;</span>)
+})</code></pre></div>
+<h2 id="isboolean"><a class="anchor" href="#isboolean">#</a>isBoolean</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code> is a boolean.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> isReady = <span class="hljs-literal">true</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isBoolean&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isBoolean</span>(isReady, <span class="hljs-string">&#x27;isReady is a boolean&#x27;</span>)
+})</code></pre></div>
+<h2 id="isnotboolean"><a class="anchor" href="#isnotboolean">#</a>isNotBoolean</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code> is not a boolean.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> isReady = <span class="hljs-string">&#x27;sure&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isBoolean&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isBoolean</span>(isReady, <span class="hljs-string">&#x27;isReady is not a boolean but string&#x27;</span>)
+})</code></pre></div>
+<h2 id="typeof"><a class="anchor" href="#typeof">#</a>typeOf</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, name: string, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code>’s type is <code>name</code>, as determined by Object.prototype.toString.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.typeOf&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">typeOf</span>({ <span class="hljs-attr">color</span>: <span class="hljs-string">&#x27;red&#x27;</span> }, <span class="hljs-string">&#x27;object&#x27;</span>, <span class="hljs-string">&#x27;we have an object&#x27;</span>)
+  assert.<span class="hljs-title function_">typeOf</span>([<span class="hljs-string">&#x27;red&#x27;</span>, <span class="hljs-string">&#x27;green&#x27;</span>], <span class="hljs-string">&#x27;array&#x27;</span>, <span class="hljs-string">&#x27;we have an array&#x27;</span>)
+  assert.<span class="hljs-title function_">typeOf</span>(<span class="hljs-string">&#x27;red&#x27;</span>, <span class="hljs-string">&#x27;string&#x27;</span>, <span class="hljs-string">&#x27;we have a string&#x27;</span>)
+  assert.<span class="hljs-title function_">typeOf</span>(<span class="hljs-regexp">/red/</span>, <span class="hljs-string">&#x27;regexp&#x27;</span>, <span class="hljs-string">&#x27;we have a regular expression&#x27;</span>)
+  assert.<span class="hljs-title function_">typeOf</span>(<span class="hljs-literal">null</span>, <span class="hljs-string">&#x27;null&#x27;</span>, <span class="hljs-string">&#x27;we have a null&#x27;</span>)
+  assert.<span class="hljs-title function_">typeOf</span>(<span class="hljs-literal">undefined</span>, <span class="hljs-string">&#x27;undefined&#x27;</span>, <span class="hljs-string">&#x27;we have an undefined&#x27;</span>)
+})</code></pre></div>
+<h2 id="nottypeof"><a class="anchor" href="#nottypeof">#</a>notTypeOf</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, name: string, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code>’s type is not <code>name</code>, as determined by Object.prototype.toString.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notTypeOf&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notTypeOf</span>(<span class="hljs-string">&#x27;red&#x27;</span>, <span class="hljs-string">&#x27;number&#x27;</span>, <span class="hljs-string">&#x27;&quot;red&quot; is not a number&#x27;</span>)
+})</code></pre></div>
+<h2 id="instanceof"><a class="anchor" href="#instanceof">#</a>instanceOf</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, constructor: Function, message?: string) =&gt; asserts value is T</code></li>
+</ul>
+<p>Asserts that <code>value</code> is an instance of <code>constructor</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Person</span>(<span class="hljs-params">name</span>) { <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = name }
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Person</span>(<span class="hljs-string">&#x27;foo&#x27;</span>)
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Tea</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params">name</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = name
+  }
+}
+<span class="hljs-keyword">const</span> coffee = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Tea</span>(<span class="hljs-string">&#x27;coffee&#x27;</span>)
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.instanceOf&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">instanceOf</span>(foo, <span class="hljs-title class_">Person</span>, <span class="hljs-string">&#x27;foo is an instance of Person&#x27;</span>)
+  assert.<span class="hljs-title function_">instanceOf</span>(coffee, <span class="hljs-title class_">Tea</span>, <span class="hljs-string">&#x27;coffee is an instance of Tea&#x27;</span>)
+})</code></pre></div>
+<h2 id="notinstanceof"><a class="anchor" href="#notinstanceof">#</a>notInstanceOf</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(value: T, constructor: Function, message?: string) =&gt; asserts value is Exclude&lt;T, U&gt;</code></li>
+</ul>
+<p>Asserts that <code>value</code> is not an instance of <code>constructor</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Person</span>(<span class="hljs-params">name</span>) { <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = name }
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Person</span>(<span class="hljs-string">&#x27;foo&#x27;</span>)
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Tea</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params">name</span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = name
+  }
+}
+<span class="hljs-keyword">const</span> coffee = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Tea</span>(<span class="hljs-string">&#x27;coffee&#x27;</span>)
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.instanceOf&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">instanceOf</span>(foo, <span class="hljs-title class_">Tea</span>, <span class="hljs-string">&#x27;foo is not an instance of Tea&#x27;</span>)
+})</code></pre></div>
+<h2 id="include"><a class="anchor" href="#include">#</a>include</h2>
+<ul>
+<li><strong>Type:</strong><ul>
+<li><code>(haystack: string, needle: string, message?: string) =&gt; void</code></li>
+<li><code>&lt;T&gt;(haystack: readonly T[] | ReadonlySet&lt;T&gt; | ReadonlyMap&lt;any, T&gt;, needle: T, message?: string) =&gt; void</code></li>
+<li><code>&lt;T extends object&gt;(haystack: WeakSet&lt;T&gt;, needle: T, message?: string) =&gt; void</code></li>
+<li><code>&lt;T&gt;(haystack: T, needle: Partial&lt;T&gt;, message?: string) =&gt; void</code></li>
+</ul>
+</li>
+</ul>
+<p>Asserts that <code>haystack</code> includes <code>needle</code>. Can be used to assert the inclusion of a value in an array, a substring in a string, or a subset of properties in an object.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.include&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">include</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;array contains value&#x27;</span>)
+  assert.<span class="hljs-title function_">include</span>(<span class="hljs-string">&#x27;foobar&#x27;</span>, <span class="hljs-string">&#x27;foo&#x27;</span>, <span class="hljs-string">&#x27;string contains substring&#x27;</span>)
+  assert.<span class="hljs-title function_">include</span>({ <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-attr">hello</span>: <span class="hljs-string">&#x27;universe&#x27;</span> }, { <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span> }, <span class="hljs-string">&#x27;object contains property&#x27;</span>)
+})</code></pre></div>
+<h2 id="notinclude"><a class="anchor" href="#notinclude">#</a>notInclude</h2>
+<ul>
+<li><strong>Type:</strong><ul>
+<li><code>(haystack: string, needle: string, message?: string) =&gt; void</code></li>
+<li><code>&lt;T&gt;(haystack: readonly T[] | ReadonlySet&lt;T&gt; | ReadonlyMap&lt;any, T&gt;, needle: T, message?: string) =&gt; void</code></li>
+<li><code>&lt;T extends object&gt;(haystack: WeakSet&lt;T&gt;, needle: T, message?: string) =&gt; void</code></li>
+<li><code>&lt;T&gt;(haystack: T, needle: Partial&lt;T&gt;, message?: string) =&gt; void</code></li>
+</ul>
+</li>
+</ul>
+<p>Asserts that <code>haystack</code> does not include <code>needle</code>. It can be used to assert the absence of a value in an array, a substring in a string, or a subset of properties in an object.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notInclude&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notInclude</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], <span class="hljs-number">4</span>, <span class="hljs-string">&#x27;array doesn\&#x27;t contain 4&#x27;</span>)
+  assert.<span class="hljs-title function_">notInclude</span>(<span class="hljs-string">&#x27;foobar&#x27;</span>, <span class="hljs-string">&#x27;baz&#x27;</span>, <span class="hljs-string">&#x27;foobar doesn\&#x27;t contain baz&#x27;</span>)
+  assert.<span class="hljs-title function_">notInclude</span>({ <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-attr">hello</span>: <span class="hljs-string">&#x27;universe&#x27;</span> }, { <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;baz&#x27;</span> }, <span class="hljs-string">&#x27;object doesn\&#x27;t contain property&#x27;</span>)
+})</code></pre></div>
+<h2 id="deepinclude"><a class="anchor" href="#deepinclude">#</a>deepInclude</h2>
+<ul>
+<li><strong>Type:</strong></li>
+<li><code>(haystack: string, needle: string, message?: string) =&gt; void</code></li>
+<li><code>&lt;T&gt;(haystack: readonly T[] | ReadonlySet&lt;T&gt; | ReadonlyMap&lt;any, T&gt;, needle: T, message?: string) =&gt; void</code></li>
+<li><code>&lt;T&gt;(haystack: T, needle: T extends WeakSet&lt;any&gt; ? never : Partial&lt;T&gt;, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>haystack</code> includes <code>needle</code>. Can be used to assert the inclusion of a value in an array or a subset of properties in an object. Deep equality is used.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> obj1 = { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }
+<span class="hljs-keyword">const</span> obj2 = { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.deepInclude&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">deepInclude</span>([obj1, obj2], { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> })
+  assert.<span class="hljs-title function_">deepInclude</span>({ <span class="hljs-attr">foo</span>: obj1, <span class="hljs-attr">bar</span>: obj2 }, { <span class="hljs-attr">foo</span>: { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> } })
+})</code></pre></div>
+<h2 id="notdeepinclude"><a class="anchor" href="#notdeepinclude">#</a>notDeepInclude</h2>
+<ul>
+<li><strong>Type:</strong><ul>
+<li><code>(haystack: string, needle: string, message?: string) =&gt; void</code></li>
+<li><code>&lt;T&gt;(haystack: readonly T[] | ReadonlySet&lt;T&gt; | ReadonlyMap&lt;any, T&gt;, needle: T, message?: string) =&gt; void</code></li>
+<li><code>&lt;T&gt;(haystack: T, needle: T extends WeakSet&lt;any&gt; ? never : Partial&lt;T&gt;, message?: string) =&gt; void</code></li>
+</ul>
+</li>
+</ul>
+<p>Asserts that <code>haystack</code> does not include <code>needle</code>. It can be used to assert the absence of a value in an array or a subset of properties in an object. Deep equality is used.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> obj1 = { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }
+<span class="hljs-keyword">const</span> obj2 = { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notDeepInclude&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notDeepInclude</span>([obj1, obj2], { <span class="hljs-attr">a</span>: <span class="hljs-number">10</span> })
+  assert.<span class="hljs-title function_">notDeepInclude</span>({ <span class="hljs-attr">foo</span>: obj1, <span class="hljs-attr">bar</span>: obj2 }, { <span class="hljs-attr">foo</span>: { <span class="hljs-attr">a</span>: <span class="hljs-number">10</span> } })
+})</code></pre></div>
+<h2 id="nestedinclude"><a class="anchor" href="#nestedinclude">#</a>nestedInclude</h2>
+<ul>
+<li><strong>Type:</strong> <code>(haystack: any, needle: any, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>haystack</code> includes <code>needle</code>. Can be used to assert the inclusion of a subset of properties in an object. Enables the use of dot- and bracket-notation for referencing nested properties. ‘[]’ and ‘.’ in property names can be escaped using double backslashes.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.nestedInclude&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">nestedInclude</span>({ <span class="hljs-string">&#x27;.a&#x27;</span>: { <span class="hljs-attr">b</span>: <span class="hljs-string">&#x27;x&#x27;</span> } }, { <span class="hljs-string">&#x27;\\.a.[b]&#x27;</span>: <span class="hljs-string">&#x27;x&#x27;</span> })
+  assert.<span class="hljs-title function_">nestedInclude</span>({ <span class="hljs-attr">a</span>: { <span class="hljs-string">&#x27;[b]&#x27;</span>: <span class="hljs-string">&#x27;x&#x27;</span> } }, { <span class="hljs-string">&#x27;a.\\[b\\]&#x27;</span>: <span class="hljs-string">&#x27;x&#x27;</span> })
+})</code></pre></div>
+<h2 id="notnestedinclude"><a class="anchor" href="#notnestedinclude">#</a>notNestedInclude</h2>
+<ul>
+<li><strong>Type:</strong> <code>(haystack: any, needle: any, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>haystack</code> does not include <code>needle</code>. Can be used to assert the inclusion of a subset of properties in an object. Enables the use of dot- and bracket-notation for referencing nested properties. ‘[]’ and ‘.’ in property names can be escaped using double backslashes.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.nestedInclude&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notNestedInclude</span>({ <span class="hljs-string">&#x27;.a&#x27;</span>: { <span class="hljs-attr">b</span>: <span class="hljs-string">&#x27;x&#x27;</span> } }, { <span class="hljs-string">&#x27;\\.a.b&#x27;</span>: <span class="hljs-string">&#x27;y&#x27;</span> })
+  assert.<span class="hljs-title function_">notNestedInclude</span>({ <span class="hljs-attr">a</span>: { <span class="hljs-string">&#x27;[b]&#x27;</span>: <span class="hljs-string">&#x27;x&#x27;</span> } }, { <span class="hljs-string">&#x27;a.\\[b\\]&#x27;</span>: <span class="hljs-string">&#x27;y&#x27;</span> })
+})</code></pre></div>
+<h2 id="deepnestedinclude"><a class="anchor" href="#deepnestedinclude">#</a>deepNestedInclude</h2>
+<ul>
+<li><strong>Type:</strong> <code>(haystack: any, needle: any, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>haystack</code> includes <code>needle</code>. Can be used to assert the inclusion of a subset of properties in an object while checking for deep equality. Enables the use of dot- and bracket-notation for referencing nested properties. ‘[]’ and ‘.’ in property names can be escaped using double backslashes.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.deepNestedInclude&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">deepNestedInclude</span>({ <span class="hljs-attr">a</span>: { <span class="hljs-attr">b</span>: [{ <span class="hljs-attr">x</span>: <span class="hljs-number">1</span> }] } }, { <span class="hljs-string">&#x27;a.b[0]&#x27;</span>: { <span class="hljs-attr">x</span>: <span class="hljs-number">1</span> } })
+  assert.<span class="hljs-title function_">deepNestedInclude</span>({ <span class="hljs-string">&#x27;.a&#x27;</span>: { <span class="hljs-string">&#x27;[b]&#x27;</span>: { <span class="hljs-attr">x</span>: <span class="hljs-number">1</span> } } }, { <span class="hljs-string">&#x27;\\.a.\\[b\\]&#x27;</span>: { <span class="hljs-attr">x</span>: <span class="hljs-number">1</span> } })
+})</code></pre></div>
+<h2 id="notdeepnestedinclude"><a class="anchor" href="#notdeepnestedinclude">#</a>notDeepNestedInclude</h2>
+<ul>
+<li><strong>Type:</strong> <code>(haystack: any, needle: any, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>haystack</code> not includes <code>needle</code>. Can be used to assert the absence of a subset of properties in an object while checking for deep equality. Enables the use of dot- and bracket-notation for referencing nested properties. ‘[]’ and ‘.’ in property names can be escaped using double backslashes.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notDeepNestedInclude&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notDeepNestedInclude</span>({ <span class="hljs-attr">a</span>: { <span class="hljs-attr">b</span>: [{ <span class="hljs-attr">x</span>: <span class="hljs-number">1</span> }] } }, { <span class="hljs-string">&#x27;a.b[0]&#x27;</span>: { <span class="hljs-attr">y</span>: <span class="hljs-number">1</span> } })
+  assert.<span class="hljs-title function_">notDeepNestedInclude</span>({ <span class="hljs-string">&#x27;.a&#x27;</span>: { <span class="hljs-string">&#x27;[b]&#x27;</span>: { <span class="hljs-attr">x</span>: <span class="hljs-number">1</span> } } }, { <span class="hljs-string">&#x27;\\.a.\\[b\\]&#x27;</span>: { <span class="hljs-attr">y</span>: <span class="hljs-number">2</span> } })
+})</code></pre></div>
+<h2 id="owninclude"><a class="anchor" href="#owninclude">#</a>ownInclude</h2>
+<ul>
+<li><strong>Type:</strong> <code>(haystack: any, needle: any, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>haystack</code> includes <code>needle</code>. Can be used to assert the inclusion of a subset of properties in an object while ignoring inherited properties.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.ownInclude&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">ownInclude</span>({ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> })
+})</code></pre></div>
+<h2 id="notowninclude"><a class="anchor" href="#notowninclude">#</a>notOwnInclude</h2>
+<ul>
+<li><strong>Type:</strong> <code>(haystack: any, needle: any, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>haystack</code> includes <code>needle</code>. Can be used to assert the absence of a subset of properties in an object while ignoring inherited properties.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> obj1 = {
+  <span class="hljs-attr">b</span>: <span class="hljs-number">2</span>
+}
+
+<span class="hljs-keyword">const</span> obj2 = <span class="hljs-built_in">object</span>.<span class="hljs-title function_">create</span>(obj1)
+obj2.<span class="hljs-property">a</span> = <span class="hljs-number">1</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notOwnInclude&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notOwnInclude</span>(obj2, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> })
+})</code></pre></div>
+<h2 id="deepowninclude"><a class="anchor" href="#deepowninclude">#</a>deepOwnInclude</h2>
+<ul>
+<li><strong>Type:</strong> <code>(haystack: any, needle: any, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>haystack</code> includes <code>needle</code>. Can be used to assert the inclusion of a subset of properties in an object while ignoring inherited properties and checking for deep equality.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.deepOwnInclude&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">deepOwnInclude</span>({ <span class="hljs-attr">a</span>: { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> } }, { <span class="hljs-attr">a</span>: { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> } })
+})</code></pre></div>
+<h2 id="notdeepowninclude"><a class="anchor" href="#notdeepowninclude">#</a>notDeepOwnInclude</h2>
+<ul>
+<li><strong>Type:</strong> <code>(haystack: any, needle: any, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>haystack</code> not includes <code>needle</code>. Can be used to assert the absence of a subset of properties in an object while ignoring inherited properties and checking for deep equality.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notDeepOwnInclude&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notDeepOwnInclude</span>({ <span class="hljs-attr">a</span>: { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> } }, { <span class="hljs-attr">a</span>: { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> } })
+})</code></pre></div>
+<h2 id="match"><a class="anchor" href="#match">#</a>match</h2>
+<ul>
+<li><strong>Type:</strong> <code>(value: string, regexp: RegExp, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code> matches the regular expression <code>regexp</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.match&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">match</span>(<span class="hljs-string">&#x27;foobar&#x27;</span>, <span class="hljs-regexp">/^foo/</span>, <span class="hljs-string">&#x27;regexp matches&#x27;</span>)
+})</code></pre></div>
+<h2 id="notmatch"><a class="anchor" href="#notmatch">#</a>notMatch</h2>
+<ul>
+<li><strong>Type:</strong> <code>(value: string, regexp: RegExp, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>value</code> does not matches the regular expression <code>regexp</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notMatch&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notMatch</span>(<span class="hljs-string">&#x27;foobar&#x27;</span>, <span class="hljs-regexp">/^foo/</span>, <span class="hljs-string">&#x27;regexp does not match&#x27;</span>)
+})</code></pre></div>
+<h2 id="property"><a class="anchor" href="#property">#</a>property</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, property: string, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> has a direct or inherited property named by <code>property</code></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.property&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">property</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> } }, <span class="hljs-string">&#x27;tea&#x27;</span>)
+  assert.<span class="hljs-title function_">property</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> } }, <span class="hljs-string">&#x27;toString&#x27;</span>)
+})</code></pre></div>
+<h2 id="notproperty"><a class="anchor" href="#notproperty">#</a>notProperty</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, property: string, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> does not have a direct or inherited property named by <code>property</code></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notProperty&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notProperty</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> } }, <span class="hljs-string">&#x27;coffee&#x27;</span>)
+})</code></pre></div>
+<h2 id="propertyval"><a class="anchor" href="#propertyval">#</a>propertyVal</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T, V&gt;(object: T, property: string, value: V, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> has a direct or inherited property named by <code>property</code> with a value given by <code>value</code>. Uses a strict equality check (===).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notPropertyVal&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">propertyVal</span>({ <span class="hljs-attr">tea</span>: <span class="hljs-string">&#x27;is good&#x27;</span> }, <span class="hljs-string">&#x27;tea&#x27;</span>, <span class="hljs-string">&#x27;is good&#x27;</span>)
+})</code></pre></div>
+<h2 id="notpropertyval"><a class="anchor" href="#notpropertyval">#</a>notPropertyVal</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T, V&gt;(object: T, property: string, value: V, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> does not have a direct or inherited property named by <code>property</code> with a value given by <code>value</code>. Uses a strict equality check (===).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notPropertyVal&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notPropertyVal</span>({ <span class="hljs-attr">tea</span>: <span class="hljs-string">&#x27;is good&#x27;</span> }, <span class="hljs-string">&#x27;tea&#x27;</span>, <span class="hljs-string">&#x27;is bad&#x27;</span>)
+  assert.<span class="hljs-title function_">notPropertyVal</span>({ <span class="hljs-attr">tea</span>: <span class="hljs-string">&#x27;is good&#x27;</span> }, <span class="hljs-string">&#x27;coffee&#x27;</span>, <span class="hljs-string">&#x27;is good&#x27;</span>)
+})</code></pre></div>
+<h2 id="deeppropertyval"><a class="anchor" href="#deeppropertyval">#</a>deepPropertyVal</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T, V&gt;(object: T, property: string, value: V, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> has a direct or inherited property named by <code>property</code> with a value given by <code>value</code>. Uses a deep equality check.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.deepPropertyVal&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">deepPropertyVal</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> } }, <span class="hljs-string">&#x27;tea&#x27;</span>, { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> })
+})</code></pre></div>
+<h2 id="notdeeppropertyval"><a class="anchor" href="#notdeeppropertyval">#</a>notDeepPropertyVal</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T, V&gt;(object: T, property: string, value: V, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> does not have a direct or inherited property named by <code>property</code> with a value given by <code>value</code>. Uses a deep equality check.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.deepPropertyVal&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notDeepPropertyVal</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> } }, <span class="hljs-string">&#x27;tea&#x27;</span>, { <span class="hljs-attr">black</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> })
+  assert.<span class="hljs-title function_">notDeepPropertyVal</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> } }, <span class="hljs-string">&#x27;tea&#x27;</span>, { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;oolong&#x27;</span> })
+  assert.<span class="hljs-title function_">notDeepPropertyVal</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> } }, <span class="hljs-string">&#x27;coffee&#x27;</span>, { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> })
+})</code></pre></div>
+<h2 id="nestedproperty"><a class="anchor" href="#nestedproperty">#</a>nestedProperty</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, property: string, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> has a direct or inherited property named by <code>property</code>, which can be a string using dot- and bracket-notation for nested reference.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.deepPropertyVal&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">nestedProperty</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> } }, <span class="hljs-string">&#x27;tea.green&#x27;</span>)
+})</code></pre></div>
+<h2 id="notnestedproperty"><a class="anchor" href="#notnestedproperty">#</a>notNestedProperty</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, property: string, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> does not have a direct or inherited property named by <code>property</code>, which can be a string using dot- and bracket-notation for nested reference.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.deepPropertyVal&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notNestedProperty</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> } }, <span class="hljs-string">&#x27;tea.oolong&#x27;</span>)
+})</code></pre></div>
+<h2 id="nestedpropertyval"><a class="anchor" href="#nestedpropertyval">#</a>nestedPropertyVal</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, property: string, value: any, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> has a property named by <code>property</code> with value given by <code>value</code>. <code>property</code> can use dot- and bracket-notation for nested reference. Uses a strict equality check (===).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.nestedPropertyVal&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">nestedPropertyVal</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> } }, <span class="hljs-string">&#x27;tea.green&#x27;</span>, <span class="hljs-string">&#x27;matcha&#x27;</span>)
+})</code></pre></div>
+<h2 id="notnestedpropertyval"><a class="anchor" href="#notnestedpropertyval">#</a>notNestedPropertyVal</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, property: string, value: any, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> does not have a property named by <code>property</code> with value given by <code>value</code>. <code>property</code> can use dot- and bracket-notation for nested reference. Uses a strict equality check (===).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notNestedPropertyVal&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notNestedPropertyVal</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> } }, <span class="hljs-string">&#x27;tea.green&#x27;</span>, <span class="hljs-string">&#x27;konacha&#x27;</span>)
+  assert.<span class="hljs-title function_">notNestedPropertyVal</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> } }, <span class="hljs-string">&#x27;coffee.green&#x27;</span>, <span class="hljs-string">&#x27;matcha&#x27;</span>)
+})</code></pre></div>
+<h2 id="deepnestedpropertyval"><a class="anchor" href="#deepnestedpropertyval">#</a>deepNestedPropertyVal</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, property: string, value: any, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> has a property named by <code>property</code> with a value given by <code>value</code>. <code>property</code> can use dot- and bracket-notation for nested reference. Uses a deep equality check (===).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notNestedPropertyVal&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notNestedPropertyVal</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> } }, <span class="hljs-string">&#x27;tea.green&#x27;</span>, <span class="hljs-string">&#x27;konacha&#x27;</span>)
+  assert.<span class="hljs-title function_">notNestedPropertyVal</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: <span class="hljs-string">&#x27;matcha&#x27;</span> } }, <span class="hljs-string">&#x27;coffee.green&#x27;</span>, <span class="hljs-string">&#x27;matcha&#x27;</span>)
+})</code></pre></div>
+<h2 id="notdeepnestedpropertyval"><a class="anchor" href="#notdeepnestedpropertyval">#</a>notDeepNestedPropertyVal</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, property: string, value: any, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> does not have a property named by <code>property</code> with value given by <code>value</code>. <code>property</code> can use dot- and bracket-notation for nested reference. Uses a deep equality check.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notDeepNestedPropertyVal&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notDeepNestedPropertyVal</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: { <span class="hljs-attr">matcha</span>: <span class="hljs-string">&#x27;yum&#x27;</span> } } }, <span class="hljs-string">&#x27;tea.green&#x27;</span>, { <span class="hljs-attr">oolong</span>: <span class="hljs-string">&#x27;yum&#x27;</span> })
+  assert.<span class="hljs-title function_">notDeepNestedPropertyVal</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: { <span class="hljs-attr">matcha</span>: <span class="hljs-string">&#x27;yum&#x27;</span> } } }, <span class="hljs-string">&#x27;tea.green&#x27;</span>, { <span class="hljs-attr">matcha</span>: <span class="hljs-string">&#x27;yuck&#x27;</span> })
+  assert.<span class="hljs-title function_">notDeepNestedPropertyVal</span>({ <span class="hljs-attr">tea</span>: { <span class="hljs-attr">green</span>: { <span class="hljs-attr">matcha</span>: <span class="hljs-string">&#x27;yum&#x27;</span> } } }, <span class="hljs-string">&#x27;tea.black&#x27;</span>, { <span class="hljs-attr">matcha</span>: <span class="hljs-string">&#x27;yum&#x27;</span> })
+})</code></pre></div>
+<h2 id="lengthof"><a class="anchor" href="#lengthof">#</a>lengthOf</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T extends { readonly length?: number | undefined } | { readonly size?: number | undefined }&gt;(object: T, length: number, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> has a <code>length</code> or <code>size</code> with the expected value.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.lengthOf&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">lengthOf</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], <span class="hljs-number">3</span>, <span class="hljs-string">&#x27;array has length of 3&#x27;</span>)
+  assert.<span class="hljs-title function_">lengthOf</span>(<span class="hljs-string">&#x27;foobar&#x27;</span>, <span class="hljs-number">6</span>, <span class="hljs-string">&#x27;string has length of 6&#x27;</span>)
+  assert.<span class="hljs-title function_">lengthOf</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]), <span class="hljs-number">3</span>, <span class="hljs-string">&#x27;set has size of 3&#x27;</span>)
+  assert.<span class="hljs-title function_">lengthOf</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[<span class="hljs-string">&#x27;a&#x27;</span>, <span class="hljs-number">1</span>], [<span class="hljs-string">&#x27;b&#x27;</span>, <span class="hljs-number">2</span>], [<span class="hljs-string">&#x27;c&#x27;</span>, <span class="hljs-number">3</span>]]), <span class="hljs-number">3</span>, <span class="hljs-string">&#x27;map has size of 3&#x27;</span>)
+})</code></pre></div>
+<h2 id="hasanykeys"><a class="anchor" href="#hasanykeys">#</a>hasAnyKeys</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, keys: Array&lt;Object | string&gt; | { [key: string]: any }, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> has at least one of the <code>keys</code> provided. You can also provide a single object instead of a keys array and its keys will be used as the expected set of keys.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.hasAnyKeys&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">hasAnyKeys</span>({ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">bar</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">3</span> }, [<span class="hljs-string">&#x27;foo&#x27;</span>, <span class="hljs-string">&#x27;iDontExist&#x27;</span>, <span class="hljs-string">&#x27;baz&#x27;</span>])
+  assert.<span class="hljs-title function_">hasAnyKeys</span>({ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">bar</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">3</span> }, { <span class="hljs-attr">foo</span>: <span class="hljs-number">30</span>, <span class="hljs-attr">iDontExist</span>: <span class="hljs-number">99</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">1337</span> })
+  assert.<span class="hljs-title function_">hasAnyKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span> }, <span class="hljs-string">&#x27;bar&#x27;</span>], [<span class="hljs-string">&#x27;key&#x27;</span>, <span class="hljs-string">&#x27;value&#x27;</span>]]), [{ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span> }, <span class="hljs-string">&#x27;key&#x27;</span>])
+  assert.<span class="hljs-title function_">hasAnyKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span> }, <span class="hljs-string">&#x27;anotherKey&#x27;</span>]), [{ <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span> }, <span class="hljs-string">&#x27;anotherKey&#x27;</span>])
+})</code></pre></div>
+<h2 id="hasallkeys"><a class="anchor" href="#hasallkeys">#</a>hasAllKeys</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, keys: Array&lt;Object | string&gt; | { [key: string]: any }, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> has all and only all of the <code>keys</code> provided. You can also provide a single object instead of a keys array and its keys will be used as the expected set of keys.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.hasAllKeys&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">hasAllKeys</span>({ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">bar</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">3</span> }, [<span class="hljs-string">&#x27;foo&#x27;</span>, <span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-string">&#x27;baz&#x27;</span>])
+  assert.<span class="hljs-title function_">hasAllKeys</span>({ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">bar</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">3</span> }, { <span class="hljs-attr">foo</span>: <span class="hljs-number">30</span>, <span class="hljs-attr">bar</span>: <span class="hljs-number">99</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">1337</span> })
+  assert.<span class="hljs-title function_">hasAllKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span> }, <span class="hljs-string">&#x27;bar&#x27;</span>], [<span class="hljs-string">&#x27;key&#x27;</span>, <span class="hljs-string">&#x27;value&#x27;</span>]]), [{ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span> }, <span class="hljs-string">&#x27;key&#x27;</span>])
+  assert.<span class="hljs-title function_">hasAllKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span> }, <span class="hljs-string">&#x27;anotherKey&#x27;</span>], [{ <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span> }, <span class="hljs-string">&#x27;anotherKey&#x27;</span>]))
+})</code></pre></div>
+<h2 id="containsallkeys"><a class="anchor" href="#containsallkeys">#</a>containsAllKeys</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, keys: Array&lt;Object | string&gt; | { [key: string]: any }, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> has all of the <code>keys</code> provided but may have more keys not listed. You can also provide a single object instead of a keys array and its keys will be used as the expected set of keys.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.containsAllKeys&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">containsAllKeys</span>({ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">bar</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">3</span> }, [<span class="hljs-string">&#x27;foo&#x27;</span>, <span class="hljs-string">&#x27;baz&#x27;</span>])
+  assert.<span class="hljs-title function_">containsAllKeys</span>({ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">bar</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">3</span> }, [<span class="hljs-string">&#x27;foo&#x27;</span>, <span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-string">&#x27;baz&#x27;</span>])
+  assert.<span class="hljs-title function_">containsAllKeys</span>({ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">bar</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">3</span> }, { <span class="hljs-attr">foo</span>: <span class="hljs-number">30</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">1337</span> })
+  assert.<span class="hljs-title function_">containsAllKeys</span>({ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">bar</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">3</span> }, { <span class="hljs-attr">foo</span>: <span class="hljs-number">30</span>, <span class="hljs-attr">bar</span>: <span class="hljs-number">99</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">1337</span> })
+  assert.<span class="hljs-title function_">containsAllKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span> }, <span class="hljs-string">&#x27;bar&#x27;</span>], [<span class="hljs-string">&#x27;key&#x27;</span>, <span class="hljs-string">&#x27;value&#x27;</span>]]), [{ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span> }])
+  assert.<span class="hljs-title function_">containsAllKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span> }, <span class="hljs-string">&#x27;bar&#x27;</span>], [<span class="hljs-string">&#x27;key&#x27;</span>, <span class="hljs-string">&#x27;value&#x27;</span>]]), [{ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span> }, <span class="hljs-string">&#x27;key&#x27;</span>])
+  assert.<span class="hljs-title function_">containsAllKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span> }, <span class="hljs-string">&#x27;anotherKey&#x27;</span>], [{ <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span> }]))
+  assert.<span class="hljs-title function_">containsAllKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span> }, <span class="hljs-string">&#x27;anotherKey&#x27;</span>], [{ <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span> }, <span class="hljs-string">&#x27;anotherKey&#x27;</span>]))
+})</code></pre></div>
+<h2 id="doesnothaveanykeys"><a class="anchor" href="#doesnothaveanykeys">#</a>doesNotHaveAnyKeys</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, keys: Array&lt;Object | string&gt; | { [key: string]: any }, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> has none of the <code>keys</code> provided. You can also provide a single object instead of a keys array and its keys will be used as the expected set of keys.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.doesNotHaveAnyKeys&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">doesNotHaveAnyKeys</span>({ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">bar</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">3</span> }, [<span class="hljs-string">&#x27;one&#x27;</span>, <span class="hljs-string">&#x27;two&#x27;</span>, <span class="hljs-string">&#x27;example&#x27;</span>])
+  assert.<span class="hljs-title function_">doesNotHaveAnyKeys</span>({ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">bar</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">3</span> }, { <span class="hljs-attr">one</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">two</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">example</span>: <span class="hljs-string">&#x27;foo&#x27;</span> })
+  assert.<span class="hljs-title function_">doesNotHaveAnyKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span> }, <span class="hljs-string">&#x27;bar&#x27;</span>], [<span class="hljs-string">&#x27;key&#x27;</span>, <span class="hljs-string">&#x27;value&#x27;</span>]]), [{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;two&#x27;</span> }, <span class="hljs-string">&#x27;example&#x27;</span>])
+  assert.<span class="hljs-title function_">doesNotHaveAnyKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span> }, <span class="hljs-string">&#x27;anotherKey&#x27;</span>], [{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;two&#x27;</span> }, <span class="hljs-string">&#x27;example&#x27;</span>]))
+})</code></pre></div>
+<h2 id="doesnothaveallkeys"><a class="anchor" href="#doesnothaveallkeys">#</a>doesNotHaveAllKeys</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, keys: Array&lt;Object | string&gt; | { [key: string]: any }, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> does not have at least one of the <code>keys</code> provided. You can also provide a single object instead of a keys array and its keys will be used as the expected set of keys.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.hasAnyKeys&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">doesNotHaveAnyKeys</span>({ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">bar</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">3</span> }, [<span class="hljs-string">&#x27;one&#x27;</span>, <span class="hljs-string">&#x27;two&#x27;</span>, <span class="hljs-string">&#x27;example&#x27;</span>])
+  assert.<span class="hljs-title function_">doesNotHaveAnyKeys</span>({ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">bar</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">baz</span>: <span class="hljs-number">3</span> }, { <span class="hljs-attr">one</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">two</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">example</span>: <span class="hljs-string">&#x27;foo&#x27;</span> })
+  assert.<span class="hljs-title function_">doesNotHaveAnyKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">foo</span>: <span class="hljs-number">1</span> }, <span class="hljs-string">&#x27;bar&#x27;</span>], [<span class="hljs-string">&#x27;key&#x27;</span>, <span class="hljs-string">&#x27;value&#x27;</span>]]), [{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;two&#x27;</span> }, <span class="hljs-string">&#x27;example&#x27;</span>])
+  assert.<span class="hljs-title function_">doesNotHaveAnyKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span> }, <span class="hljs-string">&#x27;anotherKey&#x27;</span>]), [{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;two&#x27;</span> }, <span class="hljs-string">&#x27;example&#x27;</span>])
+})</code></pre></div>
+<h2 id="hasanydeepkeys"><a class="anchor" href="#hasanydeepkeys">#</a>hasAnyDeepKeys</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, keys: Array&lt;Object | string&gt; | { [key: string]: any }, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> has at least one of the <code>keys</code> provided. Since Sets and Maps can have objects as keys you can use this assertion to perform a deep comparison. You can also provide a single object instead of a keys array and its keys will be used as the expected set of keys.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.hasAnyDeepKeys&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">hasAnyDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, <span class="hljs-string">&#x27;valueOne&#x27;</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>]]), { <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> })
+  assert.<span class="hljs-title function_">hasAnyDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, <span class="hljs-string">&#x27;valueOne&#x27;</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>]]), [{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }])
+  assert.<span class="hljs-title function_">hasAnyDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, <span class="hljs-string">&#x27;valueOne&#x27;</span>], [{ <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }, <span class="hljs-string">&#x27;valueTwo&#x27;</span>]]), [{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }])
+  assert.<span class="hljs-title function_">hasAnyDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }]), { <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> })
+  assert.<span class="hljs-title function_">hasAnyDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }]), [{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">three</span>: <span class="hljs-string">&#x27;three&#x27;</span> }])
+  assert.<span class="hljs-title function_">hasAnyDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }]), [{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }])
+})</code></pre></div>
+<h2 id="hasalldeepkeys"><a class="anchor" href="#hasalldeepkeys">#</a>hasAllDeepKeys</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, keys: Array&lt;Object | string&gt; | { [key: string]: any }, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> has all and only all of the <code>keys</code> provided. Since Sets and Maps can have objects as keys you can use this assertion to perform a deep comparison. You can also provide a single object instead of a keys array and its keys will be used as the expected set of keys.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.hasAnyDeepKeys&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">hasAllDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, <span class="hljs-string">&#x27;valueOne&#x27;</span>]]), { <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> })
+  assert.<span class="hljs-title function_">hasAllDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, <span class="hljs-string">&#x27;valueOne&#x27;</span>], [{ <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }, <span class="hljs-string">&#x27;valueTwo&#x27;</span>]]), [{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }])
+  assert.<span class="hljs-title function_">hasAllDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }]), { <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> })
+  assert.<span class="hljs-title function_">hasAllDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }]), [{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }])
+})</code></pre></div>
+<h2 id="containsalldeepkeys"><a class="anchor" href="#containsalldeepkeys">#</a>containsAllDeepKeys</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, keys: Array&lt;Object | string&gt; | { [key: string]: any }, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> contains all of the <code>keys</code> provided. Since Sets and Maps can have objects as keys you can use this assertion to perform a deep comparison. You can also provide a single object instead of a keys array and its keys will be used as the expected set of keys.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.containsAllDeepKeys&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">containsAllDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, <span class="hljs-string">&#x27;valueOne&#x27;</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>]]), { <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> })
+  assert.<span class="hljs-title function_">containsAllDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, <span class="hljs-string">&#x27;valueOne&#x27;</span>], [{ <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }, <span class="hljs-string">&#x27;valueTwo&#x27;</span>]]), [{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }])
+  assert.<span class="hljs-title function_">containsAllDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }]), { <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> })
+  assert.<span class="hljs-title function_">containsAllDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }]), [{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }])
+})</code></pre></div>
+<h2 id="doesnothaveanydeepkeys"><a class="anchor" href="#doesnothaveanydeepkeys">#</a>doesNotHaveAnyDeepKeys</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, keys: Array&lt;Object | string&gt; | { [key: string]: any }, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> has none of the <code>keys</code> provided. Since Sets and Maps can have objects as keys you can use this assertion to perform a deep comparison. You can also provide a single object instead of a keys array and its keys will be used as the expected set of keys.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.doesNotHaveAnyDeepKeys&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">doesNotHaveAnyDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, <span class="hljs-string">&#x27;valueOne&#x27;</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>]]), { <span class="hljs-attr">thisDoesNot</span>: <span class="hljs-string">&#x27;exist&#x27;</span> })
+  assert.<span class="hljs-title function_">doesNotHaveAnyDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, <span class="hljs-string">&#x27;valueOne&#x27;</span>], [{ <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }, <span class="hljs-string">&#x27;valueTwo&#x27;</span>]]), [{ <span class="hljs-attr">twenty</span>: <span class="hljs-string">&#x27;twenty&#x27;</span> }, { <span class="hljs-attr">fifty</span>: <span class="hljs-string">&#x27;fifty&#x27;</span> }])
+  assert.<span class="hljs-title function_">doesNotHaveAnyDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }]), { <span class="hljs-attr">twenty</span>: <span class="hljs-string">&#x27;twenty&#x27;</span> })
+  assert.<span class="hljs-title function_">doesNotHaveAnyDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }]), [{ <span class="hljs-attr">twenty</span>: <span class="hljs-string">&#x27;twenty&#x27;</span> }, { <span class="hljs-attr">fifty</span>: <span class="hljs-string">&#x27;fifty&#x27;</span> }])
+})</code></pre></div>
+<h2 id="doesnothavealldeepkeys"><a class="anchor" href="#doesnothavealldeepkeys">#</a>doesNotHaveAllDeepKeys</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, keys: Array&lt;Object | string&gt; | { [key: string]: any }, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>object</code> does not have at least one of the <code>keys</code> provided. Since Sets and Maps can have objects as keys you can use this assertion to perform a deep comparison. You can also provide a single object instead of a keys array and its keys will be used as the expected set of keys.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.doesNotHaveAllDeepKeys&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">doesNotHaveAllDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, <span class="hljs-string">&#x27;valueOne&#x27;</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>]]), { <span class="hljs-attr">thisDoesNot</span>: <span class="hljs-string">&#x27;exist&#x27;</span> })
+  assert.<span class="hljs-title function_">doesNotHaveAllDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>([[{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, <span class="hljs-string">&#x27;valueOne&#x27;</span>], [{ <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }, <span class="hljs-string">&#x27;valueTwo&#x27;</span>]]), [{ <span class="hljs-attr">twenty</span>: <span class="hljs-string">&#x27;twenty&#x27;</span> }, { <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }])
+  assert.<span class="hljs-title function_">doesNotHaveAllDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }]), { <span class="hljs-attr">twenty</span>: <span class="hljs-string">&#x27;twenty&#x27;</span> })
+  assert.<span class="hljs-title function_">doesNotHaveAllDeepKeys</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;two&#x27;</span> }]), [{ <span class="hljs-attr">one</span>: <span class="hljs-string">&#x27;one&#x27;</span> }, { <span class="hljs-attr">fifty</span>: <span class="hljs-string">&#x27;fifty&#x27;</span> }])
+})</code></pre></div>
+<h2 id="throws"><a class="anchor" href="#throws">#</a>throws</h2>
+<ul>
+<li><strong>Type:</strong><ul>
+<li><code>(fn: () =&gt; void, errMsgMatcher?: RegExp | string, ignored?: any, message?: string) =&gt; void</code></li>
+<li><code>(fn: () =&gt; void, errorLike?: ErrorConstructor | Error | null, errMsgMatcher?: RegExp | string | null, message?: string) =&gt; void</code></li>
+</ul>
+</li>
+<li><strong>Alias:</strong><ul>
+<li><code>throw</code></li>
+<li><code>Throw</code></li>
+</ul>
+</li>
+</ul>
+<p>If <code>errorLike</code> is an Error constructor, asserts that <code>fn</code> will throw an error that is an instance of <code>errorLike</code>. If errorLike is an Error instance, asserts that the error thrown is the same instance as <code>errorLike</code>. If <code>errMsgMatcher</code> is provided, it also asserts that the error thrown will have a message matching <code>errMsgMatcher</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.throws&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">throws</span>(fn, <span class="hljs-string">&#x27;Error thrown must have this msg&#x27;</span>)
+  assert.<span class="hljs-title function_">throws</span>(fn, <span class="hljs-regexp">/Error thrown must have a msg that matches this/</span>)
+  assert.<span class="hljs-title function_">throws</span>(fn, <span class="hljs-title class_">ReferenceError</span>)
+  assert.<span class="hljs-title function_">throws</span>(fn, errorInstance)
+  assert.<span class="hljs-title function_">throws</span>(fn, <span class="hljs-title class_">ReferenceError</span>, <span class="hljs-string">&#x27;Error thrown must be a ReferenceError and have this msg&#x27;</span>)
+  assert.<span class="hljs-title function_">throws</span>(fn, errorInstance, <span class="hljs-string">&#x27;Error thrown must be the same errorInstance and have this msg&#x27;</span>)
+  assert.<span class="hljs-title function_">throws</span>(fn, <span class="hljs-title class_">ReferenceError</span>, <span class="hljs-regexp">/Error thrown must be a ReferenceError and match this/</span>)
+  assert.<span class="hljs-title function_">throws</span>(fn, errorInstance, <span class="hljs-regexp">/Error thrown must be the same errorInstance and match this/</span>)
+})</code></pre></div>
+<h2 id="doesnotthrow"><a class="anchor" href="#doesnotthrow">#</a>doesNotThrow</h2>
+<ul>
+<li><strong>Type:</strong> <code>(fn: () =&gt; void, errMsgMatcher?: RegExp | string, ignored?: any, message?: string) =&gt; void</code></li>
+<li><strong>Type:</strong> <code>(fn: () =&gt; void, errorLike?: ErrorConstructor | Error | null, errMsgMatcher?: RegExp | string | null, message?: string) =&gt; void</code></li>
+</ul>
+<p>If <code>errorLike</code> is an Error constructor, asserts that <code>fn</code> will not throw an error that is an instance of <code>errorLike</code>. If errorLike is an Error instance, asserts that the error thrown is not the same instance as <code>errorLike</code>. If <code>errMsgMatcher</code> is provided, it also asserts that the error thrown will not have a message matching <code>errMsgMatcher</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.doesNotThrow&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">doesNotThrow</span>(fn, <span class="hljs-string">&#x27;Any Error thrown must not have this message&#x27;</span>)
+  assert.<span class="hljs-title function_">doesNotThrow</span>(fn, <span class="hljs-regexp">/Any Error thrown must not match this/</span>)
+  assert.<span class="hljs-title function_">doesNotThrow</span>(fn, <span class="hljs-title class_">Error</span>)
+  assert.<span class="hljs-title function_">doesNotThrow</span>(fn, errorInstance)
+  assert.<span class="hljs-title function_">doesNotThrow</span>(fn, <span class="hljs-title class_">Error</span>, <span class="hljs-string">&#x27;Error must not have this message&#x27;</span>)
+  assert.<span class="hljs-title function_">doesNotThrow</span>(fn, errorInstance, <span class="hljs-string">&#x27;Error must not have this message&#x27;</span>)
+  assert.<span class="hljs-title function_">doesNotThrow</span>(fn, <span class="hljs-title class_">Error</span>, <span class="hljs-regexp">/Error must not match this/</span>)
+  assert.<span class="hljs-title function_">doesNotThrow</span>(fn, errorInstance, <span class="hljs-regexp">/Error must not match this/</span>)
+})</code></pre></div>
+<h2 id="operator"><a class="anchor" href="#operator">#</a>operator</h2>
+<ul>
+<li><strong>Type:</strong> <code>(val1: OperatorComparable, operator: Operator, val2: OperatorComparable, message?: string) =&gt; void</code></li>
+</ul>
+<p>Compare <code>val1</code> and <code>val2</code> using <code>operator</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.operator&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">operator</span>(<span class="hljs-number">1</span>, <span class="hljs-string">&#x27;&lt;&#x27;</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&#x27;everything is ok&#x27;</span>)
+})</code></pre></div>
+<h2 id="closeto"><a class="anchor" href="#closeto">#</a>closeTo</h2>
+<ul>
+<li><strong>Type:</strong> <code>(actual: number, expected: number, delta: number, message?: string) =&gt; void</code></li>
+<li><strong>Alias:</strong> <code>approximately</code></li>
+</ul>
+<p>Asserts that the <code>actual</code> is equal <code>expected</code>, to within a +/- <code>delta</code> range.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.closeTo&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">closeTo</span>(<span class="hljs-number">1.5</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0.5</span>, <span class="hljs-string">&#x27;numbers are close&#x27;</span>)
+})</code></pre></div>
+<h2 id="samemembers"><a class="anchor" href="#samemembers">#</a>sameMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(set1: T[], set2: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>set1</code> and <code>set2</code> have the same members in any order. Uses a strict equality check (===).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.sameMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">sameMembers</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>], <span class="hljs-string">&#x27;same members&#x27;</span>)
+})</code></pre></div>
+<h2 id="notsamemembers"><a class="anchor" href="#notsamemembers">#</a>notSameMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(set1: T[], set2: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>set1</code> and <code>set2</code> don&#39;t have the same members in any order. Uses a strict equality check (===).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.sameMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notSameMembers</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], [<span class="hljs-number">5</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>], <span class="hljs-string">&#x27;not same members&#x27;</span>)
+})</code></pre></div>
+<h2 id="samedeepmembers"><a class="anchor" href="#samedeepmembers">#</a>sameDeepMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(set1: T[], set2: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>set1</code> and <code>set2</code> have the same members in any order. Uses a deep equality check.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.sameDeepMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">sameDeepMembers</span>([{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], [{ <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], <span class="hljs-string">&#x27;same deep members&#x27;</span>)
+})</code></pre></div>
+<h2 id="notsamedeepmembers"><a class="anchor" href="#notsamedeepmembers">#</a>notSameDeepMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(set1: T[], set2: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>set1</code> and <code>set2</code> don’t have the same members in any order. Uses a deep equality check.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.sameDeepMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">sameDeepMembers</span>([{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], [{ <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], <span class="hljs-string">&#x27;same deep members&#x27;</span>)
+})</code></pre></div>
+<h2 id="sameorderedmembers"><a class="anchor" href="#sameorderedmembers">#</a>sameOrderedMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(set1: T[], set2: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>set1</code> and <code>set2</code> have the same members in the same order. Uses a strict equality check (===).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.sameOrderedMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">sameOrderedMembers</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], <span class="hljs-string">&#x27;same ordered members&#x27;</span>)
+})</code></pre></div>
+<h2 id="notsameorderedmembers"><a class="anchor" href="#notsameorderedmembers">#</a>notSameOrderedMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(set1: T[], set2: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>set1</code> and <code>set2</code> have the same members in the same order. Uses a strict equality check (===).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notSameOrderedMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notSameOrderedMembers</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>], <span class="hljs-string">&#x27;not same ordered members&#x27;</span>)
+})</code></pre></div>
+<h2 id="samedeeporderedmembers"><a class="anchor" href="#samedeeporderedmembers">#</a>sameDeepOrderedMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(set1: T[], set2: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>set1</code> and <code>set2</code> have the same members in the same order. Uses a deep equality check.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.sameDeepOrderedMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">sameDeepOrderedMembers</span>([{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], [{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], <span class="hljs-string">&#x27;same deep ordered members&#x27;</span>)
+})</code></pre></div>
+<h2 id="notsamedeeporderedmembers"><a class="anchor" href="#notsamedeeporderedmembers">#</a>notSameDeepOrderedMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(set1: T[], set2: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>set1</code> and <code>set2</code> don’t have the same members in the same order. Uses a deep equality check.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notSameDeepOrderedMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notSameDeepOrderedMembers</span>([{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], [{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">z</span>: <span class="hljs-number">5</span> }], <span class="hljs-string">&#x27;not same deep ordered members&#x27;</span>)
+  assert.<span class="hljs-title function_">notSameDeepOrderedMembers</span>([{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], [{ <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], <span class="hljs-string">&#x27;not same deep ordered members&#x27;</span>)
+})</code></pre></div>
+<h2 id="includemembers"><a class="anchor" href="#includemembers">#</a>includeMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(superset: T[], subset: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>subset</code> is included in <code>superset</code> in any order. Uses a strict equality check (===). Duplicates are ignored.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.includeMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">includeMembers</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>], <span class="hljs-string">&#x27;include members&#x27;</span>)
+})</code></pre></div>
+<h2 id="notincludemembers"><a class="anchor" href="#notincludemembers">#</a>notIncludeMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(superset: T[], subset: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>subset</code> isn&#39;t included in <code>superset</code> in any order. Uses a strict equality check (===). Duplicates are ignored.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notIncludeMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notIncludeMembers</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], [<span class="hljs-number">5</span>, <span class="hljs-number">1</span>], <span class="hljs-string">&#x27;not include members&#x27;</span>)
+})</code></pre></div>
+<h2 id="includedeepmembers"><a class="anchor" href="#includedeepmembers">#</a>includeDeepMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(superset: T[], subset: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>subset</code> is included in <code>superset</code> in any order. Uses a deep equality check. Duplicates are ignored.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.includeDeepMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">includeDeepMembers</span>([{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], [{ <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }], <span class="hljs-string">&#x27;include deep members&#x27;</span>)
+})</code></pre></div>
+<h2 id="notincludedeepmembers"><a class="anchor" href="#notincludedeepmembers">#</a>notIncludeDeepMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(superset: T[], subset: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>subset</code> isn’t included in <code>superset</code> in any order. Uses a deep equality check. Duplicates are ignored.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notIncludeDeepMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notIncludeDeepMembers</span>([{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], [{ <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">f</span>: <span class="hljs-number">5</span> }], <span class="hljs-string">&#x27;not include deep members&#x27;</span>)
+})</code></pre></div>
+<h2 id="includeorderedmembers"><a class="anchor" href="#includeorderedmembers">#</a>includeOrderedMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(superset: T[], subset: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>subset</code> is included in <code>superset</code> in the same order beginning with the first element in <code>superset</code>. Uses a strict equality check (===).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.includeOrderedMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">includeOrderedMembers</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>], <span class="hljs-string">&#x27;include ordered members&#x27;</span>)
+})</code></pre></div>
+<h2 id="notincludeorderedmembers"><a class="anchor" href="#notincludeorderedmembers">#</a>notIncludeOrderedMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(superset: T[], subset: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>subset</code> isn&#39;t included in <code>superset</code> in the same order beginning with the first element in <code>superset</code>. Uses a strict equality check (===).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.notIncludeOrderedMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notIncludeOrderedMembers</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>], <span class="hljs-string">&#x27;not include ordered members&#x27;</span>)
+  assert.<span class="hljs-title function_">notIncludeOrderedMembers</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], [<span class="hljs-number">2</span>, <span class="hljs-number">3</span>], <span class="hljs-string">&#x27;not include ordered members&#x27;</span>)
+})</code></pre></div>
+<h2 id="includedeeporderedmembers"><a class="anchor" href="#includedeeporderedmembers">#</a>includeDeepOrderedMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(superset: T[], subset: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>subset</code> is included in <code>superset</code> in the same order beginning with the first element in <code>superset</code>. Uses a deep equality check.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.includeDeepOrderedMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">includeDeepOrderedMembers</span>([{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], [{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }], <span class="hljs-string">&#x27;include deep ordered members&#x27;</span>)
+})</code></pre></div>
+<h2 id="notincludedeeporderedmembers"><a class="anchor" href="#notincludedeeporderedmembers">#</a>notIncludeDeepOrderedMembers</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(superset: T[], subset: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that <code>subset</code> isn’t included in <code>superset</code> in the same order beginning with the first element in superset. Uses a deep equality check.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.includeDeepOrderedMembers&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">notIncludeDeepOrderedMembers</span>([{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], [{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">f</span>: <span class="hljs-number">5</span> }], <span class="hljs-string">&#x27;not include deep ordered members&#x27;</span>)
+  assert.<span class="hljs-title function_">notIncludeDeepOrderedMembers</span>([{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], [{ <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }], <span class="hljs-string">&#x27;not include deep ordered members&#x27;</span>)
+  assert.<span class="hljs-title function_">notIncludeDeepOrderedMembers</span>([{ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }, { <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], [{ <span class="hljs-attr">b</span>: <span class="hljs-number">2</span> }, { <span class="hljs-attr">c</span>: <span class="hljs-number">3</span> }], <span class="hljs-string">&#x27;not include deep ordered members&#x27;</span>)
+})</code></pre></div>
+<h2 id="oneof"><a class="anchor" href="#oneof">#</a>oneOf</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(inList: T, list: T[], message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that non-object, non-array value <code>inList</code> appears in the flat array <code>list</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.oneOf&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">oneOf</span>(<span class="hljs-number">1</span>, [<span class="hljs-number">2</span>, <span class="hljs-number">1</span>], <span class="hljs-string">&#x27;Not found in list&#x27;</span>)
+})</code></pre></div>
+<h2 id="changes"><a class="anchor" href="#changes">#</a>changes</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(modifier: Function, object: T, property: string, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that a <code>modifier</code> changes the <code>object</code> of a <code>property</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.changes&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> obj = { <span class="hljs-attr">val</span>: <span class="hljs-number">10</span> }
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">fn</span>(<span class="hljs-params"></span>) { obj.<span class="hljs-property">val</span> = <span class="hljs-number">22</span> };
+  assert.<span class="hljs-title function_">changes</span>(fn, obj, <span class="hljs-string">&#x27;val&#x27;</span>)
+})</code></pre></div>
+<h2 id="changesby"><a class="anchor" href="#changesby">#</a>changesBy</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(modifier: Function, object: T, property: string, change: number, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that a <code>modifier</code> changes the <code>object</code> of a <code>property</code> by a <code>change</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.changesBy&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> obj = { <span class="hljs-attr">val</span>: <span class="hljs-number">10</span> }
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">fn</span>(<span class="hljs-params"></span>) { obj.<span class="hljs-property">val</span> += <span class="hljs-number">2</span> };
+  assert.<span class="hljs-title function_">changesBy</span>(fn, obj, <span class="hljs-string">&#x27;val&#x27;</span>, <span class="hljs-number">2</span>)
+})</code></pre></div>
+<h2 id="doesnotchange"><a class="anchor" href="#doesnotchange">#</a>doesNotChange</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(modifier: Function, object: T, property: string, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that a <code>modifier</code> does not changes the <code>object</code> of a <code>property</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.doesNotChange&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> obj = { <span class="hljs-attr">val</span>: <span class="hljs-number">10</span> }
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">fn</span>(<span class="hljs-params"></span>) { obj.<span class="hljs-property">val</span> += <span class="hljs-number">2</span> };
+  assert.<span class="hljs-title function_">doesNotChange</span>(fn, obj, <span class="hljs-string">&#x27;val&#x27;</span>, <span class="hljs-number">2</span>)
+})</code></pre></div>
+<h2 id="changesbutnotby"><a class="anchor" href="#changesbutnotby">#</a>changesButNotBy</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(modifier: Function, object: T, property: string, change:number, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that a <code>modifier</code> does not change the <code>object</code> of a <code>property</code> or of a <code>modifier</code> return value by a <code>change</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.changesButNotBy&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> obj = { <span class="hljs-attr">val</span>: <span class="hljs-number">10</span> }
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">fn</span>(<span class="hljs-params"></span>) { obj.<span class="hljs-property">val</span> += <span class="hljs-number">10</span> };
+  assert.<span class="hljs-title function_">changesButNotBy</span>(fn, obj, <span class="hljs-string">&#x27;val&#x27;</span>, <span class="hljs-number">5</span>)
+})</code></pre></div>
+<h2 id="increases"><a class="anchor" href="#increases">#</a>increases</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(modifier: Function, object: T, property: string, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that a <code>modifier</code> increases a numeric <code>object</code>&#39;s <code>property</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.increases&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> obj = { <span class="hljs-attr">val</span>: <span class="hljs-number">10</span> }
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">fn</span>(<span class="hljs-params"></span>) { obj.<span class="hljs-property">val</span> = <span class="hljs-number">13</span> };
+  assert.<span class="hljs-title function_">increases</span>(fn, obj, <span class="hljs-string">&#x27;val&#x27;</span>)
+})</code></pre></div>
+<h2 id="increasesby"><a class="anchor" href="#increasesby">#</a>increasesBy</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(modifier: Function, object: T, property: string, change: number, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that a <code>modifier</code> increases a numeric <code>object</code>&#39;s <code>property</code> or a <code>modifier</code> return value by an <code>change</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.increasesBy&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> obj = { <span class="hljs-attr">val</span>: <span class="hljs-number">10</span> }
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">fn</span>(<span class="hljs-params"></span>) { obj.<span class="hljs-property">val</span> += <span class="hljs-number">10</span> };
+  assert.<span class="hljs-title function_">increasesBy</span>(fn, obj, <span class="hljs-string">&#x27;val&#x27;</span>, <span class="hljs-number">10</span>)
+})</code></pre></div>
+<h2 id="doesnotincrease"><a class="anchor" href="#doesnotincrease">#</a>doesNotIncrease</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(modifier: Function, object: T, property: string, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that a <code>modifier</code> does not increases a numeric <code>object</code>&#39;s <code>property</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.doesNotIncrease&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> obj = { <span class="hljs-attr">val</span>: <span class="hljs-number">10</span> }
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">fn</span>(<span class="hljs-params"></span>) { obj.<span class="hljs-property">val</span> = <span class="hljs-number">8</span> }
+  assert.<span class="hljs-title function_">doesNotIncrease</span>(fn, obj, <span class="hljs-string">&#x27;val&#x27;</span>)
+})</code></pre></div>
+<h2 id="increasesbutnotby"><a class="anchor" href="#increasesbutnotby">#</a>increasesButNotBy</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(modifier: Function, object: T, property: string, change: number, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that a <code>modifier</code> does not increases a numeric <code>object</code>&#39;s <code>property</code> or a <code>modifier</code> return value by an <code>change</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.increasesButNotBy&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> obj = { <span class="hljs-attr">val</span>: <span class="hljs-number">10</span> }
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">fn</span>(<span class="hljs-params"></span>) { obj.<span class="hljs-property">val</span> += <span class="hljs-number">15</span> };
+  assert.<span class="hljs-title function_">increasesButNotBy</span>(fn, obj, <span class="hljs-string">&#x27;val&#x27;</span>, <span class="hljs-number">10</span>)
+})</code></pre></div>
+<h2 id="decreases"><a class="anchor" href="#decreases">#</a>decreases</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(modifier: Function, object: T, property: string, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that a <code>modifier</code> decreases a numeric <code>object</code>&#39;s <code>property</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.decreases&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> obj = { <span class="hljs-attr">val</span>: <span class="hljs-number">10</span> }
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">fn</span>(<span class="hljs-params"></span>) { obj.<span class="hljs-property">val</span> = <span class="hljs-number">5</span> };
+  assert.<span class="hljs-title function_">decreases</span>(fn, obj, <span class="hljs-string">&#x27;val&#x27;</span>)
+})</code></pre></div>
+<h2 id="decreasesby"><a class="anchor" href="#decreasesby">#</a>decreasesBy</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(modifier: Function, object: T, property: string, change: number, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that a <code>modifier</code> decreases a numeric <code>object</code>&#39;s <code>property</code> or a <code>modifier</code> return value by a <code>change</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.decreasesBy&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> obj = { <span class="hljs-attr">val</span>: <span class="hljs-number">10</span> }
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">fn</span>(<span class="hljs-params"></span>) { obj.<span class="hljs-property">val</span> -= <span class="hljs-number">5</span> };
+  assert.<span class="hljs-title function_">decreasesBy</span>(fn, obj, <span class="hljs-string">&#x27;val&#x27;</span>, <span class="hljs-number">5</span>)
+})</code></pre></div>
+<h2 id="doesnotdecrease"><a class="anchor" href="#doesnotdecrease">#</a>doesNotDecrease</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(modifier: Function, object: T, property: string, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that a <code>modifier</code> dose not decrease a numeric <code>object</code>&#39;s <code>property</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.doesNotDecrease&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> obj = { <span class="hljs-attr">val</span>: <span class="hljs-number">10</span> }
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">fn</span>(<span class="hljs-params"></span>) { obj.<span class="hljs-property">val</span> = <span class="hljs-number">15</span> }
+  assert.<span class="hljs-title function_">doesNotDecrease</span>(fn, obj, <span class="hljs-string">&#x27;val&#x27;</span>)
+})</code></pre></div>
+<h2 id="doesnotdecreaseby"><a class="anchor" href="#doesnotdecreaseby">#</a>doesNotDecreaseBy</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(modifier: Function, object: T, property: string, change: number, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that a <code>modifier</code> does not decrease a numeric <code>object</code>&#39;s <code>property</code> or a <code>modifier</code> return value by a <code>change</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.doesNotDecreaseBy&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> obj = { <span class="hljs-attr">val</span>: <span class="hljs-number">10</span> }
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">fn</span>(<span class="hljs-params"></span>) { obj.<span class="hljs-property">val</span> = <span class="hljs-number">5</span> };
+  assert.<span class="hljs-title function_">doesNotDecreaseBy</span>(fn, obj, <span class="hljs-string">&#x27;val&#x27;</span>, <span class="hljs-number">1</span>)
+})</code></pre></div>
+<h2 id="decreasesbutnotby"><a class="anchor" href="#decreasesbutnotby">#</a>decreasesButNotBy</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(modifier: Function, object: T, property: string, change: number, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts that a <code>modifier</code> does not decrease a numeric <code>object</code>&#39;s <code>property</code> or a <code>modifier</code> return value by a <code>change</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.decreasesButNotBy&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> obj = { <span class="hljs-attr">val</span>: <span class="hljs-number">10</span> }
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">fn</span>(<span class="hljs-params"></span>) { obj.<span class="hljs-property">val</span> = <span class="hljs-number">5</span> };
+  assert.<span class="hljs-title function_">decreasesButNotBy</span>(fn, obj, <span class="hljs-string">&#x27;val&#x27;</span>, <span class="hljs-number">1</span>)
+})</code></pre></div>
+<h2 id="iferror"><a class="anchor" href="#iferror">#</a>ifError</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, message?: string) =&gt; void</code></li>
+</ul>
+<p>Asserts if <code>object</code> is not a false value, and throws if it is a true value. This is added to allow for chai to be a drop-in replacement for Node’s assert class.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.ifError&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> err = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;I am a custom error&#x27;</span>)
+  assert.<span class="hljs-title function_">ifError</span>(err) <span class="hljs-comment">// Rethrows err!</span>
+})</code></pre></div>
+<h2 id="isextensible"><a class="anchor" href="#isextensible">#</a>isExtensible</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, message?: string) =&gt; void</code></li>
+<li><strong>Alias:</strong> <code>extensible</code></li>
+</ul>
+<p>Asserts that <code>object</code> is extensible (can have new properties added to it).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isExtensible&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isExtensible</span>({})
+})</code></pre></div>
+<h2 id="isnotextensible"><a class="anchor" href="#isnotextensible">#</a>isNotExtensible</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, message?: string) =&gt; void</code></li>
+<li><strong>Alias:</strong> <code>notExtensible</code></li>
+</ul>
+<p>Asserts that <code>object</code> is not extensible (can not have new properties added to it).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNotExtensible&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> nonExtensibleObject = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">preventExtensions</span>({})
+  <span class="hljs-keyword">const</span> sealedObject = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">seal</span>({})
+  <span class="hljs-keyword">const</span> frozenObject = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">freeze</span>({})
+
+  assert.<span class="hljs-title function_">isNotExtensible</span>(nonExtensibleObject)
+  assert.<span class="hljs-title function_">isNotExtensible</span>(sealedObject)
+  assert.<span class="hljs-title function_">isNotExtensible</span>(frozenObject)
+})</code></pre></div>
+<h2 id="issealed"><a class="anchor" href="#issealed">#</a>isSealed</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, message?: string) =&gt; void</code></li>
+<li><strong>Alias:</strong> <code>sealed</code></li>
+</ul>
+<p>Asserts that <code>object</code> is sealed (cannot have new properties added to it and its existing properties cannot be removed).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isSealed&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> sealedObject = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">seal</span>({})
+  <span class="hljs-keyword">const</span> frozenObject = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">seal</span>({})
+
+  assert.<span class="hljs-title function_">isSealed</span>(sealedObject)
+  assert.<span class="hljs-title function_">isSealed</span>(frozenObject)
+})</code></pre></div>
+<h2 id="isnotsealed"><a class="anchor" href="#isnotsealed">#</a>isNotSealed</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, message?: string) =&gt; void</code></li>
+<li><strong>Alias:</strong> <code>notSealed</code></li>
+</ul>
+<p>Asserts that <code>object</code> is not sealed (can have new properties added to it and its existing properties can be removed).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNotSealed&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isNotSealed</span>({})
+})</code></pre></div>
+<h2 id="isfrozen"><a class="anchor" href="#isfrozen">#</a>isFrozen</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, message?: string) =&gt; void</code></li>
+<li><strong>Alias:</strong> <code>frozen</code></li>
+</ul>
+<p>Asserts that object is frozen (cannot have new properties added to it and its existing properties cannot be modified).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isFrozen&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> frozenObject = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">freeze</span>({})
+  assert.<span class="hljs-title function_">frozen</span>(frozenObject)
+})</code></pre></div>
+<h2 id="isnotfrozen"><a class="anchor" href="#isnotfrozen">#</a>isNotFrozen</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, message?: string) =&gt; void</code></li>
+<li><strong>Alias:</strong> <code>notFrozen</code></li>
+</ul>
+<p>Asserts that <code>object</code> is not frozen (can have new properties added to it and its existing properties can be modified).</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNotFrozen&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isNotFrozen</span>({})
+})</code></pre></div>
+<h2 id="isempty"><a class="anchor" href="#isempty">#</a>isEmpty</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(target: T, message?: string) =&gt; void</code></li>
+<li><strong>Alias:</strong> <code>empty</code></li>
+</ul>
+<p>Asserts that the <code>target</code> does not contain any values. For arrays and strings, it checks the length property. For Map and Set instances, it checks the size property. For non-function objects, it gets the count of its own enumerable string keys.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isEmpty&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isEmpty</span>([])
+  assert.<span class="hljs-title function_">isEmpty</span>(<span class="hljs-string">&#x27;&#x27;</span>)
+  assert.<span class="hljs-title function_">isEmpty</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>())
+  assert.<span class="hljs-title function_">isEmpty</span>({})
+})</code></pre></div>
+<h2 id="isnotempty"><a class="anchor" href="#isnotempty">#</a>isNotEmpty</h2>
+<ul>
+<li><strong>Type:</strong> <code>&lt;T&gt;(object: T, message?: string) =&gt; void</code></li>
+<li><strong>Alias:</strong> <code>notEmpty</code></li>
+</ul>
+<p>Asserts that the <code>target</code> contains values. For arrays and strings, it checks the length property. For Map and Set instances, it checks the size property. For non-function objects, it gets the count of its own enumerable string keys.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assert, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;assert.isNotEmpty&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  assert.<span class="hljs-title function_">isNotEmpty</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>])
+  assert.<span class="hljs-title function_">isNotEmpty</span>(<span class="hljs-string">&#x27;34&#x27;</span>)
+  assert.<span class="hljs-title function_">isNotEmpty</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>([<span class="hljs-number">5</span>, <span class="hljs-number">6</span>]))
+  assert.<span class="hljs-title function_">isNotEmpty</span>({ <span class="hljs-attr">key</span>: <span class="hljs-number">7</span> })
+})</code></pre></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#assert-2">assert</a><a class="toc-2" href="#fail">fail</a><a class="toc-2" href="#isok">isOk</a><a class="toc-2" href="#isnotok">isNotOk</a><a class="toc-2" href="#equal">equal</a><a class="toc-2" href="#notequal">notEqual</a><a class="toc-2" href="#strictequal">strictEqual</a><a class="toc-2" href="#deepequal">deepEqual</a><a class="toc-2" href="#notdeepequal">notDeepEqual</a><a class="toc-2" href="#isabove">isAbove</a><a class="toc-2" href="#isatleast">isAtLeast</a><a class="toc-2" href="#isbelow">isBelow</a><a class="toc-2" href="#isatmost">isAtMost</a><a class="toc-2" href="#istrue">isTrue</a><a class="toc-2" href="#isnottrue">isNotTrue</a><a class="toc-2" href="#isfalse">isFalse</a><a class="toc-2" href="#isnotfalse">isNotFalse</a><a class="toc-2" href="#isnull">isNull</a><a class="toc-2" href="#isnotnull">isNotNull</a><a class="toc-2" href="#isnan">isNaN</a><a class="toc-2" href="#isnotnan">isNotNaN</a><a class="toc-2" href="#exists">exists</a><a class="toc-2" href="#notexists">notExists</a><a class="toc-2" href="#isundefined">isUndefined</a><a class="toc-2" href="#isdefined">isDefined</a><a class="toc-2" href="#isfunction">isFunction</a><a class="toc-2" href="#isnotfunction">isNotFunction</a><a class="toc-2" href="#isobject">isObject</a><a class="toc-2" href="#isnotobject">isNotObject</a><a class="toc-2" href="#isarray">isArray</a><a class="toc-2" href="#isnotarray">isNotArray</a><a class="toc-2" href="#isstring">isString</a><a class="toc-2" href="#isnotstring">isNotString</a><a class="toc-2" href="#isnumber">isNumber</a><a class="toc-2" href="#isnotnumber">isNotNumber</a><a class="toc-2" href="#isfinite">isFinite</a><a class="toc-2" href="#isboolean">isBoolean</a><a class="toc-2" href="#isnotboolean">isNotBoolean</a><a class="toc-2" href="#typeof">typeOf</a><a class="toc-2" href="#nottypeof">notTypeOf</a><a class="toc-2" href="#instanceof">instanceOf</a><a class="toc-2" href="#notinstanceof">notInstanceOf</a><a class="toc-2" href="#include">include</a><a class="toc-2" href="#notinclude">notInclude</a><a class="toc-2" href="#deepinclude">deepInclude</a><a class="toc-2" href="#notdeepinclude">notDeepInclude</a><a class="toc-2" href="#nestedinclude">nestedInclude</a><a class="toc-2" href="#notnestedinclude">notNestedInclude</a><a class="toc-2" href="#deepnestedinclude">deepNestedInclude</a><a class="toc-2" href="#notdeepnestedinclude">notDeepNestedInclude</a><a class="toc-2" href="#owninclude">ownInclude</a><a class="toc-2" href="#notowninclude">notOwnInclude</a><a class="toc-2" href="#deepowninclude">deepOwnInclude</a><a class="toc-2" href="#notdeepowninclude">notDeepOwnInclude</a><a class="toc-2" href="#match">match</a><a class="toc-2" href="#notmatch">notMatch</a><a class="toc-2" href="#property">property</a><a class="toc-2" href="#notproperty">notProperty</a><a class="toc-2" href="#propertyval">propertyVal</a><a class="toc-2" href="#notpropertyval">notPropertyVal</a><a class="toc-2" href="#deeppropertyval">deepPropertyVal</a><a class="toc-2" href="#notdeeppropertyval">notDeepPropertyVal</a><a class="toc-2" href="#nestedproperty">nestedProperty</a><a class="toc-2" href="#notnestedproperty">notNestedProperty</a><a class="toc-2" href="#nestedpropertyval">nestedPropertyVal</a><a class="toc-2" href="#notnestedpropertyval">notNestedPropertyVal</a><a class="toc-2" href="#deepnestedpropertyval">deepNestedPropertyVal</a><a class="toc-2" href="#notdeepnestedpropertyval">notDeepNestedPropertyVal</a><a class="toc-2" href="#lengthof">lengthOf</a><a class="toc-2" href="#hasanykeys">hasAnyKeys</a><a class="toc-2" href="#hasallkeys">hasAllKeys</a><a class="toc-2" href="#containsallkeys">containsAllKeys</a><a class="toc-2" href="#doesnothaveanykeys">doesNotHaveAnyKeys</a><a class="toc-2" href="#doesnothaveallkeys">doesNotHaveAllKeys</a><a class="toc-2" href="#hasanydeepkeys">hasAnyDeepKeys</a><a class="toc-2" href="#hasalldeepkeys">hasAllDeepKeys</a><a class="toc-2" href="#containsalldeepkeys">containsAllDeepKeys</a><a class="toc-2" href="#doesnothaveanydeepkeys">doesNotHaveAnyDeepKeys</a><a class="toc-2" href="#doesnothavealldeepkeys">doesNotHaveAllDeepKeys</a><a class="toc-2" href="#throws">throws</a><a class="toc-2" href="#doesnotthrow">doesNotThrow</a><a class="toc-2" href="#operator">operator</a><a class="toc-2" href="#closeto">closeTo</a><a class="toc-2" href="#samemembers">sameMembers</a><a class="toc-2" href="#notsamemembers">notSameMembers</a><a class="toc-2" href="#samedeepmembers">sameDeepMembers</a><a class="toc-2" href="#notsamedeepmembers">notSameDeepMembers</a><a class="toc-2" href="#sameorderedmembers">sameOrderedMembers</a><a class="toc-2" href="#notsameorderedmembers">notSameOrderedMembers</a><a class="toc-2" href="#samedeeporderedmembers">sameDeepOrderedMembers</a><a class="toc-2" href="#notsamedeeporderedmembers">notSameDeepOrderedMembers</a><a class="toc-2" href="#includemembers">includeMembers</a><a class="toc-2" href="#notincludemembers">notIncludeMembers</a><a class="toc-2" href="#includedeepmembers">includeDeepMembers</a><a class="toc-2" href="#notincludedeepmembers">notIncludeDeepMembers</a><a class="toc-2" href="#includeorderedmembers">includeOrderedMembers</a><a class="toc-2" href="#notincludeorderedmembers">notIncludeOrderedMembers</a><a class="toc-2" href="#includedeeporderedmembers">includeDeepOrderedMembers</a><a class="toc-2" href="#notincludedeeporderedmembers">notIncludeDeepOrderedMembers</a><a class="toc-2" href="#oneof">oneOf</a><a class="toc-2" href="#changes">changes</a><a class="toc-2" href="#changesby">changesBy</a><a class="toc-2" href="#doesnotchange">doesNotChange</a><a class="toc-2" href="#changesbutnotby">changesButNotBy</a><a class="toc-2" href="#increases">increases</a><a class="toc-2" href="#increasesby">increasesBy</a><a class="toc-2" href="#doesnotincrease">doesNotIncrease</a><a class="toc-2" href="#increasesbutnotby">increasesButNotBy</a><a class="toc-2" href="#decreases">decreases</a><a class="toc-2" href="#decreasesby">decreasesBy</a><a class="toc-2" href="#doesnotdecrease">doesNotDecrease</a><a class="toc-2" href="#doesnotdecreaseby">doesNotDecreaseBy</a><a class="toc-2" href="#decreasesbutnotby">decreasesButNotBy</a><a class="toc-2" href="#iferror">ifError</a><a class="toc-2" href="#isextensible">isExtensible</a><a class="toc-2" href="#isnotextensible">isNotExtensible</a><a class="toc-2" href="#issealed">isSealed</a><a class="toc-2" href="#isnotsealed">isNotSealed</a><a class="toc-2" href="#isfrozen">isFrozen</a><a class="toc-2" href="#isnotfrozen">isNotFrozen</a><a class="toc-2" href="#isempty">isEmpty</a><a class="toc-2" href="#isnotempty">isNotEmpty</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-constant-binary-expression (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-constant-binary-expression <span class="badge badge-problem">problème</span> <span class="badge badge-reco">✅ dans js/recommended</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-constant-binary-expression">version en ligne</a></div>
+<h1>no-constant-binary-expression</h1><p>Comparisons which will always evaluate to true or false and logical expressions (<code>||</code>, <code>&amp;&amp;</code>, <code>??</code>) which either always short-circuit or never short-circuit are both likely indications of programmer error.</p>
+<p>These errors are especially common in complex expressions where operator precedence is easy to misjudge. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// One might think this would evaluate as `a + (b ?? c)`:</span>
+<span class="hljs-keyword">const</span> x = a + b ?? c;
+
+<span class="hljs-comment">// But it actually evaluates as `(a + b) ?? c`. Since `a + b` can never be null,</span>
+<span class="hljs-comment">// the `?? c` has no effect.</span></code></pre></div>
+<p>Additionally, this rule detects comparisons to newly constructed objects/arrays/functions/etc. In JavaScript, where objects are compared by reference, a newly constructed object can <em>never</em> <code>===</code> any other value. This can be surprising for programmers coming from languages where objects are compared by value.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// Programmers coming from a language where objects are compared by value might expect this to work:</span>
+<span class="hljs-keyword">const</span> isEmpty = x === [];
+
+<span class="hljs-comment">// However, this will always result in `isEmpty` being `false`.</span></code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule identifies <code>==</code> and <code>===</code> comparisons which, based on the semantics of the JavaScript language, will always evaluate to <code>true</code> or <code>false</code>.</p>
+<p>It also identifies <code>||</code>, <code>&amp;&amp;</code> and <code>??</code> logical expressions which will either always or never short-circuit. Additionally, when configured with the <code>checkRelationalComparisons</code> option, it can identify constant relational comparisons (such as <code>&lt;</code> or <code>&gt;=</code>).</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-constant-binary-expression: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> value1 = +x == <span class="hljs-literal">null</span>;
+
+<span class="hljs-keyword">const</span> value2 = condition ? x : {} || <span class="hljs-variable constant_">DEFAULT</span>;
+
+<span class="hljs-keyword">const</span> value3 = !foo == <span class="hljs-literal">null</span>;
+
+<span class="hljs-keyword">const</span> value4 = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Boolean</span>(foo) === <span class="hljs-literal">true</span>;
+
+<span class="hljs-keyword">const</span> objIsEmpty = someObj === {};
+
+<span class="hljs-keyword">const</span> arrIsEmpty = someArr === [];
+
+<span class="hljs-keyword">const</span> shortCircuit1 = condition1 &amp;&amp; <span class="hljs-literal">false</span> &amp;&amp; condition2;
+
+<span class="hljs-keyword">const</span> shortCircuit2 = condition1 || <span class="hljs-literal">true</span> || condition2;
+
+<span class="hljs-keyword">const</span> shortCircuit3 = condition1 ?? <span class="hljs-string">&quot;non-nullish&quot;</span> ?? condition2;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-constant-binary-expression: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> value1 = x == <span class="hljs-literal">null</span>;
+
+<span class="hljs-keyword">const</span> value2 = (condition ? x : {}) || <span class="hljs-variable constant_">DEFAULT</span>;
+
+<span class="hljs-keyword">const</span> value3 = !(foo == <span class="hljs-literal">null</span>);
+
+<span class="hljs-keyword">const</span> value4 = <span class="hljs-title class_">Boolean</span>(foo) === <span class="hljs-literal">true</span>;
+
+<span class="hljs-keyword">const</span> objIsEmpty = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(someObj).<span class="hljs-property">length</span> === <span class="hljs-number">0</span>;
+
+<span class="hljs-keyword">const</span> arrIsEmpty = someArr.<span class="hljs-property">length</span> === <span class="hljs-number">0</span>;</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has an object option:</p>
+<ul>
+<li><code>&quot;checkRelationalComparisons&quot;: true</code> (default <code>false</code>) checks for relational comparisons (<code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>) where both sides are literal values.</li>
+</ul>
+<h3 id="checkrelationalcomparisons"><a class="anchor" href="#checkrelationalcomparisons">#</a>checkRelationalComparisons</h3>
+<p>Examples of <strong>incorrect</strong> code for this rule with the <code>{ &quot;checkRelationalComparisons&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-constant-binary-expression: [&quot;error&quot;, { &quot;checkRelationalComparisons&quot;: true } ]*/</span>
+
+<span class="hljs-keyword">const</span> value1 = <span class="hljs-number">1</span> &lt; <span class="hljs-number">2</span>;
+
+<span class="hljs-keyword">const</span> value2 = <span class="hljs-string">&quot;a&quot;</span> &gt;= <span class="hljs-string">&quot;b&quot;</span>;
+
+<span class="hljs-keyword">const</span> value3 = <span class="hljs-literal">true</span> &gt; <span class="hljs-literal">false</span>;
+
+<span class="hljs-keyword">const</span> hasStreak = profile.<span class="hljs-property">streak</span> ?? <span class="hljs-number">0</span> &gt; <span class="hljs-number">1</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule with the <code>{ &quot;checkRelationalComparisons&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-constant-binary-expression: [&quot;error&quot;, { &quot;checkRelationalComparisons&quot;: true } ]*/</span>
+
+<span class="hljs-keyword">const</span> value1 = <span class="hljs-number">1</span> &lt; x;
+
+<span class="hljs-keyword">const</span> value2 = a &gt;= b;
+
+<span class="hljs-keyword">const</span> hasStreak = (profile.<span class="hljs-property">streak</span> ?? <span class="hljs-number">0</span>) &gt; <span class="hljs-number">1</span>;</code></pre></div>
+</div><div class="box box-info"><div class="box-title">Règles liées</div><p><a href="no-constant-condition.html"><code>no-constant-condition</code></a></p></div><h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://eslint.org/blog/2022/07/interesting-bugs-caught-by-no-constant-binary-expression/">https://eslint.org/blog/2022/07/interesting-bugs-caught-by-no-constant-binary-expression/</a></li></ul>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#checkrelationalcomparisons">checkRelationalComparisons</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

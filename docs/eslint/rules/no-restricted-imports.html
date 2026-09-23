@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-restricted-imports (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-restricted-imports <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-restricted-imports">version en ligne</a></div>
+<h1>no-restricted-imports</h1><p>Imports are an ES6/ES2015 standard for making the functionality of other modules available in your current module. In CommonJS this is implemented through the <code>require()</code> call which makes this ESLint rule roughly equivalent to its CommonJS counterpart <code>no-restricted-modules</code>.</p>
+<p>Why would you want to restrict imports?</p>
+<ul>
+<li><p>Some imports might not make sense in a particular environment. For example, Node.js&#39; <code>fs</code> module would not make sense in an environment that didn&#39;t have a file system.</p>
+</li>
+<li><p>Some modules provide similar or identical functionality, think <code>lodash</code> and <code>underscore</code>. Your project may have standardized on a module. You want to make sure that the other alternatives are not being used as this would unnecessarily bloat the project and provide a higher maintenance cost of two dependencies when one would suffice.</p>
+</li>
+</ul>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule allows you to specify imports that you don&#39;t want to use in your application.</p>
+<p>It applies to static imports only, not dynamic ones.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has both string and object options to specify the imported modules to restrict.</p>
+<p>Using string option, you can specify  the name of a module that you want to restrict from being imported as a value in the rule options array:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;import1&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;import2&quot;</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>Examples of <strong>incorrect</strong> code for string option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, &quot;fs&quot;]*/</span>
+
+<span class="hljs-keyword">import</span> fs <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;fs&#x27;</span>;</code></pre></div>
+</div><p>String options also restrict the module from being exported, as in this example:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, &quot;fs&quot;]*/</span>
+
+<span class="hljs-keyword">export</span> { fs } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;fs&#x27;</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, &quot;fs&quot;]*/</span>
+
+<span class="hljs-keyword">export</span> * <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;fs&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for string option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, &quot;fs&quot;]*/</span>
+
+<span class="hljs-keyword">import</span> crypto <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;crypto&#x27;</span>;
+<span class="hljs-keyword">export</span> { foo } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;bar&quot;</span>;</code></pre></div>
+</div><p>You may also specify a custom message for a particular module using the <code>name</code> and <code>message</code> properties inside an object, where the value of the <code>name</code> is the name of the module and <code>message</code> property contains the custom message. (The custom message is appended to the default error message from the rule.)</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;import-foo&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Please use import-bar instead.&quot;</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;import-baz&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Please use import-quux instead.&quot;</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>Examples of <strong>incorrect</strong> code for string option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, {
+    &quot;name&quot;: &quot;disallowed-import&quot;,
+    &quot;message&quot;: &quot;Please use &#x27;allowed-import&#x27; instead&quot;
+}]*/</span>
+
+<span class="hljs-keyword">import</span> foo <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;disallowed-import&#x27;</span>;</code></pre></div>
+</div><h3 id="paths"><a class="anchor" href="#paths">#</a>paths</h3>
+<p>This is an object option whose value is an array containing the names of the modules you want to restrict.</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;paths&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;import1&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;import2&quot;</span><span class="hljs-punctuation">]</span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>Examples of <strong>incorrect</strong> code for <code>paths</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { &quot;paths&quot;: [&quot;cluster&quot;] }]*/</span>
+
+<span class="hljs-keyword">import</span> cluster <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;cluster&#x27;</span>;</code></pre></div>
+</div><p>Custom messages for a particular module can also be specified in <code>paths</code> array using objects with <code>name</code> and <code>message</code>.</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;paths&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;import-foo&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Please use import-bar instead.&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;import-baz&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Please use import-quux instead.&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<h4 id="importnames"><a class="anchor" href="#importnames">#</a>importNames</h4>
+<p>This option in <code>paths</code> is an array and can be used to specify the names of certain bindings exported from a module. Import names specified inside <code>paths</code> array affect the module specified in the <code>name</code> property of corresponding object, so it is required to specify the <code>name</code> property first when you are using <code>importNames</code> or <code>message</code> option.</p>
+<p>Specifying <code>&quot;default&quot;</code> string inside the <code>importNames</code> array will restrict the default export from being imported.</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;paths&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;import-foo&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;importNames&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;Bar&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Please use Bar from /import-bar/baz/ instead.&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>Examples of <strong>incorrect</strong> code when <code>importNames</code> in <code>paths</code> has <code>&quot;default&quot;</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { paths: [{
+    name: &quot;foo&quot;,
+    importNames: [&quot;default&quot;],
+    message: &quot;Please use the default import from &#x27;/bar/baz/&#x27; instead.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">DisallowedObject</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;foo&quot;</span>;</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for <code>importNames</code> in <code>paths</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { paths: [{
+    name: &quot;foo&quot;,
+    importNames: [&quot;DisallowedObject&quot;],
+    message: &quot;Please import &#x27;DisallowedObject&#x27; from &#x27;/bar/baz/&#x27; instead.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">DisallowedObject</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;foo&quot;</span>;
+
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">DisallowedObject</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">AllowedObject</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;foo&quot;</span>;
+
+<span class="hljs-keyword">import</span> { <span class="hljs-string">&quot;DisallowedObject&quot;</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">SomeObject</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;foo&quot;</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { paths: [{
+    name: &quot;foo&quot;,
+    importNames: [&quot;DisallowedObject&quot;],
+    message: &quot;Please import &#x27;DisallowedObject&#x27; from &#x27;/bar/baz/&#x27; instead.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> <span class="hljs-title class_">Foo</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;foo&quot;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for <code>importNames</code> in <code>paths</code>:</p>
+<p>If the local name assigned to a default export is the same as a string in <code>importNames</code>, this will not cause an error.</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { paths: [{ name: &quot;foo&quot;, importNames: [&quot;DisallowedObject&quot;] }] }]*/</span>
+
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">DisallowedObject</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;foo&quot;</span></code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { paths: [{
+    name: &quot;foo&quot;,
+    importNames: [&quot;DisallowedObject&quot;],
+    message: &quot;Please import &#x27;DisallowedObject&#x27; from &#x27;/bar/baz/&#x27; instead.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">AllowedObject</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">DisallowedObject</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;foo&quot;</span>;</code></pre></div>
+</div><h4 id="allowimportnames"><a class="anchor" href="#allowimportnames">#</a>allowImportNames</h4>
+<p>This option is an array. Inverse of <code>importNames</code>, <code>allowImportNames</code> allows the imports that are specified inside this array. So it restricts all imports from a module, except specified allowed ones.</p>
+<p>Note: <code>allowImportNames</code> cannot be used in combination with <code>importNames</code>.</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;paths&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;import-foo&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;allowImportNames&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;Bar&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Please use only Bar from import-foo.&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>Examples of <strong>incorrect</strong> code for <code>allowImportNames</code> in <code>paths</code>:</p>
+<p>Disallowing all import names except &#39;AllowedObject&#39;.</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { paths: [{
+    name: &quot;foo&quot;,
+    allowImportNames: [&quot;AllowedObject&quot;],
+    message: &quot;Please use only &#x27;AllowedObject&#x27; from &#x27;foo&#x27;.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">DisallowedObject</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;foo&quot;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for <code>allowImportNames</code> in <code>paths</code>:</p>
+<p>Disallowing all import names except &#39;AllowedObject&#39;.</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { paths: [{
+    name: &quot;foo&quot;,
+    allowImportNames: [&quot;AllowedObject&quot;],
+    message: &quot;Only use &#x27;AllowedObject&#x27; from &#x27;foo&#x27;.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">AllowedObject</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;foo&quot;</span>;</code></pre></div>
+</div><h4 id="allowtypeimports-typescript-only"><a class="anchor" href="#allowtypeimports-typescript-only">#</a>allowTypeImports (TypeScript only)</h4>
+<p>Whether to allow <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-8.html#type-only-imports-and-export">Type-Only Imports</a> for a path. This includes type-only <code>export</code> statements, as they are equivalent to re-exporting an <code>import</code>. Default: <code>false</code>.</p>
+<p>Examples of <strong>incorrect</strong> code for <code>allowTypeImports</code> in <code>paths</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { paths: [{
+    name: &quot;import-foo&quot;,
+    allowTypeImports: true,
+    message: &quot;Please use only type-only imports from &#x27;import-foo&#x27;.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> foo <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;import-foo&#x27;</span>;
+<span class="hljs-keyword">export</span> { <span class="hljs-title class_">Foo</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;import-foo&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for <code>allowTypeImports</code> in <code>paths</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { paths: [{
+    name: &quot;import-foo&quot;,
+    allowTypeImports: true,
+    message: &quot;Please use only type-only imports from &#x27;import-foo&#x27;.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> foo <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;import-foo&#x27;</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">Foo</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;import-foo&#x27;</span>;
+
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> foo = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;import-foo&quot;</span>);</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { paths: [{
+    name: &quot;import-foo&quot;,
+	importNames: [&quot;Baz&quot;],
+    allowTypeImports: true,
+    message: &quot;Please use &#x27;Baz&#x27; from &#x27;import-foo&#x27; as a type only.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">Bar</span>, <span class="hljs-keyword">type</span> <span class="hljs-title class_">Baz</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;import-foo&quot;</span>;</code></pre></div>
+</div><h3 id="patterns"><a class="anchor" href="#patterns">#</a>patterns</h3>
+<p>This is also an object option whose value is an array. This option allows you to specify multiple modules to restrict using <code>gitignore</code>-style patterns or regular expressions.</p>
+<p>Where <code>paths</code> option takes exact import paths, <code>patterns</code> option can be used to specify the import paths with more flexibility, allowing for the restriction of multiple modules within the same directory. For example:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;paths&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;import-foo&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>This configuration restricts import of the <code>import-foo</code> module but wouldn&#39;t restrict the import of <code>import-foo/bar</code> or <code>import-foo/baz</code>. You can use <code>patterns</code> to restrict both:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;paths&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;import-foo&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;patterns&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;group&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;import-foo/ba*&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>This configuration restricts imports not just from <code>import-foo</code> using <code>path</code>, but also <code>import-foo/bar</code> and <code>import-foo/baz</code> using <code>patterns</code>.</p>
+<p>To re-include a module when using <code>gitignore-</code>style patterns, add a negation (<code>!</code>) mark before the pattern. (Make sure these negated patterns are placed last in the array, as order matters)</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;patterns&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;import1/private/*&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;import2/*&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;!import2/good&quot;</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>You can also use regular expressions to restrict modules (see the <a href="#regex"><code>regex</code> option</a>).</p>
+<p>Examples of <strong>incorrect</strong> code for <code>patterns</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { &quot;patterns&quot;: [&quot;lodash/*&quot;] }]*/</span>
+
+<span class="hljs-keyword">import</span> pick <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;lodash/pick&#x27;</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { &quot;patterns&quot;: [&quot;lodash/*&quot;, &quot;!lodash/pick&quot;] }]*/</span>
+
+<span class="hljs-keyword">import</span> pick <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;lodash/map&#x27;</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { &quot;patterns&quot;: [&quot;import1/*&quot;, &quot;!import1/private/*&quot;] }]*/</span>
+
+<span class="hljs-keyword">import</span> pick <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;import1/private/someModule&#x27;</span>;</code></pre></div>
+</div><p>In this example, <code>&quot;!import1/private/*&quot;</code> is not reincluding the modules inside <code>private</code> because the negation mark (<code>!</code>) does not reinclude the files if it&#39;s parent directory is excluded by a pattern. In this case, <code>import1/private</code> directory is already excluded by the <code>import1/*</code> pattern. (The excluded directory can be reincluded using <code>&quot;!import1/private&quot;</code>.)</p>
+<p>Examples of <strong>correct</strong> code for <code>patterns</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { &quot;patterns&quot;: [&quot;crypto/*&quot;] }]*/</span>
+
+<span class="hljs-keyword">import</span> crypto <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;crypto&#x27;</span>;</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { &quot;patterns&quot;: [&quot;lodash/*&quot;, &quot;!lodash/pick&quot;] }]*/</span>
+
+<span class="hljs-keyword">import</span> pick <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;lodash/pick&#x27;</span>;</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { &quot;patterns&quot;: [&quot;import1/*&quot;, &quot;!import1/private&quot;] }]*/</span>
+
+<span class="hljs-keyword">import</span> pick <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;import1/private/someModule&#x27;</span>;</code></pre></div>
+</div><h4 id="group"><a class="anchor" href="#group">#</a>group</h4>
+<p>The <code>patterns</code> array can also include objects. The <code>group</code> property is used to specify the <code>gitignore</code>-style patterns for restricting modules and the <code>message</code> property is used to specify a custom message.</p>
+<p>Either of the <code>group</code> or <code>regex</code> properties is required when using the <code>patterns</code> option.</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;patterns&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;group&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;import1/private/*&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;usage of import1 private modules not allowed.&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;group&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;import2/*&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;!import2/good&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;import2 is deprecated, except the modules in import2/good.&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>Examples of <strong>incorrect</strong> code for <code>group</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;lodash/*&quot;],
+    message: &quot;Please use the default import from &#x27;lodash&#x27; instead.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> pick <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;lodash/pick&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this <code>group</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;lodash/*&quot;],
+    message: &quot;Please use the default import from &#x27;lodash&#x27; instead.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> lodash <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;lodash&#x27;</span>;</code></pre></div>
+</div><h4 id="regex"><a class="anchor" href="#regex">#</a>regex</h4>
+<p>The <code>regex</code> property is used to specify the regex patterns for restricting modules.</p>
+<p>Note: <code>regex</code> cannot be used in combination with <code>group</code>.</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;patterns&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;regex&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;import1/private/&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;usage of import1 private modules not allowed.&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;regex&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;import2/(?!good)&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;import2 is deprecated, except the modules in import2/good.&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>Examples of <strong>incorrect</strong> code for <code>regex</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    regex: &quot;@app/(?!(api/enums$)).*&quot;,
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Foo</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@app/api&#x27;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Bar</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@app/api/bar&#x27;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Baz</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@app/api/baz&#x27;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Bux</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@app/api/enums/foo&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for <code>regex</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    regex: &quot;@app/(?!(api/enums$)).*&quot;,
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Foo</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@app/api/enums&#x27;</span>;</code></pre></div>
+</div><h4 id="casesensitive"><a class="anchor" href="#casesensitive">#</a>caseSensitive</h4>
+<p>This is a boolean option and sets the patterns specified in the <code>group</code> or <code>regex</code> properties to be case-sensitive when <code>true</code>. Default is <code>false</code>.</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;patterns&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;group&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;import1/private/prefix[A-Z]*&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;caseSensitive&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>Examples of <strong>incorrect</strong> code for <code>caseSensitive: true</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;foo[A-Z]*&quot;],
+    caseSensitive: true
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> pick <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;fooBar&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for <code>caseSensitive: true</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;foo[A-Z]*&quot;],
+    caseSensitive: true
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> pick <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;food&#x27;</span>;</code></pre></div>
+</div><h4 id="importnames-2"><a class="anchor" href="#importnames-2">#</a>importNames</h4>
+<p>You can also specify <code>importNames</code> within objects inside the <code>patterns</code> array. In this case, the specified names apply only to the associated <code>group</code> or <code>regex</code> property.</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;patterns&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;group&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;utils/*&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;importNames&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;isEmpty&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Use &#x27;isEmpty&#x27; from lodash instead.&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>Examples of <strong>incorrect</strong> code for <code>importNames</code> in <code>patterns</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;utils/*&quot;],
+    importNames: [&#x27;isEmpty&#x27;],
+    message: &quot;Use &#x27;isEmpty&#x27; from lodash instead.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { isEmpty } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;utils/collection-utils&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for <code>importNames</code> in <code>patterns</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;utils/*&quot;],
+    importNames: [&#x27;isEmpty&#x27;],
+    message: &quot;Use &#x27;isEmpty&#x27; from lodash instead.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { hasValues } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;utils/collection-utils&#x27;</span>;</code></pre></div>
+</div><h4 id="allowimportnames-2"><a class="anchor" href="#allowimportnames-2">#</a>allowImportNames</h4>
+<p>You can also specify <code>allowImportNames</code> within objects inside the <code>patterns</code> array. In this case, the specified names apply only to the associated <code>group</code> or <code>regex</code> property.</p>
+<p>Note: <code>allowImportNames</code> cannot be used in combination with <code>importNames</code>, <code>importNamePattern</code> or <code>allowImportNamePattern</code>.</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;patterns&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;group&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;utils/*&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;allowImportNames&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;isEmpty&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Please use only &#x27;isEmpty&#x27; from utils.&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>Examples of <strong>incorrect</strong> code for <code>allowImportNames</code> in <code>patterns</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;utils/*&quot;],
+    allowImportNames: [&#x27;isEmpty&#x27;],
+    message: &quot;Please use only &#x27;isEmpty&#x27; from utils.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { hasValues } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;utils/collection-utils&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for <code>allowImportNames</code> in <code>patterns</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;utils/*&quot;],
+    allowImportNames: [&#x27;isEmpty&#x27;],
+    message: &quot;Please use only &#x27;isEmpty&#x27; from utils.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { isEmpty } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;utils/collection-utils&#x27;</span>;</code></pre></div>
+</div><h4 id="importnamepattern"><a class="anchor" href="#importnamepattern">#</a>importNamePattern</h4>
+<p>This option allows you to use regex patterns to restrict import names:</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;patterns&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;group&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;import-foo/*&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;importNamePattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^foo&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>Examples of <strong>incorrect</strong> code for <code>importNamePattern</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;utils/*&quot;],
+    importNamePattern: &#x27;^is&#x27;,
+    message: &quot;Use &#x27;is*&#x27; functions from lodash instead.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { isEmpty } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;utils/collection-utils&#x27;</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;foo/*&quot;],
+    importNamePattern: &#x27;^(is|has)&#x27;,
+    message: &quot;Use &#x27;is*&#x27; and &#x27;has*&#x27; functions from baz/bar instead&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { isSomething, hasSomething } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo/bar&#x27;</span>;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;foo/*&quot;],
+    importNames: [&quot;bar&quot;],
+    importNamePattern: &#x27;^baz&#x27;,
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { bar, bazQux } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo/quux&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for <code>importNamePattern</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;utils/*&quot;],
+    importNamePattern: &#x27;^is&#x27;,
+    message: &quot;Use &#x27;is*&#x27; functions from lodash instead.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> isEmpty, { hasValue } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;utils/collection-utils&#x27;</span>;</code></pre></div>
+</div><p>You can also use this option to allow only side-effect imports by setting it to a pattern that matches any name, such as <code>^</code>.</p>
+<p>Examples of <strong>incorrect</strong> code for <code>importNamePattern</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;utils/*&quot;],
+    importNamePattern: &quot;^&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> isEmpty, { hasValue } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;utils/collection-utils&#x27;</span>;
+
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> file <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;utils/file-utils&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for <code>importNamePattern</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;utils/*&quot;],
+    importNamePattern: &quot;^&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;utils/init-utils&#x27;</span>;</code></pre></div>
+</div><h4 id="allowimportnamepattern"><a class="anchor" href="#allowimportnamepattern">#</a>allowImportNamePattern</h4>
+<p>This is a string option. Inverse of <code>importNamePattern</code>, this option allows imports that matches the specified regex pattern. So it restricts all imports from a module, except specified allowed patterns.</p>
+<p>Note: <code>allowImportNamePattern</code> cannot be used in combination with <code>importNames</code>, <code>importNamePattern</code> or <code>allowImportNames</code>.</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;patterns&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">&quot;group&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;import-foo/*&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;allowImportNamePattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^foo&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>Examples of <strong>incorrect</strong> code for <code>allowImportNamePattern</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;utils/*&quot;],
+    allowImportNamePattern: &#x27;^has&#x27;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { isEmpty } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;utils/collection-utils&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for <code>allowImportNamePattern</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;utils/*&quot;],
+    allowImportNamePattern: &#x27;^is&#x27;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { isEmpty } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;utils/collection-utils&#x27;</span>;</code></pre></div>
+</div><h4 id="allowtypeimports-typescript-only-2"><a class="anchor" href="#allowtypeimports-typescript-only-2">#</a>allowTypeImports (TypeScript only)</h4>
+<p>Whether to allow <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-8.html#type-only-imports-and-export">Type-Only Imports</a> for a path. This includes type-only <code>export</code> statements, as they are equivalent to re-exporting an <code>import</code>. Default: <code>false</code>.</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;no-restricted-imports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;patterns&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;group&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;import/private/*&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;allowTypeImports&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span></code></pre></div>
+<p>Examples of <strong>incorrect</strong> code for <code>allowTypeImports</code> in <code>patterns</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;import/private/*&quot;],
+    allowTypeImports: true,
+    message: &quot;Please use only type-only imports from &#x27;import/private/*&#x27;.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { foo } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;import/private/bar&#x27;</span>;
+<span class="hljs-keyword">export</span> { foo } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;import/private/bar&#x27;</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for <code>allowTypeImports</code> in <code>patterns</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;import/private/*&quot;],
+    allowTypeImports: true,
+    message: &quot;Please use only type-only imports from &#x27;import/private/*&#x27;.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { foo } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;import/private/bar&#x27;</span>;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">type</span> { foo } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;import/private/bar&#x27;</span>;
+
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> foo = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;import/private/bar&quot;</span>);</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { patterns: [{
+    group: [&quot;import/private/*&quot;],
+    importNames: [&quot;Baz&quot;],
+    allowTypeImports: true,
+    message: &quot;Please use &#x27;Baz&#x27; from &#x27;import/private/*&#x27; as a type only.&quot;
+}]}]*/</span>
+
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">Bar</span>, <span class="hljs-keyword">type</span> <span class="hljs-title class_">Baz</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;import/private/bar&quot;</span>;</code></pre></div>
+</div><h2 id="known-limitations"><a class="anchor" href="#known-limitations">#</a>Known Limitations</h2>
+<p>TypeScript <a href="https://www.typescriptlang.org/docs/handbook/2/modules.html#es-module-syntax-with-commonjs-behavior"><code>import = require()</code> syntax</a> is valid and the rule can recognize and lint such instances, but with certain limitations.</p>
+<p>You can only fully restrict these imports, you cannot restrict them based on specific import names like <code>importNames</code>, <code>allowImportNames</code>, <code>importNamePattern</code>, or <code>allowImportNamePattern</code> options.</p>
+<p>Examples of <strong>incorrect</strong> code for TypeScript import equals declarations:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, &quot;disallowed-import&quot;]*/</span>
+
+<span class="hljs-keyword">import</span> foo = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;disallowed-import&quot;</span>);</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { 
+  &quot;paths&quot;: [{ &quot;name&quot;: &quot;disallowed-import&quot; }] 
+}]*/</span>
+
+<span class="hljs-keyword">import</span> foo = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;disallowed-import&quot;</span>);</code></pre></div>
+</div><p><strong>Note:</strong> Import name restrictions do not apply to TypeScript import equals declarations. The following configuration will not restrict the import equals declaration:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/*eslint no-restricted-imports: [&quot;error&quot;, { 
+  &quot;paths&quot;: [{ 
+    &quot;name&quot;: &quot;foo&quot;,
+    &quot;importNames&quot;: [&quot;foo&quot;]
+  }] 
+}]*/</span>
+
+<span class="hljs-comment">// This import equals declaration will NOT be restricted</span>
+<span class="hljs-comment">// even though it imports the entire module</span>
+<span class="hljs-keyword">import</span> foo = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;foo&quot;</span>);</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>Don&#39;t use this rule or don&#39;t include a module in the list for this rule if you want to be able to import a module in your project without an ESLint error or warning.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#paths">paths</a><a class="toc-3" href="#patterns">patterns</a><a class="toc-2" href="#known-limitations">Known Limitations</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

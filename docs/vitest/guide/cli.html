@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Command Line Interface | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/cli  <a class="ext small" href="https://vitest.dev/guide/cli">version en ligne</a></div>
+<h1 id="command-line-interface"><a class="anchor" href="#command-line-interface">#</a>Command Line Interface</h1>
+<h2 id="commands"><a class="anchor" href="#commands">#</a>Commands</h2>
+<h3 id="vitest"><a class="anchor" href="#vitest">#</a><code>vitest</code></h3>
+<p>Start Vitest in the current directory. Will enter the watch mode in development environment and run mode in CI (or non-interactive terminal) automatically.</p>
+<p>You can pass an additional argument as the filter of the test files to run. For example:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest foobar</code></pre></div>
+<p>Will run only the test file that contains <code>foobar</code> in their paths. This filter only checks inclusion and doesn&#39;t support regexp or glob patterns (unless your terminal processes it before Vitest receives the filter).</p>
+<p>Since Vitest 3, you can also specify the test by filename and line number:</p>
+<div class="code"><pre><code class="hljs lang-bash">$ vitest basic/foo.test.ts:10</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Note that Vitest requires the full filename for this feature to work. It can be relative to the current working directory or an absolute file path.</p>
+<div class="code"><pre><code class="hljs lang-bash">$ vitest basic/foo.js:10 <span class="hljs-comment"># ✅</span>
+$ vitest ./basic/foo.js:10 <span class="hljs-comment"># ✅</span>
+$ vitest /users/project/basic/foo.js:10 <span class="hljs-comment"># ✅</span>
+$ vitest foo:10 <span class="hljs-comment"># ❌</span>
+$ vitest ./basic/foo:10 <span class="hljs-comment"># ❌</span></code></pre></div>
+<p>At the moment Vitest also doesn&#39;t support ranges:</p>
+<div class="code"><pre><code class="hljs lang-bash">$ vitest basic/foo.test.ts:10, basic/foo.test.ts:25 <span class="hljs-comment"># ✅</span>
+$ vitest basic/foo.test.ts:10-25 <span class="hljs-comment"># ❌</span></code></pre></div>
+</div><h3 id="vitest-run"><a class="anchor" href="#vitest-run">#</a><code>vitest run</code></h3>
+<p>Perform a single run without watch mode.</p>
+<h3 id="vitest-watch"><a class="anchor" href="#vitest-watch">#</a><code>vitest watch</code></h3>
+<p>Run all test suites but watch for changes and rerun tests when they change. Same as calling <code>vitest</code> without an argument. Will fallback to <code>vitest run</code> in CI or when stdin is not a TTY (non-interactive environment).</p>
+<h3 id="vitest-dev"><a class="anchor" href="#vitest-dev">#</a><code>vitest dev</code></h3>
+<p>Alias to <code>vitest watch</code>.</p>
+<h3 id="vitest-related"><a class="anchor" href="#vitest-related">#</a><code>vitest related</code></h3>
+<p>Run only tests that cover a list of source files. Works with static imports (e.g., <code>import(&#39;./index.js&#39;)</code> or <code>import index from &#39;./index.js</code>), but not the dynamic ones (e.g., <code>import(filepath)</code>). All files should be relative to root folder.</p>
+<p>Useful to run with <a href="https://github.com/okonet/lint-staged"><code>lint-staged</code></a> or with your CI setup.</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest related /src/index.ts /src/hello-world.js</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Don&#39;t forget that Vitest runs with enabled watch mode by default. If you are using tools like <code>lint-staged</code>, you  should also pass <code>--run</code> option, so that command can exit normally.</p>
+<div class="code"><div class="code-title">.lintstagedrc.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+  <span class="hljs-string">&#x27;*.{js,ts}&#x27;</span>: <span class="hljs-string">&#x27;vitest related --run&#x27;</span>,
+}</code></pre></div>
+</div><h3 id="vitest-bench"><a class="anchor" href="#vitest-bench">#</a><code>vitest bench</code></h3>
+<p>Run only <a href="features.html#benchmarking">benchmark</a> tests, which compare performance results.</p>
+<h3 id="vitest-init"><a class="anchor" href="#vitest-init">#</a><code>vitest init</code></h3>
+<p><code>vitest init &lt;name&gt;</code> can be used to setup project configuration. At the moment, it only supports <a href="browser/index.html"><code>browser</code></a> value:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest init browser</code></pre></div>
+<h3 id="vitest-list"><a class="anchor" href="#vitest-list">#</a><code>vitest list</code></h3>
+<p><code>vitest list</code> command inherits all <code>vitest</code> options to print the list of all matching tests. This command ignores <code>reporters</code> option. By default, it will print the names of all tests that matched the file filter and name pattern:</p>
+<div class="code"><pre><code class="hljs lang-shell">vitest list filename.spec.ts -t=<span class="hljs-string">&quot;some-test&quot;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-txt">describe &gt; some-test
+describe &gt; some-test &gt; test 1
+describe &gt; some-test &gt; test 2</code></pre></div>
+<p>You can pass down <code>--json</code> flag to print tests in JSON format or save it in a separate file:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest list filename.spec.ts -t=<span class="hljs-string">&quot;some-test&quot;</span> --json=./file.json</code></pre></div>
+<p>If <code>--json</code> flag doesn&#39;t receive a value, it will output the JSON into stdout.</p>
+<p>You also can pass down <code>--filesOnly</code> flag to print the test files only:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest list --filesOnly</code></pre></div>
+<div class="code"><pre><code class="hljs lang-txt">tests/test1.test.ts
+tests/test2.test.ts</code></pre></div>
+<p>Since Vitest 5, <code>vitest list</code> <a href="../api/advanced/vitest.html#parsespecifications">parses test files</a> statically instead of running them to collect tests. Pass <code>--no-static-parse</code> to run the files instead. Vitest parses test files with limited concurrency, defaulting to <code>os.availableParallelism()</code>. You can change it via the <code>--static-parse-concurrency</code> option.</p>
+<h3 id="vitest-doctor"><a class="anchor" href="#vitest-doctor">#</a><code>vitest doctor</code></h3>
+<p><code>vitest doctor</code> measures how much faster the test suite would run under alternative configurations by running it under each of them. The candidates are picked based on the current config:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest doctor</code></pre></div>
+<div class="code"><pre><code class="hljs lang-txt">Results (min of 3 runs each)
+
+  baseline (pool: forks · isolate: true)  4.08s
+  pool: 'threads'                         3.64s (-11%)
+  pool: 'vmThreads'                       1.33s (-67%)
+  isolate: false                          1.28s (-69%)
+
+Recommendation: pool: 'vmThreads' (-67%)
+
+  // vitest.config.ts
+  import { defineConfig } from 'vitest/config'
+
+  export default defineConfig({
+    test: {
+      pool: 'vmThreads', // measured -67% on this suite
+    },
+  })</code></pre></div>
+<p>The <code>isolate: false</code> candidate is additionally validated by running the suite twice with a shuffled file order: if any test depends on isolation, the candidate is reported as failed instead of recommended. When several candidates are close to the fastest, doctor prefers the one that keeps per-file isolation.</p>
+<p>Doctor also probes lower <a href="../config/maxworkers.html"><code>maxWorkers</code></a> values on top of the winning configuration: every worker funnels its transform requests through the single main-thread Vite server, so past a certain count more workers make the run slower, not faster. Starting from half the current worker count, doctor keeps halving while the suite gets at least 5% faster, and includes the winning value in the recommendation.</p>
+<p>Suites running a DOM or a custom environment are measured under both vm pools, <code>vmThreads</code> and <code>vmForks</code>: they amortize the environment creation cost by keeping one environment per worker while every file still gets a fresh VM context. <code>vmForks</code> uses child processes instead of worker threads: each child gets its own heap and garbage collector, so either pool can come out faster depending on the suite, and <code>vmForks</code> is the vm option for suites that cannot run in worker threads.</p>
+<p>Projects running <code>jsdom</code> are also measured under <code>environment: &#39;happy-dom&#39;</code> when the package is installed. The swap is applied per project; projects on other environments keep them. happy-dom implements the DOM differently than jsdom, so tests that depend on layout or navigation should be verified before adopting the swap. When the <a href="../config/fsmodulecache.html">fs module cache</a> is off, doctor measures <code>fsModuleCache: true</code> after an untimed priming run that populates the cache, so the reported time is what repeated runs pay.</p>
+<p>Every measurement runs the full suite, including browser projects: <code>isolate: false</code> also affects browser mode. Candidates that cannot affect browser projects (<code>pool</code>, <code>environment</code>, the fs module cache) are picked based on the node-side projects only.</p>
+<p>Failing candidates are reported with an excerpt of their errors. If the suite fails under the current configuration, doctor aborts and shows the errors: it needs a passing baseline to compare against.</p>
+<p>Short suites are measured multiple times and the best time is reported, so the comparison reflects a warm steady state. Doctor runs the full suite several times, so it takes a multiple of a normal run&#39;s time. See <a href="improving-performance.html">Improving Performance</a> for the trade-offs behind every candidate.</p>
+<p>Doctor measures and reports the baseline even when there are no candidates to compare. Configurations on a <code>vm</code> pool are additionally compared against <code>pool: &#39;threads&#39;</code> with <code>isolate: false</code>, which also reuses workers but shares module state between files; a configuration already on one vm pool is still measured under the other.</p>
+<h2 id="shell-autocompletions"><a class="anchor" href="#shell-autocompletions">#</a>Shell Autocompletions</h2>
+<p>Vitest provides shell autocompletions for commands, options, and option values powered by <a href="https://github.com/bombshell-dev/tab"><code>@bomb.sh/tab</code></a>.</p>
+<h3 id="setup"><a class="anchor" href="#setup">#</a>Setup</h3>
+<p>For permanent setup in zsh, add this to your <code>~/.zshrc</code>:</p>
+<div class="code"><pre><code class="hljs lang-bash"><span class="hljs-comment"># Add to ~/.zshrc for permanent autocompletions (same can be done for other shells)</span>
+<span class="hljs-built_in">source</span> &lt;(vitest complete zsh)</code></pre></div>
+<h3 id="package-manager-integration"><a class="anchor" href="#package-manager-integration">#</a>Package Manager Integration</h3>
+<p><code>@bomb.sh/tab</code> integrates with <a href="https://github.com/bombshell-dev/tab?tab=readme-ov-file#package-manager-completions">package managers</a>. Autocompletions work when running vitest directly:</p>
+<div class="code-group"><div class="code"><div class="code-title">npm</div><pre><code class="hljs lang-bash">npm vitest &lt;Tab&gt;</code></pre></div>
+<div class="code"><div class="code-title">npm</div><pre><code class="hljs lang-bash">npm <span class="hljs-built_in">exec</span> vitest &lt;Tab&gt;</code></pre></div>
+<div class="code"><div class="code-title">pnpm</div><pre><code class="hljs lang-bash">pnpm vitest &lt;Tab&gt;</code></pre></div>
+<div class="code"><div class="code-title">yarn</div><pre><code class="hljs lang-bash">yarn vitest &lt;Tab&gt;</code></pre></div>
+<div class="code"><div class="code-title">bun</div><pre><code class="hljs lang-bash">bun vitest &lt;Tab&gt;</code></pre></div>
+</div><p>For package manager autocompletions, you should install <a href="https://github.com/bombshell-dev/tab?tab=readme-ov-file#package-manager-completions">tab&#39;s package manager completions</a> separately.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Vitest supports both camel case and kebab case for <a href="https://github.com/cacjs/cac#dot-nested-options">CLI arguments</a>. For example, <code>--passWithNoTests</code> and <code>--pass-with-no-tests</code> will both work (<code>--no-color</code> and <code>--inspect-brk</code> are the exceptions).</p>
+<p>Vitest also supports different ways of specifying the value: <code>--reporter dot</code> and <code>--reporter=dot</code> are both valid.</p>
+<p>If option supports an array of values, you need to pass the option multiple times:</p>
+<div class="code"><pre><code class="hljs lang-txt">vitest --reporter=dot --reporter=default</code></pre></div>
+<p>Boolean options can be negated with <code>no-</code> prefix. Specifying the value as <code>false</code> also works:</p>
+<div class="code"><pre><code class="hljs lang-txt">vitest --no-api
+vitest --api=false</code></pre></div>
+</div><!--@include: ./cli-generated.md--><h3 id="shard"><a class="anchor" href="#shard">#</a>shard</h3>
+<ul>
+<li><strong>Type:</strong> <code>string</code></li>
+<li><strong>Default:</strong> disabled</li>
+</ul>
+<p>Test suite shard to execute in a format of <code>&lt;index&gt;</code>/<code>&lt;count&gt;</code>, where</p>
+<ul>
+<li><code>count</code> is a positive integer, count of divided parts</li>
+<li><code>index</code> is a positive integer, index of divided part</li>
+</ul>
+<p>This command will divide all tests into <code>count</code> equal parts, and will run only those that happen to be in an <code>index</code> part. For example, to split your tests suite into three parts, use this:</p>
+<div class="code"><pre><code class="hljs lang-sh">vitest run --shard=1/3
+vitest run --shard=2/3
+vitest run --shard=3/3</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>You cannot use this option with <code>--watch</code> enabled (enabled in dev by default).</p>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If <code>--reporter=blob</code> is used without an output file, the default path will include the current shard config and blob label from <code>VITEST_BLOB_LABEL</code> or the blob reporter <code>label</code> option to avoid collisions with other Vitest processes.</p>
+</div><h3 id="merge-reports"><a class="anchor" href="#merge-reports">#</a>merge-reports</h3>
+<ul>
+<li><strong>Type:</strong> <code>boolean | string</code></li>
+</ul>
+<p>Merges every blob report located in the specified folder (<code>.vitest/blob/</code> by default). You can use any reporters with this command (except <a href="reporters.html#blob-reporter"><code>blob</code></a>):</p>
+<div class="code"><pre><code class="hljs lang-sh">vitest --merge-reports --reporter=junit</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#commands">Commands</a><a class="toc-3" href="#vitest">vitest</a><a class="toc-3" href="#vitest-run">vitest run</a><a class="toc-3" href="#vitest-watch">vitest watch</a><a class="toc-3" href="#vitest-dev">vitest dev</a><a class="toc-3" href="#vitest-related">vitest related</a><a class="toc-3" href="#vitest-bench">vitest bench</a><a class="toc-3" href="#vitest-init">vitest init</a><a class="toc-3" href="#vitest-list">vitest list</a><a class="toc-3" href="#vitest-doctor">vitest doctor</a><a class="toc-2" href="#shell-autocompletions">Shell Autocompletions</a><a class="toc-3" href="#setup">Setup</a><a class="toc-3" href="#package-manager-integration">Package Manager Integration</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#shard">shard</a><a class="toc-3" href="#merge-reports">merge-reports</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

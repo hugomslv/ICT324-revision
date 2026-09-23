@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Features (Vite) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link active" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vite</a> › guide/features  <a class="ext small" href="https://vite.dev/guide/features">version en ligne</a></div>
+<h1 id="features"><a class="anchor" href="#features">#</a>Features</h1>
+<p>At the very basic level, developing using Vite is not that different from using a static file server. However, Vite provides many enhancements over native ESM imports to support various features that are typically seen in bundler-based setups.</p>
+<h2 id="npm-dependency-resolving-and-pre-bundling"><a class="anchor" href="#npm-dependency-resolving-and-pre-bundling">#</a>npm Dependency Resolving and Pre-Bundling</h2>
+<p>Native ES imports do not support bare module imports like the following:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { someMethod } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;my-dep&#x27;</span></code></pre></div>
+<p>The above import will throw an error in the browser. Vite will detect such bare module imports in all served source files and perform the following:</p>
+<ol>
+<li><p><a href="dep-pre-bundling.html">Pre-bundle</a> them to improve page loading speed and convert CommonJS / UMD modules to ESM. The pre-bundling step is performed with <a href="https://rolldown.rs/">Rolldown</a> and makes Vite&#39;s cold start time significantly faster than any JavaScript-based bundler.</p>
+</li>
+<li><p>Rewrite the imports to valid URLs like <code>/node_modules/.vite/deps/my-dep.js?v=f3sf2ebd</code> so that the browser can import them properly.</p>
+</li>
+</ol>
+<p><strong>Dependencies are Strongly Cached</strong></p>
+<p>Vite caches dependency requests via HTTP headers, so if you wish to locally edit/debug a dependency, follow the steps <a href="dep-pre-bundling.html#browser-cache">here</a>.</p>
+<h2 id="hot-module-replacement"><a class="anchor" href="#hot-module-replacement">#</a>Hot Module Replacement</h2>
+<p>Vite provides an <a href="api-hmr.html">HMR API</a> over native ESM. Frameworks with HMR capabilities can leverage the API to provide instant, precise updates without reloading the page or blowing away application state. Vite provides first-party HMR integrations for <a href="https://github.com/vitejs/vite-plugin-vue/tree/main/packages/plugin-vue">Vue Single File Components</a> and <a href="https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react">React Fast Refresh</a>. There are also official integrations for Preact via <a href="https://github.com/JoviDeCroock/prefresh/tree/main/packages/vite">@prefresh/vite</a>.</p>
+<p>Note you don&#39;t need to manually set these up - when you <a href="index.html">create an app via <code>create-vite</code></a>, the selected templates would have these pre-configured for you already.</p>
+<h2 id="typescript"><a class="anchor" href="#typescript">#</a>TypeScript</h2>
+<p>Vite supports importing <code>.ts</code> files out of the box.</p>
+<h3 id="transpile-only"><a class="anchor" href="#transpile-only">#</a>Transpile Only</h3>
+<p>Note that Vite only performs transpilation on <code>.ts</code> files and does <strong>NOT</strong> perform type checking. It assumes type checking is taken care of by your IDE and build process.</p>
+<p>The reason Vite does not perform type checking as part of the transform process is because the two jobs work fundamentally differently. Transpilation can work on a per-file basis and aligns perfectly with Vite&#39;s on-demand compile model. In comparison, type checking requires knowledge of the entire module graph. Shoe-horning type checking into Vite&#39;s transform pipeline will inevitably compromise Vite&#39;s speed benefits.</p>
+<p>Vite&#39;s job is to get your source modules into a form that can run in the browser as fast as possible. To that end, we recommend separating static analysis checks from Vite&#39;s transform pipeline. This principle applies to other static analysis checks such as ESLint.</p>
+<ul>
+<li><p>For production builds, you can run <code>tsc --noEmit</code> in addition to Vite&#39;s build command.</p>
+</li>
+<li><p>During development, if you need more than IDE hints, we recommend running <code>tsc --noEmit --watch</code> in a separate process, or use <a href="https://github.com/fi3ework/vite-plugin-checker">vite-plugin-checker</a> if you prefer having type errors directly reported in the browser.</p>
+</li>
+</ul>
+<p>Vite uses <a href="https://oxc.rs/docs/guide/usage/transformer.html">Oxc Transformer</a> to transpile TypeScript into JavaScript which is faster than vanilla <code>tsc</code>, and HMR updates can reflect in the browser in under 50ms.</p>
+<p>Use the <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-8.html#type-only-imports-and-export">Type-Only Imports and Export</a> syntax to avoid potential problems like type-only imports being incorrectly bundled, for example:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { T } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;only/types&#x27;</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">type</span> { T }</code></pre></div>
+<h3 id="typescript-compiler-options"><a class="anchor" href="#typescript-compiler-options">#</a>TypeScript Compiler Options</h3>
+<p>Vite respects some of the options in <code>tsconfig.json</code> and sets the corresponding Oxc Transformer options. By default, Vite uses the closest parent <code>tsconfig.json</code> that matches each file. A config referenced by that config&#39;s <a href="https://www.typescriptlang.org/tsconfig/#references"><code>references</code></a> field is used when it matches the file. Vite treats a config as matching the file when the file satisfies the config&#39;s <a href="https://www.typescriptlang.org/tsconfig/#files"><code>files</code></a>, <a href="https://www.typescriptlang.org/tsconfig/#include"><code>include</code></a>, and <a href="https://www.typescriptlang.org/tsconfig/#exclude"><code>exclude</code></a> fields.</p>
+<p>When the options are set in both the Vite config and the <code>tsconfig.json</code>, the value in the Vite config takes precedence.</p>
+<p>Some configuration fields under <code>compilerOptions</code> in <code>tsconfig.json</code> require special attention.</p>
+<h4 id="isolatedmodules"><a class="anchor" href="#isolatedmodules">#</a><code>isolatedModules</code></h4>
+<ul>
+<li><a href="https://www.typescriptlang.org/tsconfig#isolatedModules">TypeScript documentation</a></li>
+</ul>
+<p>Should be set to <code>true</code>.</p>
+<p>It is because Oxc transformer only performs transpilation without type information, it doesn&#39;t support certain features like const enum and implicit type-only imports.</p>
+<p>You must set <code>&quot;isolatedModules&quot;: true</code> in your <code>tsconfig.json</code> under <code>compilerOptions</code>, so that TS will warn you against the features that do not work with isolated transpilation.</p>
+<p>If a dependency doesn&#39;t work well with <code>&quot;isolatedModules&quot;: true</code>, you can use <code>&quot;skipLibCheck&quot;: true</code> to temporarily suppress the errors until it is fixed upstream.</p>
+<h4 id="usedefineforclassfields"><a class="anchor" href="#usedefineforclassfields">#</a><code>useDefineForClassFields</code></h4>
+<ul>
+<li><a href="https://www.typescriptlang.org/tsconfig#useDefineForClassFields">TypeScript documentation</a></li>
+</ul>
+<p>The default value will be <code>true</code> if the TypeScript target is <code>ES2022</code> or newer including <code>ESNext</code>. It is consistent with the <a href="https://github.com/microsoft/TypeScript/pull/42663">behavior of TypeScript 4.3.2+</a>.
+Other TypeScript targets will default to <code>false</code>.</p>
+<p><code>true</code> is the standard ECMAScript runtime behavior.</p>
+<p>If you are using a library that heavily relies on class fields, please be careful about the library&#39;s intended usage of it.
+While most libraries expect <code>&quot;useDefineForClassFields&quot;: true</code>, you can explicitly set <code>useDefineForClassFields</code> to <code>false</code> if your library doesn&#39;t support it.</p>
+<h4 id="target"><a class="anchor" href="#target">#</a><code>target</code></h4>
+<ul>
+<li><a href="https://www.typescriptlang.org/tsconfig#target">TypeScript documentation</a></li>
+</ul>
+<p>Vite ignores the <code>target</code> value in the <code>tsconfig.json</code>, following the same behavior as <a href="https://esbuild.github.io/">esbuild</a>.</p>
+<p>To specify the target in dev, the <a href="../config/shared-options.html#oxc"><code>oxc.target</code></a> option can be used, which defaults to <code>esnext</code> for minimal transpilation. In builds, the <a href="../config/build-options.html#build-target"><code>build.target</code></a> option takes higher priority over <code>oxc.target</code> and can also be set if needed.</p>
+<h4 id="emitdecoratormetadata"><a class="anchor" href="#emitdecoratormetadata">#</a><code>emitDecoratorMetadata</code></h4>
+<ul>
+<li><a href="https://www.typescriptlang.org/tsconfig#emitDecoratorMetadata">TypeScript documentation</a></li>
+</ul>
+<p>This option is only partially supported. Full support requires type inference by the TypeScript compiler, which is not supported. See <a href="https://oxc.rs/docs/guide/usage/transformer/typescript.html#decorators">Oxc Transformer&#39;s documentation</a> for details.</p>
+<h4 id="paths"><a class="anchor" href="#paths">#</a><code>paths</code></h4>
+<ul>
+<li><a href="https://www.typescriptlang.org/tsconfig/#paths">TypeScript documentation</a></li>
+</ul>
+<p><a href="../config/shared-options.html#resolve-tsconfigpaths"><code>resolve.tsconfigPaths: true</code></a> can be specified to tell Vite to use the <code>paths</code> option in <code>tsconfig.json</code> to resolve imports.</p>
+<p>Note that this feature has a performance cost and is <a href="https://www.typescriptlang.org/tsconfig/#paths:~:text=Note%20that%20this%20feature%20does%20not%20change%20how%20import%20paths%20are%20emitted%20by%20tsc%2C%20so%20paths%20should%20only%20be%20used%20to%20inform%20TypeScript%20that%20another%20tool%20has%20this%20mapping%20and%20will%20use%20it%20at%20runtime%20or%20when%20bundling.">discouraged by the TypeScript team to use this option to change the behavior of the external tools</a>.</p>
+<h4 id="other-compiler-options-affecting-the-build-result"><a class="anchor" href="#other-compiler-options-affecting-the-build-result">#</a>Other Compiler Options Affecting the Build Result</h4>
+<ul>
+<li><a href="https://www.typescriptlang.org/tsconfig#extends"><code>extends</code></a></li>
+<li><a href="https://www.typescriptlang.org/tsconfig#importsNotUsedAsValues"><code>importsNotUsedAsValues</code></a></li>
+<li><a href="https://www.typescriptlang.org/tsconfig#preserveValueImports"><code>preserveValueImports</code></a></li>
+<li><a href="https://www.typescriptlang.org/tsconfig#verbatimModuleSyntax"><code>verbatimModuleSyntax</code></a></li>
+<li><a href="https://www.typescriptlang.org/tsconfig#jsx"><code>jsx</code></a></li>
+<li><a href="https://www.typescriptlang.org/tsconfig#jsxFactory"><code>jsxFactory</code></a></li>
+<li><a href="https://www.typescriptlang.org/tsconfig#jsxFragmentFactory"><code>jsxFragmentFactory</code></a></li>
+<li><a href="https://www.typescriptlang.org/tsconfig#jsxImportSource"><code>jsxImportSource</code></a></li>
+<li><a href="https://www.typescriptlang.org/tsconfig#experimentalDecorators"><code>experimentalDecorators</code></a></li>
+</ul>
+<div class="box box-tip"><div class="box-title">💡 Astuce : <code>skipLibCheck</code></div><p>Vite starter templates have <code>&quot;skipLibCheck&quot;: true</code> by default to avoid typechecking dependencies, as they may choose to only support specific versions and configurations of TypeScript. You can learn more at <a href="https://github.com/vuejs/vue-cli/pull/5688">vuejs/vue-cli#5688</a>.</p>
+</div><h3 id="client-types"><a class="anchor" href="#client-types">#</a>Client Types</h3>
+<p>Vite&#39;s default types are for its Node.js API. To shim the environment of client-side code in a Vite application, you can add <code>vite/client</code> to <code>compilerOptions.types</code> inside <code>tsconfig.json</code>:</p>
+<div class="code"><div class="code-title">tsconfig.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;compilerOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;types&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;vite/client&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;some-other-global-lib&quot;</span><span class="hljs-punctuation">]</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Note that if <a href="https://www.typescriptlang.org/tsconfig#types"><code>compilerOptions.types</code></a> is specified, only these packages will be included in the global scope (instead of all visible ”@types” packages). This is recommended since TS 5.9.</p>
+<details class="box"><summary>Using triple-slash directive</summary><p>Alternatively, you can add a <code>d.ts</code> declaration file:</p>
+<div class="code"><div class="code-title">vite-env.d.ts</div><pre><code class="hljs lang-typescript"><span class="hljs-comment">/// &lt;reference types=&quot;vite/client&quot; /&gt;</span></code></pre></div>
+</details><p><code>vite/client</code> provides the following type shims:</p>
+<ul>
+<li>Asset imports (e.g. importing an <code>.svg</code> file)</li>
+<li>Types for the Vite-injected <a href="env-and-mode.html#env-variables">constants</a> on <code>import.meta.env</code></li>
+<li>Types for the <a href="api-hmr.html">HMR API</a> on <code>import.meta.hot</code></li>
+</ul>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>To override the default typing, add a type definition file that contains your typings. Then, add the type reference before <code>vite/client</code>.</p>
+<p>For example, to make the default import of <code>*.svg</code> a React component:</p>
+<ul>
+<li><code>vite-env-override.d.ts</code> (the file that contains your typings):<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;*.svg&#x27;</span> {
+  <span class="hljs-keyword">const</span> <span class="hljs-attr">content</span>: <span class="hljs-title class_">React</span>.<span class="hljs-property">FC</span>&lt;<span class="hljs-title class_">React</span>.<span class="hljs-property">SVGProps</span>&lt;<span class="hljs-title class_">SVGElement</span>&gt;&gt;
+  <span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> content
+}</code></pre></div>
+</li>
+<li>If you are using <code>compilerOptions.types</code>, ensure the file is included in <code>tsconfig.json</code>:<div class="code"><div class="code-title">tsconfig.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;include&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;src&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;./vite-env-override.d.ts&quot;</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+</li>
+<li>If you are using triple-slash directives, update the file containing the reference to <code>vite/client</code> (normally <code>vite-env.d.ts</code>):<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/// &lt;reference types=&quot;./vite-env-override.d.ts&quot; /&gt;</span>
+<span class="hljs-comment">/// &lt;reference types=&quot;vite/client&quot; /&gt;</span></code></pre></div>
+</li>
+</ul>
+</div><h2 id="html"><a class="anchor" href="#html">#</a>HTML</h2>
+<p>HTML files stand <a href="index.html#index-html-and-project-root">front-and-center</a> of a Vite project, serving as the entry points for your application, making it simple to build single-page and <a href="build.html#multi-page-app">multi-page applications</a>.</p>
+<p>Any HTML files in your project root can be directly accessed by its respective directory path:</p>
+<ul>
+<li><code>&lt;root&gt;/index.html</code> -&gt; <code>http://localhost:5173/</code></li>
+<li><code>&lt;root&gt;/about.html</code> -&gt; <code>http://localhost:5173/about.html</code></li>
+<li><code>&lt;root&gt;/blog/index.html</code> -&gt; <code>http://localhost:5173/blog/index.html</code></li>
+</ul>
+<p>Assets referenced by HTML elements such as <code>&lt;script type=&quot;module&quot; src&gt;</code> and <code>&lt;link href&gt;</code> are processed and bundled as part of the app. The full list of supported elements is as below:</p>
+<ul>
+<li><code>&lt;audio src&gt;</code></li>
+<li><code>&lt;embed src&gt;</code></li>
+<li><code>&lt;img src&gt;</code> and <code>&lt;img srcset&gt;</code></li>
+<li><code>&lt;image href&gt;</code> and <code>&lt;image xlink:href&gt;</code></li>
+<li><code>&lt;input src&gt;</code></li>
+<li><code>&lt;link href&gt;</code> and <code>&lt;link imagesrcset&gt;</code></li>
+<li><code>&lt;object data&gt;</code></li>
+<li><code>&lt;script type=&quot;module&quot; src&gt;</code></li>
+<li><code>&lt;source src&gt;</code> and <code>&lt;source srcset&gt;</code></li>
+<li><code>&lt;track src&gt;</code></li>
+<li><code>&lt;use href&gt;</code> and <code>&lt;use xlink:href&gt;</code></li>
+<li><code>&lt;video src&gt;</code> and <code>&lt;video poster&gt;</code></li>
+<li><code>&lt;meta content&gt;</code><ul>
+<li>Only if <code>name</code> attribute matches <code>msapplication-tileimage</code>, <code>msapplication-square70x70logo</code>, <code>msapplication-square150x150logo</code>, <code>msapplication-wide310x150logo</code>, <code>msapplication-square310x310logo</code>, <code>msapplication-config</code>, or <code>twitter:image</code></li>
+<li>Or only if <code>property</code> attribute matches <code>og:image</code>, <code>og:image:url</code>, <code>og:image:secure_url</code>, <code>og:audio</code>, <code>og:audio:secure_url</code>, <code>og:video</code>, or <code>og:video:secure_url</code></li>
+</ul>
+</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-meta">&lt;!doctype <span class="hljs-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;icon&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/favicon.ico&quot;</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;stylesheet&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/src/styles.css&quot;</span> /&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/src/images/logo.svg&quot;</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;logo&quot;</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/src/main.js&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></code></pre></div>
+<p>To opt-out of HTML processing on certain elements, you can add the <code>vite-ignore</code> attribute on the element, which can be useful when referencing external assets or CDN.</p>
+<h2 id="frameworks"><a class="anchor" href="#frameworks">#</a>Frameworks</h2>
+<p>All modern frameworks maintain integrations with Vite. Most framework plugins are maintained by each framework team, with the exception of the official Vue and React Vite plugins that are maintained in the vite org:</p>
+<ul>
+<li>Vue support via <a href="https://github.com/vitejs/vite-plugin-vue/tree/main/packages/plugin-vue">@vitejs/plugin-vue</a></li>
+<li>Vue JSX support via <a href="https://github.com/vitejs/vite-plugin-vue/tree/main/packages/plugin-vue-jsx">@vitejs/plugin-vue-jsx</a></li>
+<li>React support via <a href="https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react">@vitejs/plugin-react</a></li>
+<li>React using SWC support via <a href="https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react-swc">@vitejs/plugin-react-swc</a></li>
+<li><a href="https://react.dev/reference/rsc/server-components">React Server Components (RSC)</a> support via <a href="https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-rsc">@vitejs/plugin-rsc</a></li>
+</ul>
+<p>Check out the <a href="../plugins/index.html">Plugins Guide</a> for more information.</p>
+<h2 id="jsx"><a class="anchor" href="#jsx">#</a>JSX</h2>
+<p><code>.jsx</code> and <code>.tsx</code> files are also supported out of the box. JSX transpilation is also handled via <a href="https://oxc.rs/docs/guide/usage/transformer.html">Oxc Transformer</a>.</p>
+<p>Your framework of choice will already configure JSX out of the box (for example, Vue users should use the official <a href="https://github.com/vitejs/vite-plugin-vue/tree/main/packages/plugin-vue-jsx">@vitejs/plugin-vue-jsx</a> plugin, which provides Vue 3 specific features including HMR, global component resolving, directives and slots).</p>
+<p>If using JSX with your own framework, custom <code>jsxFactory</code> and <code>jsxFragment</code> can be configured using the <a href="../config/shared-options.html#oxc"><code>oxc</code> option</a>. For example, the Preact plugin would use:</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">oxc</span>: {
+    <span class="hljs-attr">jsx</span>: {
+      <span class="hljs-attr">importSource</span>: <span class="hljs-string">&#x27;preact&#x27;</span>,
+    },
+  },
+})</code></pre></div>
+<p>More details in <a href="https://oxc.rs/docs/guide/usage/transformer/jsx.html">Oxc Transformer docs</a>.</p>
+<p>You can inject the JSX helpers using <code>jsxInject</code> (which is a Vite-only option) to avoid manual imports:</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">oxc</span>: {
+    <span class="hljs-attr">jsxInject</span>: <span class="hljs-string">`import React from &#x27;react&#x27;`</span>,
+  },
+})</code></pre></div>
+<h2 id="css"><a class="anchor" href="#css">#</a>CSS</h2>
+<p>Importing <code>.css</code> files will inject its content to the page via a <code>&lt;style&gt;</code> tag with HMR support.</p>
+<h3 id="import-inlining-and-rebasing"><a class="anchor" href="#import-inlining-and-rebasing">#</a><code>@import</code> Inlining and Rebasing</h3>
+<p>Vite is pre-configured to support CSS <code>@import</code> inlining via <code>postcss-import</code>. Vite aliases are also respected for CSS <code>@import</code>. In addition, all CSS <code>url()</code> references, even if the imported files are in different directories, are always automatically rebased to ensure correctness.</p>
+<p><code>@import</code> aliases and URL rebasing are also supported for Sass and Less files (see <a href="#css-pre-processors">CSS Pre-processors</a>).</p>
+<h3 id="postcss"><a class="anchor" href="#postcss">#</a>PostCSS</h3>
+<p>If the project contains valid PostCSS config (any format supported by <a href="https://github.com/postcss/postcss-load-config">postcss-load-config</a>, e.g. <code>postcss.config.js</code>), it will be automatically applied to all imported CSS.</p>
+<p>Note that CSS minification will run after PostCSS and will use the <a href="../config/build-options.html#build-csstarget"><code>build.cssTarget</code></a> option.</p>
+<h3 id="css-modules"><a class="anchor" href="#css-modules">#</a>CSS Modules</h3>
+<p>Any CSS file ending with <code>.module.css</code> is considered a <a href="https://github.com/css-modules/css-modules">CSS modules file</a>. Importing such a file will return the corresponding module object:</p>
+<div class="code"><div class="code-title">example.module.css</div><pre><code class="hljs lang-css"><span class="hljs-selector-class">.red</span> {
+  <span class="hljs-attribute">color</span>: red;
+}</code></pre></div>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> classes <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.module.css&#x27;</span>
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;foo&#x27;</span>).<span class="hljs-property">className</span> = classes.<span class="hljs-property">red</span></code></pre></div>
+<p>CSS modules behavior can be configured via the <a href="../config/shared-options.html#css-modules"><code>css.modules</code> option</a>.</p>
+<p>If <code>css.modules.localsConvention</code> is set to enable camelCase locals (e.g. <code>localsConvention: &#39;camelCaseOnly&#39;</code>), you can also use named imports:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-comment">// .apply-color -&gt; applyColor</span>
+<span class="hljs-keyword">import</span> { applyColor } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.module.css&#x27;</span>
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;foo&#x27;</span>).<span class="hljs-property">className</span> = applyColor</code></pre></div>
+<h3 id="css-pre-processors"><a class="anchor" href="#css-pre-processors">#</a>CSS Pre-processors</h3>
+<p>Because Vite targets modern browsers only, it is recommended to use native CSS variables with PostCSS plugins that implement CSSWG drafts (e.g. <a href="https://github.com/csstools/postcss-plugins/tree/main/plugins/postcss-nesting">postcss-nesting</a>) and author plain, future-standards-compliant CSS.</p>
+<p>That said, Vite does provide built-in support for <code>.scss</code>, <code>.sass</code>, <code>.less</code>, <code>.styl</code> and <code>.stylus</code> files. There is no need to install Vite-specific plugins for them, but the corresponding pre-processor itself must be installed:</p>
+<div class="code"><pre><code class="hljs lang-bash"><span class="hljs-comment"># .scss and .sass</span>
+npm add -D sass-embedded <span class="hljs-comment"># or sass</span>
+
+<span class="hljs-comment"># .less</span>
+npm add -D less
+
+<span class="hljs-comment"># .styl and .stylus</span>
+npm add -D stylus</code></pre></div>
+<p>If using Vue single file components, this also automatically enables <code>&lt;style lang=&quot;sass&quot;&gt;</code> et al.</p>
+<p>Vite improves <code>@import</code> resolving for Sass and Less so that Vite aliases are also respected. In addition, relative <code>url()</code> references inside imported Sass/Less files that are in different directories from the root file are also automatically rebased to ensure correctness. Rebasing <code>url()</code> references that start with a variable or an interpolation is not supported due to its API constraints.</p>
+<p><code>@import</code> alias and url rebasing are not supported for Stylus due to its API constraints.</p>
+<p>You can also use CSS modules combined with pre-processors by prepending <code>.module</code> to the file extension, for example <code>style.module.scss</code>.</p>
+<h3 id="disabling-css-injection-into-the-page"><a class="anchor" href="#disabling-css-injection-into-the-page">#</a>Disabling CSS injection into the page</h3>
+<p>The automatic injection of CSS contents can be turned off via the <code>?inline</code> query parameter. In this case, the processed CSS string is returned as the module&#39;s default export as usual, but the styles aren&#39;t injected to the page.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;./foo.css&#x27;</span> <span class="hljs-comment">// will be injected into the page</span>
+<span class="hljs-keyword">import</span> otherStyles <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./bar.css?inline&#x27;</span> <span class="hljs-comment">// will not be injected</span></code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce : NOTE</div><p>Default and named imports from CSS files (e.g <code>import style from &#39;./foo.css&#39;</code>) are removed since Vite 5. Use the <code>?inline</code> query instead.</p>
+</div><h3 id="lightning-css"><a class="anchor" href="#lightning-css">#</a>Lightning CSS</h3>
+<p>Vite uses <a href="https://lightningcss.dev/">Lightning CSS</a> to minify CSS in production builds by default. However, PostCSS is still used for other CSS processing.</p>
+<p>There is experimental support for using Lightning CSS for CSS processing entirely. You can opt into it by adding <a href="../config/shared-options.html#css-transformer"><code>css.transformer: &#39;lightningcss&#39;</code></a>.</p>
+<p>To configure it, you can pass Lightning CSS options to the <a href="../config/shared-options.html#css-lightningcss"><code>css.lightningcss</code></a> config option. To configure CSS Modules, you should use <a href="https://lightningcss.dev/css-modules.html"><code>css.lightningcss.cssModules</code></a> instead of <a href="../config/shared-options.html#css-modules"><code>css.modules</code></a> (which configures the way PostCSS handles CSS modules).</p>
+<h2 id="static-assets"><a class="anchor" href="#static-assets">#</a>Static Assets</h2>
+<p><ScrimbaLink href="https://scrimba.com/intro-to-vite-c03p6pbbdq/~05pq?via=vite" title="Static Assets in Vite">Watch an interactive lesson on Scrimba</ScrimbaLink></p>
+<p>Importing a static asset will return the resolved public URL when it is served:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> imgUrl <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./img.png&#x27;</span>
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;hero-img&#x27;</span>).<span class="hljs-property">src</span> = imgUrl</code></pre></div>
+<p>Special queries can modify how assets are loaded:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-comment">// Explicitly load assets as URL (automatically inlined depending on the file size)</span>
+<span class="hljs-keyword">import</span> assetAsURL <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./asset.js?url&#x27;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-comment">// Load assets as strings</span>
+<span class="hljs-keyword">import</span> assetAsString <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./shader.glsl?raw&#x27;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-comment">// Load Web Workers</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Worker</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./worker.js?worker&#x27;</span></code></pre></div>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-comment">// Web Workers inlined as base64 strings at build time</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">InlineWorker</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./worker.js?worker&amp;inline&#x27;</span></code></pre></div>
+<p>More details in <a href="assets.html">Static Asset Handling</a>.</p>
+<h2 id="json"><a class="anchor" href="#json">#</a>JSON</h2>
+<p>JSON files can be directly imported - named imports are also supported:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-comment">// import the entire object</span>
+<span class="hljs-keyword">import</span> json <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.json&#x27;</span>
+<span class="hljs-comment">// import a root field as named exports - helps with tree-shaking!</span>
+<span class="hljs-keyword">import</span> { field } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.json&#x27;</span></code></pre></div>
+<h2 id="glob-import"><a class="anchor" href="#glob-import">#</a>Glob Import</h2>
+<p>Vite supports importing multiple modules from the file system via the special <code>import.meta.glob</code> function:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">const</span> modules = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-title function_">glob</span>(<span class="hljs-string">&#x27;./dir/*.js&#x27;</span>)</code></pre></div>
+<p>The above will be transformed into the following:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// code produced by vite</span>
+<span class="hljs-keyword">const</span> modules = {
+  <span class="hljs-string">&#x27;./dir/bar.js&#x27;</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./dir/bar.js&#x27;</span>),
+  <span class="hljs-string">&#x27;./dir/foo.js&#x27;</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./dir/foo.js&#x27;</span>),
+}</code></pre></div>
+<p>You can then iterate over the keys of the <code>modules</code> object to access the corresponding modules:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> path <span class="hljs-keyword">in</span> modules) {
+  modules[path]().<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">mod</span>) =&gt;</span> {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(path, mod)
+  })
+}</code></pre></div>
+<p>Matched files are by default lazy-loaded via dynamic import and will be split into separate chunks during build. If you&#39;d rather import all the modules directly (e.g. relying on side-effects in these modules to be applied first), you can pass <code>{ eager: true }</code> as the second argument:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">const</span> modules = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-title function_">glob</span>(<span class="hljs-string">&#x27;./dir/*.js&#x27;</span>, { <span class="hljs-attr">eager</span>: <span class="hljs-literal">true</span> })</code></pre></div>
+<p>The above will be transformed into the following:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// code produced by vite</span>
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> __vite_glob_0_0 <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./dir/bar.js&#x27;</span>
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> __vite_glob_0_1 <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./dir/foo.js&#x27;</span>
+<span class="hljs-keyword">const</span> modules = {
+  <span class="hljs-string">&#x27;./dir/bar.js&#x27;</span>: __vite_glob_0_0,
+  <span class="hljs-string">&#x27;./dir/foo.js&#x27;</span>: __vite_glob_0_1,
+}</code></pre></div>
+<h3 id="multiple-patterns"><a class="anchor" href="#multiple-patterns">#</a>Multiple Patterns</h3>
+<p>The first argument can be an array of globs, for example</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">const</span> modules = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-title function_">glob</span>([<span class="hljs-string">&#x27;./dir/*.js&#x27;</span>, <span class="hljs-string">&#x27;./another/*.js&#x27;</span>])</code></pre></div>
+<h3 id="negative-patterns"><a class="anchor" href="#negative-patterns">#</a>Negative Patterns</h3>
+<p>Negative glob patterns are also supported (prefixed with <code>!</code>). To ignore some files from the result, you can add exclude glob patterns to the first argument:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">const</span> modules = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-title function_">glob</span>([<span class="hljs-string">&#x27;./dir/*.js&#x27;</span>, <span class="hljs-string">&#x27;!**/bar.js&#x27;</span>])</code></pre></div>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// code produced by vite</span>
+<span class="hljs-keyword">const</span> modules = {
+  <span class="hljs-string">&#x27;./dir/foo.js&#x27;</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./dir/foo.js&#x27;</span>),
+}</code></pre></div>
+<h4 id="named-imports"><a class="anchor" href="#named-imports">#</a>Named Imports</h4>
+<p>It&#39;s possible to only import parts of the modules with the <code>import</code> options.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">const</span> modules = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-title function_">glob</span>(<span class="hljs-string">&#x27;./dir/*.js&#x27;</span>, { <span class="hljs-attr">import</span>: <span class="hljs-string">&#x27;setup&#x27;</span> })</code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// code produced by vite</span>
+<span class="hljs-keyword">const</span> modules = {
+  <span class="hljs-string">&#x27;./dir/bar.js&#x27;</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./dir/bar.js&#x27;</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">m</span>) =&gt;</span> m.<span class="hljs-property">setup</span>),
+  <span class="hljs-string">&#x27;./dir/foo.js&#x27;</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./dir/foo.js&#x27;</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">m</span>) =&gt;</span> m.<span class="hljs-property">setup</span>),
+}</code></pre></div>
+<p>When combined with <code>eager</code> it&#39;s even possible to have tree-shaking enabled for those modules.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">const</span> modules = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-title function_">glob</span>(<span class="hljs-string">&#x27;./dir/*.js&#x27;</span>, {
+  <span class="hljs-attr">import</span>: <span class="hljs-string">&#x27;setup&#x27;</span>,
+  <span class="hljs-attr">eager</span>: <span class="hljs-literal">true</span>,
+})</code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// code produced by vite:</span>
+<span class="hljs-keyword">import</span> { setup <span class="hljs-keyword">as</span> __vite_glob_0_0 } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./dir/bar.js&#x27;</span>
+<span class="hljs-keyword">import</span> { setup <span class="hljs-keyword">as</span> __vite_glob_0_1 } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./dir/foo.js&#x27;</span>
+<span class="hljs-keyword">const</span> modules = {
+  <span class="hljs-string">&#x27;./dir/bar.js&#x27;</span>: __vite_glob_0_0,
+  <span class="hljs-string">&#x27;./dir/foo.js&#x27;</span>: __vite_glob_0_1,
+}</code></pre></div>
+<p>Set <code>import</code> to <code>default</code> to import the default export.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">const</span> modules = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-title function_">glob</span>(<span class="hljs-string">&#x27;./dir/*.js&#x27;</span>, {
+  <span class="hljs-attr">import</span>: <span class="hljs-string">&#x27;default&#x27;</span>,
+  <span class="hljs-attr">eager</span>: <span class="hljs-literal">true</span>,
+})</code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// code produced by vite:</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> __vite_glob_0_0 } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./dir/bar.js&#x27;</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> __vite_glob_0_1 } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./dir/foo.js&#x27;</span>
+<span class="hljs-keyword">const</span> modules = {
+  <span class="hljs-string">&#x27;./dir/bar.js&#x27;</span>: __vite_glob_0_0,
+  <span class="hljs-string">&#x27;./dir/foo.js&#x27;</span>: __vite_glob_0_1,
+}</code></pre></div>
+<h4 id="custom-queries"><a class="anchor" href="#custom-queries">#</a>Custom Queries</h4>
+<p>You can also use the <code>query</code> option to provide queries to imports, for example, to import assets <a href="assets.html#importing-asset-as-string">as a string</a> or <a href="assets.html#importing-asset-as-url">as a url</a>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">const</span> moduleStrings = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-title function_">glob</span>(<span class="hljs-string">&#x27;./dir/*.svg&#x27;</span>, {
+  <span class="hljs-attr">query</span>: <span class="hljs-string">&#x27;?raw&#x27;</span>,
+  <span class="hljs-attr">import</span>: <span class="hljs-string">&#x27;default&#x27;</span>,
+})
+<span class="hljs-keyword">const</span> moduleUrls = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-title function_">glob</span>(<span class="hljs-string">&#x27;./dir/*.svg&#x27;</span>, {
+  <span class="hljs-attr">query</span>: <span class="hljs-string">&#x27;?url&#x27;</span>,
+  <span class="hljs-attr">import</span>: <span class="hljs-string">&#x27;default&#x27;</span>,
+})</code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// code produced by vite:</span>
+<span class="hljs-keyword">const</span> moduleStrings = {
+  <span class="hljs-string">&#x27;./dir/bar.svg&#x27;</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./dir/bar.svg?raw&#x27;</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">m</span>) =&gt;</span> m[<span class="hljs-string">&#x27;default&#x27;</span>]),
+  <span class="hljs-string">&#x27;./dir/foo.svg&#x27;</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./dir/foo.svg?raw&#x27;</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">m</span>) =&gt;</span> m[<span class="hljs-string">&#x27;default&#x27;</span>]),
+}
+<span class="hljs-keyword">const</span> moduleUrls = {
+  <span class="hljs-string">&#x27;./dir/bar.svg&#x27;</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./dir/bar.svg?url&#x27;</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">m</span>) =&gt;</span> m[<span class="hljs-string">&#x27;default&#x27;</span>]),
+  <span class="hljs-string">&#x27;./dir/foo.svg&#x27;</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./dir/foo.svg?url&#x27;</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">m</span>) =&gt;</span> m[<span class="hljs-string">&#x27;default&#x27;</span>]),
+}</code></pre></div>
+<p>You can also provide custom queries for other plugins to consume:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">const</span> modules = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-title function_">glob</span>(<span class="hljs-string">&#x27;./dir/*.js&#x27;</span>, {
+  <span class="hljs-attr">query</span>: { <span class="hljs-attr">foo</span>: <span class="hljs-string">&#x27;bar&#x27;</span>, <span class="hljs-attr">bar</span>: <span class="hljs-literal">true</span> },
+})</code></pre></div>
+<h4 id="base-path"><a class="anchor" href="#base-path">#</a>Base Path</h4>
+<p>You can also use the <code>base</code> option to provide base path for the imports:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">const</span> modulesWithBase = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-title function_">glob</span>(<span class="hljs-string">&#x27;./**/*.js&#x27;</span>, {
+  <span class="hljs-attr">base</span>: <span class="hljs-string">&#x27;./base&#x27;</span>,
+})</code></pre></div>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// code produced by vite:</span>
+<span class="hljs-keyword">const</span> modulesWithBase = {
+  <span class="hljs-string">&#x27;./dir/foo.js&#x27;</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./base/dir/foo.js&#x27;</span>),
+  <span class="hljs-string">&#x27;./dir/bar.js&#x27;</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./base/dir/bar.js&#x27;</span>),
+}</code></pre></div>
+<p>The base option can only be a directory path relative to the importer file or absolute against the project root. Aliases and virtual modules aren&#39;t supported.</p>
+<p>Only the globs that are relative paths are interpreted as relative to the resolved base.</p>
+<p>All the resulting module keys are modified to be relative to the base if provided.</p>
+<h4 id="case-sensitive-matching"><a class="anchor" href="#case-sensitive-matching">#</a>Case Sensitive Matching</h4>
+<p>By default, glob pattern matching is case-sensitive. You can use the <code>caseSensitive</code> option to change this behavior:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">const</span> modules = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-title function_">glob</span>(<span class="hljs-string">&#x27;./dir/module*.js&#x27;</span>, {
+  <span class="hljs-attr">caseSensitive</span>: <span class="hljs-literal">false</span>,
+})</code></pre></div>
+<p>With <code>caseSensitive: false</code>, the glob will match files regardless of case (e.g., <code>Module.js</code>, <code>module.js</code>, <code>MODULE.js</code> will all be matched by <code>module*.js</code>).</p>
+<h3 id="glob-import-caveats"><a class="anchor" href="#glob-import-caveats">#</a>Glob Import Caveats</h3>
+<p>Note that:</p>
+<ul>
+<li>This is a Vite-only feature and is not a web or ES standard.</li>
+<li>The glob patterns are treated like import specifiers: they must be either relative (start with <code>./</code>) or absolute (start with <code>/</code>, resolved relative to project root) or an alias path (see <a href="../config/shared-options.html#resolve-alias"><code>resolve.alias</code> option</a>).</li>
+<li>The glob matching is done via <a href="https://github.com/SuperchupuDev/tinyglobby"><code>tinyglobby</code></a> - check out its documentation for <a href="https://superchupu.dev/tinyglobby/comparison">supported glob patterns</a>.</li>
+<li>You should also be aware that all the arguments in the <code>import.meta.glob</code> must be <strong>passed as literals</strong>. You can NOT use variables or expressions in them.</li>
+</ul>
+<h2 id="dynamic-import"><a class="anchor" href="#dynamic-import">#</a>Dynamic Import</h2>
+<p>Similar to <a href="#glob-import">glob import</a>, Vite also supports dynamic import with variables.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> <span class="hljs-variable language_">module</span> = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">`./dir/<span class="hljs-subst">${file}</span>.js`</span>)</code></pre></div>
+<p>Note that variables only represent file names one level deep. If <code>file</code> is <code>&#39;foo/bar&#39;</code>, the import would fail. For more advanced usage, you can use the <a href="#glob-import">glob import</a> feature.</p>
+<p>Also note that the dynamic import must match the following rules to be bundled:</p>
+<ul>
+<li>Imports must start with <code>./</code> or <code>../</code> or <code>#</code>: <code>import(`./dir/${foo}.js`)</code> is valid, but <code>import(`${foo}.js`)</code> is not.</li>
+<li>Imports must end with a file extension: <code>import(`./dir/${foo}.js`)</code> is valid, but <code>import(`./dir/${foo}`)</code> is not.</li>
+<li>Imports to the own directory must specify a file name pattern: <code>import(`./prefix-${foo}.js`)</code> is valid, but <code>import(`./${foo}.js`)</code> is not.</li>
+</ul>
+<p>These rules are enforced to prevent accidentally importing files that are not intended to be bundled. For example, without these rules, <code>import(foo)</code> would bundle everything in the file system.</p>
+<h2 id="webassembly"><a class="anchor" href="#webassembly">#</a>WebAssembly</h2>
+<p>Vite supports importing pre-compiled <code>.wasm</code> files in two ways: directly as an <a href="#esm-integration">ES module</a> when you only need the module&#39;s exports, or with <a href="#manual-initialization"><code>?init</code></a> when you need explicit control over instantiation.</p>
+<h3 id="esm-integration"><a class="anchor" href="#esm-integration">#</a>ESM Integration</h3>
+<p>A <code>.wasm</code> file can be imported directly. Vite reads the module&#39;s imports and exports from the binary, instantiates it, and re-exposes its exports as named ES module exports:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { add } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./add.wasm&#x27;</span>
+
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)) <span class="hljs-comment">// 3</span></code></pre></div>
+<p>If the WebAssembly module declares imports of its own, Vite resolves them from JavaScript modules. Each import&#39;s module name is treated as an import specifier (resolved relative to the <code>.wasm</code> file) and the requested members are wired into the instance automatically.</p>
+<p>This follows the <a href="https://github.com/WebAssembly/esm-integration">WebAssembly/ES Module Integration proposal</a>. Because a WebAssembly module is instantiated asynchronously, a directly imported <code>.wasm</code> file behaves as an async module and requires top-level <code>await</code> support.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : TypeScript support</div><p>Since the types of <code>.wasm</code> files are unknown, TypeScript will report errors like <code>Module &#39;&quot;*.wasm&quot;&#39; has no exported member &#39;add&#39;</code>. To fix this, enable <a href="https://www.typescriptlang.org/tsconfig/#allowArbitraryExtensions"><code>allowArbitraryExtensions</code></a> in your <code>tsconfig.json</code> and create a declaration file next to your <code>.wasm</code> file. With <code>allowArbitraryExtensions</code> enabled, TypeScript will look for a declaration file named <code>{filename}.d.wasm.ts</code> when resolving a <code>.wasm</code> import. For example, for <code>add.wasm</code>, create <code>add.d.wasm.ts</code>:</p>
+<div class="code"><div class="code-title">add.d.wasm.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params"><span class="hljs-attr">a</span>: <span class="hljs-built_in">number</span>, <span class="hljs-attr">b</span>: <span class="hljs-built_in">number</span></span>): <span class="hljs-built_in">number</span></code></pre></div>
+</div><h3 id="manual-initialization"><a class="anchor" href="#manual-initialization">#</a>Manual Initialization</h3>
+<p>When you need control over when and how the module is instantiated, import it with <code>?init</code>. The default export will be an initialization function that returns a Promise of the <a href="https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/Instance"><code>WebAssembly.Instance</code></a>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> init <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.wasm?init&#x27;</span>
+
+<span class="hljs-title function_">init</span>().<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">instance</span>) =&gt;</span> {
+  instance.<span class="hljs-property">exports</span>.<span class="hljs-title function_">test</span>()
+})</code></pre></div>
+<p>The init function can also take an importObject which is passed along to <a href="https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/instantiate"><code>WebAssembly.instantiate</code></a> as its second argument:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> init <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./example.wasm?init&#x27;</span>
+<span class="hljs-title function_">init</span>({
+  <span class="hljs-attr">imports</span>: {
+    <span class="hljs-attr">someFunc</span>: <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-comment">/* ... */</span>
+    },
+  },
+}).<span class="hljs-title function_">then</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-comment">/* ... */</span>
+})</code></pre></div>
+<p>In the production build, <code>.wasm</code> files smaller than <code>assetsInlineLimit</code> will be inlined as base64 strings. Otherwise, they will be treated as a <a href="assets.html">static asset</a> and fetched on-demand.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : For SSR build, Node.js compatible runtimes are only supported</div><p>Due to the lack of a universal way to load a file, the internal implementation for both direct <code>.wasm</code> imports and <code>.wasm?init</code> relies on the <code>node:fs</code> module. This means that these features will only work in Node.js compatible runtimes for SSR builds.</p>
+</div><h3 id="accessing-the-webassembly-module"><a class="anchor" href="#accessing-the-webassembly-module">#</a>Accessing the WebAssembly Module</h3>
+<p>If you need access to the <code>Module</code> object, e.g. to instantiate it multiple times, use an <a href="assets.html#explicit-url-imports">explicit URL import</a> to resolve the asset, and then perform the instantiation:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> wasmUrl <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;foo.wasm?url&#x27;</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">main</span> = <span class="hljs-keyword">async</span> (<span class="hljs-params"></span>) =&gt; {
+  <span class="hljs-keyword">const</span> responsePromise = <span class="hljs-title function_">fetch</span>(wasmUrl)
+  <span class="hljs-keyword">const</span> { <span class="hljs-variable language_">module</span>, instance } =
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">WebAssembly</span>.<span class="hljs-title function_">instantiateStreaming</span>(responsePromise)
+  <span class="hljs-comment">/* ... */</span>
+}
+
+<span class="hljs-title function_">main</span>()</code></pre></div>
+<h2 id="web-workers"><a class="anchor" href="#web-workers">#</a>Web Workers</h2>
+<h3 id="import-with-constructors"><a class="anchor" href="#import-with-constructors">#</a>Import with Constructors</h3>
+<p>A web worker script can be imported using <a href="https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker"><code>new Worker()</code></a> and <a href="https://developer.mozilla.org/en-US/docs/Web/API/SharedWorker/SharedWorker"><code>new SharedWorker()</code></a>. Compared to the worker suffixes, this syntax leans closer to the standards and is the <strong>recommended</strong> way to create workers.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> worker = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Worker</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(<span class="hljs-string">&#x27;./worker.js&#x27;</span>, <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">url</span>))</code></pre></div>
+<p>The worker constructor also accepts options, which can be used to create &quot;module&quot; workers:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> worker = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Worker</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(<span class="hljs-string">&#x27;./worker.js&#x27;</span>, <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">url</span>), {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;module&#x27;</span>,
+})</code></pre></div>
+<p>The worker detection will only work if the <code>new URL()</code> constructor is used directly inside the <code>new Worker()</code> declaration. Otherwise it is handled as a <a href="assets.html#new-url-url-import-meta-url">static asset URL</a> instead. Additionally, all options parameters must be static values (i.e. string literals).</p>
+<h3 id="import-with-query-suffixes"><a class="anchor" href="#import-with-query-suffixes">#</a>Import with Query Suffixes</h3>
+<p>A web worker script can be directly imported by appending <code>?worker</code> or <code>?sharedworker</code> to the import request. The default export will be a custom worker constructor:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">MyWorker</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./worker?worker&#x27;</span>
+
+<span class="hljs-keyword">const</span> worker = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MyWorker</span>()</code></pre></div>
+<p>The worker script can also use ESM <code>import</code> statements instead of <code>importScripts()</code>. <strong>Note</strong>: During development this relies on <a href="https://caniuse.com/?search=module%20worker">browser native support</a>, but for the production build it is compiled away.</p>
+<p>By default, the worker script will be emitted as a separate chunk in the production build. If you wish to inline the worker as base64 strings, add the <code>inline</code> query:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">MyWorker</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./worker?worker&amp;inline&#x27;</span></code></pre></div>
+<p>If you wish to retrieve the worker as a URL, add the <code>url</code> query:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;vite/client&#x27;</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">MyWorker</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./worker?worker&amp;url&#x27;</span></code></pre></div>
+<p>See <a href="../config/worker-options.html">Worker Options</a> for details on configuring the bundling of all workers.</p>
+<h2 id="content-security-policy-csp"><a class="anchor" href="#content-security-policy-csp">#</a>Content Security Policy (CSP)</h2>
+<p>To deploy CSP, certain directives or configs must be set due to Vite&#39;s internals.</p>
+<h3 id="nonce-random"><a class="anchor" href="#nonce-random">#</a><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/Sources#nonce-base64-value"><code>&#39;nonce-{RANDOM}&#39;</code></a></h3>
+<p>When <a href="../config/shared-options.html#html-cspnonce"><code>html.cspNonce</code></a> is set, Vite adds a nonce attribute with the specified value to any <code>&lt;script&gt;</code> and <code>&lt;style&gt;</code> tags, as well as <code>&lt;link&gt;</code> tags for stylesheets and module preloading. Additionally, when this option is set, Vite will inject a meta tag (<code>&lt;meta property=&quot;csp-nonce&quot; nonce=&quot;PLACEHOLDER&quot; /&gt;</code>).</p>
+<p>The nonce value of a meta tag with <code>property=&quot;csp-nonce&quot;</code> will be used by Vite whenever necessary during both dev and after build.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Ensure that you replace the placeholder with a unique value for each request. This is important to prevent bypassing a resource&#39;s policy, which can otherwise be easily done.</p>
+</div><h3 id="data"><a class="anchor" href="#data">#</a><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/Sources#scheme-source:~:text=schemes%20(not%20recommended).-,data%3A,-Allows%20data%3A"><code>data:</code></a></h3>
+<p>By default, during build, Vite inlines small assets as data URIs. Allowing <code>data:</code> for related directives (e.g. <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/img-src"><code>img-src</code></a>, <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/font-src"><code>font-src</code></a>), or, disabling it by setting <a href="../config/build-options.html#build-assetsinlinelimit"><code>build.assetsInlineLimit: 0</code></a> is necessary.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Do not allow <code>data:</code> for <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src"><code>script-src</code></a>. It will allow injection of arbitrary scripts.</p>
+</div><h2 id="license"><a class="anchor" href="#license">#</a>License</h2>
+<p>Vite can generate a file of all the dependencies&#39; licenses used in the build with the <a href="../config/build-options.html#build-license"><code>build.license</code></a> option. It can be hosted to display and acknowledge the dependencies used by the app.</p>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">build</span>: {
+    <span class="hljs-attr">license</span>: <span class="hljs-literal">true</span>,
+  },
+})</code></pre></div>
+<p>This will generate a <code>.vite/license.md</code> file with an output that may look like this:</p>
+<div class="code"><pre><code class="hljs lang-md"><span class="hljs-section"># Licenses</span>
+
+The app bundles dependencies which contain the following licenses:
+
+<span class="hljs-section">## dep-1 - 1.2.3 (CC0-1.0)</span>
+
+CC0 1.0 Universal
+
+...
+
+<span class="hljs-section">## dep-2 - 4.5.6 (MIT)</span>
+
+MIT License
+
+...</code></pre></div>
+<p>To serve the file at a different path, you can pass <code>{ fileName: &#39;license.md&#39; }</code> for example, so that it&#39;s served at <code>https://example.com/license.md</code>. See the <a href="../config/build-options.html#build-license"><code>build.license</code></a> docs for more information.</p>
+<h2 id="build-optimizations"><a class="anchor" href="#build-optimizations">#</a>Build Optimizations</h2>
+<blockquote>
+<p>Features listed below are automatically applied (except for the experimental chunk import map feature) as part of the build process and there is no need for explicit configuration unless you want to disable them.</p>
+</blockquote>
+<h3 id="css-code-splitting"><a class="anchor" href="#css-code-splitting">#</a>CSS Code Splitting</h3>
+<p>Vite automatically extracts the CSS used by modules in an async chunk and generates a separate file for it. The CSS file is automatically loaded via a <code>&lt;link&gt;</code> tag when the associated async chunk is loaded, and the async chunk is guaranteed to only be evaluated after the CSS is loaded to avoid <a href="https://en.wikipedia.org/wiki/Flash_of_unstyled_content#:~:text=A%20flash%20of%20unstyled%20content,before%20all%20information%20is%20retrieved.">FOUC</a>.</p>
+<p>If you&#39;d rather have all the CSS extracted into a single file, you can disable CSS code splitting by setting <a href="../config/build-options.html#build-csscodesplit"><code>build.cssCodeSplit</code></a> to <code>false</code>.</p>
+<h3 id="preload-directives-generation"><a class="anchor" href="#preload-directives-generation">#</a>Preload Directives Generation</h3>
+<p>Vite automatically generates <code>&lt;link rel=&quot;modulepreload&quot;&gt;</code> directives for entry chunks and their direct imports in the built HTML.</p>
+<h3 id="async-chunk-loading-optimization"><a class="anchor" href="#async-chunk-loading-optimization">#</a>Async Chunk Loading Optimization</h3>
+<p>In real world applications, Rollup often generates &quot;common&quot; chunks - code that is shared between two or more other chunks. Combined with dynamic imports, it is quite common to have the following scenario:</p>
+<svg-image :svg="graphSvg" /><p>In the non-optimized scenarios, when async chunk <code>A</code> is imported, the browser will have to request and parse <code>A</code> before it can figure out that it also needs the common chunk <code>C</code>. This results in an extra network roundtrip:</p>
+<div class="code"><pre><code class="hljs lang-txt">Entry ---&gt; A ---&gt; C</code></pre></div>
+<p>Vite automatically rewrites code-split dynamic import calls with a preload step so that when <code>A</code> is requested, <code>C</code> is fetched <strong>in parallel</strong>:</p>
+<div class="code"><pre><code class="hljs lang-txt">Entry ---&gt; (A + C)</code></pre></div>
+<p>It is possible for <code>C</code> to have further imports, which will result in even more roundtrips in the un-optimized scenario. Vite&#39;s optimization will trace all the direct imports to completely eliminate the roundtrips regardless of import depth.</p>
+<h3 id="chunk-import-map-optimization"><a class="anchor" href="#chunk-import-map-optimization">#</a>Chunk Import Map Optimization</h3>
+<p>To improve the cache hit rate of chunks, Vite can create an import map for chunks. This prevents the cascading cache invalidation issue, which is a problem with ES Modules.</p>
+<p>For example, consider the following scenario:</p>
+<div class="code"><pre><code class="hljs lang-txt">Entry --&gt; A ---&gt; C</code></pre></div>
+<p>If <code>C</code> is updated, the only chunk that inherently needs to be invalidated is <code>C</code>. However, if <code>A</code> references <code>C</code> via a normal URL in a static import (i.e. the hash of <code>C</code> is included in the URL), the content of <code>A</code> is changed, thus <code>A</code> would also need to be invalidated. The same applies to <code>Entry</code>.</p>
+<p>By utilizing the import maps feature, this issue can be avoided. When this optimization is enabled, Vite will create an import map that maps each chunk&#39;s ID to its URL and uses the chunk ID in the import statements instead of the URL. This way, when a chunk is updated, only the updated chunk needs to be invalidated, while the chunks that reference it will not be invalidated.</p>
+<p>Note that this optimization currently does not apply to CSS and assets. If you update an asset, the chunks that reference it will be invalidated. That said, the invalidation would not cascade and the chunk importing the invalidated chunk would not be invalidated.</p>
+<p>To enable this feature, set <a href="../config/build-options.html#build-chunkimportmap"><code>build.chunkImportMap</code></a> to <code>true</code>.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#npm-dependency-resolving-and-pre-bundling">npm Dependency Resolving and Pre-Bundling</a><a class="toc-2" href="#hot-module-replacement">Hot Module Replacement</a><a class="toc-2" href="#typescript">TypeScript</a><a class="toc-3" href="#transpile-only">Transpile Only</a><a class="toc-3" href="#typescript-compiler-options">TypeScript Compiler Options</a><a class="toc-3" href="#client-types">Client Types</a><a class="toc-2" href="#html">HTML</a><a class="toc-2" href="#frameworks">Frameworks</a><a class="toc-2" href="#jsx">JSX</a><a class="toc-2" href="#css">CSS</a><a class="toc-3" href="#import-inlining-and-rebasing">@import Inlining and Rebasing</a><a class="toc-3" href="#postcss">PostCSS</a><a class="toc-3" href="#css-modules">CSS Modules</a><a class="toc-3" href="#css-pre-processors">CSS Pre-processors</a><a class="toc-3" href="#disabling-css-injection-into-the-page">Disabling CSS injection into the page</a><a class="toc-3" href="#lightning-css">Lightning CSS</a><a class="toc-2" href="#static-assets">Static Assets</a><a class="toc-2" href="#json">JSON</a><a class="toc-2" href="#glob-import">Glob Import</a><a class="toc-3" href="#multiple-patterns">Multiple Patterns</a><a class="toc-3" href="#negative-patterns">Negative Patterns</a><a class="toc-3" href="#glob-import-caveats">Glob Import Caveats</a><a class="toc-2" href="#dynamic-import">Dynamic Import</a><a class="toc-2" href="#webassembly">WebAssembly</a><a class="toc-3" href="#esm-integration">ESM Integration</a><a class="toc-3" href="#manual-initialization">Manual Initialization</a><a class="toc-3" href="#accessing-the-webassembly-module">Accessing the WebAssembly Module</a><a class="toc-2" href="#web-workers">Web Workers</a><a class="toc-3" href="#import-with-constructors">Import with Constructors</a><a class="toc-3" href="#import-with-query-suffixes">Import with Query Suffixes</a><a class="toc-2" href="#content-security-policy-csp">Content Security Policy (CSP)</a><a class="toc-3" href="#nonce-random">'nonce-{RANDOM}'</a><a class="toc-3" href="#data">data:</a><a class="toc-2" href="#license">License</a><a class="toc-2" href="#build-optimizations">Build Optimizations</a><a class="toc-3" href="#css-code-splitting">CSS Code Splitting</a><a class="toc-3" href="#preload-directives-generation">Preload Directives Generation</a><a class="toc-3" href="#async-chunk-loading-optimization">Async Chunk Loading Optimization</a><a class="toc-3" href="#chunk-import-map-optimization">Chunk Import Map Optimization</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

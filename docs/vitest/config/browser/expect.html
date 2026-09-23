@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>browser.expect | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › config/browser/expect  <a class="ext small" href="https://vitest.dev/config/browser/expect">version en ligne</a></div>
+<h1 id="browser-expect"><a class="anchor" href="#browser-expect">#</a>browser.expect</h1>
+<ul>
+<li><strong>Type:</strong> <code>ExpectOptions</code></li>
+</ul>
+<h2 id="browser-expect-tomatchscreenshot"><a class="anchor" href="#browser-expect-tomatchscreenshot">#</a>browser.expect.toMatchScreenshot</h2>
+<p>Default options for the
+<a href="../../api/browser/assertions.html#tomatchscreenshot"><code>toMatchScreenshot</code> assertion</a>.
+These options will be applied to all screenshot assertions.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>Setting global defaults for screenshot assertions helps maintain consistency
+across your test suite and reduces repetition in individual tests. You can still
+override these defaults at the assertion level when needed for specific test cases.</p>
+</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">expect</span>: {
+        <span class="hljs-attr">toMatchScreenshot</span>: {
+          <span class="hljs-attr">comparatorName</span>: <span class="hljs-string">&#x27;pixelmatch&#x27;</span>,
+          <span class="hljs-attr">comparatorOptions</span>: {
+            <span class="hljs-attr">threshold</span>: <span class="hljs-number">0.2</span>,
+            <span class="hljs-attr">allowedMismatchedPixels</span>: <span class="hljs-number">100</span>,
+          },
+          <span class="hljs-attr">resolveScreenshotPath</span>: <span class="hljs-function">(<span class="hljs-params">{ arg, browserName, ext, testFileName }</span>) =&gt;</span>
+            <span class="hljs-string">`custom-screenshots/<span class="hljs-subst">${testFileName}</span>/<span class="hljs-subst">${arg}</span>-<span class="hljs-subst">${browserName}</span><span class="hljs-subst">${ext}</span>`</span>,
+        },
+      },
+    },
+  },
+})</code></pre></div>
+<p><a href="../../api/browser/assertions.html#options">All options available in the <code>toMatchScreenshot</code> assertion</a>
+can be configured here. Additionally, two path resolution functions are
+available: <code>resolveScreenshotPath</code> and <code>resolveDiffPath</code>.</p>
+<h2 id="browser-expect-tomatchscreenshot-screenshotdirectory"><a class="anchor" href="#browser-expect-tomatchscreenshot-screenshotdirectory">#</a>browser.expect.toMatchScreenshot.screenshotDirectory</h2>
+<ul>
+<li><strong>Type:</strong> <code>string | undefined</code></li>
+<li><strong>Default:</strong> <code>__screenshots__</code></li>
+</ul>
+<p>The directory name used for storing reference screenshots.</p>
+<p>This value is passed as <code>screenshotDirectory</code> to <a href="#browser-expect-tomatchscreenshot-resolvescreenshotpath"><code>browser.expect.toMatchScreenshot.resolveScreenshotPath</code></a> and <a href="#browser-expect-tomatchscreenshot-resolvediffpath"><code>browser.expect.toMatchScreenshot.resolveDiffPath</code></a>, and used in the default path resolution of <code>resolveScreenshotPath</code>.</p>
+<h2 id="browser-expect-tomatchscreenshot-resolvescreenshotpath"><a class="anchor" href="#browser-expect-tomatchscreenshot-resolvescreenshotpath">#</a>browser.expect.toMatchScreenshot.resolveScreenshotPath</h2>
+<ul>
+<li><strong>Type:</strong> <code>(data: PathResolveData) =&gt; string</code></li>
+<li><strong>Default output:</strong> <code>path.resolve(root, testFileDirectory, screenshotDirectory, testFileName, `${arg}-${browserName}-${platform}${ext}`)</code></li>
+</ul>
+<p>A function to customize where reference screenshots are stored. The function
+receives an object with the following properties:</p>
+<ul>
+<li><p><code>arg: string</code></p>
+<p>Path <strong>without</strong> extension, sanitized and relative to the test file.</p>
+<p>This comes from the arguments passed to <code>toMatchScreenshot</code>; if called
+without arguments this will be the auto-generated name.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;calls `onClick`&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(locator).<span class="hljs-title function_">toMatchScreenshot</span>()
+  <span class="hljs-comment">// arg = &quot;calls-onclick-1&quot;</span>
+})
+
+<span class="hljs-title function_">expect</span>(locator).<span class="hljs-title function_">toMatchScreenshot</span>(<span class="hljs-string">&#x27;foo/bar/baz.png&#x27;</span>)
+<span class="hljs-comment">// arg = &quot;foo/bar/baz&quot;</span>
+
+<span class="hljs-title function_">expect</span>(locator).<span class="hljs-title function_">toMatchScreenshot</span>(<span class="hljs-string">&#x27;../foo/bar/baz.png&#x27;</span>)
+<span class="hljs-comment">// arg = &quot;foo/bar/baz&quot;</span></code></pre></div>
+</li>
+<li><p><code>ext: string</code></p>
+<p>Screenshot extension, with leading dot.</p>
+<p>This can be set through the arguments passed to <code>toMatchScreenshot</code>, but
+the value will fall back to <code>&#39;.png&#39;</code> if an unsupported extension is used.</p>
+</li>
+<li><p><code>browserName: string</code></p>
+<p>The instance&#39;s browser name.</p>
+</li>
+<li><p><code>platform: NodeJS.Platform</code></p>
+<p>The value of
+<a href="https://nodejs.org/docs/v22.16.0/api/process.html#processplatform"><code>process.platform</code></a>.</p>
+</li>
+<li><p><code>screenshotDirectory: string</code></p>
+<p>The value provided to <a href="#browser-expect-tomatchscreenshot-screenshotdirectory"><code>browser.expect.toMatchScreenshot.screenshotDirectory</code></a>, if none is provided, its default value (<code>__screenshots__</code>).</p>
+</li>
+<li><p><code>root: string</code></p>
+<p>Absolute path to the project&#39;s <a href="../root.html"><code>root</code></a>.</p>
+</li>
+<li><p><code>testFileDirectory: string</code></p>
+<p>Path to the test file, relative to the project&#39;s <a href="../root.html"><code>root</code></a>.</p>
+</li>
+<li><p><code>testFileName: string</code></p>
+<p>The test&#39;s filename.</p>
+</li>
+<li><p><code>testName: string</code></p>
+<p>The <a href="../../api/test.html"><code>test</code></a>&#39;s name, including parent
+<a href="../../api/describe.html"><code>describe</code></a>, sanitized.</p>
+</li>
+<li><p><code>attachmentsDir: string</code></p>
+<p>The value provided to <a href="../attachmentsdir.html"><code>attachmentsDir</code></a>, if none is
+provided, its default value.</p>
+</li>
+<li><p><code>project: TestProject</code> <Version type="experimental">4.1.6</Version> <Experimental /></p>
+<p>The <a href="../../api/advanced/test-project.html"><code>TestProject</code></a> the test belongs to.</p>
+</li>
+</ul>
+<p>For example, to group screenshots by browser:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-attr">resolveScreenshotPath</span>: <span class="hljs-function">(<span class="hljs-params">{ arg, browserName, ext, root, testFileName }</span>) =&gt;</span>
+  <span class="hljs-string">`<span class="hljs-subst">${root}</span>/screenshots/<span class="hljs-subst">${browserName}</span>/<span class="hljs-subst">${testFileName}</span>/<span class="hljs-subst">${arg}</span><span class="hljs-subst">${ext}</span>`</span></code></pre></div>
+<h2 id="browser-expect-tomatchscreenshot-resolvediffpath"><a class="anchor" href="#browser-expect-tomatchscreenshot-resolvediffpath">#</a>browser.expect.toMatchScreenshot.resolveDiffPath</h2>
+<ul>
+<li><strong>Type:</strong> <code>(data: PathResolveData) =&gt; string</code></li>
+<li><strong>Default output:</strong> <code>path.resolve(root, attachmentsDir, testFileDirectory, testFileName, `${arg}-${browserName}-${platform}${ext}`)</code></li>
+</ul>
+<p>A function to customize where diff images are stored when screenshot comparisons
+fail. Receives the same data object as
+<a href="#browser-expect-tomatchscreenshot-resolvescreenshotpath"><code>resolveScreenshotPath</code></a>.</p>
+<p>For example, to store diffs in a subdirectory of attachments:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-attr">resolveDiffPath</span>: <span class="hljs-function">(<span class="hljs-params">{ arg, attachmentsDir, browserName, ext, root, testFileName }</span>) =&gt;</span>
+  <span class="hljs-string">`<span class="hljs-subst">${root}</span>/<span class="hljs-subst">${attachmentsDir}</span>/screenshot-diffs/<span class="hljs-subst">${testFileName}</span>/<span class="hljs-subst">${arg}</span>-<span class="hljs-subst">${browserName}</span><span class="hljs-subst">${ext}</span>`</span></code></pre></div>
+<h2 id="browser-expect-tomatchscreenshot-comparators"><a class="anchor" href="#browser-expect-tomatchscreenshot-comparators">#</a>browser.expect.toMatchScreenshot.comparators</h2>
+<ul>
+<li><strong>Type:</strong> <code>Record&lt;string, Comparator&gt;</code></li>
+</ul>
+<p>Register custom screenshot comparison algorithms, like <a href="https://en.wikipedia.org/wiki/Structural_similarity_index_measure">SSIM</a> or other perceptual similarity metrics.</p>
+<p>To create a custom comparator, you need to register it in your config. If using TypeScript, declare its options in the <code>ScreenshotComparatorRegistry</code> interface.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-comment">// 1. Declare the comparator&#x27;s options type</span>
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">module</span> <span class="hljs-string">&#x27;vitest/browser&#x27;</span> {
+  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ScreenshotComparatorRegistry</span> {
+    <span class="hljs-attr">myCustomComparator</span>: {
+      <span class="hljs-attr">sensitivity</span>?: <span class="hljs-built_in">number</span>
+      <span class="hljs-attr">ignoreColors</span>?: <span class="hljs-built_in">boolean</span>
+    }
+  }
+}
+
+<span class="hljs-comment">// 2. Implement the comparator</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">browser</span>: {
+      <span class="hljs-attr">expect</span>: {
+        <span class="hljs-attr">toMatchScreenshot</span>: {
+          <span class="hljs-attr">comparators</span>: {
+            <span class="hljs-attr">myCustomComparator</span>: <span class="hljs-title function_">async</span> (
+              reference,
+              actual,
+              {
+                createDiff, <span class="hljs-comment">// always provided by Vitest</span>
+                sensitivity = <span class="hljs-number">0.01</span>,
+                ignoreColors = <span class="hljs-literal">false</span>,
+              }
+            ) =&gt; {
+              <span class="hljs-comment">// ...algorithm implementation</span>
+              <span class="hljs-keyword">return</span> { pass, diff, message }
+            },
+          },
+        },
+      },
+    },
+  },
+})</code></pre></div>
+<p>Then use it in your tests:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(locator).<span class="hljs-title function_">toMatchScreenshot</span>({
+  <span class="hljs-attr">comparatorName</span>: <span class="hljs-string">&#x27;myCustomComparator&#x27;</span>,
+  <span class="hljs-attr">comparatorOptions</span>: {
+    <span class="hljs-attr">sensitivity</span>: <span class="hljs-number">0.08</span>,
+    <span class="hljs-attr">ignoreColors</span>: <span class="hljs-literal">true</span>,
+  },
+})</code></pre></div>
+<p><strong>Comparator Function Signature:</strong></p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">type</span> <span class="hljs-title class_">Comparator</span>&lt;<span class="hljs-title class_">Options</span>&gt; = <span class="hljs-function">(<span class="hljs-params">
+  <span class="hljs-attr">reference</span>: {
+    metadata: { height: <span class="hljs-built_in">number</span>; width: <span class="hljs-built_in">number</span> }
+    data: TypedArray
+  },
+  <span class="hljs-attr">actual</span>: {
+    metadata: { height: <span class="hljs-built_in">number</span>; width: <span class="hljs-built_in">number</span> }
+    data: TypedArray
+  },
+  <span class="hljs-attr">options</span>: {
+    createDiff: <span class="hljs-built_in">boolean</span>
+  } &amp; <span class="hljs-title class_">Options</span>
+</span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;{
+  <span class="hljs-attr">pass</span>: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-attr">diff</span>: <span class="hljs-title class_">TypedArray</span> | <span class="hljs-literal">null</span>
+  <span class="hljs-attr">message</span>: <span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span>
+}&gt; | {
+  <span class="hljs-attr">pass</span>: <span class="hljs-built_in">boolean</span>
+  <span class="hljs-attr">diff</span>: <span class="hljs-title class_">TypedArray</span> | <span class="hljs-literal">null</span>
+  <span class="hljs-attr">message</span>: <span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span>
+}</code></pre></div>
+<p>The <code>reference</code> and <code>actual</code> images are decoded using the appropriate codec (currently only PNG). The <code>data</code> property is a flat <code>TypedArray</code> (<code>Buffer</code>, <code>Uint8Array</code>, or <code>Uint8ClampedArray</code>) containing pixel data in RGBA format:</p>
+<ul>
+<li><strong>4 bytes per pixel</strong>: red, green, blue, alpha (from <code>0</code> to <code>255</code> each)</li>
+<li><strong>Row-major order</strong>: pixels are stored left-to-right, top-to-bottom</li>
+<li><strong>Total length</strong>: <code>width × height × 4</code> bytes</li>
+<li><strong>Alpha channel</strong>: always present. Images without transparency have alpha values set to <code>255</code> (fully opaque)</li>
+</ul>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Performance Considerations</div><p>The <code>createDiff</code> option indicates whether a diff image is needed. During <a href="../../guide/browser/visual-regression-testing.html#how-visual-tests-work">stable screenshot detection</a>, Vitest calls comparators with <code>createDiff: false</code> to avoid unnecessary work.</p>
+<p><strong>Respect this flag to keep your tests fast</strong>.</p>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention : Handle Missing Options</div><p>The <code>options</code> parameter in <code>toMatchScreenshot()</code> is optional, so users might not provide all your comparator options. Always make them optional with default values:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-attr">myCustomComparator</span>: <span class="hljs-function">(<span class="hljs-params">
+  reference,
+  actual,
+  { createDiff, threshold = <span class="hljs-number">0.1</span>, maxDiff = <span class="hljs-number">100</span> },
+</span>) =&gt;</span> {
+  <span class="hljs-comment">// ...comparison logic</span>
+}</code></pre></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#browser-expect-tomatchscreenshot">browser.expect.toMatchScreenshot</a><a class="toc-2" href="#browser-expect-tomatchscreenshot-screenshotdirectory">browser.expect.toMatchScreenshot.screenshotDirectory</a><a class="toc-2" href="#browser-expect-tomatchscreenshot-resolvescreenshotpath">browser.expect.toMatchScreenshot.resolveScreenshotPath</a><a class="toc-2" href="#browser-expect-tomatchscreenshot-resolvediffpath">browser.expect.toMatchScreenshot.resolveDiffPath</a><a class="toc-2" href="#browser-expect-tomatchscreenshot-comparators">browser.expect.toMatchScreenshot.comparators</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

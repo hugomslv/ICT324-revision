@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fakeTimers | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/faketimers  <a class="ext small" href="https://vitest.dev/config/faketimers">version en ligne</a></div>
+<h1 id="faketimers"><a class="anchor" href="#faketimers">#</a>fakeTimers</h1>
+<ul>
+<li><strong>Type:</strong> <code>FakeTimerConfig</code></li>
+</ul>
+<p>Options that Vitest will pass down to <a href="https://npmx.dev/package/@sinonjs/fake-timers"><code>@sinon/fake-timers</code></a> when using <a href="../api/vi.html#vi-usefaketimers"><code>vi.useFakeTimers()</code></a>.</p>
+<h2 id="faketimers-now"><a class="anchor" href="#faketimers-now">#</a>fakeTimers.now</h2>
+<ul>
+<li><strong>Type:</strong> <code>number | Date</code></li>
+<li><strong>Default:</strong> <code>Date.now()</code></li>
+</ul>
+<p>Installs fake timers with the specified Unix epoch.</p>
+<h2 id="faketimers-tofake"><a class="anchor" href="#faketimers-tofake">#</a>fakeTimers.toFake</h2>
+<ul>
+<li><strong>Type:</strong> <code>(&#39;setTimeout&#39; | &#39;clearTimeout&#39; | &#39;setImmediate&#39; | &#39;clearImmediate&#39; | &#39;setInterval&#39; | &#39;clearInterval&#39; | &#39;Date&#39; | &#39;nextTick&#39; | &#39;hrtime&#39; | &#39;requestAnimationFrame&#39; | &#39;cancelAnimationFrame&#39; | &#39;requestIdleCallback&#39; | &#39;cancelIdleCallback&#39; | &#39;performance&#39; | &#39;queueMicrotask&#39; | &#39;Intl&#39; | &#39;Temporal&#39;)[]</code></li>
+<li><strong>Default:</strong> everything available globally except <code>nextTick</code> and <code>queueMicrotask</code></li>
+</ul>
+<p>An array with names of global methods and APIs to fake. For example, to only mock <code>setTimeout()</code> and <code>nextTick()</code>, specify this property as <code>[&#39;setTimeout&#39;, &#39;nextTick&#39;]</code>.</p>
+<p><code>Temporal</code> is only faked when it is available on the global object: natively (Node.js &gt;= 26 by default, behind <code>--harmony-temporal</code> on older versions, and supporting browsers) or through a globally installed polyfill such as <code>import &#39;temporal-polyfill/global&#39;</code>.</p>
+<p>Mocking <code>nextTick</code> is not supported when running Vitest inside <code>node:child_process</code> by using <code>--pool=forks</code>. NodeJS uses <code>process.nextTick</code> internally in <code>node:child_process</code> and hangs when it is mocked. Mocking <code>nextTick</code> is supported when running Vitest with <code>--pool=threads</code>.</p>
+<h2 id="faketimers-tonotfake"><a class="anchor" href="#faketimers-tonotfake">#</a>fakeTimers.toNotFake</h2>
+<ul>
+<li><strong>Type:</strong> <code>(&#39;setTimeout&#39; | &#39;clearTimeout&#39; | &#39;setImmediate&#39; | &#39;clearImmediate&#39; | &#39;setInterval&#39; | &#39;clearInterval&#39; | &#39;Date&#39; | &#39;nextTick&#39; | &#39;hrtime&#39; | &#39;requestAnimationFrame&#39; | &#39;cancelAnimationFrame&#39; | &#39;requestIdleCallback&#39; | &#39;cancelIdleCallback&#39; | &#39;performance&#39; | &#39;queueMicrotask&#39; | &#39;Intl&#39; | &#39;Temporal&#39;)[]</code></li>
+<li><strong>Default:</strong> <code>[]</code></li>
+</ul>
+<p>An array of global methods and APIs to exclude from fake timers. Vitest always excludes <code>nextTick</code> and <code>queueMicrotask</code> when this option is used. To fake either API, use <code>toFake</code> instead.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Using both <code>toFake</code> and <code>toNotFake</code> together is not supported.</p>
+</div><h2 id="faketimers-looplimit"><a class="anchor" href="#faketimers-looplimit">#</a>fakeTimers.loopLimit</h2>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Default:</strong> <code>10_000</code></li>
+</ul>
+<p>The maximum number of timers that will be run when calling <a href="../api/vi.html#vi-runalltimers"><code>vi.runAllTimers()</code></a>.</p>
+<h2 id="faketimers-shouldadvancetime"><a class="anchor" href="#faketimers-shouldadvancetime">#</a>fakeTimers.shouldAdvanceTime</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>false</code></li>
+</ul>
+<p>Tells @sinonjs/fake-timers to increment mocked time automatically based on the real system time shift (e.g. the mocked time will be incremented by 20ms for every 20ms change in the real system time).</p>
+<h2 id="faketimers-advancetimedelta"><a class="anchor" href="#faketimers-advancetimedelta">#</a>fakeTimers.advanceTimeDelta</h2>
+<ul>
+<li><strong>Type:</strong> <code>number</code></li>
+<li><strong>Default:</strong> <code>20</code></li>
+</ul>
+<p>Relevant only when using with <code>shouldAdvanceTime: true</code>. increment mocked time by advanceTimeDelta ms every advanceTimeDelta ms change in the real system time.</p>
+<h2 id="faketimers-shouldclearnativetimers"><a class="anchor" href="#faketimers-shouldclearnativetimers">#</a>fakeTimers.shouldClearNativeTimers</h2>
+<ul>
+<li><strong>Type:</strong> <code>boolean</code></li>
+<li><strong>Default:</strong> <code>true</code></li>
+</ul>
+<p>Tells fake timers to clear &quot;native&quot; (i.e. not fake) timers by delegating to their respective handlers. When disabled, it can lead to potentially unexpected behavior if timers existed prior to starting fake timers session.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#faketimers-now">fakeTimers.now</a><a class="toc-2" href="#faketimers-tofake">fakeTimers.toFake</a><a class="toc-2" href="#faketimers-tonotfake">fakeTimers.toNotFake</a><a class="toc-2" href="#faketimers-looplimit">fakeTimers.loopLimit</a><a class="toc-2" href="#faketimers-shouldadvancetime">fakeTimers.shouldAdvanceTime</a><a class="toc-2" href="#faketimers-advancetimedelta">fakeTimers.advanceTimeDelta</a><a class="toc-2" href="#faketimers-shouldclearnativetimers">fakeTimers.shouldClearNativeTimers</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

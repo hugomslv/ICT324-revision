@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profiling Test Performance (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/profiling-test-performance  <a class="ext small" href="https://vitest.dev/guide/profiling-test-performance">version en ligne</a></div>
+<h1 id="profiling-test-performance"><a class="anchor" href="#profiling-test-performance">#</a>Profiling Test Performance</h1>
+<p>When you run Vitest it reports multiple time metrics of your tests:</p>
+<blockquote>
+<div class="code"><pre><code class="hljs lang-bash">RUN  v2.1.1 /x/vitest/examples/profiling
+
+✓ <span class="hljs-built_in">test</span>/prime-number.test.ts (1) 4517ms
+  ✓ generate prime number 4517ms
+
+Test Files  1 passed (1)
+     Tests  1 passed (1)
+  Start at  09:32:53
+  Duration  4.80s (transform 44ms, setup 0ms, import 35ms, tests 4.52s, environment 0ms)
+  <span class="hljs-comment"># Time metrics ^^</span></code></pre></div>
+</blockquote>
+<ul>
+<li>Transform: How much time was spent transforming the files. See <a href="#file-transform">File Transform</a>.</li>
+<li>Setup: Time spent for running the <a href="../config/setupfiles.html"><code>setupFiles</code></a> files.</li>
+<li>Import: Time it took to import your test files and their dependencies. This also includes the time spent collecting all tests. Note that this doesn&#39;t include dynamic imports inside of tests.</li>
+<li>Tests: Time spent for actually running the test cases.</li>
+<li>Environment: Time spent for setting up the test <a href="../config/environment.html"><code>environment</code></a>, for example JSDOM.</li>
+</ul>
+<h2 id="test-runner"><a class="anchor" href="#test-runner">#</a>Test Runner</h2>
+<p>In cases where your test execution time is high, you can generate a profile of the test runner. See NodeJS documentation for following options:</p>
+<ul>
+<li><a href="https://nodejs.org/api/cli.html#--cpu-prof"><code>--cpu-prof</code></a></li>
+<li><a href="https://nodejs.org/api/cli.html#--heap-prof"><code>--heap-prof</code></a></li>
+<li><a href="https://nodejs.org/api/cli.html#--prof"><code>--prof</code></a></li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>The <code>--prof</code> option does not work with <code>pool: &#39;threads&#39;</code> due to <code>node:worker_threads</code> limitations.</p>
+</div><p>To pass these options to Vitest&#39;s test runner, define <code>execArgv</code> in your Vitest configuration:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">fileParallelism</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">execArgv</span>: [
+      <span class="hljs-string">&#x27;--cpu-prof&#x27;</span>,
+      <span class="hljs-string">&#x27;--cpu-prof-dir=test-runner-profile&#x27;</span>,
+      <span class="hljs-string">&#x27;--heap-prof&#x27;</span>,
+      <span class="hljs-string">&#x27;--heap-prof-dir=test-runner-profile&#x27;</span>
+    ],
+  },
+})</code></pre></div>
+<p>After the tests have run there should be a <code>test-runner-profile/*.cpuprofile</code> and <code>test-runner-profile/*.heapprofile</code> files generated. See <a href="#inspecting-profiling-records">Inspecting profiling records</a> for instructions how to analyze these files.</p>
+<p>See <a href="https://github.com/vitest-dev/vitest/tree/main/examples/profiling">Profiling | Examples</a> for example.</p>
+<h2 id="main-thread"><a class="anchor" href="#main-thread">#</a>Main Thread</h2>
+<p>Profiling main thread is useful for debugging Vitest&#39;s Vite usage and <a href="../config/globalsetup.html"><code>globalSetup</code></a> files.
+This is also where your Vite plugins are running.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>See <a href="https://vitejs.dev/guide/performance.html">Performance | Vite</a> for more tips about Vite specific profiling.</p>
+<p>We recommend <a href="https://github.com/antfu-collective/vite-plugin-inspect"><code>vite-plugin-inspect</code></a> for profiling your Vite plugin performance.</p>
+</div><p>To do this you&#39;ll need to pass arguments to the Node process that runs Vitest.</p>
+<div class="code"><pre><code class="hljs lang-bash">$ node --cpu-prof --cpu-prof-dir=main-profile ./node_modules/vitest/vitest.mjs --run
+<span class="hljs-comment">#      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                  ^^^^^</span>
+<span class="hljs-comment">#               NodeJS arguments                                           Vitest arguments</span></code></pre></div>
+<p>After the tests have run there should be a <code>main-profile/*.cpuprofile</code> file generated. See <a href="#inspecting-profiling-records">Inspecting profiling records</a> for instructions how to analyze these files.</p>
+<h2 id="file-transform"><a class="anchor" href="#file-transform">#</a>File Transform</h2>
+<p>This profiling strategy is a good way to identify unnecessary transforms caused by <a href="https://vitejs.dev/guide/performance.html#avoid-barrel-files">barrel files</a>.
+If these logs contain files that should not be loaded when your test is run, you might have barrel files that are importing files unnecessarily.</p>
+<p>You can also use <a href="ui.html">Vitest UI</a> to debug slowness caused by barrel file.
+The example below shows how importing files without barrel file reduces amount of transformed files by ~85%.</p>
+<div class="code-group"><div class="code"><div class="code-title">File tree</div><pre><code class="hljs lang-txt">├── src
+│   └── utils
+│       ├── currency.ts
+│       ├── formatters.ts  &lt;-- File to test
+│       ├── index.ts
+│       ├── location.ts
+│       ├── math.ts
+│       ├── time.ts
+│       └── users.ts
+├── test
+│   └── formatters.test.ts
+└── vitest.config.ts</code></pre></div>
+<div class="code"><div class="code-title">example.test.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { formatter } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;../src/utils&#x27;</span>
+<span class="hljs-keyword">import</span> { formatter } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;../src/utils/formatters&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;formatter works&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(formatter).<span class="hljs-property">not</span>.<span class="hljs-title function_">toThrow</span>()
+})</code></pre></div>
+</div><span class="img-missing">[image : Vitest UI demonstrating barrel file issues]</span><p>To see how files are transformed, you can open the &quot;Module Info&quot; view in the UI:</p>
+<span class="img-missing">[image]</span>
+<span class="img-missing">[image]</span><h2 id="file-import"><a class="anchor" href="#file-import">#</a>File Import</h2>
+<p>Some modules just take a long time to load. To identify which modules are the slowest, enable <a href="../config/experimental.html#experimental-importdurations"><code>experimental.importDurations</code></a> in your configuration:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">experimental</span>: {
+      <span class="hljs-attr">importDurations</span>: {
+        <span class="hljs-attr">print</span>: <span class="hljs-literal">true</span>,
+      },
+    },
+  },
+})</code></pre></div>
+<p>This will print a breakdown of the slowest imports after your tests finish:</p>
+<div class="code"><pre><code class="hljs lang-bash">Import Duration Breakdown (Top 10)
+
+Module                      Self     Total
+my-test.test.ts              5ms    620ms [████████████████████]
+date-fns/index.js          500ms    500ms [████████████████░░░░] <span class="hljs-comment"># [!code error]</span>
+src/utils/helpers.ts        10ms    120ms [████████░░░░░░░░░░░░]</code></pre></div>
+<p>You can also use <code>--experimental.importDurations.print</code> from the CLI without changing your configuration:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest --experimental.importDurations.<span class="hljs-built_in">print</span></code></pre></div>
+<p>Once you&#39;ve identified the slow modules, there are several strategies to speed up imports:</p>
+<h3 id="use-specific-entry-points"><a class="anchor" href="#use-specific-entry-points">#</a>Use Specific Entry Points</h3>
+<p>Many libraries ship multiple entry points. Importing the main entry point (which is often a <a href="https://vitejs.dev/guide/performance.html#avoid-barrel-files">barrel file</a>) can pull in far more code than you need.</p>
+<p>For example, <code>date-fns</code> re-exports hundreds of functions from its main entry point. Instead of importing from the top-level module, import directly from the specific function:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { format } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;date-fns&#x27;</span>
+<span class="hljs-keyword">import</span> { format } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;date-fns/format&#x27;</span></code></pre></div>
+<h3 id="use-resolve-alias-to-redirect-imports"><a class="anchor" href="#use-resolve-alias-to-redirect-imports">#</a>Use <code>resolve.alias</code> to Redirect Imports</h3>
+<p>If a dependency doesn&#39;t provide granular entry points, or if third-party code imports the heavy entry point, you can use <a href="https://vite.dev/config/shared-options#resolve-alias"><code>resolve.alias</code></a> to redirect imports to a lighter alternative:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">resolve</span>: {
+    <span class="hljs-attr">alias</span>: [
+      {
+        <span class="hljs-attr">find</span>: <span class="hljs-regexp">/^date-fns$/</span>,
+        <span class="hljs-attr">replacement</span>: <span class="hljs-title function_">join</span>(<span class="hljs-title function_">dirname</span>(<span class="hljs-built_in">require</span>.<span class="hljs-title function_">resolve</span>(<span class="hljs-string">&#x27;date-fns/package.json&#x27;</span>)), <span class="hljs-string">&#x27;index.cjs&#x27;</span>),
+      },
+    ]
+  },
+})</code></pre></div>
+<h3 id="use-the-dependency-optimizer"><a class="anchor" href="#use-the-dependency-optimizer">#</a>Use the Dependency Optimizer</h3>
+<p>Vitest can bundle external libraries into a single file using <a href="../config/deps.html#deps-optimizer"><code>deps.optimizer</code></a>, which reduces the overhead of importing packages with many internal modules:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">deps</span>: {
+      <span class="hljs-attr">optimizer</span>: {
+        <span class="hljs-attr">ssr</span>: {
+          <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+          <span class="hljs-attr">include</span>: [<span class="hljs-string">&#x27;date-fns&#x27;</span>],
+        },
+      },
+    },
+  },
+})</code></pre></div>
+<p>This is especially effective for UI libraries and packages with deep import trees. Use <code>optimizer.ssr</code> for <code>node</code>/<code>edge</code> environments and <code>optimizer.client</code> for <code>jsdom</code>/<code>happy-dom</code> environments.</p>
+<h2 id="code-coverage"><a class="anchor" href="#code-coverage">#</a>Code Coverage</h2>
+<p>If code coverage generation is slow on your project you can use <code>DEBUG=vitest:coverage</code> environment variable to enable performance logging.</p>
+<div class="code"><pre><code class="hljs lang-bash">$ DEBUG=vitest:coverage vitest --run --coverage
+
+ RUN  v3.1.1 /x/vitest-example
+
+  vitest:coverage Reading coverage results 2/2
+  vitest:coverage Converting 1/2
+  vitest:coverage 4 ms /x/src/multiply.ts
+  vitest:coverage Converting 2/2
+  vitest:coverage 552 ms /x/src/add.ts
+  vitest:coverage Uncovered files 1/2
+  vitest:coverage File <span class="hljs-string">&quot;/x/src/large-file.ts&quot;</span> is taking longer than 3s <span class="hljs-comment"># [!code error]</span>
+  vitest:coverage 3027 ms /x/src/large-file.ts
+  vitest:coverage Uncovered files 2/2
+  vitest:coverage 4 ms /x/src/untested-file.ts
+  vitest:coverage Generate coverage total <span class="hljs-keyword">time</span> 3521 ms</code></pre></div>
+<p>This profiling approach is great for detecting large files that are accidentally picked by coverage providers.
+For example if your configuration is accidentally including large built minified Javascript files in code coverage, they should appear in logs.
+In these cases you might want to adjust your <a href="../config/coverage.html#coverage-include"><code>coverage.include</code></a> and <a href="../config/coverage.html#coverage-exclude"><code>coverage.exclude</code></a> options.</p>
+<h2 id="inspecting-profiling-records"><a class="anchor" href="#inspecting-profiling-records">#</a>Inspecting Profiling Records</h2>
+<p>You can inspect the contents of <code>*.cpuprofile</code> and <code>*.heapprofile</code> with various tools. See list below for examples.</p>
+<ul>
+<li><a href="https://www.speedscope.app/">Speedscope</a></li>
+<li><a href="https://code.visualstudio.com/docs/nodejs/profiling#_analyzing-a-profile">Performance Profiling JavaScript in Visual Studio Code</a></li>
+<li><a href="https://developer.chrome.com/docs/devtools/performance/nodejs#analyze">Profile Node.js performance with the Performance panel | developer.chrome.com</a></li>
+<li><a href="https://developer.chrome.com/docs/devtools/memory-problems/heap-snapshots#view_snapshots">Memory panel overview | developer.chrome.com</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#test-runner">Test Runner</a><a class="toc-2" href="#main-thread">Main Thread</a><a class="toc-2" href="#file-transform">File Transform</a><a class="toc-2" href="#file-import">File Import</a><a class="toc-3" href="#use-specific-entry-points">Use Specific Entry Points</a><a class="toc-3" href="#use-resolve-alias-to-redirect-imports">Use resolve.alias to Redirect Imports</a><a class="toc-3" href="#use-the-dependency-optimizer">Use the Dependency Optimizer</a><a class="toc-2" href="#code-coverage">Code Coverage</a><a class="toc-2" href="#inspecting-profiling-records">Inspecting Profiling Records</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

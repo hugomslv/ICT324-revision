@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>@memberof (JSDoc) · ICT-324 Révision</title>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/hljs.css">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../index.html">Accueil</a><a class="nav-link" href="../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../docs/index.html">Index des docs</a><a class="nav-link" href="../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../docs/vite/index.html">Vite</a><a class="nav-link active" href="../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="index.html">JSDoc</a> › tags-memberof <span class="badge">This symbol belongs to a parent symbol.</span> <a class="ext small" href="https://jsdoc.app/tags-memberof.html">version en ligne</a></div>
+<h1>@memberof</h1><h2 id="syntax"><a class="anchor" href="#syntax">#</a>Syntax</h2>
+<ul>
+<li><code>@memberof &lt;parentNamepath&gt;</code></li>
+<li><code>@memberof! &lt;parentNamepath&gt;</code></li>
+</ul>
+<h2 id="overview"><a class="anchor" href="#overview">#</a>Overview</h2>
+<p>The @memberof tag identifies a member symbol that belongs to a parent symbol.</p>
+<p>By default, the @memberof tag documents member symbols as static members. For inner and instance
+members, you can use scoping punctuation after the namepath, or you can add the <a href="tags-inner.html">@inner</a>
+or <a href="tags-instance.html">@instance</a> tag.</p>
+<p>The &quot;forced&quot; @memberof tag, @memberof!, forces the object to be documented as belonging to a specific
+parent even if it appears to have a different parent.</p>
+<h2 id="examples"><a class="anchor" href="#examples">#</a>Examples</h2>
+<p>In the following example, the <code>hammer</code> function would normally be documented as a global function.
+That&#39;s because, in fact, it is a global function, but it is also a member of the <code>Tools</code> namespace,
+and that&#39;s how you wish to document it. The solution is to add a @memberof tag:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Using @memberof</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/** <span class="hljs-doctag">@namespace</span> */</span>
+<span class="hljs-keyword">var</span> <span class="hljs-title class_">Tools</span> = {};
+
+<span class="hljs-comment">/** <span class="hljs-doctag">@memberof</span> Tools */</span>
+<span class="hljs-keyword">var</span> hammer = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+};
+
+<span class="hljs-title class_">Tools</span>.<span class="hljs-property">hammer</span> = hammer;</code></pre></div>
+</div><p>For instance members of a class, use the syntax &quot;@memberof ClassName.prototype&quot; or &quot;@memberof
+ClassName#&quot;. Alternatively, you can combine &quot;@memberof ClassName&quot; with the &quot;@instance&quot; tag.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Using @memberof with a class prototype</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/** <span class="hljs-doctag">@class</span> Observable */</span>
+<span class="hljs-title function_">create</span>(
+    <span class="hljs-string">&#x27;Observable&#x27;</span>,
+    {
+        <span class="hljs-comment">/**
+         * This will be a static member, Observable.cache.
+         * <span class="hljs-doctag">@memberof</span> <span class="hljs-variable">Observable</span>
+         */</span>
+        <span class="hljs-attr">cache</span>: [],
+
+        <span class="hljs-comment">/**
+         * This will be an instance member, Observable#publish.
+         * <span class="hljs-doctag">@memberof</span> Observable.prototype
+         */</span>
+        <span class="hljs-attr">publish</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">msg</span>) {},
+
+        <span class="hljs-comment">/**
+         * This will also be an instance member, Observable#save.
+         * <span class="hljs-doctag">@memberof</span> Observable#
+         */</span>
+        <span class="hljs-attr">save</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {},
+
+        <span class="hljs-comment">/**
+         * This will also be an instance member, Observable#end.
+         * <span class="hljs-doctag">@memberof</span> <span class="hljs-variable">Observable</span>
+         * <span class="hljs-doctag">@instance</span>
+         */</span>
+        <span class="hljs-attr">end</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}
+    }
+);</code></pre></div>
+</div><p>The following example uses the forced @memberof tag, &quot;@memberof!&quot;, to document a property of an
+object (Data#point) that is an instance member of a class (Data).</p>
+<p>When you use the @property tag to document a property, you cannot link to the property using its
+longname. We can force the property to be linkable by using &quot;@alias&quot; and &quot;@memberof!&quot; to tell JSDoc
+that Data#point.y should be documented as a member &quot;point.y&quot; of &quot;Data#&quot;, rather than a member &quot;y&quot; of
+&quot;point&quot; of &quot;Data#&quot;.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Using @memberof! for object properties</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/** <span class="hljs-doctag">@class</span> */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Data</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@type</span> {<span class="hljs-type">object</span>}
+     * <span class="hljs-doctag">@property</span> {<span class="hljs-type">number</span>} y This will show up as a property of `Data#point`,
+     * but you cannot link to the property as {<span class="hljs-doctag">@link</span> Data#point.y}.
+     */</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">point</span> = {
+        <span class="hljs-comment">/**
+         * The <span class="hljs-doctag">@alias</span> and <span class="hljs-doctag">@memberof</span>! tags force JSDoc to document the
+         * property as `point.x` (rather than `x`) and to be a member of
+         * `Data#`. You can link to the property as {<span class="hljs-doctag">@link</span> Data#point.x}.
+         * <span class="hljs-doctag">@alias</span> point.x
+         * <span class="hljs-doctag">@memberof</span>! Data#
+         */</span>
+        <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">y</span>: <span class="hljs-number">1</span>
+    };
+}</code></pre></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#syntax">Syntax</a><a class="toc-2" href="#overview">Overview</a><a class="toc-2" href="#examples">Examples</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

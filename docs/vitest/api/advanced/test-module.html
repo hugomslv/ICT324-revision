@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TestModule (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › api/advanced/test-module  <a class="ext small" href="https://vitest.dev/api/advanced/test-module">version en ligne</a></div>
+<h1 id="testmodule"><a class="anchor" href="#testmodule">#</a>TestModule</h1>
+<p>The <code>TestModule</code> class represents a single module in a single project. This class is only available in the main thread. Refer to the <a href="runner.html#tasks">&quot;Runner API&quot;</a> if you are working with runtime tasks.</p>
+<p>The <code>TestModule</code> instance always has a <code>type</code> property with the value of <code>module</code>. You can use it to distinguish between different task types:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">if</span> (task.<span class="hljs-property">type</span> === <span class="hljs-string">&#x27;module&#x27;</span>) {
+  task <span class="hljs-comment">// TestModule</span>
+}</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Extending Suite Methods</div><p>The <code>TestModule</code> class inherits all methods and properties from the <a href="test-suite.html"><code>TestSuite</code></a>. This guide will only list methods and properties unique to the <code>TestModule</code>.</p>
+</div><h2 id="moduleid"><a class="anchor" href="#moduleid">#</a>moduleId</h2>
+<p>This is usually an absolute unix file path (even on Windows). It can be a virtual id if the file is not on the disk. This value corresponds to Vite&#39;s <code>ModuleGraph</code> id.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-string">&#x27;C:/Users/Documents/project/example.test.ts&#x27;</span> <span class="hljs-comment">// ✅</span>
+<span class="hljs-string">&#x27;/Users/mac/project/example.test.ts&#x27;</span> <span class="hljs-comment">// ✅</span>
+<span class="hljs-string">&#x27;C:\\Users\\Documents\\project\\example.test.ts&#x27;</span> <span class="hljs-comment">// ❌</span></code></pre></div>
+<h2 id="relativemoduleid"><a class="anchor" href="#relativemoduleid">#</a>relativeModuleId</h2>
+<p>Module id relative to the project. This is the same as <code>task.name</code> in the deprecated API.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-string">&#x27;project/example.test.ts&#x27;</span> <span class="hljs-comment">// ✅</span>
+<span class="hljs-string">&#x27;example.test.ts&#x27;</span> <span class="hljs-comment">// ✅</span>
+<span class="hljs-string">&#x27;project\\example.test.ts&#x27;</span> <span class="hljs-comment">// ❌</span></code></pre></div>
+<h2 id="viteenvironment"><a class="anchor" href="#viteenvironment">#</a>viteEnvironment <Version>4.1.0</Version></h2>
+<p>This is a Vite&#39;s <a href="https://vite.dev/guide/api-environment"><code>DevEnvironment</code></a> that transforms all files inside of the test module.</p>
+<details class="box"><summary>History</summary><ul>
+<li><code>v4.0.15</code>: added as experimental</li>
+</ul>
+</details><h2 id="state"><a class="anchor" href="#state">#</a>state</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">state</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">TestModuleState</span></code></pre></div>
+<p>Works the same way as <a href="test-suite.html#state"><code>testSuite.state()</code></a>, but can also return <code>queued</code> if module wasn&#39;t executed yet.</p>
+<h2 id="meta"><a class="anchor" href="#meta">#</a>meta <Version>3.1.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">meta</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">TaskMeta</span></code></pre></div>
+<p>Custom <a href="metadata.html">metadata</a> that was attached to the module during its execution or collection. The meta can be attached by assigning a property to the <code>task.meta</code> object during a test run:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;the validation works correctly&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">task</span>) =&gt;</span> {
+  <span class="hljs-comment">// assign &quot;decorated&quot; during collection</span>
+  task.<span class="hljs-property">file</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">decorated</span> = <span class="hljs-literal">false</span>
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;some test&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ task }</span>) =&gt;</span> {
+    <span class="hljs-comment">// assign &quot;decorated&quot; during test run, it will be available</span>
+    <span class="hljs-comment">// only in onTestCaseReady hook</span>
+    task.<span class="hljs-property">file</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">decorated</span> = <span class="hljs-literal">false</span>
+  })
+})</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>If metadata was attached during collection (outside of the <code>test</code> function), then it will be available in <a href="reporters.html#ontestmodulecollected"><code>onTestModuleCollected</code></a> hook in the custom reporter.</p>
+</div><h2 id="diagnostic"><a class="anchor" href="#diagnostic">#</a>diagnostic</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">diagnostic</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">ModuleDiagnostic</span></code></pre></div>
+<p>Useful information about the module like duration, memory usage, etc. If the module was not executed yet, all diagnostic values will return <code>0</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">ModuleDiagnostic</span> {
+  <span class="hljs-comment">/**
+   * The time it takes to import and initiate an environment.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">environmentSetupDuration</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * The time it takes Vitest to setup test harness (runner, mocks, etc.).
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">prepareDuration</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * The time it takes to import the test module.
+   * This includes importing everything in the module and executing suite callbacks.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">collectDuration</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * The time it takes to import the setup module.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">setupDuration</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * Accumulated duration of all tests and hooks in the module.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">duration</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * The amount of memory used by the module in bytes.
+   * This value is only available if the test was executed with `logHeapUsage` flag.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">heap</span>: <span class="hljs-built_in">number</span> | <span class="hljs-literal">undefined</span>
+  <span class="hljs-comment">/**
+   * The time spent importing every non-externalized dependency that Vitest has processed.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">importDurations</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-title class_">ImportDuration</span>&gt;
+  <span class="hljs-comment">/**
+   * The id of the worker that ran this file. This value cannot be higher than `maxWorkers`.
+   * If file did not run yet, this will be 0.
+   *
+   * **Warning**: Node.js tests and browser tests run in different pools and do not share `concurrencyId`.
+   * It is possible to have multiple modules with the same `concurrencyId` because of that.
+   * Use `project.isBrowserEnabled()` to distinguish the concurrency.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">concurrencyId</span>: <span class="hljs-built_in">number</span>
+  <span class="hljs-comment">/**
+   * Incremental number of the worker that ran this file. This number increases with each worker.
+   * If file did not run yet, this will be 0.
+   *
+   * **Warning**: Node.js tests and browser tests run in different pools and do not share `workerId`.
+   * It is possible to have multiple modules with the same `workerId` because of that.
+   * Use `project.isBrowserEnabled()` to distinguish the concurrency.
+   */</span>
+  <span class="hljs-keyword">readonly</span> <span class="hljs-attr">workerId</span>: <span class="hljs-built_in">number</span>
+}
+
+<span class="hljs-comment">/** The time spent importing &amp; executing a non-externalized file. */</span>
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">ImportDuration</span> {
+  <span class="hljs-comment">/** The time spent importing &amp; executing the file itself, not counting all non-externalized imports that the file does. */</span>
+  <span class="hljs-attr">selfTime</span>: <span class="hljs-built_in">number</span>
+
+  <span class="hljs-comment">/** The time spent importing &amp; executing the file and all its imports. */</span>
+  <span class="hljs-attr">totalTime</span>: <span class="hljs-built_in">number</span>
+}</code></pre></div>
+<h2 id="logs"><a class="anchor" href="#logs">#</a>logs <Version>5.0.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">logs</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">ReadonlyArray</span>&lt;<span class="hljs-title class_">UserConsoleLog</span>&gt;</code></pre></div>
+<p>Console logs recorded on top level of the module during test collection. For example:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;included&#x27;</span>)
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&#x27;suite&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;not included&#x27;</span>)
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;test&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;not included&#x27;</span>)
+  })
+})</code></pre></div>
+<h2 id="totestspecification"><a class="anchor" href="#totestspecification">#</a>toTestSpecification <Version>4.1.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">toTestSpecification</span>(<span class="hljs-params"><span class="hljs-attr">testCases</span>?: <span class="hljs-title class_">TestCase</span>[]</span>): <span class="hljs-title class_">TestSpecification</span></code></pre></div>
+<p>Returns a new <a href="test-specification.html">test specification</a> that can be used to filter or run this specific test module.</p>
+<p>It accepts an optional array of test cases that should be filtered.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#moduleid">moduleId</a><a class="toc-2" href="#relativemoduleid">relativeModuleId</a><a class="toc-2" href="#viteenvironment">viteEnvironment 4.1.0</a><a class="toc-2" href="#state">state</a><a class="toc-2" href="#meta">meta 3.1.0</a><a class="toc-2" href="#diagnostic">diagnostic</a><a class="toc-2" href="#logs">logs 5.0.0</a><a class="toc-2" href="#totestspecification">toTestSpecification 4.1.0</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

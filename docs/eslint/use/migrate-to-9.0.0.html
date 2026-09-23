@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Migrate to v9.x (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › use/migrate-to-9.0.0  <a class="ext small" href="https://eslint.org/docs/latest/use/migrate-to-9.0.0">version en ligne</a></div>
+<h1>Migrate to v9.x</h1><p>ESLint v9.0.0 is a major release of ESLint, and as such, has several breaking changes that you need to be aware of. This guide is intended to walk you through the breaking changes.</p>
+<p>To help with this migration, ESLint provides codemods to automate many of the changes described in this guide. All official ESLint codemods are available in the <a href="https://github.com/eslint/codemods">eslint/codemods</a> repository and through the <a href="https://app.codemod.com/registry?q=scope%3Aeslint">Codemod Registry</a>.</p>
+<h2 id="use-migration-codemods"><a class="anchor" href="#use-migration-codemods">#</a>Use migration codemods</h2>
+<h3 id="migrate-eslint-configuration"><a class="anchor" href="#migrate-eslint-configuration">#</a>Migrate ESLint configuration</h3>
+<p>The <code>@eslint/v8-to-v9-config</code> codemod migrates ESLint v8 configuration files to the ESLint v9 flat config format. It updates config structure, rule schemas, plugins, ignores, and deprecated JSDoc rules while preserving existing behavior as much as possible. It also modifies <code>package.json</code> entries containing <code>eslintConfig</code>, <code>.eslintignore</code>/<code>.gitignore</code> files, <code>/* exported */</code> comments, and certain <code>/* eslint */</code> comments.</p>
+<div class="code"><pre><code class="hljs lang-shell">npx codemod @eslint/v8-to-v9-config</code></pre></div>
+<p>Learn more in the <a href="https://app.codemod.com/registry/@eslint/v8-to-v9-config">Codemod Registry</a>.</p>
+<h3 id="migrate-custom-rules"><a class="anchor" href="#migrate-custom-rules">#</a>Migrate custom rules</h3>
+<p>If you maintain custom ESLint rules, the <code>@eslint/v8-to-v9-custom-rules</code> codemod converts function-style rules to the object format and updates deprecated rule APIs to their ESLint v9-compatible equivalents.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>The workflow runs on <code>**/*.js</code>, <code>**/*.mjs</code>, <code>**/*.cjs</code>, <code>**/*.jsx</code>, <code>**/*.ts</code>, <code>**/*.mts</code>, <code>**/*.cts</code>, and <code>**/*.tsx</code>. Run it only against rule files or directories, since it may incorrectly transform non-rule JavaScript files.</p>
+</div><div class="code"><pre><code class="hljs lang-shell">npx codemod @eslint/v8-to-v9-custom-rules</code></pre></div>
+<p>Learn more in the <a href="https://app.codemod.com/registry/@eslint/v8-to-v9-custom-rules">Codemod Registry</a>.</p>
+<p>Codemods are a starting point. Review the changes and consult the breaking changes below for anything the codemods do not cover.</p>
+<p>The lists below are ordered roughly by the number of users each change is expected to affect, where the first items are expected to affect the most users.</p>
+<h2 id="table-of-contents"><a class="anchor" href="#table-of-contents">#</a>Table of Contents</h2>
+<h3 id="breaking-changes-for-users"><a class="anchor" href="#breaking-changes-for-users">#</a>Breaking changes for users</h3>
+<ul>
+<li><a href="#drop-old-node">Node.js &lt; v18.18, v19 are no longer supported</a></li>
+<li><a href="#flat-config">New default config format (<code>eslint.config.js</code>)</a></li>
+<li><a href="#removed-formatters">Removed multiple formatters</a></li>
+<li><a href="#remove-jsdoc-rules">Removed <code>require-jsdoc</code> and <code>valid-jsdoc</code> rules</a></li>
+<li><a href="#eslint-recommended"><code>eslint:recommended</code> has been updated</a></li>
+<li><a href="#quiet-warn"><code>--quiet</code> no longer runs rules set to <code>&quot;warn&quot;</code></a></li>
+<li><a href="#output-file"><code>--output-file</code> now writes a file to disk even with an empty output</a></li>
+<li><a href="#cli-empty-patterns">Change in behavior when no patterns are passed to CLI</a></li>
+<li><a href="#eslint-comment-options"><code>/* eslint */</code> comments with only severity now retain options from the config file</a></li>
+<li><a href="#multiple-eslint-comments">Multiple <code>/* eslint */</code> comments for the same rule are now disallowed</a></li>
+<li><a href="#exported-parsing">Stricter <code>/* exported */</code> parsing</a></li>
+<li><a href="#stricter-rule-schemas"><code>no-constructor-return</code> and <code>no-sequences</code> rule schemas are stricter</a></li>
+<li><a href="#no-implicit-coercion">New checks in <code>no-implicit-coercion</code> by default</a></li>
+<li><a href="#no-invalid-regexp">Case-sensitive flags in <code>no-invalid-regexp</code></a></li>
+<li><a href="#vars-ignore-pattern"><code>varsIgnorePattern</code> option of <code>no-unused-vars</code> no longer applies to catch arguments</a></li>
+<li><a href="#no-restricted-imports"><code>no-restricted-imports</code> now accepts multiple config entries with the same <code>name</code></a></li>
+<li><a href="#string-config"><code>&quot;eslint:recommended&quot;</code> and <code>&quot;eslint:all&quot;</code> strings no longer accepted in flat config</a></li>
+<li><a href="#no-inner-declarations"><code>no-inner-declarations</code> has a new default behavior with a new option</a></li>
+<li><a href="#no-unused-vars"><code>no-unused-vars</code> now defaults <code>caughtErrors</code> to <code>&quot;all&quot;</code></a></li>
+<li><a href="#no-useless-computed-key"><code>no-useless-computed-key</code> flags unnecessary computed member names in classes by default</a></li>
+<li><a href="#camelcase"><code>camelcase</code> allow option only accepts an array of strings</a></li>
+</ul>
+<h3 id="breaking-changes-for-plugin-developers"><a class="anchor" href="#breaking-changes-for-plugin-developers">#</a>Breaking changes for plugin developers</h3>
+<ul>
+<li><a href="#drop-old-node">Node.js &lt; v18.18, v19 are no longer supported</a></li>
+<li><a href="#removed-context-methods">Removed multiple <code>context</code> methods</a></li>
+<li><a href="#removed-sourcecode-getcomments">Removed <code>sourceCode.getComments()</code></a></li>
+<li><a href="#removed-codepath-currentsegments">Removed <code>CodePath#currentSegments</code></a></li>
+<li><a href="#codepath-precalc">Code paths are now precalculated</a></li>
+<li><a href="#drop-function-style-rules">Function-style rules are no longer supported</a></li>
+<li><a href="#meta-schema-required"><code>meta.schema</code> is required for rules with options</a></li>
+<li><a href="#flat-rule-tester"><code>FlatRuleTester</code> is now <code>RuleTester</code></a></li>
+<li><a href="#stricter-rule-tester">Stricter <code>RuleTester</code> checks</a></li>
+</ul>
+<h3 id="breaking-changes-for-integration-developers"><a class="anchor" href="#breaking-changes-for-integration-developers">#</a>Breaking changes for integration developers</h3>
+<ul>
+<li><a href="#drop-old-node">Node.js &lt; v18.18, v19 are no longer supported</a></li>
+<li><a href="#flat-eslint"><code>FlatESLint</code> is now <code>ESLint</code></a></li>
+<li><a href="#flat-linter"><code>Linter</code> now expects flat config format</a></li>
+</ul>
+<hr>
+<h2 id="drop-old-node"><a class="anchor" href="#drop-old-node">#</a>Node.js &lt; v18.18, v19 are no longer supported</h2>
+<p>ESLint is officially dropping support for these versions of Node.js starting with ESLint v9.0.0. ESLint now supports the following versions of Node.js:</p>
+<ul>
+<li>Node.js v18.18.0 and above</li>
+<li>Node.js v20.9.0 and above</li>
+<li>Node.js v21 and above</li>
+</ul>
+<p><strong>To address:</strong> Make sure you upgrade to at least Node.js v18.18.0 when using ESLint v9.0.0. One important thing to double check is the Node.js version supported by your editor when using ESLint via editor integrations. If you are unable to upgrade, we recommend continuing to use ESLint v8.56.0 until you are able to upgrade Node.js.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/17595">#17595</a></p>
+<h2 id="flat-config"><a class="anchor" href="#flat-config">#</a>New default config format (<code>eslint.config.js</code>)</h2>
+<p>As announced in our <a href="https://eslint.org/docs/latest/blog/2023/10/flat-config-rollout-plans/" class="ext" title="lien en ligne (non disponible hors-ligne)">blog post</a>, in ESLint v9.0.0, <a href="configure/configuration-files.html"><code>eslint.config.js</code></a> is the new default configuration format. The previous format, eslintrc, is now deprecated and will not automatically be searched for.</p>
+<p><strong>Codemod:</strong> Use the <a href="#use-migration-codemods">@eslint/v8-to-v9-config</a> codemod to automate much of this migration.</p>
+<p><strong>To address:</strong> Update your configuration manually to the new format following the <a href="configure/migration-guide.html">Configuration Migration Guide</a>. In case you still need to use the deprecated eslintrc config format, set environment variable <code>ESLINT_USE_FLAT_CONFIG</code> to <code>false</code>.</p>
+<p><strong>Related Issues(s):</strong> <a href="https://github.com/eslint/eslint/issues/13481">#13481</a></p>
+<h2 id="removed-formatters"><a class="anchor" href="#removed-formatters">#</a>Removed multiple formatters</h2>
+<p>ESLint v9.0.0 has removed the following formatters from the core:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Removed Formatter</strong></th>
+<th><strong>Replacement npm Package</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>checkstyle</code></td>
+<td><code>eslint-formatter-checkstyle</code></td>
+</tr>
+<tr>
+<td><code>compact</code></td>
+<td><code>eslint-formatter-compact</code></td>
+</tr>
+<tr>
+<td><code>jslint-xml</code></td>
+<td><code>eslint-formatter-jslint-xml</code></td>
+</tr>
+<tr>
+<td><code>junit</code></td>
+<td><code>eslint-formatter-junit</code></td>
+</tr>
+<tr>
+<td><code>tap</code></td>
+<td><code>eslint-formatter-tap</code></td>
+</tr>
+<tr>
+<td><code>unix</code></td>
+<td><code>eslint-formatter-unix</code></td>
+</tr>
+<tr>
+<td><code>visualstudio</code></td>
+<td><code>eslint-formatter-visualstudio</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-config</a> codemod fully supports this change.</p>
+<p><strong>To address:</strong> If you are using any of these formatters via the <code>-f</code> command line flag, you&#39;ll need to install the respective package for the formatter.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/17524">#17524</a></p>
+<h2 id="remove-jsdoc-rules"><a class="anchor" href="#remove-jsdoc-rules">#</a>Removed <code>require-jsdoc</code> and <code>valid-jsdoc</code> rules</h2>
+<p>The <code>require-jsdoc</code> and <code>valid-jsdoc</code> rules have been removed in ESLint v9.0.0. These rules were initially deprecated in 2018.</p>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-config</a> codemod migrates deprecated JSDoc rules. When those rules are active in the configuration, it removes <code>require-jsdoc</code>/<code>valid-jsdoc</code>, adds <code>eslint-plugin-jsdoc</code> and <code>jsdoc({ config: &#39;flat/recommended&#39; })</code>, and also removes file-level JSDoc ESLint comments.</p>
+<p><strong>To address:</strong> Use the <a href="https://github.com/gajus/eslint-plugin-jsdoc/wiki/Comparison-with-deprecated-JSdoc-related-ESLint-rules">replacement rules</a> in <code>eslint-plugin-jsdoc</code> for equivalent linting.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/15820">#15820</a></p>
+<h2 id="eslint-recommended"><a class="anchor" href="#eslint-recommended">#</a><code>eslint:recommended</code> has been updated</h2>
+<p>Four new rules have been enabled in <code>eslint:recommended</code>:</p>
+<ul>
+<li><a href="../rules/no-constant-binary-expression.html"><code>no-constant-binary-expression</code></a></li>
+<li><a href="../rules/no-empty-static-block.html"><code>no-empty-static-block</code></a></li>
+<li><a href="../rules/no-new-native-nonconstructor.html"><code>no-new-native-nonconstructor</code></a></li>
+<li><a href="../rules/no-unused-private-class-members.html"><code>no-unused-private-class-members</code></a></li>
+</ul>
+<p>Additionally, the following rules have been removed from <code>eslint:recommended</code>:</p>
+<ul>
+<li><a href="../rules/no-extra-semi.html"><code>no-extra-semi</code></a></li>
+<li><a href="../rules/no-inner-declarations.html"><code>no-inner-declarations</code></a></li>
+<li><a href="../rules/no-mixed-spaces-and-tabs.html"><code>no-mixed-spaces-and-tabs</code></a></li>
+<li><a href="../rules/no-new-symbol.html"><code>no-new-symbol</code></a></li>
+</ul>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-config</a> codemod partially covers this change. When your configuration extends <code>eslint:recommended</code>, it disables the four newly enabled recommended rules listed above (unless you already configure them explicitly) to preserve ESLint v8 lint behavior. It does not re-enable rules removed from the preset, fix new violations in source files, or change configs that use <code>@eslint/js</code> presets without a legacy <code>eslint:recommended</code> extend entry.</p>
+<p><strong>To address:</strong> Fix errors or disable these rules.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/15576">#15576</a>, <a href="https://github.com/eslint/eslint/issues/17446">#17446</a>, <a href="https://github.com/eslint/eslint/issues/17596">#17596</a></p>
+<h2 id="quiet-warn"><a class="anchor" href="#quiet-warn">#</a><code>--quiet</code> no longer runs rules set to <code>&quot;warn&quot;</code></h2>
+<p>Prior to ESLint v9.0.0, the <code>--quiet</code> CLI flag would run all rules set to either <code>&quot;error&quot;</code> or <code>&quot;warn&quot;</code> and then hide the results from rules set to <code>&quot;warn&quot;</code>. In ESLint v9.0.0, <code>--quiet</code> will prevent rules from being executed when set to <code>&quot;warn&quot;</code>. This can result in a performance improvement for configurations containing many rules set to <code>&quot;warn&quot;</code>.</p>
+<p>If <code>--max-warnings</code> is used then <code>--quiet</code> will not suppress the execution of rules set to <code>&quot;warn&quot;</code> but the output of those rules will be suppressed.</p>
+<p><strong>To address:</strong> In most cases, this change is transparent. If, however, you are running a rule set to <code>&quot;warn&quot;</code> that makes changes to the data available to other rules (for example, if the rule uses <code>sourceCode.markVariableAsUsed()</code>), then this can result in a behavior change. In such a case, you&#39;ll need to either set the rule to <code>&quot;error&quot;</code> or stop using <code>--quiet</code>.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/16450">#16450</a></p>
+<h2 id="output-file"><a class="anchor" href="#output-file">#</a><code>--output-file</code> now writes a file to disk even with an empty output</h2>
+<p>Prior to ESLint v9.0.0, the <code>--output-file</code> flag would skip writing a file to disk if the output was empty. However, in ESLint v9.0.0, <code>--output-file</code> now consistently writes a file to disk, even when the output is empty. This update ensures a more consistent and reliable behavior for <code>--output-file</code>.</p>
+<p><strong>To address:</strong> Review your usage of the <code>--output-file</code> flag, especially if your processes depend on the file&#39;s presence or absence based on output content. If necessary, update your scripts or configurations to accommodate this change.</p>
+<p><strong>Related Issues(s):</strong> <a href="https://github.com/eslint/eslint/issues/17660">#17660</a></p>
+<h2 id="cli-empty-patterns"><a class="anchor" href="#cli-empty-patterns">#</a>Change in behavior when no patterns are passed to CLI</h2>
+<p>Prior to ESLint v9.0.0, running the ESLint CLI without any file or directory patterns would result in no files being linted and would exit with code 0. This was confusing because it wasn&#39;t clear that nothing had actually happened. In ESLint v9.0.0, this behavior has been updated:</p>
+<ul>
+<li><strong>Flat config.</strong> If you are using flat config, you can run <code>npx eslint</code> or <code>eslint</code> (if globally installed) and ESLint will assume you want to lint the current directory. Effectively, passing no patterns is equivalent to passing <code>.</code>.</li>
+<li><strong>eslintrc.</strong> If you are using the deprecated eslintrc config, you&#39;ll now receive an error when running the CLI without any patterns.</li>
+</ul>
+<p><strong>To address:</strong> In most cases, no change is necessary, and you may find some locations where you thought ESLint was running but it wasn&#39;t. If you&#39;d like to keep the v8.x behavior, where passing no patterns results in ESLint exiting with code 0, add the <code>--pass-on-no-patterns</code> flag to the CLI call.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/14308">#14308</a></p>
+<h2 id="eslint-comment-options"><a class="anchor" href="#eslint-comment-options">#</a><code>/* eslint */</code> comments with only severity now retain options from the config file</h2>
+<p>Prior to ESLint v9.0.0, configuration comments such as <code>/* eslint curly: &quot;warn&quot; */</code> or <code>/* eslint curly: [&quot;warn&quot;] */</code> would completely override any configuration specified for the rule in the config file, and thus enforce the default options of the rule.</p>
+<p>In ESLint v9.0.0, the behavior of configuration comments is aligned with how rule configurations in config files are merged, meaning that a configuration comment with only severity now retains options specified in the config file and just overrides the severity.</p>
+<p>For example, if you have the following config file:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> [
+	{
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-attr">curly</span>: [<span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;multi&quot;</span>],
+		},
+	},
+];</code></pre></div>
+<p>and the following configuration comment:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// my-file.js</span>
+
+<span class="hljs-comment">/* eslint curly: &quot;warn&quot; */</span></code></pre></div>
+<p>the resulting configuration for the <code>curly</code> rule when linting <code>my-file.js</code> will be <code>curly: [&quot;warn&quot;, &quot;multi&quot;]</code>.</p>
+<p>Note that this change only affects cases where the same rule is configured in the config file with options and using a configuration comment without options. In all other cases (e.g. the rule is only configured using a configuration comment), the behavior remains the same as prior to ESLint v9.0.0.</p>
+<p><strong>To address:</strong> We expect that in most cases no change is necessary, as rules configured using configuration comments are typically not already configured in the config file. However, if you need a configuration comment to completely override configuration from the config file and enforce the default options, you&#39;ll need to specify at least one option:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// my-file.js</span>
+
+<span class="hljs-comment">/* eslint curly: [&quot;warn&quot;, &quot;all&quot;] */</span></code></pre></div>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/17381">#17381</a></p>
+<h2 id="multiple-eslint-comments"><a class="anchor" href="#multiple-eslint-comments">#</a>Multiple <code>/* eslint */</code> comments for the same rule are now disallowed</h2>
+<p>Prior to ESLint v9.0.0, if the file being linted contained multiple <code>/* eslint */</code> configuration comments for the same rule, the last one would be applied, while the others would be silently ignored. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint semi: [&quot;error&quot;, &quot;always&quot;] */</span>
+<span class="hljs-comment">/* eslint semi: [&quot;error&quot;, &quot;never&quot;] */</span>
+
+<span class="hljs-title function_">foo</span>(); <span class="hljs-comment">// valid, because the configuration is &quot;never&quot;</span></code></pre></div>
+<p>In ESLint v9.0.0, the first one is applied, while the others are reported as lint errors:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* eslint semi: [&quot;error&quot;, &quot;always&quot;] */</span>
+<span class="hljs-comment">/* eslint semi: [&quot;error&quot;, &quot;never&quot;] */</span> <span class="hljs-comment">// error: Rule &quot;semi&quot; is already configured by another configuration comment in the preceding code. This configuration is ignored.</span>
+
+<span class="hljs-title function_">foo</span>(); <span class="hljs-comment">// error: Missing semicolon</span></code></pre></div>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-config</a> codemod includes a <code>remove-unnecessary-eslint-comments</code> step that modifies these comments. It removes all ESLint config comments matching its regex except the first one, not just duplicates of the same rule.</p>
+<p><strong>To address:</strong> Remove duplicate <code>/* eslint */</code> comments.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/18132">#18132</a></p>
+<h2 id="exported-parsing"><a class="anchor" href="#exported-parsing">#</a>Stricter <code>/* exported */</code> parsing</h2>
+<p>Prior to ESLint v9.0.0, the <code>/* exported */</code> directive incorrectly allowed the following syntax:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* exported foo: true, bar: false */</span>
+
+<span class="hljs-comment">// and</span>
+
+<span class="hljs-comment">/* exported foo bar */</span></code></pre></div>
+<p>The <code>true</code> and <code>false</code> in this example had no effect on ESLint&#39;s behavior, and in fact, was a parsing bug.</p>
+<p>In ESLint v9.0.0, any <code>/* exported */</code> variables followed by a colon and value will be ignored as invalid.</p>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-config</a> codemod rewrites both <code>/* exported foo: true, bar: false */</code> and the whitespace-separated form into a comma-separated format.</p>
+<p><strong>To address:</strong> Update any <code>/* exported */</code> directives to eliminate the colons and subsequent values, and ensure there are commas between variable names such as:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* exported foo, bar */</span></code></pre></div>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/17622">#17622</a></p>
+<h2 id="stricter-rule-schemas"><a class="anchor" href="#stricter-rule-schemas">#</a><code>no-constructor-return</code> and <code>no-sequences</code> rule schemas are stricter</h2>
+<p>In previous versions of ESLint, <code>no-constructor-return</code> and <code>no-sequences</code> rules were mistakenly accepting invalid options.</p>
+<p>This has been fixed in ESLint v9.0.0:</p>
+<ul>
+<li>The <code>no-constructor-return</code> rule does not accept any options.</li>
+<li>The <code>no-sequences</code> rule can take one option, an object with a property <code>&quot;allowInParentheses&quot;</code> (boolean).</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;rules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;no-constructor-return&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;no-sequences&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;allowInParentheses&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-config</a> codemod may update your configuration for this.</p>
+<p><strong>To address:</strong> If ESLint still reports invalid configuration for any of these rules, update your configuration manually.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/16879">#16879</a></p>
+<h2 id="no-implicit-coercion"><a class="anchor" href="#no-implicit-coercion">#</a>New checks in <code>no-implicit-coercion</code> by default</h2>
+<p>In ESLint v9.0.0, the <code>no-implicit-coercion</code> rule additionally reports the following cases by default:</p>
+<div class="code"><pre><code class="hljs lang-js">-(-foo);
+foo - <span class="hljs-number">0</span>;</code></pre></div>
+<p><strong>To address:</strong> If you want to retain the previous behavior of this rule, set <code>&quot;allow&quot;: [&quot;-&quot;, &quot;- -&quot;]</code>.</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;rules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;no-implicit-coercion&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-number">2</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;allow&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;-&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;- -&quot;</span><span class="hljs-punctuation">]</span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/pull/17832">#17832</a></p>
+<h2 id="no-invalid-regexp"><a class="anchor" href="#no-invalid-regexp">#</a>Case-sensitive flags in <code>no-invalid-regexp</code></h2>
+<p>In ESLint v9.0.0, the option <code>allowConstructorFlags</code> is now case-sensitive.</p>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-config</a> codemod expands <code>allowConstructorFlags</code> with opposite-case variants to preserve ESLint v8 behavior under v9&#39;s case-sensitive matching.</p>
+<p><strong>To address:</strong> Update your configuration manually if needed.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/16574">#16574</a></p>
+<h2 id="vars-ignore-pattern"><a class="anchor" href="#vars-ignore-pattern">#</a><code>varsIgnorePattern</code> option of <code>no-unused-vars</code> no longer applies to catch arguments</h2>
+<p>In previous versions of ESLint, the <code>varsIgnorePattern</code> option of <code>no-unused-vars</code> incorrectly ignored errors specified in a <code>catch</code> clause. In ESLint v9.0.0, <code>varsIgnorePattern</code> no longer applies to errors in <code>catch</code> clauses. For example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;caughtErrors&quot;: &quot;all&quot;, &quot;varsIgnorePattern&quot;: &quot;^err&quot; }]*/</span>
+
+<span class="hljs-keyword">try</span> {
+	<span class="hljs-comment">//...</span>
+} <span class="hljs-keyword">catch</span> (err) {
+	<span class="hljs-comment">// &#x27;err&#x27; will be reported.</span>
+	<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(<span class="hljs-string">&quot;errors&quot;</span>);
+}</code></pre></div>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-config</a> codemod copies <code>varsIgnorePattern</code> to <code>caughtErrorsIgnorePattern</code> when the rule is explicitly configured, catch errors are checked (<code>caughtErrors</code> is not <code>&quot;none&quot;</code>), and no separate <code>caughtErrorsIgnorePattern</code> is set. This preserves v8 behavior where <code>varsIgnorePattern</code> incorrectly applied to catch bindings. It does not apply when the rule comes only from a preset, when <code>caughtErrors</code> is <code>&quot;none&quot;</code>, or for <code>@typescript-eslint/no-unused-vars</code>.</p>
+<p><strong>To address:</strong> If you want to specify ignore patterns for <code>catch</code> clause variable names, use the <code>caughtErrorsIgnorePattern</code> option in addition to <code>varsIgnorePattern</code>.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/17540">#17540</a></p>
+<h2 id="no-restricted-imports"><a class="anchor" href="#no-restricted-imports">#</a><code>no-restricted-imports</code> now accepts multiple config entries with the same <code>name</code></h2>
+<p>In previous versions of ESLint, if multiple entries in the <code>paths</code> array of your configuration for the <code>no-restricted-imports</code> rule had the same <code>name</code> property, only the last one would apply, while the previous ones would be ignored.</p>
+<p>As of ESLint v9.0.0, all entries apply, allowing for specifying different messages for different imported names. For example, you can now configure the rule like this:</p>
+<div class="code"><pre><code class="hljs lang-js">{
+    <span class="hljs-attr">rules</span>: {
+        <span class="hljs-string">&quot;no-restricted-imports&quot;</span>: [<span class="hljs-string">&quot;error&quot;</span>, {
+            <span class="hljs-attr">paths</span>: [
+                {
+                    <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;react-native&quot;</span>,
+                    <span class="hljs-attr">importNames</span>: [<span class="hljs-string">&quot;Text&quot;</span>],
+                    <span class="hljs-attr">message</span>: <span class="hljs-string">&quot;import &#x27;Text&#x27; from &#x27;ui/_components&#x27; instead&quot;</span>
+                },
+                {
+                    <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;react-native&quot;</span>,
+                    <span class="hljs-attr">importNames</span>: [<span class="hljs-string">&quot;View&quot;</span>],
+                    <span class="hljs-attr">message</span>: <span class="hljs-string">&quot;import &#x27;View&#x27; from &#x27;ui/_components&#x27; instead&quot;</span>
+                }
+            ]
+        }]
+    }
+}</code></pre></div>
+<p>and both <code>import { Text } from &quot;react-native&quot;</code> and <code>import { View } from &quot;react-native&quot;</code> will be reported, with different messages.</p>
+<p>In previous versions of ESLint, with this configuration only <code>import { View } from &quot;react-native&quot;</code> would be reported.</p>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-config</a> codemod updates <code>no-restricted-imports</code> configurations during migration. When the rule uses a <code>paths</code> array, it restructures the options for flat config and deduplicates entries that share the same <code>name</code>, keeping the last entry so lint behavior matches ESLint v8 (where only the last matching entry applied).</p>
+<p><strong>To address:</strong> If your configuration for this rule has multiple entries with the same <code>name</code>, you may need to remove unintentional ones.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/15261">#15261</a></p>
+<h2 id="string-config"><a class="anchor" href="#string-config">#</a><code>&quot;eslint:recommended&quot;</code> and <code>&quot;eslint:all&quot;</code> no longer accepted in flat config</h2>
+<p>In ESLint v8.x, <code>eslint.config.js</code> could refer to <code>&quot;eslint:recommended&quot;</code> and <code>&quot;eslint:all&quot;</code> configurations by inserting a string into the config array, as in this example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> [<span class="hljs-string">&quot;eslint:recommended&quot;</span>, <span class="hljs-string">&quot;eslint:all&quot;</span>];</code></pre></div>
+<p>In ESLint v9.0.0, this format is no longer supported and will result in an error.</p>
+<p><strong>Codemod:</strong> Use the <a href="#use-migration-codemods">@eslint/v8-to-v9-config</a> codemod. It converts legacy string presets in existing <code>eslint.config.*</code> files and migrates eslintrc configs via <code>FlatCompat</code> + <code>@eslint/js</code>.</p>
+<p><strong>To address:</strong> Install and use <code>@eslint/js</code> manually:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> js <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/js&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> [js.<span class="hljs-property">configs</span>.<span class="hljs-property">recommended</span>, js.<span class="hljs-property">configs</span>.<span class="hljs-property">all</span>];</code></pre></div>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/17488">#17488</a></p>
+<h2 id="no-inner-declarations"><a class="anchor" href="#no-inner-declarations">#</a><code>no-inner-declarations</code> has a new default behavior with a new option</h2>
+<p>ESLint v9.0.0 introduces a new option in <code>no-inner-declarations</code> rule called <code>blockScopeFunctions</code> which by default allows block-level <code>function</code>s in strict mode when <code>languageOptions.ecmaVersion</code> is set to <code>2015</code> or above.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-inner-declarations: &quot;error&quot;*/</span>
+<span class="hljs-meta">&quot;use strict&quot;</span>;
+
+<span class="hljs-keyword">if</span> (test) {
+	<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {} <span class="hljs-comment">// no error</span>
+}</code></pre></div>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-config</a> codemod adds <code>blockScopedFunctions: &quot;disallow&quot;</code> when <code>no-inner-declarations</code> is explicitly configured, preserving v8 reporting behavior. It does not apply when the rule comes only from a preset.</p>
+<p><strong>To address:</strong> If you want to report the block-level <code>function</code>s in every condition regardless of strict or non-strict mode, set the <code>blockScopeFunctions</code> option to <code>&quot;disallow&quot;</code>.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/15576">#15576</a></p>
+<h2 id="no-unused-vars"><a class="anchor" href="#no-unused-vars">#</a><code>no-unused-vars</code> now defaults <code>caughtErrors</code> to <code>&quot;all&quot;</code></h2>
+<p>ESLint v9.0.0 changes the default value for the <code>no-unused-vars</code> rule&#39;s <code>caughtErrors</code> option.
+Previously it defaulted to <code>&quot;none&quot;</code> to never check whether caught errors were used.
+It now defaults to <code>&quot;all&quot;</code> to check caught errors for being used.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: &quot;error&quot;*/</span>
+<span class="hljs-keyword">try</span> {
+} <span class="hljs-keyword">catch</span> (error) {
+	<span class="hljs-comment">// &#x27;error&#x27; is defined but never used</span>
+}</code></pre></div>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-config</a> codemod updates <code>no-unused-vars</code> when the rule is explicitly configured. It adds <code>caughtErrors: &quot;none&quot;</code> if that option is omitted, preserving ESLint v8 behavior. Existing <code>caughtErrors</code> values are kept unchanged. If catch errors are checked and <code>varsIgnorePattern</code> is set, it also copies that pattern to <code>caughtErrorsIgnorePattern</code>. It does not add the rule when it is enabled only through <code>eslint:recommended</code>, and it does not migrate <code>@typescript-eslint/no-unused-vars</code>.</p>
+<p><strong>To address:</strong> If you want to allow unused caught errors, such as when writing code that will be directly run in an environment that does not support ES2019 optional catch bindings, set the <code>caughtErrors</code> option to <code>&quot;none&quot;</code>.
+Otherwise, delete the unused caught errors.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: &quot;error&quot;*/</span>
+<span class="hljs-keyword">try</span> {
+} <span class="hljs-keyword">catch</span> {
+	<span class="hljs-comment">// no error</span>
+}</code></pre></div>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/17974">#17974</a></p>
+<h2 id="no-useless-computed-key"><a class="anchor" href="#no-useless-computed-key">#</a><code>no-useless-computed-key</code> flags unnecessary computed member names in classes by default</h2>
+<p>In ESLint v9.0.0, the default value of the <code>enforceForClassMembers</code> option of the <code>no-useless-computed-key</code> rule was changed from <code>false</code> to <code>true</code>.
+The effect of this change is that unnecessary computed member names in classes will be flagged by default.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-useless-computed-key: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">SomeClass</span> {
+	[<span class="hljs-string">&quot;someMethod&quot;</span>]() {} <span class="hljs-comment">// ok in ESLint v8, error in ESLint v9.</span>
+}</code></pre></div>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-config</a> codemod sets <code>enforceForClassMembers</code> to <code>false</code> when the <code>no-useless-computed-key</code> rule is configured with an empty options object, preserving ESLint v8 behavior.</p>
+<p><strong>To address:</strong> Fix the problems reported by the rule or revert to the previous behavior by setting the <code>enforceForClassMembers</code> option to <code>false</code>.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/issues/18042">#18042</a></p>
+<h2 id="camelcase"><a class="anchor" href="#camelcase">#</a><code>camelcase</code> allow option only accepts an array of strings</h2>
+<p>Previously the camelcase rule didn&#39;t enforce the <code>allow</code> option to be an array of strings. In ESLint v9.0.0, the <code>allow</code> option now only accepts an array of strings.</p>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-config</a> codemod may update your configuration for this.</p>
+<p><strong>To address:</strong> If ESLint still reports invalid configuration for this rule, update your configuration manually.</p>
+<p><strong>Related issue(s):</strong> <a href="https://github.com/eslint/eslint/pull/18232">#18232</a></p>
+<h2 id="removed-context-methods"><a class="anchor" href="#removed-context-methods">#</a>Removed multiple <code>context</code> methods</h2>
+<p>ESLint v9.0.0 removes multiple deprecated methods from the <code>context</code> object and moves them onto the <code>SourceCode</code> object:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Removed on <code>context</code></strong></th>
+<th><strong>Replacement(s) on <code>SourceCode</code></strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>context.getSource()</code></td>
+<td><code>sourceCode.getText()</code></td>
+</tr>
+<tr>
+<td><code>context.getSourceLines()</code></td>
+<td><code>sourceCode.getLines()</code></td>
+</tr>
+<tr>
+<td><code>context.getAllComments()</code></td>
+<td><code>sourceCode.getAllComments()</code></td>
+</tr>
+<tr>
+<td><code>context.getNodeByRangeIndex()</code></td>
+<td><code>sourceCode.getNodeByRangeIndex()</code></td>
+</tr>
+<tr>
+<td><code>context.getComments()</code></td>
+<td><code>sourceCode.getCommentsBefore()</code>, <code>sourceCode.getCommentsAfter()</code>, <code>sourceCode.getCommentsInside()</code></td>
+</tr>
+<tr>
+<td><code>context.getCommentsBefore()</code></td>
+<td><code>sourceCode.getCommentsBefore()</code></td>
+</tr>
+<tr>
+<td><code>context.getCommentsAfter()</code></td>
+<td><code>sourceCode.getCommentsAfter()</code></td>
+</tr>
+<tr>
+<td><code>context.getCommentsInside()</code></td>
+<td><code>sourceCode.getCommentsInside()</code></td>
+</tr>
+<tr>
+<td><code>context.getJSDocComment()</code></td>
+<td><code>sourceCode.getJSDocComment()</code></td>
+</tr>
+<tr>
+<td><code>context.getFirstToken()</code></td>
+<td><code>sourceCode.getFirstToken()</code></td>
+</tr>
+<tr>
+<td><code>context.getFirstTokens()</code></td>
+<td><code>sourceCode.getFirstTokens()</code></td>
+</tr>
+<tr>
+<td><code>context.getLastToken()</code></td>
+<td><code>sourceCode.getLastToken()</code></td>
+</tr>
+<tr>
+<td><code>context.getLastTokens()</code></td>
+<td><code>sourceCode.getLastTokens()</code></td>
+</tr>
+<tr>
+<td><code>context.getTokenAfter()</code></td>
+<td><code>sourceCode.getTokenAfter()</code></td>
+</tr>
+<tr>
+<td><code>context.getTokenBefore()</code></td>
+<td><code>sourceCode.getTokenBefore()</code></td>
+</tr>
+<tr>
+<td><code>context.getTokenByRangeStart()</code></td>
+<td><code>sourceCode.getTokenByRangeStart()</code></td>
+</tr>
+<tr>
+<td><code>context.getTokens()</code></td>
+<td><code>sourceCode.getTokens()</code></td>
+</tr>
+<tr>
+<td><code>context.getTokensAfter()</code></td>
+<td><code>sourceCode.getTokensAfter()</code></td>
+</tr>
+<tr>
+<td><code>context.getTokensBefore()</code></td>
+<td><code>sourceCode.getTokensBefore()</code></td>
+</tr>
+<tr>
+<td><code>context.getTokensBetween()</code></td>
+<td><code>sourceCode.getTokensBetween()</code></td>
+</tr>
+<tr>
+<td><code>context.parserServices</code></td>
+<td><code>sourceCode.parserServices</code></td>
+</tr>
+<tr>
+<td><code>context.getDeclaredVariables()</code></td>
+<td><code>sourceCode.getDeclaredVariables()</code></td>
+</tr>
+</tbody></table></div>
+<p>In addition to the methods in the above table, there are several other methods that are also moved but required different method signatures:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th><strong>Removed on <code>context</code></strong></th>
+<th><strong>Replacement(s) on <code>SourceCode</code></strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>context.getAncestors()</code></td>
+<td><code>sourceCode.getAncestors(node)</code></td>
+</tr>
+<tr>
+<td><code>context.getScope()</code></td>
+<td><code>sourceCode.getScope(node)</code></td>
+</tr>
+<tr>
+<td><code>context.markVariableAsUsed(name)</code></td>
+<td><code>sourceCode.markVariableAsUsed(name, node)</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>Codemod:</strong> Use the <a href="#use-migration-codemods">@eslint/v8-to-v9-custom-rules</a> codemod to automate much of this migration.</p>
+<p><strong>To address:</strong> For more information, see the <a href="https://eslint.org/blog/2023/09/preparing-custom-rules-eslint-v9/#automatically-update-your-rules">blog post</a>.</p>
+<p><strong>Related Issues(s):</strong> <a href="https://github.com/eslint/eslint/issues/16999">#16999</a>, <a href="https://github.com/eslint/eslint/issues/13481">#13481</a></p>
+<h2 id="removed-sourcecode-getcomments"><a class="anchor" href="#removed-sourcecode-getcomments">#</a>Removed <code>sourceCode.getComments()</code></h2>
+<p>ESLint v9.0.0 removes the deprecated <code>sourceCode.getComments()</code> method.</p>
+<p><strong>Codemod:</strong> Use the <a href="#use-migration-codemods">@eslint/v8-to-v9-custom-rules</a> codemod. It converts both <code>context.getComments()</code> and <code>sourceCode.getComments()</code> to combinations of <code>getCommentsBefore()</code>, <code>getCommentsInside()</code>, and <code>getCommentsAfter()</code>.</p>
+<p><strong>To address:</strong> Replace with <code>sourceCode.getCommentsBefore()</code>, <code>sourceCode.getCommentsAfter()</code>, or <code>sourceCode.getCommentsInside()</code>.</p>
+<p><strong>Related Issues(s):</strong> <a href="https://github.com/eslint/eslint/issues/14744">#14744</a></p>
+<h2 id="removed-codepath-currentsegments"><a class="anchor" href="#removed-codepath-currentsegments">#</a>Removed <code>CodePath#currentSegments</code></h2>
+<p>ESLint v9.0.0 removes the deprecated <code>CodePath#currentSegments</code> property.</p>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-custom-rules</a> codemod may automate part of this migration.</p>
+<p><strong>To address:</strong> Update your code following the recommendations in the <a href="https://eslint.org/blog/2023/09/preparing-custom-rules-eslint-v9/#codepath%23currentsegments">blog post</a>.</p>
+<p><strong>Related Issues(s):</strong> <a href="https://github.com/eslint/eslint/issues/17457">#17457</a></p>
+<h2 id="codepath-precalc"><a class="anchor" href="#codepath-precalc">#</a>Code paths are now precalculated</h2>
+<p>Prior to ESLint v9.0.0, code paths were calculated during the same AST traversal used by rules, meaning that the information passed to methods like <code>onCodePathStart</code> and <code>onCodePathSegmentStart</code> was incomplete. Specifically, array properties like <code>CodePath#childCodePaths</code> and <code>CodePathSegment#nextSegments</code> began empty and then were filled with the appropriate information as the traversal completed, meaning that those arrays could have different elements depending on when you checked their values.</p>
+<p>ESLint v9.0.0 now precalculates code path information before the traversal used by rules. As a result, the code path information is now complete regardless of where it is accessed inside of a rule.</p>
+<p><strong>Codemod:</strong> The migration codemods do not cover code path precalculation. Rules that rely on when <code>CodePath</code> or <code>CodePathSegment</code> array properties are populated must be reviewed manually. The <a href="#use-migration-codemods">@eslint/v8-to-v9-custom-rules</a> codemod only migrates removed <code>CodePath#currentSegments</code> usage.</p>
+<p><strong>To address:</strong> If you are accessing any array properties on <code>CodePath</code> or <code>CodePathSegment</code>, you&#39;ll need to update your code. Specifically:</p>
+<ul>
+<li>If you are checking the <code>length</code> of any array properties, ensure you are using relative comparison operators like <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, and <code>&gt;=</code> instead of equals.</li>
+<li>If you are accessing the <code>nextSegments</code>, <code>prevSegments</code>, <code>allNextSegments</code>, or <code>allPrevSegments</code> properties on a <code>CodePathSegment</code>, or <code>CodePath#childCodePaths</code>, verify that your code will still work as expected. To be backwards compatible, consider moving the logic that checks these properties into <code>onCodePathEnd</code>.</li>
+</ul>
+<p><strong>Related Issues(s):</strong> <a href="https://github.com/eslint/eslint/issues/16999">#16999</a></p>
+<h2 id="drop-function-style-rules"><a class="anchor" href="#drop-function-style-rules">#</a>Function-style rules are no longer supported</h2>
+<p>ESLint v9.0.0 drops support for function-style rules. Function-style rules are rules created by exporting a function rather than an object with a <code>create()</code> method. This rule format was deprecated in 2016.</p>
+<p><strong>Codemod:</strong> Use the <a href="#use-migration-codemods">@eslint/v8-to-v9-custom-rules</a> codemod to convert function-style rules to the object format.</p>
+<p><strong>To address:</strong> Update your rules to <a href="https://eslint.org/docs/latest/extend/custom-rules" class="ext" title="lien en ligne (non disponible hors-ligne)">the most recent rule format</a>. For rules written in CommonJS, you can also use <a href="https://github.com/eslint/eslint-transforms/blob/main/README.md#new-rule-format"><code>eslint-transforms</code></a>.</p>
+<p>The <a href="https://github.com/eslint-community/eslint-plugin-eslint-plugin/blob/main/docs/rules/prefer-object-rule.md">eslint-plugin/prefer-object-rule</a> rule can help enforce the usage of object-style rules and autofix any remaining function-style rules.</p>
+<p><strong>Related Issues(s):</strong> <a href="https://github.com/eslint/eslint/issues/14709">#14709</a></p>
+<h2 id="meta-schema-required"><a class="anchor" href="#meta-schema-required">#</a><code>meta.schema</code> is required for rules with options</h2>
+<p>As of ESLint v9.0.0, an error will be thrown if any options are <a href="configure/rules.html#use-configuration-files">passed</a> to a rule that doesn&#39;t specify <code>meta.schema</code> property.</p>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-custom-rules</a> codemod generates <code>meta.schema</code> for function-style and object-style rules, migrates legacy <code>module.exports.schema</code>, and inserts a TODO when it detects <code>context.options</code> without a schema. The limitation is that it does not fully infer the actual schema.</p>
+<p><strong>To address:</strong></p>
+<ul>
+<li>If your rule expects <a href="https://eslint.org/docs/latest/extend/custom-rules#accessing-options-passed-to-a-rule" class="ext" title="lien en ligne (non disponible hors-ligne)">options</a>, set <a href="https://eslint.org/docs/latest/extend/custom-rules#options-schemas" class="ext" title="lien en ligne (non disponible hors-ligne)"><code>meta.schema</code></a> property to a JSON Schema format description of the rule’s options. This schema will be used by ESLint to validate configured options and prevent invalid or unexpected inputs to your rule.</li>
+<li>If your rule doesn&#39;t expect any options, there is no action required. This change ensures that end users will not mistakenly configure options for rules that don&#39;t expect options.</li>
+<li><strong>(not recommended)</strong> you can also set <code>meta.schema</code> to <code>false</code> to disable this validation, but it is highly recommended to provide a schema if the rule expects options and omit the schema (or set <code>[]</code>) if the rule doesn&#39;t expect options so that ESLint can ensure that your users&#39; configurations are valid.</li>
+</ul>
+<p>The <a href="https://github.com/eslint-community/eslint-plugin-eslint-plugin/blob/main/docs/rules/require-meta-schema.md">eslint-plugin/require-meta-schema</a> rule can help enforce that rules have schemas when required.</p>
+<p><strong>Related Issues(s):</strong> <a href="https://github.com/eslint/eslint/issues/14709">#14709</a></p>
+<h2 id="flat-rule-tester"><a class="anchor" href="#flat-rule-tester">#</a><code>FlatRuleTester</code> is now <code>RuleTester</code></h2>
+<p>As announced in our <a href="https://eslint.org/docs/latest/blog/2023/10/flat-config-rollout-plans/" class="ext" title="lien en ligne (non disponible hors-ligne)">blog post</a>, the temporary <code>FlatRuleTester</code> class has been renamed to <code>RuleTester</code>, while the <code>RuleTester</code> class from v8.x has been removed. Additionally, the <code>FlatRuleTester</code> export from <code>eslint/use-at-your-own-risk</code> has been removed.</p>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-custom-rules</a> codemod renames <code>FlatRuleTester</code> to <code>RuleTester</code> and moves <code>parserOptions</code> to <code>languageOptions</code> in test cases. Updating imports from <code>eslint/use-at-your-own-risk</code> to <code>eslint</code>, adjusting for new <code>RuleTester</code> defaults, and translating other eslintrc-style test config must be done manually.</p>
+<p><strong>To address:</strong> Update your rule tests to use the new <code>RuleTester</code>. To do so, here are some of the common changes you&#39;ll need to make:</p>
+<ul>
+<li><p><strong>Be aware of new defaults for <code>ecmaVersion</code> and <code>sourceType</code>.</strong> By default, <code>RuleTester</code> uses the flat config default of <code>ecmaVersion: &quot;latest&quot;</code> and <code>sourceType: &quot;module&quot;</code>. This may cause some tests to break if they were expecting the old default of <code>ecmaVersion: 5</code> and <code>sourceType: &quot;script&quot;</code>. If you&#39;d like to use the old default, you&#39;ll need to manually specify that in your <code>RuleTester</code> like this:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// use eslintrc defaults</span>
+<span class="hljs-keyword">const</span> ruleTester = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RuleTester</span>({
+    <span class="hljs-attr">languageOptions</span>: {
+        <span class="hljs-attr">ecmaVersion</span>: <span class="hljs-number">5</span>,
+        <span class="hljs-attr">sourceType</span>: <span class="hljs-string">&quot;script&quot;</span>,
+    },
+});</code></pre></div>
+</li>
+<li><p><strong>Change <code>parserOptions</code> to <code>languageOptions</code>.</strong> If you&#39;re setting <code>ecmaVersion</code> or <code>sourceType</code> on your tests, move those from <code>parserOptions</code> to <code>languageOptions</code>, like this:</p>
+<div class="code"><pre><code class="hljs lang-js">ruleTester.<span class="hljs-title function_">run</span>(<span class="hljs-string">&quot;my-rule&quot;</span>, myRule, {
+    <span class="hljs-attr">valid</span>: [
+        {
+            <span class="hljs-attr">code</span>: <span class="hljs-string">&quot;foo&quot;</span>,
+            <span class="hljs-attr">parserOptions</span>: {
+                <span class="hljs-attr">ecmaVersion</span>: <span class="hljs-number">6</span>,
+            },
+        },
+    ],
+});
+
+<span class="hljs-comment">// becomes</span>
+
+ruleTester.<span class="hljs-title function_">run</span>(<span class="hljs-string">&quot;my-rule&quot;</span>, myRule, {
+    <span class="hljs-attr">valid</span>: [
+        {
+            <span class="hljs-attr">code</span>: <span class="hljs-string">&quot;foo&quot;</span>,
+            <span class="hljs-attr">languageOptions</span>: {
+                <span class="hljs-attr">ecmaVersion</span>: <span class="hljs-number">6</span>,
+            },
+        },
+    ],
+});</code></pre></div>
+</li>
+<li><p><strong>Translate other config keys.</strong> Keys such as <code>env</code> and <code>parser</code> that used to run on the eslintrc config system must be translated into the flat config system. Please refer to the <a href="configure/migration-guide.html">Configuration Migration Guide</a> for details on translating other keys you may be using.</p>
+</li>
+</ul>
+<p><strong>Related Issues(s):</strong> <a href="https://github.com/eslint/eslint/issues/13481">#13481</a></p>
+<h2 id="stricter-rule-tester"><a class="anchor" href="#stricter-rule-tester">#</a>Stricter <code>RuleTester</code> checks</h2>
+<p>In order to aid in the development of high-quality custom rules that are free from common bugs, ESLint v9.0.0 implements several changes to <code>RuleTester</code>:</p>
+<ol>
+<li><strong>Test case <code>output</code> must be different from <code>code</code>.</strong> In ESLint v8.x, if <code>output</code> is the same as <code>code</code>, it asserts that there was no autofix. When looking at a test case, it&#39;s not always immediately clear whether <code>output</code> differs from <code>code</code>, especially if the strings are longer or multiline, making it difficult for developers to determine whether or not the test case expects an autofix. In ESLint v9.0.0, to avoid this ambiguity, <code>RuleTester</code> now throws an error if the test <code>output</code> has the same value as the test <code>code</code>. Therefore, specifying <code>output</code> now necessarily means that the test case expects an autofix and asserts its result. If the test case doesn&#39;t expect an autofix, omit the <code>output</code> property or set it to <code>null</code>. This asserts that there was no autofix.</li>
+<li><strong>Test error objects must specify <code>message</code> or <code>messageId</code>.</strong> To improve the quality of test coverage, <code>RuleTester</code> now throws an error if neither <code>message</code> nor <code>messageId</code> is specified on test error objects.</li>
+<li><strong>Test error object must specify <code>suggestions</code> if the actual error provides suggestions.</strong> In ESLint v8.x, if the <code>suggestions</code> property was omitted from test error objects, <code>RuleTester</code> wasn&#39;t performing any checks related to suggestions, so it was easy to forget to assert if a test case produces suggestions. In ESLint v9.0.0, omitting the <code>suggestions</code> property asserts that the actual error does not provide suggestions, while you need to specify the <code>suggestions</code> property if the actual error does provide suggestions. We highly recommend that you test suggestions in detail by specifying an array of test suggestion objects, but you can also specify <code>suggestions: &lt;number&gt;</code> to assert just the number of suggestions.</li>
+<li><strong>Test suggestion objects must specify <code>output</code>.</strong> To improve the quality of test coverage, <code>RuleTester</code> now throws an error if <code>output</code> property is not specified on test suggestion objects.</li>
+<li><strong>Test suggestion objects must specify <code>desc</code> or <code>messageId</code>.</strong> To improve the quality of test coverage, <code>RuleTester</code> now throws an error if neither <code>desc</code> nor <code>messageId</code> property is specified on test suggestion objects. It&#39;s also not allowed to specify both. If you want to assert the suggestion description text in addition to the <code>messageId</code>, then also add the <code>data</code> property.</li>
+<li><strong>Suggestion messages must be unique.</strong> Because suggestions are typically displayed in an editor as a dropdown list, it&#39;s important that no two suggestions for the same lint problem have the same message. Otherwise, it&#39;s impossible to know what any given suggestion will do. This additional check runs automatically.</li>
+<li><strong>Suggestions must change the code.</strong> Suggestions are expected to fix the reported problem by changing the code. <code>RuleTester</code> now throws an error if the suggestion test <code>output</code> is the same as the test <code>code</code>.</li>
+<li><strong>Suggestions must generate valid syntax.</strong> In order for rule suggestions to be helpful, they need to be valid syntax. <code>RuleTester</code> now parses the output of suggestions using the same language options as the <code>code</code> value and throws an error if parsing fails.</li>
+<li><strong>Test cases must be unique.</strong> Identical test cases can cause confusion and be hard to detect manually in a long test file. Duplicates are now automatically detected and can be safely removed.</li>
+<li><strong><code>filename</code> and <code>only</code> must be of the expected type.</strong> <code>RuleTester</code> now checks the type of <code>filename</code> and <code>only</code> properties of test objects. If specified, <code>filename</code> must be a string value. If specified, <code>only</code> must be a boolean value.</li>
+<li><strong>Messages cannot have unsubstituted placeholders.</strong> The <code>RuleTester</code> now also checks if there are <code>{{ placeholder }}</code>  still in the message as their values were not passed via <code>data</code> in the respective <code>context.report()</code> call.</li>
+</ol>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-custom-rules</a> codemod renames <code>FlatRuleTester</code> to <code>RuleTester</code>, moves <code>parserOptions</code> to <code>languageOptions</code> in test cases, and removes <code>output</code> when it equals <code>code</code>. All other stricter <code>RuleTester</code> checks must be fixed manually by running your rule tests and updating failing cases.</p>
+<p><strong>To address:</strong> Run your rule tests using <code>RuleTester</code> and fix any errors that occur. The changes you&#39;ll need to make to satisfy <code>RuleTester</code> are compatible with ESLint v8.x.</p>
+<p><strong>Related Issues(s):</strong> <a href="https://github.com/eslint/eslint/issues/15104">#15104</a>, <a href="https://github.com/eslint/eslint/issues/15735">#15735</a>, <a href="https://github.com/eslint/eslint/issues/16908">#16908</a>, <a href="https://github.com/eslint/eslint/issues/18016">#18016</a></p>
+<h2 id="flat-eslint"><a class="anchor" href="#flat-eslint">#</a><code>FlatESLint</code> is now <code>ESLint</code></h2>
+<p>As announced in our <a href="https://eslint.org/docs/latest/blog/2023/10/flat-config-rollout-plans/" class="ext" title="lien en ligne (non disponible hors-ligne)">blog post</a>, the temporary <code>FlatESLint</code> class has been renamed to <code>ESLint</code>, while the <code>ESLint</code> class from v8.x has been renamed to <code>LegacyESLint</code>.</p>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-custom-rules</a> codemod renames <code>FlatESLint</code> to <code>ESLint</code>.</p>
+<p><strong>To address:</strong> If you are currently using the <code>ESLint</code> class, verify that your tests pass using the new <code>ESLint</code> class. Not all of the old options are supported, so you may need to update the arguments passed to the constructor. See the <a href="https://eslint.org/docs/latest/integrate/nodejs-api" class="ext" title="lien en ligne (non disponible hors-ligne)">Node.js API Reference</a> for details.</p>
+<p>If you still need the v8.x <code>ESLint</code> functionality, use the <code>LegacyESLint</code> class like this:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> { <span class="hljs-title class_">LegacyESLint</span> } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;eslint/use-at-your-own-risk&quot;</span>);</code></pre></div>
+<p><strong>Related Issues(s):</strong> <a href="https://github.com/eslint/eslint/issues/13481">#13481</a></p>
+<h2 id="flat-linter"><a class="anchor" href="#flat-linter">#</a><code>Linter</code> now expects flat config format</h2>
+<p>In ESLint v9.0.0, the <code>config</code> argument passed to <code>Linter#verify()</code> and <code>Linter#verifyAndFix()</code> methods should be in the flat config format.</p>
+<p>Additionally, methods <code>Linter#defineRule()</code>, <code>Linter#defineRules()</code>, <code>Linter#defineParser()</code>, and <code>Linter#getRules()</code> are no longer available.</p>
+<p><strong>Codemod:</strong> The <a href="#use-migration-codemods">@eslint/v8-to-v9-custom-rules</a> codemod renames <code>FlatESLint</code> to <code>ESLint</code> and moves <code>parserOptions</code> to <code>languageOptions</code> in <code>Linter#verify()</code> and <code>Linter#verifyAndFix()</code> calls. Calls to removed methods (<code>defineRule</code>, <code>defineRules</code>, <code>defineParser</code>, <code>getRules</code>) are marked with TODO comments; migrating rules and parsers into flat plugins / <code>languageOptions</code> config must be done manually.</p>
+<p><strong>To address:</strong> If you are using the <code>Linter</code> class, verify that your tests pass.</p>
+<p>If you&#39;re passing configuration objects that are incompatible with the flat config format, you&#39;ll need to update the code.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslintrc config format</span>
+linter.<span class="hljs-title function_">verify</span>(code, {
+	<span class="hljs-attr">parserOptions</span>: {
+		<span class="hljs-attr">ecmaVersion</span>: <span class="hljs-number">6</span>,
+	},
+});
+
+<span class="hljs-comment">// flat config format</span>
+linter.<span class="hljs-title function_">verify</span>(code, {
+	<span class="hljs-attr">languageOptions</span>: {
+		<span class="hljs-attr">ecmaVersion</span>: <span class="hljs-number">6</span>,
+	},
+});</code></pre></div>
+<p>Please refer to the <a href="configure/migration-guide.html">Configuration Migration Guide</a> for details on translating other keys you may be using.</p>
+<p>Rules and parsers can be defined directly in the configuration.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslintrc mode</span>
+linter.<span class="hljs-title function_">defineRule</span>(<span class="hljs-string">&quot;my-rule1&quot;</span>, myRule1);
+linter.<span class="hljs-title function_">defineRules</span>({
+	<span class="hljs-string">&quot;my-rule2&quot;</span>: myRule2,
+	<span class="hljs-string">&quot;my-rule3&quot;</span>: myRule3,
+});
+linter.<span class="hljs-title function_">defineParser</span>(<span class="hljs-string">&quot;my-parser&quot;</span>, myParser);
+linter.<span class="hljs-title function_">verify</span>(code, {
+	<span class="hljs-attr">rules</span>: {
+		<span class="hljs-string">&quot;my-rule1&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		<span class="hljs-string">&quot;my-rule2&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		<span class="hljs-string">&quot;my-rule3&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+	},
+	<span class="hljs-attr">parser</span>: <span class="hljs-string">&quot;my-parser&quot;</span>,
+});
+
+<span class="hljs-comment">// flat config mode</span>
+linter.<span class="hljs-title function_">verify</span>(code, {
+	<span class="hljs-attr">plugins</span>: {
+		<span class="hljs-string">&quot;my-plugin-foo&quot;</span>: {
+			<span class="hljs-attr">rules</span>: {
+				<span class="hljs-string">&quot;my-rule1&quot;</span>: myRule1,
+			},
+		},
+		<span class="hljs-string">&quot;my-plugin-bar&quot;</span>: {
+			<span class="hljs-attr">rules</span>: {
+				<span class="hljs-string">&quot;my-rule2&quot;</span>: myRule2,
+				<span class="hljs-string">&quot;my-rule3&quot;</span>: myRule3,
+			},
+		},
+	},
+	<span class="hljs-attr">rules</span>: {
+		<span class="hljs-string">&quot;my-plugin-foo/my-rule1&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		<span class="hljs-string">&quot;my-plugin-bar/my-rule2&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+		<span class="hljs-string">&quot;my-plugin-bar/my-rule3&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+	},
+	<span class="hljs-attr">languageOptions</span>: {
+		<span class="hljs-attr">parser</span>: myParser,
+	},
+});</code></pre></div>
+<p>If you still need the v8.x <code>Linter</code> functionality, pass <code>configType: &quot;eslintrc&quot;</code> to the constructor like this:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> linter = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Linter</span>({ <span class="hljs-attr">configType</span>: <span class="hljs-string">&quot;eslintrc&quot;</span> });
+
+linter.<span class="hljs-title function_">verify</span>(code, {
+	<span class="hljs-attr">parserOptions</span>: {
+		<span class="hljs-attr">ecmaVersion</span>: <span class="hljs-number">6</span>,
+	},
+});
+
+linter.<span class="hljs-title function_">getRules</span>();</code></pre></div>
+<p><strong>Related Issues(s):</strong> <a href="https://github.com/eslint/eslint/issues/13481">#13481</a></p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#use-migration-codemods">Use migration codemods</a><a class="toc-3" href="#migrate-eslint-configuration">Migrate ESLint configuration</a><a class="toc-3" href="#migrate-custom-rules">Migrate custom rules</a><a class="toc-2" href="#table-of-contents">Table of Contents</a><a class="toc-3" href="#breaking-changes-for-users">Breaking changes for users</a><a class="toc-3" href="#breaking-changes-for-plugin-developers">Breaking changes for plugin developers</a><a class="toc-3" href="#breaking-changes-for-integration-developers">Breaking changes for integration developers</a><a class="toc-2" href="#drop-old-node">Node.js &lt; v18.18, v19 are no longer supported</a><a class="toc-2" href="#flat-config">New default config format ( eslint.config.js )</a><a class="toc-2" href="#removed-formatters">Removed multiple formatters</a><a class="toc-2" href="#remove-jsdoc-rules">Removed require-jsdoc and valid-jsdoc rules</a><a class="toc-2" href="#eslint-recommended">eslint:recommended has been updated</a><a class="toc-2" href="#quiet-warn">--quiet no longer runs rules set to &quot;warn&quot;</a><a class="toc-2" href="#output-file">--output-file now writes a file to disk even with an empty output</a><a class="toc-2" href="#cli-empty-patterns">Change in behavior when no patterns are passed to CLI</a><a class="toc-2" href="#eslint-comment-options">/* eslint */ comments with only severity now retain options from the config file</a><a class="toc-2" href="#multiple-eslint-comments">Multiple /* eslint */ comments for the same rule are now disallowed</a><a class="toc-2" href="#exported-parsing">Stricter /* exported */ parsing</a><a class="toc-2" href="#stricter-rule-schemas">no-constructor-return and no-sequences rule schemas are stricter</a><a class="toc-2" href="#no-implicit-coercion">New checks in no-implicit-coercion by default</a><a class="toc-2" href="#no-invalid-regexp">Case-sensitive flags in no-invalid-regexp</a><a class="toc-2" href="#vars-ignore-pattern">varsIgnorePattern option of no-unused-vars no longer applies to catch arguments</a><a class="toc-2" href="#no-restricted-imports">no-restricted-imports now accepts multiple config entries with the same name</a><a class="toc-2" href="#string-config">&quot;eslint:recommended&quot; and &quot;eslint:all&quot; no longer accepted in flat config</a><a class="toc-2" href="#no-inner-declarations">no-inner-declarations has a new default behavior with a new option</a><a class="toc-2" href="#no-unused-vars">no-unused-vars now defaults caughtErrors to &quot;all&quot;</a><a class="toc-2" href="#no-useless-computed-key">no-useless-computed-key flags unnecessary computed member names in classes by default</a><a class="toc-2" href="#camelcase">camelcase allow option only accepts an array of strings</a><a class="toc-2" href="#removed-context-methods">Removed multiple context methods</a><a class="toc-2" href="#removed-sourcecode-getcomments">Removed sourceCode.getComments()</a><a class="toc-2" href="#removed-codepath-currentsegments">Removed CodePath#currentSegments</a><a class="toc-2" href="#codepath-precalc">Code paths are now precalculated</a><a class="toc-2" href="#drop-function-style-rules">Function-style rules are no longer supported</a><a class="toc-2" href="#meta-schema-required">meta.schema is required for rules with options</a><a class="toc-2" href="#flat-rule-tester">FlatRuleTester is now RuleTester</a><a class="toc-2" href="#stricter-rule-tester">Stricter RuleTester checks</a><a class="toc-2" href="#flat-eslint">FlatESLint is now ESLint</a><a class="toc-2" href="#flat-linter">Linter now expects flat config format</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

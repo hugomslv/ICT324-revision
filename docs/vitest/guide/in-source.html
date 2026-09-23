@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>In-Source Testing | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/in-source  <a class="ext small" href="https://vitest.dev/guide/in-source">version en ligne</a></div>
+<h1 id="in-source-testing"><a class="anchor" href="#in-source-testing">#</a>In-Source Testing</h1>
+<p>Vitest provides a way to run tests within your source code along side the implementation, similar to <a href="https://doc.rust-lang.org/book/ch11-03-test-organization.html#the-tests-module-and-cfgtest">Rust&#39;s module tests</a>.</p>
+<p>This makes the tests share the same closure as the implementations and able to test against private states without exporting. Meanwhile, it also brings a closer feedback loop for development.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>This guide explains how to write tests inside your source code. If you need to write tests in separate test files, follow the <a href="index.html#writing-tests">&quot;Writing Tests&quot; guide</a>.</p>
+</div><h2 id="setup"><a class="anchor" href="#setup">#</a>Setup</h2>
+<p>To get started, put a <code>if (import.meta.vitest)</code> block at the end of your source file and write some tests inside it. For example:</p>
+<div class="code"><div class="code-title">src/index.ts</div><pre><code class="hljs lang-ts"><span class="hljs-comment">// the implementation</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">...<span class="hljs-attr">args</span>: <span class="hljs-built_in">number</span>[]</span>) {
+  <span class="hljs-keyword">return</span> args.<span class="hljs-title function_">reduce</span>(<span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> a + b, <span class="hljs-number">0</span>)
+}
+
+<span class="hljs-comment">// in-source test suites</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">vitest</span>) {
+  <span class="hljs-keyword">const</span> { it, expect } = <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">vitest</span>
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&#x27;add&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">0</span>)
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">1</span>)
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">add</span>(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">6</span>)
+  })
+}</code></pre></div>
+<p>Update the <code>includeSource</code> config for Vitest to grab the files under <code>src/</code>:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">includeSource</span>: [<span class="hljs-string">&#x27;src/**/*.{js,ts}&#x27;</span>],
+  },
+})</code></pre></div>
+<p>Then you can start to test!</p>
+<div class="code"><pre><code class="hljs lang-bash">$ npx vitest</code></pre></div>
+<h2 id="production-build"><a class="anchor" href="#production-build">#</a>Production Build</h2>
+<p>For the production build, you will need to set the <code>define</code> options in your config file, letting the bundler do the dead code elimination. For example, in Vite</p>
+<div class="code"><div class="code-title">vite.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-comment">/// &lt;reference types=&quot;vitest/config&quot; /&gt;</span>
+
+<span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vite&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">includeSource</span>: [<span class="hljs-string">&#x27;src/**/*.{js,ts}&#x27;</span>],
+  },
+  <span class="hljs-attr">define</span>: {
+    <span class="hljs-string">&#x27;import.meta.vitest&#x27;</span>: <span class="hljs-string">&#x27;undefined&#x27;</span>,
+  },
+})</code></pre></div>
+<h3 id="other-bundlers"><a class="anchor" href="#other-bundlers">#</a>Other Bundlers</h3>
+<details class="box"><summary>Rolldown</summary><div class="code"><div class="code-title">rolldown.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;rolldown/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">transform</span>: {
+    <span class="hljs-attr">define</span>: {
+      <span class="hljs-string">&#x27;import.meta.vitest&#x27;</span>: <span class="hljs-string">&#x27;undefined&#x27;</span>,
+    },
+  },
+})</code></pre></div>
+<p>Learn more: <a href="https://rolldown.rs/">Rolldown</a></p>
+</details><details class="box"><summary>Rollup</summary><div class="code"><div class="code-title">rollup.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> replace <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@rollup/plugin-replace&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+  <span class="hljs-attr">plugins</span>: [
+    <span class="hljs-title function_">replace</span>({
+      <span class="hljs-string">&#x27;import.meta.vitest&#x27;</span>: <span class="hljs-string">&#x27;undefined&#x27;</span>,
+    })
+  ],
+  <span class="hljs-comment">// other options</span>
+}</code></pre></div>
+<p>Learn more: <a href="https://rollupjs.org/">Rollup</a></p>
+</details><details class="box"><summary>unbuild</summary><div class="code"><div class="code-title">build.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineBuildConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;unbuild&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineBuildConfig</span>({
+  <span class="hljs-attr">replace</span>: {
+    <span class="hljs-string">&#x27;import.meta.vitest&#x27;</span>: <span class="hljs-string">&#x27;undefined&#x27;</span>,
+  },
+  <span class="hljs-comment">// other options</span>
+})</code></pre></div>
+<p>Learn more: <a href="https://github.com/unjs/unbuild">unbuild</a></p>
+</details><details class="box"><summary>webpack</summary><div class="code"><div class="code-title">webpack.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;webpack&#x27;</span>)
+
+<span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = {
+  <span class="hljs-attr">plugins</span>: [
+    <span class="hljs-keyword">new</span> webpack.<span class="hljs-title class_">DefinePlugin</span>({
+      <span class="hljs-string">&#x27;import.meta.vitest&#x27;</span>: <span class="hljs-string">&#x27;undefined&#x27;</span>,
+    })
+  ],
+}</code></pre></div>
+<p>Learn more: <a href="https://webpack.js.org/plugins/define-plugin/">webpack</a></p>
+</details><h2 id="typescript"><a class="anchor" href="#typescript">#</a>TypeScript</h2>
+<p>To get TypeScript support for <code>import.meta.vitest</code>, add <code>vitest/importMeta</code> to your <code>tsconfig.json</code>:</p>
+<div class="code"><div class="code-title">tsconfig.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;compilerOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;types&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+      <span class="hljs-string">&quot;vitest/importMeta&quot;</span>
+    <span class="hljs-punctuation">]</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Reference to <a href="https://github.com/vitest-dev/vitest/tree/main/examples/in-source-test"><code>examples/in-source-test</code></a> for the full example.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>There is a limitation when using <a href="https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#assertion-functions">assertion functions</a> such as <code>assert</code> in in-source tests. See <a href="../api/assert.html#in-source-testing"><code>assert</code></a> for details and workarounds.</p>
+</div><h2 id="notes"><a class="anchor" href="#notes">#</a>Notes</h2>
+<p>This feature could be useful for:</p>
+<ul>
+<li>Unit testing for small-scoped functions or utilities</li>
+<li>Prototyping</li>
+<li>Inline Assertion</li>
+</ul>
+<p>It&#39;s recommended to <strong>use separate test files instead</strong> for more complex tests like components or E2E testing.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#setup">Setup</a><a class="toc-2" href="#production-build">Production Build</a><a class="toc-3" href="#other-bundlers">Other Bundlers</a><a class="toc-2" href="#typescript">TypeScript</a><a class="toc-2" href="#notes">Notes</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

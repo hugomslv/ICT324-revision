@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cancellable Test Resources | Recipes (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/recipes/cancellable  <a class="ext small" href="https://vitest.dev/guide/recipes/cancellable">version en ligne</a></div>
+<h1 id="cancellable-test-resources"><a class="anchor" href="#cancellable-test-resources">#</a>Cancellable Test Resources</h1>
+<p>A test can hold onto resources that don&#39;t stop when the test stops. A <code>fetch</code>, a child process, a file stream, a polling loop: none of those notice when Vitest has cancelled the test, and the worker has to sit there waiting for them to finish on their own. Vitest cancels a test when it exceeds its <code>timeout</code>, when another test fails under <code>--bail</code>, or when someone presses <kbd>Ctrl</kbd>+<kbd>C</kbd> in the terminal.</p>
+<p>The test context provides a <a href="../test-context.html#signal"><code>signal</code></a> <Version>3.2.0</Version> that fires in all of those cases. Pass it to anything that accepts an <code>AbortSignal</code> and the resource is released when Vitest cancels.</p>
+<h2 id="pattern"><a class="anchor" href="#pattern">#</a>Pattern</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;stop request when test times out&#x27;</span>, <span class="hljs-title function_">async</span> ({ signal }) =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">&#x27;/heavy-resource&#x27;</span>, { signal })
+}, <span class="hljs-number">2000</span>)</code></pre></div>
+<p>If the request hasn&#39;t completed within 2 seconds, <code>fetch</code> rejects with <code>AbortError</code> instead of the test hanging until the operation finishes.</p>
+<h2 id="other-web-apis-that-accept-an-abortsignal"><a class="anchor" href="#other-web-apis-that-accept-an-abortsignal">#</a>Other Web APIs that accept an <code>AbortSignal</code></h2>
+<ul>
+<li><a href="https://developer.mozilla.org/docs/Web/API/fetch"><code>fetch</code></a></li>
+<li><a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener"><code>addEventListener</code></a>, where passing <code>{ signal }</code> removes the listener on abort</li>
+<li><a href="https://developer.mozilla.org/docs/Web/API/ReadableStream/pipeTo"><code>ReadableStream.pipeTo</code></a></li>
+<li>Node.js APIs like <a href="https://nodejs.org/api/fs.html#fspromisesreadfilepath-options"><code>fs.readFile</code></a>, <a href="https://nodejs.org/api/child_process.html#child_processspawncommand-args-options"><code>child_process.spawn</code></a>, and <a href="https://nodejs.org/api/timers.html"><code>setTimeout</code> or <code>setInterval</code></a>, all of which accept <code>{ signal }</code></li>
+<li>Any custom code that calls <code>signal.throwIfAborted()</code> or listens for <code>&#39;abort&#39;</code></li>
+</ul>
+<h2 id="forwarding-the-signal"><a class="anchor" href="#forwarding-the-signal">#</a>Forwarding the signal</h2>
+<p>Wire the test&#39;s signal into your own helpers so cancellation propagates all the way down:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">pollUntilReady</span>(<span class="hljs-params"><span class="hljs-attr">url</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">signal</span>: <span class="hljs-title class_">AbortSignal</span></span>) {
+  <span class="hljs-keyword">while</span> (!signal.<span class="hljs-property">aborted</span>) {
+    <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(url, { signal })
+    <span class="hljs-keyword">if</span> (res.<span class="hljs-property">ok</span>) {
+      <span class="hljs-keyword">return</span>
+    }
+    <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function"><span class="hljs-params">r</span> =&gt;</span> <span class="hljs-built_in">setTimeout</span>(r, <span class="hljs-number">200</span>))
+  }
+  signal.<span class="hljs-title function_">throwIfAborted</span>()
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;worker becomes ready&#x27;</span>, <span class="hljs-title function_">async</span> ({ signal }) =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">pollUntilReady</span>(<span class="hljs-string">&#x27;http://localhost:4000/health&#x27;</span>, signal)
+}, <span class="hljs-number">5000</span>)</code></pre></div>
+<h2 id="see-also"><a class="anchor" href="#see-also">#</a>See also</h2>
+<ul>
+<li><a href="../test-context.html#signal"><code>signal</code> in Test Context</a></li>
+<li><a href="../../config/bail.html"><code>bail</code></a></li>
+<li><a href="../../config/testtimeout.html"><code>testTimeout</code></a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#pattern">Pattern</a><a class="toc-2" href="#other-web-apis-that-accept-an-abortsignal">Other Web APIs that accept an AbortSignal</a><a class="toc-2" href="#forwarding-the-signal">Forwarding the signal</a><a class="toc-2" href="#see-also">See also</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

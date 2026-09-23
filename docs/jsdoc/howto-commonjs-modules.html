@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CommonJS Modules (JSDoc) · ICT-324 Révision</title>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/hljs.css">
+<link rel="stylesheet" href="../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../index.html">Accueil</a><a class="nav-link" href="../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../docs/index.html">Index des docs</a><a class="nav-link" href="../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../docs/vite/index.html">Vite</a><a class="nav-link active" href="../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="index.html">JSDoc</a> › howto-commonjs-modules  <a class="ext small" href="https://jsdoc.app/howto-commonjs-modules.html">version en ligne</a></div>
+<h1>CommonJS Modules</h1><h2 id="overview"><a class="anchor" href="#overview">#</a>Overview</h2>
+<p>To help you document <a href="https://wiki.commonjs.org/wiki/Modules/1.1">CommonJS modules</a>, JSDoc 3 understands many of the
+conventions used in the CommonJS specification (for example, adding properties to the <code>exports</code>
+object). In addition, JSDoc recognizes the conventions of <a href="https://nodejs.org/api/modules.html">Node.js modules</a>, which
+extend the CommonJS standard (for example, assigning a value to <code>module.exports</code>). Depending on the
+coding conventions you follow, you may need to provide some additional tags to help JSDoc understand
+your code.</p>
+<p>This page explains how to document CommonJS and Node.js modules that use several different coding
+conventions. If you&#39;re documenting Asynchronous Module Definition (AMD) modules (also
+known as &quot;RequireJS modules&quot;), see <a href="howto-amd-modules.html">AMD Modules</a>.</p>
+<h2 id="module-identifiers"><a class="anchor" href="#module-identifiers">#</a>Module identifiers</h2>
+<p>In most cases, your CommonJS or Node.js module should include a standalone JSDoc comment that
+contains a <a href="tags-module.html"><code>@module</code> tag</a>. The <code>@module</code> tag&#39;s value should be the module identifier
+that&#39;s passed to the <code>require()</code> function. For example, if users load the module by calling
+<code>require(&#39;my/shirt&#39;)</code>, your JSDoc comment would contain the tag <code>@module my/shirt</code>.</p>
+<p>If you use the <code>@module</code> tag without a value, JSDoc will try to guess the correct module identifier
+based on the filepath.</p>
+<p>When you use a JSDoc <a href="about-namepaths.html">namepath</a> to refer to a module from another JSDoc comment, you must
+add the prefix <code>module:</code>. For example, if you want the documentation for the module <code>my/pants</code> to
+link to the module <code>my/shirt</code>, you could use the <a href="tags-see.html"><code>@see</code> tag</a> to document <code>my/pants</code> as
+follows:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Pants module.
+ * <span class="hljs-doctag">@module</span> my/pants
+ * <span class="hljs-doctag">@see</span> module:my/shirt
+ */</span></code></pre></div>
+<p>Similarly, the namepath for each member of the module will start with <code>module:</code>, followed by the
+module name. For example, if your <code>my/pants</code> module exports a <code>Jeans</code> constructor, and <code>Jeans</code> has
+an instance method named <code>hem</code>, the instance method&#39;s longname is <code>module:my/pants.Jeans#hem</code>.</p>
+<h2 id="properties-of-the-exports-object"><a class="anchor" href="#properties-of-the-exports-object">#</a>Properties of the &#39;exports&#39; object</h2>
+<p>It&#39;s easiest to document symbols that are directly assigned to a property of the <code>exports</code> object.
+JSDoc will automatically recognize that the module exports these symbols.</p>
+<p>In the following example, the <code>my/shirt</code> module exports the methods <code>button</code> and <code>unbutton</code>. JSDoc
+will automatically detect that the module exports these methods.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Methods added to the exports object</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Shirt module.
+ * <span class="hljs-doctag">@module</span> my/shirt
+ */</span>
+
+<span class="hljs-comment">/** Button the shirt. */</span>
+<span class="hljs-built_in">exports</span>.<span class="hljs-property">button</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};
+
+<span class="hljs-comment">/** Unbutton the shirt. */</span>
+<span class="hljs-built_in">exports</span>.<span class="hljs-property">unbutton</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};</code></pre></div>
+</div><p><a name="local-vars"></a></p>
+<h2 id="values-assigned-to-local-variables"><a class="anchor" href="#values-assigned-to-local-variables">#</a>Values assigned to local variables</h2>
+<p>In some cases, an exported symbol may be assigned to a local variable before it&#39;s added to the
+<code>exports</code> object. For example, if your module exports a <code>wash</code> method, and the module itself often
+calls the <code>wash</code> method, you might write the module as follows:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Method assigned to a local variable and added to the exports object</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Shirt module.
+ * <span class="hljs-doctag">@module</span> my/shirt
+ */</span>
+
+<span class="hljs-comment">/** Wash the shirt. */</span>
+<span class="hljs-keyword">var</span> wash = <span class="hljs-built_in">exports</span>.<span class="hljs-property">wash</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};</code></pre></div>
+</div><p>In this case, JSDoc will <em>not</em> automatically document <code>wash</code> as an exported method, because the
+JSDoc comment appears immediately before the local variable <code>wash</code> rather than <code>exports.wash</code>. One
+solution is to add an <a href="tags-alias.html"><code>@alias</code> tag</a> that defines the correct longname for the method. In
+this case, the method is a static member of the module <code>my/shirt</code>, so the correct longname is
+<code>module:my/shirt.wash</code>:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Longname defined in an @alias tag</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Shirt module.
+ * <span class="hljs-doctag">@module</span> my/shirt
+ */</span>
+
+<span class="hljs-comment">/**
+ * Wash the shirt.
+ * <span class="hljs-doctag">@alias</span> module:my/shirt.wash
+ */</span>
+<span class="hljs-keyword">var</span> wash = <span class="hljs-built_in">exports</span>.<span class="hljs-property">wash</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};</code></pre></div>
+</div><p>Another solution is to move the method&#39;s JSDoc comment so it comes immediately before
+<code>exports.wash</code>. This change allows JSDoc to detect that <code>wash</code> is exported by the module <code>my/shirt</code>:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : JSDoc comment immediately before exports.wash</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Shirt module.
+ * <span class="hljs-doctag">@module</span> my/shirt
+ */</span>
+
+<span class="hljs-keyword">var</span> wash =
+<span class="hljs-comment">/** Wash the shirt. */</span>
+<span class="hljs-built_in">exports</span>.<span class="hljs-property">wash</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};</code></pre></div>
+</div><h2 id="values-assigned-to-moduleexports"><a class="anchor" href="#values-assigned-to-moduleexports">#</a>Values assigned to &#39;module.exports&#39;</h2>
+<p>In a Node.js module, you can assign a value directly to <code>module.exports</code>. This section explains how
+to document different types of values when they are assigned to <code>module.exports</code>.</p>
+<h3 id="object-literal-assigned-to-moduleexports"><a class="anchor" href="#object-literal-assigned-to-moduleexports">#</a>Object literal assigned to &#39;module.exports&#39;</h3>
+<p>If a module assigns an object literal to <code>module.exports</code>. JSDoc automatically recognizes that the
+module exports only this value. In addition, JSDoc automatically sets the correct longname for each
+property:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Object literal assigned to module.exports</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Color mixer.
+ * <span class="hljs-doctag">@module</span> color/mixer
+ */</span>
+
+<span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = {
+    <span class="hljs-comment">/**
+     * Blend two colors together.
+     * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">color1</span> - The first color, in hexadecimal format.
+     * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">color2</span> - The second color, in hexadecimal format.
+     * <span class="hljs-doctag">@return</span> {<span class="hljs-type">string</span>} The blended color.
+     */</span>
+    <span class="hljs-attr">blend</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">color1, color2</span>) {
+        <span class="hljs-comment">// ...</span>
+    },
+
+    <span class="hljs-comment">/**
+     * Darken a color by the given percentage.
+     * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">color</span> - The color, in hexadecimal format.
+     * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">percent</span> - The percentage, ranging from 0 to 100.
+     * <span class="hljs-doctag">@return</span> {<span class="hljs-type">string</span>} The darkened color.
+     */</span>
+    <span class="hljs-attr">darken</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">color, percent</span>) {
+        <span class="hljs-comment">// ..</span>
+    }
+};</code></pre></div>
+</div><p>You can also use this pattern if you add properties to <code>module.exports</code> outside of the object
+literal:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Assignment to module.exports followed by property definition</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Color mixer.
+ * <span class="hljs-doctag">@module</span> color/mixer
+ */</span>
+
+<span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = {
+    <span class="hljs-comment">/**
+     * Blend two colors together.
+     * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">color1</span> - The first color, in hexadecimal format.
+     * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">color2</span> - The second color, in hexadecimal format.
+     * <span class="hljs-doctag">@return</span> {<span class="hljs-type">string</span>} The blended color.
+     */</span>
+    <span class="hljs-attr">blend</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">color1, color2</span>) {
+        <span class="hljs-comment">// ...</span>
+    }
+};
+
+<span class="hljs-comment">/**
+ * Darken a color by the given percentage.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">color</span> - The color, in hexadecimal format.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">percent</span> - The percentage, ranging from 0 to 100.
+ * <span class="hljs-doctag">@return</span> {<span class="hljs-type">string</span>} The darkened color.
+ */</span>
+<span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span>.<span class="hljs-property">darken</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">color, percent</span>) {
+    <span class="hljs-comment">// ..</span>
+};</code></pre></div>
+</div><h3 id="function-assigned-to-moduleexports"><a class="anchor" href="#function-assigned-to-moduleexports">#</a>Function assigned to &#39;module.exports&#39;</h3>
+<p>If you assign a function to <code>module.exports</code>, JSDoc will automatically set the correct longname for
+the function:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Function assigned to 'module.exports'</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Color mixer.
+ * <span class="hljs-doctag">@module</span> color/mixer
+ */</span>
+
+<span class="hljs-comment">/**
+ * Blend two colors together.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">color1</span> - The first color, in hexadecimal format.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">color2</span> - The second color, in hexadecimal format.
+ * <span class="hljs-doctag">@return</span> {<span class="hljs-type">string</span>} The blended color.
+ */</span>
+<span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">color1, color2</span>) {
+    <span class="hljs-comment">// ...</span>
+};</code></pre></div>
+</div><p>The same pattern works for constructor functions:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Constructor assigned to 'module.exports'</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Color mixer.
+ * <span class="hljs-doctag">@module</span> color/mixer
+ */</span>
+
+<span class="hljs-comment">/** Create a color mixer. */</span>
+<span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = <span class="hljs-keyword">function</span> <span class="hljs-title function_">ColorMixer</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+};</code></pre></div>
+</div><h3 id="string-number-or-boolean-assigned-to-moduleexports"><a class="anchor" href="#string-number-or-boolean-assigned-to-moduleexports">#</a>String, number, or boolean assigned to &#39;module.exports&#39;</h3>
+<p>For value types (strings, numbers, and booleans) assigned to <code>module.exports</code>, you must document the
+exported value&#39;s type by using the <a href="tags-type.html"><code>@type</code> tag</a> in the same JSDoc comment as the
+<code>@module</code> tag:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : String assigned to module.exports</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Module representing the word of the day.
+ * <span class="hljs-doctag">@module</span> <span class="hljs-variable">wotd</span>
+ * <span class="hljs-doctag">@type</span> {<span class="hljs-type">string</span>}
+ */</span>
+
+<span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = <span class="hljs-string">&#x27;perniciousness&#x27;</span>;</code></pre></div>
+</div><h2 id="values-assigned-to-moduleexports-and-local-variables"><a class="anchor" href="#values-assigned-to-moduleexports-and-local-variables">#</a>Values assigned to &#39;module.exports&#39; and local variables</h2>
+<p>If your module exports symbols that are not directly assigned to <code>module.exports</code>, you can use the
+<a href="tags-exports.html"><code>@exports</code> tag</a> in place of the <code>@module</code> tag. The <code>@exports</code> tag tells JSDoc that a
+symbol represents the value exported by a module.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Object literal assigned to a local variable and module.exports</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Color mixer.
+ * <span class="hljs-doctag">@exports</span> color/mixer
+ */</span>
+<span class="hljs-keyword">var</span> mixer = <span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = {
+    <span class="hljs-comment">/**
+     * Blend two colors together.
+     * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">color1</span> - The first color, in hexadecimal format.
+     * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">color2</span> - The second color, in hexadecimal format.
+     * <span class="hljs-doctag">@return</span> {<span class="hljs-type">string</span>} The blended color.
+     */</span>
+    <span class="hljs-attr">blend</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params">color1, color2</span>) {
+        <span class="hljs-comment">// ...</span>
+    }
+};
+</code></pre></div>
+</div><h2 id="properties-added-to-this"><a class="anchor" href="#properties-added-to-this">#</a>Properties added to &#39;this&#39;</h2>
+<p>When a module adds a property to its <code>this</code> object, JSDoc 3 automatically recognizes that the new
+property is exported by the module:</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Properties added to a module's 'this' object</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Module for bookshelf-related utilities.
+ * <span class="hljs-doctag">@module</span> <span class="hljs-variable">bookshelf</span>
+ */</span>
+
+<span class="hljs-comment">/**
+ * Create a new Book.
+ * <span class="hljs-doctag">@class</span>
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">title</span> - The title of the book.
+ */</span>
+<span class="hljs-variable language_">this</span>.<span class="hljs-property">Book</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">title</span>) {
+    <span class="hljs-comment">/** The title of the book. */</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">title</span> = title;
+}</code></pre></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#overview">Overview</a><a class="toc-2" href="#module-identifiers">Module identifiers</a><a class="toc-2" href="#properties-of-the-exports-object">Properties of the 'exports' object</a><a class="toc-2" href="#values-assigned-to-local-variables">Values assigned to local variables</a><a class="toc-2" href="#values-assigned-to-moduleexports">Values assigned to 'module.exports'</a><a class="toc-3" href="#object-literal-assigned-to-moduleexports">Object literal assigned to 'module.exports'</a><a class="toc-3" href="#function-assigned-to-moduleexports">Function assigned to 'module.exports'</a><a class="toc-3" href="#string-number-or-boolean-assigned-to-moduleexports">String, number, or boolean assigned to 'module.exports'</a><a class="toc-2" href="#values-assigned-to-moduleexports-and-local-variables">Values assigned to 'module.exports' and local variables</a><a class="toc-2" href="#properties-added-to-this">Properties added to 'this'</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

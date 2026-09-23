@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mocks (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › api/mock  <a class="ext small" href="https://vitest.dev/api/mock">version en ligne</a></div>
+<h1 id="mocks"><a class="anchor" href="#mocks">#</a>Mocks</h1>
+<p>You can create a mock function or a class to track its execution with the <code>vi.fn</code> method. If you want to track a property on an already created object, you can use the <code>vi.spyOn</code> method:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-keyword">const</span> fn = vi.<span class="hljs-title function_">fn</span>()
+<span class="hljs-title function_">fn</span>(<span class="hljs-string">&#x27;hello world&#x27;</span>)
+fn.<span class="hljs-property">mock</span>.<span class="hljs-property">calls</span>[<span class="hljs-number">0</span>] === [<span class="hljs-string">&#x27;hello world&#x27;</span>]
+
+<span class="hljs-keyword">const</span> market = {
+  <span class="hljs-attr">getApples</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-number">100</span>
+}
+
+<span class="hljs-keyword">const</span> getApplesSpy = vi.<span class="hljs-title function_">spyOn</span>(market, <span class="hljs-string">&#x27;getApples&#x27;</span>)
+market.<span class="hljs-title function_">getApples</span>()
+getApplesSpy.<span class="hljs-property">mock</span>.<span class="hljs-property">calls</span>.<span class="hljs-property">length</span> === <span class="hljs-number">1</span></code></pre></div>
+<p>You should use mock assertions (e.g., <a href="expect.html#tohavebeencalled"><code>toHaveBeenCalled</code></a>) on <a href="expect.html"><code>expect</code></a> to assert mock results. This API reference describes available properties and methods to manipulate mock behavior.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : IMPORTANT</div><p>Vitest spies inherit implementation&#39;s <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/length"><code>length</code></a> property when initialized, but it doesn&#39;t override it if the implementation was changed later:</p>
+<div class="code-group"><div class="code"><div class="code-title">vi.fn</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> fn = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">(<span class="hljs-params">arg1</span>) =&gt;</span> {})
+fn.<span class="hljs-property">length</span> <span class="hljs-comment">// == 1</span>
+
+fn.<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> {})
+fn.<span class="hljs-property">length</span> <span class="hljs-comment">// == 1</span></code></pre></div>
+<div class="code"><div class="code-title">vi.spyOn</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> example = {
+  <span class="hljs-title function_">fn</span>(<span class="hljs-params">arg1, arg2</span>) {
+    <span class="hljs-comment">// ...</span>
+  }
+}
+
+<span class="hljs-keyword">const</span> fn = vi.<span class="hljs-title function_">spyOn</span>(example, <span class="hljs-string">&#x27;fn&#x27;</span>)
+fn.<span class="hljs-property">length</span> <span class="hljs-comment">// == 2</span>
+
+fn.<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> {})
+fn.<span class="hljs-property">length</span> <span class="hljs-comment">// == 2</span></code></pre></div>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>The custom function implementation in the types below is marked with a generic <code>&lt;T&gt;</code>.</p>
+</div><div class="box box-warning"><div class="box-title">⚠️ Attention : Class Support {#class-support}</div><p>Shorthand methods like <code>mockReturnValue</code>, <code>mockReturnValueOnce</code>, <code>mockResolvedValue</code> and others cannot be used on a mocked class. Class constructors have <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/constructor">unintuitive behaviour</a> regarding the return value:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> <span class="hljs-title class_">CorrectDogClass</span> = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-keyword">class</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"><span class="hljs-keyword">public</span> <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span></span>) {}
+})
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">IncorrectDogClass</span> = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-keyword">class</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"><span class="hljs-keyword">public</span> <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span></span>) {
+    <span class="hljs-keyword">return</span> { name }
+  }
+})
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Marti</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">CorrectDogClass</span>(<span class="hljs-string">&#x27;Marti&#x27;</span>)
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Newt</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">IncorrectDogClass</span>(<span class="hljs-string">&#x27;Newt&#x27;</span>)
+
+<span class="hljs-title class_">Marti</span> <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">CorrectDogClass</span> <span class="hljs-comment">// ✅ true</span>
+<span class="hljs-title class_">Newt</span> <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">IncorrectDogClass</span> <span class="hljs-comment">// ❌ false!</span></code></pre></div>
+<p>Even though the shapes are the same, the <em>return value</em> from the constructor is assigned to <code>Newt</code>, which is a plain object, not an instance of a mock. Vitest guards you against this behaviour in shorthand methods (but not in <code>mockImplementation</code>!) and throws an error instead.</p>
+<p>If you need to mock constructed instance of a class, consider using the <code>class</code> syntax with <code>mockImplementation</code> instead:</p>
+<div class="code"><pre><code class="hljs lang-ts">mock.<span class="hljs-title function_">mockReturnValue</span>({ <span class="hljs-attr">hello</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;world&#x27;</span> })
+mock.<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-keyword">class</span> { hello = <span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;world&#x27;</span> })</code></pre></div>
+<p>If you need to test the behaviour where this is a valid use case, you can use <code>mockImplementation</code> with a <code>constructor</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts">mock.<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-keyword">class</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span></span>) {
+    <span class="hljs-keyword">return</span> { name }
+  }
+})</code></pre></div>
+</div><h2 id="getmockimplementation"><a class="anchor" href="#getmockimplementation">#</a>getMockImplementation</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getMockImplementation</span>(<span class="hljs-params"></span>): T | <span class="hljs-literal">undefined</span></code></pre></div>
+<p>Returns the current mock implementation if there is one.</p>
+<p>If the mock was created with <a href="vi.html#vi-fn"><code>vi.fn</code></a>, it will use the provided method as the mock implementation.</p>
+<p>If the mock was created with <a href="vi.html#vi-spyon"><code>vi.spyOn</code></a>, it will return <code>undefined</code> unless a custom implementation is provided.</p>
+<h2 id="getmockname"><a class="anchor" href="#getmockname">#</a>getMockName</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getMockName</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">string</span></code></pre></div>
+<p>Use it to return the name assigned to the mock with the <code>.mockName(name)</code> method. By default, <code>vi.fn()</code> mocks will return <code>&#39;vi.fn()&#39;</code>, while spies created with <code>vi.spyOn</code> will keep the original name.</p>
+<h2 id="mockclear"><a class="anchor" href="#mockclear">#</a>mockClear</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mockClear</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;</code></pre></div>
+<p>Clears all information about every call. After calling it, all properties on <code>.mock</code> will return to their initial state. This method does not reset implementations. It is useful for cleaning up mocks between different assertions.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> person = {
+  <span class="hljs-attr">greet</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-string">`Hello <span class="hljs-subst">${name}</span>`</span>,
+}
+<span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">spyOn</span>(person, <span class="hljs-string">&#x27;greet&#x27;</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;mocked&#x27;</span>)
+<span class="hljs-title function_">expect</span>(person.<span class="hljs-title function_">greet</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;mocked&#x27;</span>)
+<span class="hljs-title function_">expect</span>(spy.<span class="hljs-property">mock</span>.<span class="hljs-property">calls</span>).<span class="hljs-title function_">toEqual</span>([[<span class="hljs-string">&#x27;Alice&#x27;</span>]])
+
+<span class="hljs-comment">// clear call history but keep mock implementation</span>
+spy.<span class="hljs-title function_">mockClear</span>()
+<span class="hljs-title function_">expect</span>(spy.<span class="hljs-property">mock</span>.<span class="hljs-property">calls</span>).<span class="hljs-title function_">toEqual</span>([])
+<span class="hljs-title function_">expect</span>(person.<span class="hljs-title function_">greet</span>(<span class="hljs-string">&#x27;Bob&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;mocked&#x27;</span>)
+<span class="hljs-title function_">expect</span>(spy.<span class="hljs-property">mock</span>.<span class="hljs-property">calls</span>).<span class="hljs-title function_">toEqual</span>([[<span class="hljs-string">&#x27;Bob&#x27;</span>]])</code></pre></div>
+<p>To automatically call this method before each test, enable the <a href="../config/clearmocks.html"><code>clearMocks</code></a> setting in the configuration.</p>
+<h2 id="mockname"><a class="anchor" href="#mockname">#</a>mockName</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mockName</span>(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;</code></pre></div>
+<p>Sets the internal mock name. This is useful for identifying the mock when an assertion fails.</p>
+<h2 id="mockimplementation"><a class="anchor" href="#mockimplementation">#</a>mockImplementation</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mockImplementation</span>(<span class="hljs-params"><span class="hljs-attr">fn</span>: T</span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;</code></pre></div>
+<p>Accepts a function to be used as the mock implementation. TypeScript expects the arguments and return type to match those of the original function.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> mockFn = vi.<span class="hljs-title function_">fn</span>().<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">apples</span>: <span class="hljs-built_in">number</span></span>) =&gt;</span> apples + <span class="hljs-number">1</span>)
+<span class="hljs-comment">// or: vi.fn(apples =&gt; apples + 1);</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">NelliesBucket</span> = <span class="hljs-title function_">mockFn</span>(<span class="hljs-number">0</span>)
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">BobsBucket</span> = <span class="hljs-title function_">mockFn</span>(<span class="hljs-number">1</span>)
+
+<span class="hljs-title class_">NelliesBucket</span> === <span class="hljs-number">1</span> <span class="hljs-comment">// true</span>
+<span class="hljs-title class_">BobsBucket</span> === <span class="hljs-number">2</span> <span class="hljs-comment">// true</span>
+
+mockFn.<span class="hljs-property">mock</span>.<span class="hljs-property">calls</span>[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>] === <span class="hljs-number">0</span> <span class="hljs-comment">// true</span>
+mockFn.<span class="hljs-property">mock</span>.<span class="hljs-property">calls</span>[<span class="hljs-number">1</span>][<span class="hljs-number">0</span>] === <span class="hljs-number">1</span> <span class="hljs-comment">// true</span></code></pre></div>
+<p>If the implementation is a class, the mock&#39;s <code>prototype</code> is re-pointed to the implementation&#39;s prototype, so constructed instances see its prototype methods and pass <code>instanceof</code> checks against it. See <a href="../guide/mocking/classes.html">Mocking Classes</a> for details.</p>
+<h2 id="mockimplementationonce"><a class="anchor" href="#mockimplementationonce">#</a>mockImplementationOnce</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mockImplementationOnce</span>(<span class="hljs-params"><span class="hljs-attr">fn</span>: T</span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;</code></pre></div>
+<p>Accepts a function to be used as the mock implementation. TypeScript expects the arguments and return type to match those of the original function. This method can be chained to produce different results for multiple function calls.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> myMockFn = vi
+  .<span class="hljs-title function_">fn</span>()
+  .<span class="hljs-title function_">mockImplementationOnce</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-literal">true</span>) <span class="hljs-comment">// 1st call</span>
+  .<span class="hljs-title function_">mockImplementationOnce</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-literal">false</span>) <span class="hljs-comment">// 2nd call</span>
+
+<span class="hljs-title function_">myMockFn</span>() <span class="hljs-comment">// 1st call: true</span>
+<span class="hljs-title function_">myMockFn</span>() <span class="hljs-comment">// 2nd call: false</span></code></pre></div>
+<p>When the mocked function runs out of implementations, it will invoke the default implementation set with <code>vi.fn(() =&gt; defaultValue)</code> or <code>.mockImplementation(() =&gt; defaultValue)</code> if they were called:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> myMockFn = vi
+  .<span class="hljs-title function_">fn</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;default&#x27;</span>)
+  .<span class="hljs-title function_">mockImplementationOnce</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;first call&#x27;</span>)
+  .<span class="hljs-title function_">mockImplementationOnce</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;second call&#x27;</span>)
+
+<span class="hljs-comment">// &#x27;first call&#x27;, &#x27;second call&#x27;, &#x27;default&#x27;, &#x27;default&#x27;</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">myMockFn</span>(), <span class="hljs-title function_">myMockFn</span>(), <span class="hljs-title function_">myMockFn</span>(), <span class="hljs-title function_">myMockFn</span>())</code></pre></div>
+<h2 id="withimplementation"><a class="anchor" href="#withimplementation">#</a>withImplementation</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">withImplementation</span>(<span class="hljs-params">
+  <span class="hljs-attr">fn</span>: T,
+  <span class="hljs-attr">cb</span>: () =&gt; <span class="hljs-built_in">void</span>
+</span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">withImplementation</span>(<span class="hljs-params">
+  <span class="hljs-attr">fn</span>: T,
+  <span class="hljs-attr">cb</span>: () =&gt; <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Mock</span>&lt;T&gt;&gt;</code></pre></div>
+<p>Overrides the original mock implementation temporarily while the callback is being executed.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> myMockFn = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;original&#x27;</span>)
+
+myMockFn.<span class="hljs-title function_">withImplementation</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;temp&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">myMockFn</span>() <span class="hljs-comment">// &#x27;temp&#x27;</span>
+})
+
+<span class="hljs-title function_">myMockFn</span>() <span class="hljs-comment">// &#x27;original&#x27;</span></code></pre></div>
+<p>Can be used with an asynchronous callback. The method has to be awaited to use the original implementation afterward.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;async callback&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> myMockFn = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;original&#x27;</span>)
+
+  <span class="hljs-comment">// We await this call since the callback is async</span>
+  <span class="hljs-keyword">await</span> myMockFn.<span class="hljs-title function_">withImplementation</span>(
+    <span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;temp&#x27;</span>,
+    <span class="hljs-title function_">async</span> () =&gt; {
+      <span class="hljs-title function_">myMockFn</span>() <span class="hljs-comment">// &#x27;temp&#x27;</span>
+    },
+  )
+
+  <span class="hljs-title function_">myMockFn</span>() <span class="hljs-comment">// &#x27;original&#x27;</span>
+})</code></pre></div>
+<p>Note that this method takes precedence over the <a href="#mockimplementationonce"><code>mockImplementationOnce</code></a>.</p>
+<h2 id="mockrejectedvalue"><a class="anchor" href="#mockrejectedvalue">#</a>mockRejectedValue</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mockRejectedValue</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;</code></pre></div>
+<p>Accepts an error that will be rejected when an async function is called.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> asyncMock = vi.<span class="hljs-title function_">fn</span>().<span class="hljs-title function_">mockRejectedValue</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;Async error&#x27;</span>))
+
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">asyncMock</span>() <span class="hljs-comment">// throws Error&lt;&#x27;Async error&#x27;&gt;</span></code></pre></div>
+<h2 id="mockrejectedvalueonce"><a class="anchor" href="#mockrejectedvalueonce">#</a>mockRejectedValueOnce</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mockRejectedValueOnce</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;</code></pre></div>
+<p>Accepts a value that will be rejected during the next function call. If chained, each consecutive call will reject the specified value.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> asyncMock = vi
+  .<span class="hljs-title function_">fn</span>()
+  .<span class="hljs-title function_">mockResolvedValueOnce</span>(<span class="hljs-string">&#x27;first call&#x27;</span>)
+  .<span class="hljs-title function_">mockRejectedValueOnce</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;Async error&#x27;</span>))
+
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">asyncMock</span>() <span class="hljs-comment">// &#x27;first call&#x27;</span>
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">asyncMock</span>() <span class="hljs-comment">// throws Error&lt;&#x27;Async error&#x27;&gt;</span></code></pre></div>
+<h2 id="mockreset"><a class="anchor" href="#mockreset">#</a>mockReset</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mockReset</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;</code></pre></div>
+<p>Does what <a href="#mockClear"><code>mockClear</code></a> does and resets the mock implementation. This also resets all &quot;once&quot; implementations.</p>
+<p>Note that resetting a mock from <code>vi.fn()</code> will set the implementation to an empty function that returns <code>undefined</code>.
+Resetting a mock from <code>vi.fn(impl)</code> will reset the implementation to <code>impl</code>.</p>
+<p>The mock&#39;s <code>prototype</code> chain follows along: it reverts to the original class for <code>vi.fn(impl)</code> and <code>vi.spyOn()</code>, and to a plain object for <code>vi.fn()</code>, so instances constructed after the reset no longer pass <code>instanceof</code> checks against a previously set class implementation.</p>
+<p>This is useful when you want to reset a mock to its original state.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> person = {
+  <span class="hljs-attr">greet</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-string">`Hello <span class="hljs-subst">${name}</span>`</span>,
+}
+<span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">spyOn</span>(person, <span class="hljs-string">&#x27;greet&#x27;</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;mocked&#x27;</span>)
+<span class="hljs-title function_">expect</span>(person.<span class="hljs-title function_">greet</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;mocked&#x27;</span>)
+<span class="hljs-title function_">expect</span>(spy.<span class="hljs-property">mock</span>.<span class="hljs-property">calls</span>).<span class="hljs-title function_">toEqual</span>([[<span class="hljs-string">&#x27;Alice&#x27;</span>]])
+
+<span class="hljs-comment">// clear call history and reset implementation, but method is still spied</span>
+spy.<span class="hljs-title function_">mockReset</span>()
+<span class="hljs-title function_">expect</span>(spy.<span class="hljs-property">mock</span>.<span class="hljs-property">calls</span>).<span class="hljs-title function_">toEqual</span>([])
+<span class="hljs-title function_">expect</span>(person.<span class="hljs-property">greet</span>).<span class="hljs-title function_">toBe</span>(spy)
+<span class="hljs-title function_">expect</span>(person.<span class="hljs-title function_">greet</span>(<span class="hljs-string">&#x27;Bob&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Hello Bob&#x27;</span>)
+<span class="hljs-title function_">expect</span>(spy.<span class="hljs-property">mock</span>.<span class="hljs-property">calls</span>).<span class="hljs-title function_">toEqual</span>([[<span class="hljs-string">&#x27;Bob&#x27;</span>]])</code></pre></div>
+<p>To automatically call this method before each test, enable the <a href="../config/mockreset.html"><code>mockReset</code></a> setting in the configuration.</p>
+<h2 id="mockrestore"><a class="anchor" href="#mockrestore">#</a>mockRestore</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mockRestore</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;</code></pre></div>
+<p>Does what <a href="#mockreset"><code>mockReset</code></a> does and restores the original descriptors of spied-on objects, if the mock was created with <a href="vi.html#vi-spyon"><code>vi.spyOn</code></a>.</p>
+<p><code>mockRestore</code> on a <code>vi.fn()</code> mock is identical to <a href="#mockreset"><code>mockReset</code></a>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> person = {
+  <span class="hljs-attr">greet</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-string">`Hello <span class="hljs-subst">${name}</span>`</span>,
+}
+<span class="hljs-keyword">const</span> spy = vi.<span class="hljs-title function_">spyOn</span>(person, <span class="hljs-string">&#x27;greet&#x27;</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;mocked&#x27;</span>)
+<span class="hljs-title function_">expect</span>(person.<span class="hljs-title function_">greet</span>(<span class="hljs-string">&#x27;Alice&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;mocked&#x27;</span>)
+<span class="hljs-title function_">expect</span>(spy.<span class="hljs-property">mock</span>.<span class="hljs-property">calls</span>).<span class="hljs-title function_">toEqual</span>([[<span class="hljs-string">&#x27;Alice&#x27;</span>]])
+
+<span class="hljs-comment">// clear call history and restore spied object method</span>
+spy.<span class="hljs-title function_">mockRestore</span>()
+<span class="hljs-title function_">expect</span>(spy.<span class="hljs-property">mock</span>.<span class="hljs-property">calls</span>).<span class="hljs-title function_">toEqual</span>([])
+<span class="hljs-title function_">expect</span>(person.<span class="hljs-property">greet</span>).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBe</span>(spy)
+<span class="hljs-title function_">expect</span>(person.<span class="hljs-title function_">greet</span>(<span class="hljs-string">&#x27;Bob&#x27;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&#x27;Hello Bob&#x27;</span>)
+<span class="hljs-title function_">expect</span>(spy.<span class="hljs-property">mock</span>.<span class="hljs-property">calls</span>).<span class="hljs-title function_">toEqual</span>([])</code></pre></div>
+<p>To automatically call this method before each test, enable the <a href="../config/restoremocks.html"><code>restoreMocks</code></a> setting in the configuration.</p>
+<h2 id="mockresolvedvalue"><a class="anchor" href="#mockresolvedvalue">#</a>mockResolvedValue</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mockResolvedValue</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-title class_">Awaited</span>&lt;<span class="hljs-title class_">ReturnType</span>&lt;T&gt;&gt;</span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;</code></pre></div>
+<p>Accepts a value that will be resolved when the async function is called. TypeScript will only accept values that match the return type of the original function.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> asyncMock = vi.<span class="hljs-title function_">fn</span>().<span class="hljs-title function_">mockResolvedValue</span>(<span class="hljs-number">42</span>)
+
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">asyncMock</span>() <span class="hljs-comment">// 42</span></code></pre></div>
+<h2 id="mockresolvedvalueonce"><a class="anchor" href="#mockresolvedvalueonce">#</a>mockResolvedValueOnce</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mockResolvedValueOnce</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-title class_">Awaited</span>&lt;<span class="hljs-title class_">ReturnType</span>&lt;T&gt;&gt;</span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;</code></pre></div>
+<p>Accepts a value that will be resolved during the next function call. TypeScript will only accept values that match the return type of the original function. If chained, each consecutive call will resolve the specified value.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> asyncMock = vi
+  .<span class="hljs-title function_">fn</span>()
+  .<span class="hljs-title function_">mockResolvedValue</span>(<span class="hljs-string">&#x27;default&#x27;</span>)
+  .<span class="hljs-title function_">mockResolvedValueOnce</span>(<span class="hljs-string">&#x27;first call&#x27;</span>)
+  .<span class="hljs-title function_">mockResolvedValueOnce</span>(<span class="hljs-string">&#x27;second call&#x27;</span>)
+
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">asyncMock</span>() <span class="hljs-comment">// first call</span>
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">asyncMock</span>() <span class="hljs-comment">// second call</span>
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">asyncMock</span>() <span class="hljs-comment">// default</span>
+<span class="hljs-keyword">await</span> <span class="hljs-title function_">asyncMock</span>() <span class="hljs-comment">// default</span></code></pre></div>
+<h2 id="mockreturnthis"><a class="anchor" href="#mockreturnthis">#</a>mockReturnThis</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mockReturnThis</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;</code></pre></div>
+<p>Use this if you need to return the <code>this</code> context from the method without invoking the actual implementation. This is a shorthand for:</p>
+<div class="code"><pre><code class="hljs lang-ts">spy.<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>
+})</code></pre></div>
+<h2 id="mockreturnvalue"><a class="anchor" href="#mockreturnvalue">#</a>mockReturnValue</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-title class_">ReturnType</span>&lt;T&gt;</span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;</code></pre></div>
+<p>Accepts a value that will be returned whenever the mock function is called. TypeScript will only accept values that match the return type of the original function.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> mock = vi.<span class="hljs-title function_">fn</span>()
+mock.<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-number">42</span>)
+<span class="hljs-title function_">mock</span>() <span class="hljs-comment">// 42</span>
+mock.<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-number">43</span>)
+<span class="hljs-title function_">mock</span>() <span class="hljs-comment">// 43</span></code></pre></div>
+<h2 id="mockreturnvalueonce"><a class="anchor" href="#mockreturnvalueonce">#</a>mockReturnValueOnce</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mockReturnValueOnce</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-title class_">ReturnType</span>&lt;T&gt;</span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;</code></pre></div>
+<p>Accepts a value that will be returned whenever the mock function is called. TypeScript will only accept values that match the return type of the original function.</p>
+<p>When the mocked function runs out of implementations, it will invoke the default implementation set with <code>vi.fn(() =&gt; defaultValue)</code> or <code>.mockImplementation(() =&gt; defaultValue)</code> if they were called:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> myMockFn = vi
+  .<span class="hljs-title function_">fn</span>()
+  .<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-string">&#x27;default&#x27;</span>)
+  .<span class="hljs-title function_">mockReturnValueOnce</span>(<span class="hljs-string">&#x27;first call&#x27;</span>)
+  .<span class="hljs-title function_">mockReturnValueOnce</span>(<span class="hljs-string">&#x27;second call&#x27;</span>)
+
+<span class="hljs-comment">// &#x27;first call&#x27;, &#x27;second call&#x27;, &#x27;default&#x27;, &#x27;default&#x27;</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">myMockFn</span>(), <span class="hljs-title function_">myMockFn</span>(), <span class="hljs-title function_">myMockFn</span>(), <span class="hljs-title function_">myMockFn</span>())</code></pre></div>
+<h2 id="mockthrow"><a class="anchor" href="#mockthrow">#</a>mockThrow <Version>4.1.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mockThrow</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;</code></pre></div>
+<p>Accepts a value that will be thrown whenever the mock function is called.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> myMockFn = vi.<span class="hljs-title function_">fn</span>()
+myMockFn.<span class="hljs-title function_">mockThrow</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;error message&#x27;</span>))
+<span class="hljs-title function_">myMockFn</span>() <span class="hljs-comment">// throws Error&lt;&#x27;error message&#x27;&gt;</span></code></pre></div>
+<h2 id="mockthrowonce"><a class="anchor" href="#mockthrowonce">#</a>mockThrowOnce <Version>4.1.0</Version></h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">function</span> <span class="hljs-title function_">mockThrowOnce</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-title class_">Mock</span>&lt;T&gt;</code></pre></div>
+<p>Accepts a value that will be thrown during the next function call. If chained, every consecutive call will throw the specified value.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> myMockFn = vi
+  .<span class="hljs-title function_">fn</span>()
+  .<span class="hljs-title function_">mockReturnValue</span>(<span class="hljs-string">&#x27;default&#x27;</span>)
+  .<span class="hljs-title function_">mockThrowOnce</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;first call error&#x27;</span>))
+  .<span class="hljs-title function_">mockThrowOnce</span>(<span class="hljs-string">&#x27;second call error&#x27;</span>)
+
+<span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">myMockFn</span>()).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;first call error&#x27;</span>)
+<span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">myMockFn</span>()).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&#x27;second call error&#x27;</span>)
+<span class="hljs-title function_">expect</span>(<span class="hljs-title function_">myMockFn</span>()).<span class="hljs-title function_">toEqual</span>(<span class="hljs-string">&#x27;default&#x27;</span>)</code></pre></div>
+<h2 id="mock-calls"><a class="anchor" href="#mock-calls">#</a>mock.calls</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> <span class="hljs-attr">calls</span>: <span class="hljs-title class_">Parameters</span>&lt;T&gt;[]</code></pre></div>
+<p>This is an array containing all arguments for each call. One item of the array is the arguments of that call.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> fn = vi.<span class="hljs-title function_">fn</span>()
+
+<span class="hljs-title function_">fn</span>(<span class="hljs-string">&#x27;arg1&#x27;</span>, <span class="hljs-string">&#x27;arg2&#x27;</span>)
+<span class="hljs-title function_">fn</span>(<span class="hljs-string">&#x27;arg3&#x27;</span>)
+
+fn.<span class="hljs-property">mock</span>.<span class="hljs-property">calls</span> === [
+  [<span class="hljs-string">&#x27;arg1&#x27;</span>, <span class="hljs-string">&#x27;arg2&#x27;</span>], <span class="hljs-comment">// first call</span>
+  [<span class="hljs-string">&#x27;arg3&#x27;</span>], <span class="hljs-comment">// second call</span>
+]</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Objects are Stored by Reference</div><p>Note that Vitest always stores objects by reference in all properties of the <code>mock</code> state. This means that if the properties were changed by your code, then some assertions like <a href="expect.html#tohavebeencalledwith"><code>.toHaveBeenCalledWith</code></a> will not pass:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> argument = {
+  <span class="hljs-attr">value</span>: <span class="hljs-number">0</span>,
+}
+<span class="hljs-keyword">const</span> fn = vi.<span class="hljs-title function_">fn</span>()
+<span class="hljs-title function_">fn</span>(argument) <span class="hljs-comment">// { value: 0 }</span>
+
+argument.<span class="hljs-property">value</span> = <span class="hljs-number">10</span>
+
+<span class="hljs-title function_">expect</span>(fn).<span class="hljs-title function_">toHaveBeenCalledWith</span>({ <span class="hljs-attr">value</span>: <span class="hljs-number">0</span> })
+
+<span class="hljs-comment">// The equality check is done against the original argument,</span>
+<span class="hljs-comment">// but its property was changed between the call and assertion</span>
+<span class="hljs-title function_">expect</span>(fn).<span class="hljs-title function_">toHaveBeenCalledWith</span>({ <span class="hljs-attr">value</span>: <span class="hljs-number">10</span> })</code></pre></div>
+<p>In this case you can clone the argument yourself:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> calledArguments = []
+<span class="hljs-keyword">const</span> fn = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">(<span class="hljs-params">arg</span>) =&gt;</span> {
+  calledArguments.<span class="hljs-title function_">push</span>(<span class="hljs-title function_">structuredClone</span>(arg))
+})
+
+<span class="hljs-title function_">expect</span>(calledArguments[<span class="hljs-number">0</span>]).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">value</span>: <span class="hljs-number">0</span> })</code></pre></div>
+</div><h2 id="mock-lastcall"><a class="anchor" href="#mock-lastcall">#</a>mock.lastCall</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> <span class="hljs-attr">lastCall</span>: <span class="hljs-title class_">Parameters</span>&lt;T&gt; | <span class="hljs-literal">undefined</span></code></pre></div>
+<p>This contains the arguments of the last call. If the mock wasn&#39;t called, it will return <code>undefined</code>.</p>
+<h2 id="mock-results"><a class="anchor" href="#mock-results">#</a>mock.results</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">MockResultReturn</span>&lt;T&gt; {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;return&#x27;</span>
+  <span class="hljs-comment">/**
+   * The value that was returned from the function.
+   * If the function returned a Promise, then this will be a resolved value.
+   */</span>
+  <span class="hljs-attr">value</span>: T
+}
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">MockResultIncomplete</span> {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;incomplete&#x27;</span>
+  <span class="hljs-attr">value</span>: <span class="hljs-literal">undefined</span>
+}
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">MockResultThrow</span> {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;throw&#x27;</span>
+  <span class="hljs-comment">/**
+   * An error that was thrown during function execution.
+   */</span>
+  <span class="hljs-attr">value</span>: <span class="hljs-built_in">any</span>
+}
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">MockResult</span>&lt;T&gt;
+  = | <span class="hljs-title class_">MockResultReturn</span>&lt;T&gt;
+    | <span class="hljs-title class_">MockResultThrow</span>
+    | <span class="hljs-title class_">MockResultIncomplete</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">results</span>: <span class="hljs-title class_">MockResult</span>&lt;<span class="hljs-title class_">ReturnType</span>&lt;T&gt;&gt;[]</code></pre></div>
+<p>This is an array containing all values that were <code>returned</code> from the function. One item of the array is an object with properties <code>type</code> and <code>value</code>. Available types are:</p>
+<ul>
+<li><code>&#39;return&#39;</code> - function returned without throwing.</li>
+<li><code>&#39;throw&#39;</code> - function threw a value.</li>
+<li><code>&#39;incomplete&#39;</code> - the function did not finish running yet.</li>
+</ul>
+<p>The <code>value</code> property contains the returned value or thrown error. If the function returned a <code>Promise</code>, then <code>result</code> will always be <code>&#39;return&#39;</code> even if the promise was rejected.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> fn = vi.<span class="hljs-title function_">fn</span>()
+  .<span class="hljs-title function_">mockReturnValueOnce</span>(<span class="hljs-string">&#x27;result&#x27;</span>)
+  .<span class="hljs-title function_">mockImplementationOnce</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&#x27;thrown error&#x27;</span>) })
+
+<span class="hljs-keyword">const</span> result = <span class="hljs-title function_">fn</span>() <span class="hljs-comment">// returned &#x27;result&#x27;</span>
+
+<span class="hljs-keyword">try</span> {
+  <span class="hljs-title function_">fn</span>() <span class="hljs-comment">// threw Error</span>
+}
+<span class="hljs-keyword">catch</span> {}
+
+fn.<span class="hljs-property">mock</span>.<span class="hljs-property">results</span> === [
+  <span class="hljs-comment">// first result</span>
+  {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;return&#x27;</span>,
+    <span class="hljs-attr">value</span>: <span class="hljs-string">&#x27;result&#x27;</span>,
+  },
+  <span class="hljs-comment">// last result</span>
+  {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;throw&#x27;</span>,
+    <span class="hljs-attr">value</span>: <span class="hljs-title class_">Error</span>,
+  },
+]</code></pre></div>
+<h2 id="mock-settledresults"><a class="anchor" href="#mock-settledresults">#</a>mock.settledResults</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">MockSettledResultIncomplete</span> {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;incomplete&#x27;</span>
+  <span class="hljs-attr">value</span>: <span class="hljs-literal">undefined</span>
+}
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">MockSettledResultFulfilled</span>&lt;T&gt; {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;fulfilled&#x27;</span>
+  <span class="hljs-attr">value</span>: T
+}
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">MockSettledResultRejected</span> {
+  <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;rejected&#x27;</span>
+  <span class="hljs-attr">value</span>: <span class="hljs-built_in">any</span>
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">type</span> <span class="hljs-title class_">MockSettledResult</span>&lt;T&gt;
+  = | <span class="hljs-title class_">MockSettledResultFulfilled</span>&lt;T&gt;
+    | <span class="hljs-title class_">MockSettledResultRejected</span>
+    | <span class="hljs-title class_">MockSettledResultIncomplete</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">settledResults</span>: <span class="hljs-title class_">MockSettledResult</span>&lt;<span class="hljs-title class_">Awaited</span>&lt;<span class="hljs-title class_">ReturnType</span>&lt;T&gt;&gt;&gt;[]</code></pre></div>
+<p>An array containing all values that were resolved or rejected by the function.</p>
+<p>If the function returned non-promise values, the <code>value</code> will be kept as is, but the <code>type</code> will still says <code>fulfilled</code> or <code>rejected</code>.</p>
+<p>Until the value is resolved or rejected, the <code>settledResult</code> type will be <code>incomplete</code>.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> fn = vi.<span class="hljs-title function_">fn</span>().<span class="hljs-title function_">mockResolvedValueOnce</span>(<span class="hljs-string">&#x27;result&#x27;</span>)
+
+<span class="hljs-keyword">const</span> result = <span class="hljs-title function_">fn</span>()
+
+fn.<span class="hljs-property">mock</span>.<span class="hljs-property">settledResults</span> === [
+  {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;incomplete&#x27;</span>,
+    <span class="hljs-attr">value</span>: <span class="hljs-literal">undefined</span>,
+  },
+]
+
+<span class="hljs-keyword">await</span> result
+
+fn.<span class="hljs-property">mock</span>.<span class="hljs-property">settledResults</span> === [
+  {
+    <span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;fulfilled&#x27;</span>,
+    <span class="hljs-attr">value</span>: <span class="hljs-string">&#x27;result&#x27;</span>,
+  },
+]</code></pre></div>
+<h2 id="mock-invocationcallorder"><a class="anchor" href="#mock-invocationcallorder">#</a>mock.invocationCallOrder</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> <span class="hljs-attr">invocationCallOrder</span>: <span class="hljs-built_in">number</span>[]</code></pre></div>
+<p>This property returns the order of the mock function&#39;s execution. It is an array of numbers that are shared between all defined mocks.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> fn1 = vi.<span class="hljs-title function_">fn</span>()
+<span class="hljs-keyword">const</span> fn2 = vi.<span class="hljs-title function_">fn</span>()
+
+<span class="hljs-title function_">fn1</span>()
+<span class="hljs-title function_">fn2</span>()
+<span class="hljs-title function_">fn1</span>()
+
+fn1.<span class="hljs-property">mock</span>.<span class="hljs-property">invocationCallOrder</span> === [<span class="hljs-number">1</span>, <span class="hljs-number">3</span>]
+fn2.<span class="hljs-property">mock</span>.<span class="hljs-property">invocationCallOrder</span> === [<span class="hljs-number">2</span>]</code></pre></div>
+<h2 id="mock-contexts"><a class="anchor" href="#mock-contexts">#</a>mock.contexts</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> <span class="hljs-attr">contexts</span>: <span class="hljs-title class_">ThisParameterType</span>&lt;T&gt;[]</code></pre></div>
+<p>This property is an array of <code>this</code> values used during each call to the mock function.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> fn = vi.<span class="hljs-title function_">fn</span>()
+<span class="hljs-keyword">const</span> context = {}
+
+fn.<span class="hljs-title function_">apply</span>(context)
+fn.<span class="hljs-title function_">call</span>(context)
+
+fn.<span class="hljs-property">mock</span>.<span class="hljs-property">contexts</span>[<span class="hljs-number">0</span>] === context
+fn.<span class="hljs-property">mock</span>.<span class="hljs-property">contexts</span>[<span class="hljs-number">1</span>] === context</code></pre></div>
+<h2 id="mock-instances"><a class="anchor" href="#mock-instances">#</a>mock.instances</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> <span class="hljs-attr">instances</span>: <span class="hljs-title class_">ReturnType</span>&lt;T&gt;[]</code></pre></div>
+<p>This property is an array containing all instances that were created when the mock was called with the <code>new</code> keyword. Note that this is the actual context (<code>this</code>) of the function, not a return value.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If the mock was instantiated with <code>new MyClass()</code>, then <code>mock.instances</code> will be an array with one value:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> <span class="hljs-title class_">MyClass</span> = vi.<span class="hljs-title function_">fn</span>()
+<span class="hljs-keyword">const</span> a = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MyClass</span>()
+
+<span class="hljs-title class_">MyClass</span>.<span class="hljs-property">mock</span>.<span class="hljs-property">instances</span>[<span class="hljs-number">0</span>] === a</code></pre></div>
+<p>If you return a value from the constructor, it will not be in the <code>instances</code> array, but instead inside <code>results</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">const</span> <span class="hljs-title class_">Spy</span> = vi.<span class="hljs-title function_">fn</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> { <span class="hljs-attr">method</span>: vi.<span class="hljs-title function_">fn</span>() }
+})
+<span class="hljs-keyword">const</span> a = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Spy</span>()
+
+<span class="hljs-title class_">Spy</span>.<span class="hljs-property">mock</span>.<span class="hljs-property">instances</span>[<span class="hljs-number">0</span>] !== a
+<span class="hljs-title class_">Spy</span>.<span class="hljs-property">mock</span>.<span class="hljs-property">results</span>[<span class="hljs-number">0</span>] === a</code></pre></div>
+</div></div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#getmockimplementation">getMockImplementation</a><a class="toc-2" href="#getmockname">getMockName</a><a class="toc-2" href="#mockclear">mockClear</a><a class="toc-2" href="#mockname">mockName</a><a class="toc-2" href="#mockimplementation">mockImplementation</a><a class="toc-2" href="#mockimplementationonce">mockImplementationOnce</a><a class="toc-2" href="#withimplementation">withImplementation</a><a class="toc-2" href="#mockrejectedvalue">mockRejectedValue</a><a class="toc-2" href="#mockrejectedvalueonce">mockRejectedValueOnce</a><a class="toc-2" href="#mockreset">mockReset</a><a class="toc-2" href="#mockrestore">mockRestore</a><a class="toc-2" href="#mockresolvedvalue">mockResolvedValue</a><a class="toc-2" href="#mockresolvedvalueonce">mockResolvedValueOnce</a><a class="toc-2" href="#mockreturnthis">mockReturnThis</a><a class="toc-2" href="#mockreturnvalue">mockReturnValue</a><a class="toc-2" href="#mockreturnvalueonce">mockReturnValueOnce</a><a class="toc-2" href="#mockthrow">mockThrow 4.1.0</a><a class="toc-2" href="#mockthrowonce">mockThrowOnce 4.1.0</a><a class="toc-2" href="#mock-calls">mock.calls</a><a class="toc-2" href="#mock-lastcall">mock.lastCall</a><a class="toc-2" href="#mock-results">mock.results</a><a class="toc-2" href="#mock-settledresults">mock.settledResults</a><a class="toc-2" href="#mock-invocationcallorder">mock.invocationCallOrder</a><a class="toc-2" href="#mock-contexts">mock.contexts</a><a class="toc-2" href="#mock-instances">mock.instances</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

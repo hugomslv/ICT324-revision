@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-unused-expressions (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-unused-expressions <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-unused-expressions">version en ligne</a></div>
+<h1>no-unused-expressions</h1><p>An unused expression which has no effect on the state of the program indicates a logic error.</p>
+<p>For example, <code>n + 1;</code> is not a syntax error, but it might be a typing mistake where a programmer meant an assignment statement <code>n += 1;</code> instead. Sometimes, such unused expressions may be eliminated by some build tools in production environment, which possibly breaks application logic.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule aims to eliminate unused expressions which have no effect on the state of the program.</p>
+<p>This rule does not apply to function calls or constructor calls with the <code>new</code> operator, because they could have <em>side effects</em> on the state of the program.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">increment</span>(<span class="hljs-params"></span>) { i += <span class="hljs-number">1</span>; }
+<span class="hljs-title function_">increment</span>(); <span class="hljs-comment">// return value is unused, but i changed as a side effect</span>
+
+<span class="hljs-keyword">let</span> nThings = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Thing</span>(<span class="hljs-params"></span>) { nThings += <span class="hljs-number">1</span>; }
+<span class="hljs-keyword">new</span> <span class="hljs-title class_">Thing</span>(); <span class="hljs-comment">// constructed object is unused, but nThings changed as a side effect</span></code></pre></div>
+<p>This rule does not apply to directives (which are in the form of literal string expressions such as <code>&quot;use strict&quot;;</code> at the beginning of a script, module, or function) when using ES5+ environments. In ES3 environments, directives are treated as unused expressions by default, but this behavior can be changed using the <code>ignoreDirectives</code> option.</p>
+<p>Sequence expressions (those using a comma, such as <code>a = 1, b = 2</code>) are always considered unused unless their return value is assigned or used in a condition evaluation, or a function call is made with the sequence expression value.</p>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule, in its default state, does not require any arguments. If you would like to enable one or more of the following you may pass an object with the options set as follows:</p>
+<ul>
+<li><code>allowShortCircuit</code> set to <code>true</code> will allow you to use short circuit evaluations in your expressions (Default: <code>false</code>).</li>
+<li><code>allowTernary</code> set to <code>true</code> will enable you to use ternary operators in your expressions similarly to short circuit evaluations (Default: <code>false</code>).</li>
+<li><code>allowTaggedTemplates</code> set to <code>true</code> will enable you to use tagged template literals in your expressions (Default: <code>false</code>).</li>
+<li><code>enforceForJSX</code> set to <code>true</code> will flag unused JSX element expressions (Default: <code>false</code>).</li>
+<li><code>ignoreDirectives</code> set to <code>true</code> will prevent directives from being reported as unused expressions when linting with <code>ecmaVersion: 3</code> (Default: <code>false</code>).</li>
+</ul>
+<p>These options allow unused expressions <em>only if all</em> of the code paths either directly change the state (for example, assignment statement) or could have <em>side effects</em> (for example, function call).</p>
+<p>Examples of <strong>incorrect</strong> code for the default <code>{ &quot;allowShortCircuit&quot;: false, &quot;allowTernary&quot;: false }</code> options:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-expressions: &quot;error&quot;*/</span>
+
+<span class="hljs-number">0</span>
+
+<span class="hljs-keyword">if</span>(<span class="hljs-number">0</span>) <span class="hljs-number">0</span>
+
+{<span class="hljs-number">0</span>}
+
+<span class="hljs-title function_">f</span>(<span class="hljs-number">0</span>), {}
+
+a &amp;&amp; <span class="hljs-title function_">b</span>()
+
+a, <span class="hljs-title function_">b</span>()
+
+c = a, b;
+
+<span class="hljs-title function_">a</span>() &amp;&amp; <span class="hljs-keyword">function</span> <span class="hljs-title function_">namedFunctionInExpressionContext</span> (<span class="hljs-params"></span>) {<span class="hljs-title function_">f</span>();}
+
+(<span class="hljs-keyword">function</span> <span class="hljs-title function_">anIncompleteIIFE</span> (<span class="hljs-params"></span>) {});
+
+injectGlobal<span class="hljs-string">`body{ color: red; }`</span>
+</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the default <code>{ &quot;allowShortCircuit&quot;: false, &quot;allowTernary&quot;: false }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-expressions: &quot;error&quot;*/</span>
+
+{} <span class="hljs-comment">// In this context, this is a block statement, not an object literal</span>
+
+{ <span class="hljs-attr">myLabel</span>: <span class="hljs-title function_">foo</span>() } <span class="hljs-comment">// In this context, this is a block statement with a label and expression, not an object literal</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">namedFunctionDeclaration</span> (<span class="hljs-params"></span>) {}
+
+(<span class="hljs-keyword">function</span> <span class="hljs-title function_">aGenuineIIFE</span> (<span class="hljs-params"></span>) {}());
+
+<span class="hljs-title function_">f</span>()
+
+a = <span class="hljs-number">0</span>
+
+<span class="hljs-keyword">new</span> C
+
+<span class="hljs-keyword">delete</span> a.<span class="hljs-property">b</span>
+
+<span class="hljs-keyword">void</span> a</code></pre></div>
+</div><p>Note that one or more string expression statements (with or without semi-colons) will only be considered as unused if they are not in the beginning of a script, module, or function (alone and uninterrupted by other statements). Otherwise, they will be treated as part of a &quot;directive prologue&quot;, a section potentially usable by JavaScript engines. This includes &quot;strict mode&quot; directives.</p>
+<p>Examples of <strong>correct</strong> code for this rule in regard to directives:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-expressions: &quot;error&quot;*/</span>
+<span class="hljs-meta">
+&quot;use strict&quot;</span>;
+<span class="hljs-meta">&quot;use asm&quot;</span>
+<span class="hljs-string">&quot;use stricter&quot;</span>;
+<span class="hljs-string">&quot;use babel&quot;</span>
+<span class="hljs-string">&quot;any other strings like this in the directive prologue&quot;</span>;
+<span class="hljs-string">&quot;this is still the directive prologue&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-string">&quot;bar&quot;</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> {
+    <span class="hljs-title function_">someMethod</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-string">&quot;use strict&quot;</span>;
+    }
+}</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for this rule in regard to directives:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-expressions: &quot;error&quot;*/</span>
+
+<span class="hljs-title function_">doSomething</span>();
+<span class="hljs-meta">&quot;use strict&quot;</span>; <span class="hljs-comment">// this isn&#x27;t in a directive prologue, because there is a non-directive statement before it</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-string">&quot;bar&quot;</span> + <span class="hljs-number">1</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> {
+    <span class="hljs-keyword">static</span> {
+        <span class="hljs-string">&quot;use strict&quot;</span>; <span class="hljs-comment">// class static blocks do not have directive prologues</span>
+    }
+}</code></pre></div>
+</div><h3 id="allowshortcircuit"><a class="anchor" href="#allowshortcircuit">#</a>allowShortCircuit</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;allowShortCircuit&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-expressions: [&quot;error&quot;, { &quot;allowShortCircuit&quot;: true }]*/</span>
+
+a || b</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;allowShortCircuit&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-expressions: [&quot;error&quot;, { &quot;allowShortCircuit&quot;: true }]*/</span>
+
+a &amp;&amp; <span class="hljs-title function_">b</span>()
+<span class="hljs-title function_">a</span>() || (b = c)</code></pre></div>
+</div><h3 id="allowternary"><a class="anchor" href="#allowternary">#</a>allowTernary</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;allowTernary&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-expressions: [&quot;error&quot;, { &quot;allowTernary&quot;: true }]*/</span>
+
+a ? b : <span class="hljs-number">0</span>
+a ? b : <span class="hljs-title function_">c</span>()</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;allowTernary&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-expressions: [&quot;error&quot;, { &quot;allowTernary&quot;: true }]*/</span>
+
+a ? <span class="hljs-title function_">b</span>() : <span class="hljs-title function_">c</span>()
+a ? (b = c) : <span class="hljs-title function_">d</span>()</code></pre></div>
+</div><h3 id="allowshortcircuit-and-allowternary"><a class="anchor" href="#allowshortcircuit-and-allowternary">#</a>allowShortCircuit and allowTernary</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;allowShortCircuit&quot;: true, &quot;allowTernary&quot;: true }</code> options:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-expressions: [&quot;error&quot;, { &quot;allowShortCircuit&quot;: true, &quot;allowTernary&quot;: true }]*/</span>
+
+a ? <span class="hljs-title function_">b</span>() || (c = d) : <span class="hljs-title function_">e</span>()</code></pre></div>
+</div><h3 id="allowtaggedtemplates"><a class="anchor" href="#allowtaggedtemplates">#</a>allowTaggedTemplates</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;allowTaggedTemplates&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-expressions: [&quot;error&quot;, { &quot;allowTaggedTemplates&quot;: true }]*/</span>
+
+<span class="hljs-string">`some untagged template string`</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;allowTaggedTemplates&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-expressions: [&quot;error&quot;, { &quot;allowTaggedTemplates&quot;: true }]*/</span>
+
+tag<span class="hljs-string">`some tagged template string`</span>;</code></pre></div>
+</div><h3 id="enforceforjsx"><a class="anchor" href="#enforceforjsx">#</a>enforceForJSX</h3>
+<p>JSX is most-commonly used in the React ecosystem, where it is compiled to <code>React.createElement</code> expressions. Though free from side-effects, these calls are not automatically flagged by the <code>no-unused-expressions</code> rule. If you&#39;re using React, or any other side-effect-free JSX pragma, this option can be enabled to flag these expressions.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;enforceForJSX&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-comment">/*eslint no-unused-expressions: [&quot;error&quot;, { &quot;enforceForJSX&quot;: true }]*/</span>
+
+&lt;<span class="hljs-title class_">MyComponent</span> /&gt;;
+
+<span class="language-xml"><span class="hljs-tag">&lt;&gt;</span><span class="hljs-tag">&lt;/&gt;</span></span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;enforceForJSX&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-jsx"><span class="hljs-comment">/*eslint no-unused-expressions: [&quot;error&quot;, { &quot;enforceForJSX&quot;: true }]*/</span>
+
+<span class="hljs-keyword">const</span> myComponentPartial = <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">MyComponent</span> /&gt;</span></span>;
+
+<span class="hljs-keyword">const</span> myFragment = <span class="language-xml"><span class="hljs-tag">&lt;&gt;</span><span class="hljs-tag">&lt;/&gt;</span></span>;</code></pre></div>
+</div><h3 id="ignoredirectives"><a class="anchor" href="#ignoredirectives">#</a>ignoreDirectives</h3>
+<p>When set to <code>false</code> (default), this rule reports directives (like <code>&quot;use strict&quot;</code>) as unused expressions when linting with <code>ecmaVersion: 3</code>. This default behavior exists because ES3 environments do not formally support directives, meaning such strings are effectively unused expressions in that specific context.</p>
+<p>Set this option to <code>true</code> to prevent directives from being reported as unused, even when <code>ecmaVersion: 3</code> is specified. This option is primarily useful for projects that need to maintain a single codebase containing directives while supporting both older ES3 environments and modern (ES5+) environments.</p>
+<p><strong>Note:</strong> In ES5+ environments, directives are always ignored regardless of this setting.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;ignoreDirectives&quot;: false }</code> option and <code>ecmaVersion: 3</code>:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-expressions: [&quot;error&quot;, { &quot;ignoreDirectives&quot;: false }]*/</span>
+<span class="hljs-meta">
+&quot;use strict&quot;</span>;
+<span class="hljs-meta">&quot;use asm&quot;</span>
+<span class="hljs-string">&quot;use stricter&quot;</span>;
+<span class="hljs-string">&quot;use babel&quot;</span>
+<span class="hljs-string">&quot;any other strings like this in the directive prologue&quot;</span>;
+<span class="hljs-string">&quot;this is still the directive prologue&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-string">&quot;bar&quot;</span>;
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;ignoreDirectives&quot;: true }</code> option and <code>ecmaVersion: 3</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-expressions: [&quot;error&quot;, { &quot;ignoreDirectives&quot;: true }]*/</span>
+<span class="hljs-meta">
+&quot;use strict&quot;</span>;
+<span class="hljs-meta">&quot;use asm&quot;</span>
+<span class="hljs-string">&quot;use stricter&quot;</span>;
+<span class="hljs-string">&quot;use babel&quot;</span>
+<span class="hljs-string">&quot;any other strings like this in the directive prologue&quot;</span>;
+<span class="hljs-string">&quot;this is still the directive prologue&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-string">&quot;bar&quot;</span>;
+}</code></pre></div>
+</div><h3 id="typescript-support"><a class="anchor" href="#typescript-support">#</a>TypeScript Support</h3>
+<p>This rule supports TypeScript-specific expressions and follows these guidelines:</p>
+<ol>
+<li>Directives (like <code>&#39;use strict&#39;</code>) are allowed in module and namespace declarations</li>
+<li>Type-related expressions are treated as unused if their wrapped value expressions are unused:<ul>
+<li>Type assertions (<code>x as number</code>, <code>&lt;number&gt;x</code>)</li>
+<li>Non-null assertions (<code>x!</code>)</li>
+<li>Type instantiations (<code>Set&lt;number&gt;</code>)</li>
+</ul>
+</li>
+</ol>
+<p><strong>Note</strong>: Although type expressions never have runtime side effects (e.g., <code>x!</code> is equivalent to <code>x</code> at runtime), they can be used to assert types for testing purposes.</p>
+<p>Examples of <strong>correct</strong> code for this rule when using TypeScript:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/* eslint no-unused-expressions: &quot;error&quot; */</span>
+
+<span class="hljs-comment">// Type expressions wrapping function calls are allowed</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getSet</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Set</span>;
+}
+<span class="hljs-title function_">getSet</span>()&lt;<span class="hljs-built_in">number</span>&gt;;
+<span class="hljs-title function_">getSet</span>() <span class="hljs-keyword">as</span> <span class="hljs-title class_">Set</span>&lt;<span class="hljs-built_in">unknown</span>&gt;;
+<span class="hljs-title function_">getSet</span>()!;
+
+<span class="hljs-comment">// Directives in modules and namespaces</span>
+<span class="hljs-variable language_">module</span> <span class="hljs-title class_">Foo</span> {
+    <span class="hljs-string">&#x27;use strict&#x27;</span>;
+    <span class="hljs-string">&#x27;hello world&#x27;</span>;
+}
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">Bar</span> {
+    <span class="hljs-string">&#x27;use strict&#x27;</span>;
+    <span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Baz</span> {}
+}</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for this rule when using TypeScript:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">/* eslint no-unused-expressions: &quot;error&quot; */</span>
+
+<span class="hljs-comment">// Standalone type expressions</span>
+<span class="hljs-title class_">Set</span>&lt;<span class="hljs-built_in">number</span>&gt;;
+<span class="hljs-number">1</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">number</span>;
+<span class="hljs-variable language_">window</span>!;
+
+<span class="hljs-comment">// Expressions inside namespaces</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">Bar</span> {
+    <span class="hljs-number">123</span>;
+}</code></pre></div>
+</div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#allowshortcircuit">allowShortCircuit</a><a class="toc-3" href="#allowternary">allowTernary</a><a class="toc-3" href="#allowshortcircuit-and-allowternary">allowShortCircuit and allowTernary</a><a class="toc-3" href="#allowtaggedtemplates">allowTaggedTemplates</a><a class="toc-3" href="#enforceforjsx">enforceForJSX</a><a class="toc-3" href="#ignoredirectives">ignoreDirectives</a><a class="toc-3" href="#typescript-support">TypeScript Support</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testing Types | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/testing-types  <a class="ext small" href="https://vitest.dev/guide/testing-types">version en ligne</a></div>
+<h1 id="testing-types"><a class="anchor" href="#testing-types">#</a>Testing Types</h1>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Sample Project</div><p><a href="https://github.com/vitest-dev/vitest/tree/main/examples/typecheck">GitHub</a> - <a href="https://stackblitz.com/fork/github/vitest-dev/vitest/tree/main/examples/typecheck?initialPath=__vitest__/">Play Online</a></p>
+</div><p>Vitest allows you to write tests for your types, using <code>expectTypeOf</code> or <code>assertType</code> syntaxes. By default all tests inside <code>*.test-d.ts</code> files are considered type tests, but you can change it with <a href="../config/typecheck.html#typecheck-include"><code>typecheck.include</code></a> config option.</p>
+<p>Under the hood Vitest calls <code>tsc</code> or <code>vue-tsc</code>, depending on your config, and parses results. Vitest will also print out type errors in your source code, if it finds any. You can disable it with <a href="../config/typecheck.html#typecheck-ignoresourceerrors"><code>typecheck.ignoreSourceErrors</code></a> config option.</p>
+<p>Keep in mind that Vitest doesn&#39;t run these files, they are only statically analyzed by the compiler. Meaning, that if you use a dynamic name or <code>test.each</code> or <code>test.for</code>, the test name will not be evaluated - it will be displayed as is.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Before Vitest 2.1, your <code>typecheck.include</code> overrode the <code>include</code> pattern, so your runtime tests did not actually run; they were only type-checked.</p>
+<p>Since Vitest 2.1, if your <code>include</code> and <code>typecheck.include</code> overlap, Vitest will report type tests and runtime tests as separate entries.</p>
+</div><p>Using CLI flags, like <code>--allowOnly</code> and <code>-t</code> are also supported for type checking.</p>
+<div class="code"><div class="code-title">mount.test-d.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { assertType, expectTypeOf } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { mount } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./mount.js&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;my types work properly&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expectTypeOf</span>(mount).<span class="hljs-title function_">toBeFunction</span>()
+  <span class="hljs-title function_">expectTypeOf</span>(mount).<span class="hljs-title function_">parameter</span>(<span class="hljs-number">0</span>).<span class="hljs-property">toExtend</span>&lt;{ <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span> }&gt;()
+
+  <span class="hljs-comment">// @ts-expect-error name is a string</span>
+  <span class="hljs-title function_">assertType</span>(<span class="hljs-title function_">mount</span>({ <span class="hljs-attr">name</span>: <span class="hljs-number">42</span> }))
+})</code></pre></div>
+<p>Any type error triggered inside a test file will be treated as a test error, so you can use any type trick you want to test types of your project.</p>
+<p>You can see a list of possible matchers in <a href="../api/expect-typeof.html">API section</a>.</p>
+<h2 id="reading-errors"><a class="anchor" href="#reading-errors">#</a>Reading Errors</h2>
+<p>If you are using <code>expectTypeOf</code> API, refer to the <a href="https://github.com/mmkal/expect-type#error-messages">expect-type documentation on its error messages</a>.</p>
+<p>When types don&#39;t match, <code>.toEqualTypeOf</code> and <code>.toExtend</code> use a special helper type to produce error messages that are as actionable as possible. But there&#39;s a bit of an nuance to understanding them. Since the assertions are written &quot;fluently&quot;, the failure should be on the &quot;expected&quot; type, not the &quot;actual&quot; type (<code>expect&lt;Actual&gt;().toEqualTypeOf&lt;Expected&gt;()</code>). This means that type errors can be a little confusing - so this library produces a <code>MismatchInfo</code> type to try to make explicit what the expectation is. For example:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">expectTypeOf</span>({ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }).<span class="hljs-property">toEqualTypeOf</span>&lt;{ <span class="hljs-attr">a</span>: <span class="hljs-built_in">string</span> }&gt;()</code></pre></div>
+<p>Is an assertion that will fail, since <code>{a: 1}</code> has type <code>{a: number}</code> and not <code>{a: string}</code>.  The error message in this case will read something like this:</p>
+<div class="code"><pre><code class="hljs lang-txt">test/test.ts:999:999 - error TS2344: Type '{ a: string; }' does not satisfy the constraint '{ a: \\&quot;Expected: string, Actual: number\\&quot;; }'.
+  Types of property 'a' are incompatible.
+    Type 'string' is not assignable to type '\\&quot;Expected: string, Actual: number\\&quot;'.
+
+999 expectTypeOf({a: 1}).toEqualTypeOf&lt;{a: string}&gt;()</code></pre></div>
+<p>Note that the type constraint reported is a human-readable messaging specifying both the &quot;expected&quot; and &quot;actual&quot; types. Rather than taking the sentence <code>Types of property &#39;a&#39; are incompatible // Type &#39;string&#39; is not assignable to type &quot;Expected: string, Actual: number&quot;</code> literally - just look at the property name (<code>&#39;a&#39;</code>) and the message: <code>Expected: string, Actual: number</code>. This will tell you what&#39;s wrong, in most cases. Extremely complex types will of course be more effort to debug, and may require some experimentation. Please <a href="https://github.com/mmkal/expect-type">raise an issue</a> if the error messages are actually misleading.</p>
+<p>The <code>toBe...</code> methods (like <code>toBeString</code>, <code>toBeNumber</code>, <code>toBeVoid</code> etc.) fail by resolving to a non-callable type when the <code>Actual</code> type under test doesn&#39;t match up. For example, the failure for an assertion like <code>expectTypeOf(1).toBeString()</code> will look something like this:</p>
+<div class="code"><pre><code class="hljs lang-txt">test/test.ts:999:999 - error TS2349: This expression is not callable.
+  Type 'ExpectString&lt;number&gt;' has no call signatures.
+
+999 expectTypeOf(1).toBeString()
+                    ~~~~~~~~~~</code></pre></div>
+<p>The <code>This expression is not callable</code> part isn&#39;t all that helpful - the meaningful error is the next line, <code>Type &#39;ExpectString&lt;number&gt; has no call signatures</code>. This essentially means you passed a number but asserted it should be a string.</p>
+<p>If TypeScript added support for <a href="https://github.com/microsoft/TypeScript/pull/40468">&quot;throw&quot; types</a> these error messages could be improved significantly. Until then they will take a certain amount of squinting.</p>
+<h3 id="concrete-expected-objects-vs-typeargs"><a class="anchor" href="#concrete-expected-objects-vs-typeargs">#</a>Concrete &quot;expected&quot; objects vs typeargs</h3>
+<p>Error messages for an assertion like this:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">expectTypeOf</span>({ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }).<span class="hljs-title function_">toEqualTypeOf</span>({ <span class="hljs-attr">a</span>: <span class="hljs-string">&#x27;&#x27;</span> })</code></pre></div>
+<p>Will be less helpful than for an assertion like this:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">expectTypeOf</span>({ <span class="hljs-attr">a</span>: <span class="hljs-number">1</span> }).<span class="hljs-property">toEqualTypeOf</span>&lt;{ <span class="hljs-attr">a</span>: <span class="hljs-built_in">string</span> }&gt;()</code></pre></div>
+<p>This is because the TypeScript compiler needs to infer the typearg for the <code>.toEqualTypeOf({a: &#39;&#39;})</code> style, and this library can only mark it as a failure by comparing it against a generic <code>Mismatch</code> type. So, where possible, use a typearg rather than a concrete type for <code>.toEqualTypeOf</code> and <code>.toExtend</code>. If it&#39;s much more convenient to compare two concrete types, you can use <code>typeof</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> one = <span class="hljs-title function_">valueFromFunctionOne</span>({ <span class="hljs-attr">some</span>: { <span class="hljs-attr">complex</span>: inputs } })
+<span class="hljs-keyword">const</span> two = <span class="hljs-title function_">valueFromFunctionTwo</span>({ <span class="hljs-attr">some</span>: { <span class="hljs-attr">other</span>: inputs } })
+
+<span class="hljs-title function_">expectTypeOf</span>(one).<span class="hljs-property">toEqualTypeOf</span>&lt;<span class="hljs-keyword">typeof</span> two&gt;()</code></pre></div>
+<p>If you find it hard working with <code>expectTypeOf</code> API and figuring out errors, you can always use more simple <code>assertType</code> API:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> answer = <span class="hljs-number">42</span>
+
+assertType&lt;<span class="hljs-built_in">number</span>&gt;(answer)
+<span class="hljs-comment">// @ts-expect-error answer is not a string</span>
+assertType&lt;<span class="hljs-built_in">string</span>&gt;(answer)</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce</div><p>When using <code>@ts-expect-error</code> syntax, you might want to make sure that you didn&#39;t make a typo. You can do that by including your type files in <a href="../config/include.html"><code>test.include</code></a> config option, so Vitest will also actually <em>run</em> these tests and fail with <code>ReferenceError</code>.</p>
+<p>This will pass, because it expects an error, but the word “answer” has a typo, so it&#39;s a false positive error:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// @ts-expect-error answer is not a string</span>
+assertType&lt;<span class="hljs-built_in">string</span>&gt;(answr)</code></pre></div>
+</div><h2 id="run-typechecking"><a class="anchor" href="#run-typechecking">#</a>Run Typechecking</h2>
+<p>To enable typechecking, just add <a href="../config/typecheck.html"><code>--typecheck</code></a> flag to your Vitest command in <code>package.json</code>:</p>
+<div class="code"><div class="code-title">package.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;test&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest --typecheck&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p>Now you can run typecheck:</p>
+<div class="code-group"><div class="code"><div class="code-title">npm</div><pre><code class="hljs lang-bash">npm run <span class="hljs-built_in">test</span></code></pre></div>
+<div class="code"><div class="code-title">yarn</div><pre><code class="hljs lang-bash">yarn <span class="hljs-built_in">test</span></code></pre></div>
+<div class="code"><div class="code-title">pnpm</div><pre><code class="hljs lang-bash">pnpm run <span class="hljs-built_in">test</span></code></pre></div>
+<div class="code"><div class="code-title">bun</div><pre><code class="hljs lang-bash">bun <span class="hljs-built_in">test</span></code></pre></div>
+</div><p>Vitest uses <code>tsc --noEmit</code> or <code>vue-tsc --noEmit</code>, depending on your configuration, so you can remove these scripts from your pipeline.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#reading-errors">Reading Errors</a><a class="toc-3" href="#concrete-expected-objects-vs-typeargs">Concrete &quot;expected&quot; objects vs typeargs</a><a class="toc-2" href="#run-typechecking">Run Typechecking</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Benchmarking | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › guide/benchmarking  <a class="ext small" href="https://vitest.dev/guide/benchmarking">version en ligne</a></div>
+<h1 id="benchmarking"><a class="anchor" href="#benchmarking">#</a>Benchmarking</h1>
+<p>Vitest lets you write benchmarks alongside your tests using the <code>bench</code> fixture from the <a href="test-context.html">test context</a>. The built-in benchmark provider is powered by <a href="https://github.com/tinylibs/tinybench">Tinybench</a>, and benchmarks are defined inside regular <code>test()</code> calls, giving you access to the full power of Vitest&#39;s test runner: retries, lifecycle hooks, filtering, and assertions.</p>
+<h2 id="defining-a-benchmark"><a class="anchor" href="#defining-a-benchmark">#</a>Defining a Benchmark</h2>
+<p>Use the <code>bench</code> fixture to define a benchmark. Call <code>.run()</code> to execute it:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;parsing performance&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;parse&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(<span class="hljs-string">&#x27;{&quot;key&quot;:&quot;value&quot;}&#x27;</span>)
+  }).<span class="hljs-title function_">run</span>()
+})</code></pre></div>
+<p>The <code>bench()</code> function registers a benchmark without executing it. Calling <code>.run()</code> runs the benchmark and returns the result. After the test completes, Vitest prints a single-row version of the <a href="#comparing-benchmarks">comparison table</a> (ops/sec, mean time, percentiles, etc.), so you get the same output for a one-off benchmark as you do for <code>bench.compare()</code>.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>The <code>bench</code> fixture is only available in files matched by <a href="../config/benchmark.html#benchmark-include"><code>benchmark.include</code></a> (default: <code>**/*.{bench,benchmark}.?(c|m)[jt]s?(x)</code>). Using <code>{ bench }</code> inside a regular test file will throw an error.</p>
+<p>Whether a file participates in the benchmark run is decided by the filename, not by whether the test uses the <code>bench</code> fixture. Renaming <code>parser.test.ts</code> to <code>parser.bench.ts</code> (or adjusting <code>benchmark.include</code>) is what moves it into the benchmark project.</p>
+</div><h2 id="running-benchmarks"><a class="anchor" href="#running-benchmarks">#</a>Running Benchmarks</h2>
+<p>Benchmark files are matched by <a href="../config/benchmark.html#benchmark-include"><code>benchmark.include</code></a> (default: <code>**/*.{bench,benchmark}.?(c|m)[jt]s?(x)</code>) and run in their own project, separate from your regular tests. There are three ways to run them, depending on whether you want to skip them, run them alongside tests, or run them on their own.</p>
+<h3 id="vitest-default"><a class="anchor" href="#vitest-default">#</a><code>vitest</code> (default)</h3>
+<p>Without <a href="../config/benchmark.html#benchmark-enabled"><code>benchmark.enabled</code></a>, the <code>vitest</code> command only runs regular tests. Benchmark files are ignored entirely. This is the default and the right choice for day-to-day development, since benchmarks are slow and noisy and shouldn&#39;t run on every save.</p>
+<h3 id="vitest-with-benchmark-enabled"><a class="anchor" href="#vitest-with-benchmark-enabled">#</a><code>vitest</code> with <code>benchmark.enabled</code></h3>
+<p>Set <code>benchmark.enabled: true</code> in your config to run benchmarks together with regular tests:</p>
+<div class="code"><div class="code-title">vitest.config.ts</div><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">benchmark</span>: {
+      <span class="hljs-attr">enabled</span>: <span class="hljs-literal">true</span>,
+    },
+  },
+})</code></pre></div>
+<p>With this config, <code>vitest</code> runs your regular tests first, then runs the benchmarks in a separate isolated group (so benchmark execution never overlaps with test execution and adds noise to results). Useful in CI when you want a single command to validate correctness and performance.</p>
+<h3 id="vitest-bench"><a class="anchor" href="#vitest-bench">#</a><code>vitest bench</code></h3>
+<p>The <code>bench</code> subcommand runs only benchmarks and skips regular tests:</p>
+<div class="code"><pre><code class="hljs lang-bash">vitest bench</code></pre></div>
+<p>This implicitly enables <code>benchmark.enabled</code> for the run, so you don&#39;t need to set it in the config. Like the <code>vitest</code> command, it accepts filename filters and <code>-t</code>/<code>--testNamePattern</code> to narrow the run:</p>
+<div class="code"><pre><code class="hljs lang-bash"><span class="hljs-comment"># only benchmarks in files matching &quot;parser&quot;</span>
+vitest bench parser
+
+<span class="hljs-comment"># only benchmarks whose test name matches &quot;JSON&quot;</span>
+vitest bench -t JSON</code></pre></div>
+<p>To execute benchmarks with another benchmarking engine or execution strategy, see the <a href="advanced/benchmark-provider.html">Custom Benchmark Provider</a> guide.</p>
+<h2 id="comparing-benchmarks"><a class="anchor" href="#comparing-benchmarks">#</a>Comparing Benchmarks</h2>
+<p>Use <code>bench.compare()</code> to compare multiple benchmarks against each other:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;compare JSON libraries&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">const</span> input = <span class="hljs-string">&#x27;{&quot;key&quot;:&quot;value&quot;,&quot;nested&quot;:{&quot;a&quot;:1}}&#x27;</span>
+
+  <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> bench.<span class="hljs-title function_">compare</span>(
+    <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;JSON.parse&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(input)
+    }),
+    <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;custom parser&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title function_">customParse</span>(input)
+    }),
+  )
+})</code></pre></div>
+<p>When comparing benchmarks, Vitest runs them using interleaved iterations to reduce environmental bias (CPU throttling, GC pressure, etc.) and prints a comparison table after the test completes:</p>
+<blockquote>
+<p><em>(extrait de code externe non inclus)</em></p>
+</blockquote>
+<h3 id="options"><a class="anchor" href="#options">#</a>Options</h3>
+<p>You can pass <a href="https://tinylibs.github.io/tinybench/interfaces/BenchOptions.html">options</a> as the last argument to <code>bench.compare()</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;compare with options&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> bench.<span class="hljs-title function_">compare</span>(
+    <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;lib1&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-title function_">lib1</span>() }),
+    <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;lib2&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-title function_">lib2</span>() }),
+    {
+      <span class="hljs-attr">iterations</span>: <span class="hljs-number">100</span>,
+      <span class="hljs-attr">time</span>: <span class="hljs-number">1000</span>,
+    },
+  )
+})</code></pre></div>
+<p>You can also pass per-benchmark <a href="https://tinylibs.github.io/tinybench/interfaces/FnOptions.html">options</a> as the second argument, matching how <code>test()</code> accepts options:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;benchmarks with setup&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> bench.<span class="hljs-title function_">compare</span>(
+    <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;with-cache&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title function_">readFromCache</span>()
+    }),
+    <span class="hljs-title function_">bench</span>(
+      <span class="hljs-string">&#x27;without-cache&#x27;</span>,
+      { <span class="hljs-attr">beforeEach</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">clearCache</span>() },
+      <span class="hljs-function">() =&gt;</span> { <span class="hljs-title function_">readFromDisk</span>() },
+    ),
+  )
+})</code></pre></div>
+<h2 id="comparing-across-projects"><a class="anchor" href="#comparing-across-projects">#</a>Comparing Across Projects</h2>
+<p>When your workspace defines multiple projects (e.g., different browsers or runtimes), pass <code>perProject: true</code> in the bench options to compare how the same benchmark performs across all of them. Vitest still prints the result inline for the current project, and additionally collects per-project results into a single comparison table at the end of the test run.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;simple example&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;1 + 1&#x27;</span>, { <span class="hljs-attr">perProject</span>: <span class="hljs-literal">true</span> }, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-number">1</span> + <span class="hljs-number">1</span>
+  }).<span class="hljs-title function_">run</span>()
+})</code></pre></div>
+<p>The same test file runs in each project (chromium, firefox, webkit, etc.), and Vitest groups the results:</p>
+<blockquote>
+<p><em>(extrait de code externe non inclus)</em></p>
+</blockquote>
+<p>You can also mix <code>perProject</code> benchmarks with regular ones inside <code>bench.compare()</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;compare implementations across browsers&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">await</span> bench.<span class="hljs-title function_">compare</span>(
+    <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;JSON.parse&#x27;</span>, { <span class="hljs-attr">perProject</span>: <span class="hljs-literal">true</span> }, <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(<span class="hljs-string">&#x27;{&quot;key&quot;:&quot;value&quot;}&#x27;</span>)
+    }),
+    <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;custom parser&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title function_">customParse</span>(<span class="hljs-string">&#x27;{&quot;key&quot;:&quot;value&quot;}&#x27;</span>)
+    }),
+  )
+})</code></pre></div>
+<p>In this case, <code>custom parser</code> appears in the normal inline comparison table per project, while <code>JSON.parse</code> is additionally collected into the cross-project comparison table at the end.</p>
+<h2 id="asserting-performance"><a class="anchor" href="#asserting-performance">#</a>Asserting Performance</h2>
+<p>Use <code>toBeFasterThan()</code> and <code>toBeSlowerThan()</code> matchers to assert relative performance between benchmarks:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;lib1 is faster than lib2&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> bench.<span class="hljs-title function_">compare</span>(
+    <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;lib1&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-title function_">lib1</span>() }),
+    <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;lib2&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-title function_">lib2</span>() }),
+  )
+
+  <span class="hljs-title function_">expect</span>(result.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;lib1&#x27;</span>)).<span class="hljs-title function_">toBeFasterThan</span>(result.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;lib2&#x27;</span>))
+})</code></pre></div>
+<p>The <code>delta</code> option specifies the minimum relative difference required for the assertion to pass. This helps avoid flaky tests caused by benchmark noise:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// lib1 must be at least 10% faster than lib2</span>
+<span class="hljs-title function_">expect</span>(result.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;lib1&#x27;</span>)).<span class="hljs-title function_">toBeFasterThan</span>(result.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;lib2&#x27;</span>), {
+  <span class="hljs-attr">delta</span>: <span class="hljs-number">0.1</span>,
+})
+
+<span class="hljs-comment">// lib2 must be at least 20% slower than lib1</span>
+<span class="hljs-title function_">expect</span>(result.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;lib2&#x27;</span>)).<span class="hljs-title function_">toBeSlowerThan</span>(result.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;lib1&#x27;</span>), {
+  <span class="hljs-attr">delta</span>: <span class="hljs-number">0.2</span>,
+})</code></pre></div>
+<p>You can also assert absolute performance using standard matchers:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;parsing is fast enough&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;parse&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">parse</span>(largeInput)
+  }).<span class="hljs-title function_">run</span>()
+
+  <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">throughput</span>.<span class="hljs-property">mean</span>).<span class="hljs-title function_">toBeGreaterThan</span>(<span class="hljs-number">10_000</span>)
+})</code></pre></div>
+<h2 id="retries"><a class="anchor" href="#retries">#</a>Retries</h2>
+<p>Since benchmarks can be noisy, use the <code>retry</code> option to automatically retry failing benchmark tests:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;performance comparison&#x27;</span>, { <span class="hljs-attr">retry</span>: <span class="hljs-number">3</span> }, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> bench.<span class="hljs-title function_">compare</span>(
+    <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;lib1&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-title function_">lib1</span>() }),
+    <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;lib2&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-title function_">lib2</span>() }),
+  )
+
+  <span class="hljs-title function_">expect</span>(result.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;lib1&#x27;</span>)).<span class="hljs-title function_">toBeFasterThan</span>(result.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;lib2&#x27;</span>))
+})</code></pre></div>
+<h2 id="storing-and-replaying-results"><a class="anchor" href="#storing-and-replaying-results">#</a>Storing and Replaying Results</h2>
+<p>Two primitives let you persist benchmark results to disk and compare against them in future runs: the <code>writeResult</code> option saves a result, and <code>bench.from()</code> reads one back.</p>
+<h3 id="writeresult"><a class="anchor" href="#writeresult">#</a><code>writeResult</code></h3>
+<p>Pass <code>writeResult</code> as a per-bench option to write the result to a JSON file every time the benchmark runs. The path is resolved against the project root:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;parse&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">bench</span>(
+    <span class="hljs-string">&#x27;parse&#x27;</span>,
+    { <span class="hljs-attr">writeResult</span>: <span class="hljs-string">&#x27;./benchmarks/parse.json&#x27;</span> },
+    <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">parse</span>(largeInput),
+  ).<span class="hljs-title function_">run</span>()
+})</code></pre></div>
+<ul>
+<li>The benchmark always runs. There is no skip-when-cached behaviour and no CLI flag, the file is overwritten on every successful run.</li>
+<li>If the function throws, the file is not written.</li>
+<li>Commit these files alongside your code so reviewers and CI share the same reference points.</li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>If you commit these files, keep in mind that benchmark results vary significantly between environments (developer machines, CI runners, different OSes). Designate a single environment (typically CI) to generate the file, and avoid regenerating it locally.</p>
+</div><h3 id="bench-from"><a class="anchor" href="#bench-from">#</a><code>bench.from()</code></h3>
+<p><code>bench.from(name, source)</code> is a registration that doesn&#39;t execute a function. It reads a previously stored result and feeds it into <code>bench.compare()</code> (or returns it directly when you call <code>.run()</code>).</p>
+<p>The source can be a path (relative to the project root) or a function that returns the result data, including a Promise:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;compare against the stored baseline&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> bench.<span class="hljs-title function_">compare</span>(
+    <span class="hljs-title function_">bench</span>(
+      <span class="hljs-string">&#x27;current&#x27;</span>,
+      { <span class="hljs-attr">writeResult</span>: <span class="hljs-string">&#x27;./benchmarks/parse.json&#x27;</span> },
+      <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">parse</span>(largeInput),
+    ),
+    bench.<span class="hljs-title function_">from</span>(<span class="hljs-string">&#x27;previous&#x27;</span>, <span class="hljs-string">&#x27;./benchmarks/parse.json&#x27;</span>),
+    bench.<span class="hljs-title function_">from</span>(<span class="hljs-string">&#x27;remote&#x27;</span>, <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">&#x27;https://path/to/external/file.json&#x27;</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function"><span class="hljs-params">r</span> =&gt;</span> r.<span class="hljs-title function_">json</span>())),
+  )
+
+  <span class="hljs-title function_">expect</span>(result.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;current&#x27;</span>)).<span class="hljs-title function_">toBeFasterThan</span>(result.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;previous&#x27;</span>))
+})</code></pre></div>
+<p>You can keep historical artifacts for older versions and compare them against the current implementation. Because <code>bench.from()</code> never invokes the function that produced the file, the original benchmark code can be deleted once the artifact is committed:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;compare parser versions&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">const</span> input = <span class="hljs-string">&#x27;{&quot;key&quot;:&quot;value&quot;}&#x27;</span>
+
+  <span class="hljs-keyword">await</span> bench.<span class="hljs-title function_">compare</span>(
+    bench.<span class="hljs-title function_">from</span>(<span class="hljs-string">&#x27;v1&#x27;</span>, <span class="hljs-string">&#x27;./benchmarks/parse.v1.json&#x27;</span>),
+    bench.<span class="hljs-title function_">from</span>(<span class="hljs-string">&#x27;v2&#x27;</span>, <span class="hljs-string">&#x27;./benchmarks/parse.v2.json&#x27;</span>),
+    <span class="hljs-title function_">bench</span>(
+      <span class="hljs-string">&#x27;current&#x27;</span>,
+      { <span class="hljs-attr">writeResult</span>: <span class="hljs-string">&#x27;./benchmarks/parse.current.json&#x27;</span> },
+      <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">customParser</span>(input),
+    ),
+  )
+})</code></pre></div>
+<p>To produce a new historical artifact, point a fresh <code>bench()</code> at that version&#39;s implementation, set <code>writeResult</code> to a versioned path (<code>./benchmarks/parse.v3.json</code>), run it once, then replace the call with <code>bench.from(&#39;v3&#39;, &#39;./benchmarks/parse.v3.json&#39;)</code>.</p>
+<p>To regenerate the baseline on demand, gate the write behind an environment variable so the same test either refreshes the artifact or compares against it:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;compare parser versions&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_WRITE_BENCH</span>) {
+    <span class="hljs-keyword">const</span> baseline = <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;baseline&#x27;</span>, { <span class="hljs-attr">writeResult</span>: <span class="hljs-string">&#x27;./my-bench.json&#x27;</span> }, <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">fn</span>())
+    <span class="hljs-keyword">await</span> baseline.<span class="hljs-title function_">run</span>()
+  }
+  <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">const</span> baseline = bench.<span class="hljs-title function_">from</span>(<span class="hljs-string">&#x27;baseline&#x27;</span>, <span class="hljs-string">&#x27;./my-bench.json&#x27;</span>)
+    <span class="hljs-keyword">await</span> bench.<span class="hljs-title function_">compare</span>(<span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;current&#x27;</span>, <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">fn</span>()), baseline)
+  }
+})</code></pre></div>
+<p>Run <code>VITE_WRITE_BENCH=1 vitest bench</code> to refresh the stored result, and <code>vitest bench</code> to compare the current implementation against it.</p>
+<h3 id="per-project-artifacts"><a class="anchor" href="#per-project-artifacts">#</a>Per-project artifacts</h3>
+<p>In a multi-project workspace (different browsers, different runtimes), share one benchmark file across projects by including <code>${projectName}</code> in the path. The placeholder is substituted with the current project name at write time:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;cross-project baseline&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">bench</span>(
+    <span class="hljs-string">&#x27;parse&#x27;</span>,
+    <span class="hljs-comment">// eslint-disable-next-line no-template-curly-in-string</span>
+    { <span class="hljs-attr">perProject</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">writeResult</span>: <span class="hljs-string">&#x27;./benchmarks/parse.${projectName}.json&#x27;</span> },
+    <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">parse</span>(largeInput),
+  ).<span class="hljs-title function_">run</span>()
+})</code></pre></div>
+<p>Use the same template in <code>bench.from()</code> so each project reads its own artifact.</p>
+<h2 id="stability"><a class="anchor" href="#stability">#</a>Stability</h2>
+<p>Benchmarks are inherently flaky: CPU load, thermal throttling, GC pressure, and background processes all affect results. Vitest takes several steps to minimize this noise:</p>
+<ul>
+<li><strong>Separate project</strong>: Benchmark files are grouped into their own project based on the <a href="../config/benchmark.html#benchmark-include"><code>benchmark.include</code></a> pattern. The <code>bench</code> fixture is only exposed in files matched by that pattern. Using it inside a regular test file will throw an error.</li>
+<li><strong>No concurrency</strong>: Tests within a benchmark file always run sequentially. Benchmark files themselves also run one at a time, never in parallel. This prevents benchmarks from interfering with each other.</li>
+</ul>
+<p>To further improve stability:</p>
+<ul>
+<li>Use the <a href="#retries"><code>retry</code></a> option to automatically rerun flaky benchmark assertions.</li>
+<li>Use the <a href="#asserting-performance"><code>delta</code></a> option in <code>toBeFasterThan</code> / <code>toBeSlowerThan</code> to allow for acceptable variance.</li>
+<li>Avoid running benchmarks alongside CPU-intensive processes.</li>
+<li>Close browsers, IDEs, and other applications that compete for CPU time.</li>
+</ul>
+<h3 id="dead-code-elimination"><a class="anchor" href="#dead-code-elimination">#</a>Dead Code Elimination</h3>
+<p>JavaScript engines can optimize away code that has no observable side effects. If your benchmark function doesn&#39;t use its result, the engine may skip the computation entirely, producing misleadingly fast numbers:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;parsing&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-comment">// BAD: the engine may eliminate the work</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;parse&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(input)
+  }).<span class="hljs-title function_">run</span>()
+
+  <span class="hljs-comment">// GOOD: the result is consumed</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;parse&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> result = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(input)
+    <span class="hljs-title function_">doSomething</span>(result)
+  }).<span class="hljs-title function_">run</span>()
+})</code></pre></div>
+<p>This applies to all engines (V8, JavaScriptCore, SpiderMonkey) but is especially aggressive in V8&#39;s TurboFan and JavaScriptCore&#39;s FTL compiler tiers.</p>
+<h3 id="module-runner-overhead"><a class="anchor" href="#module-runner-overhead">#</a>Module Runner Overhead</h3>
+<p>By default, Vitest runs tests in Node.js using Vite&#39;s module runner (configured by <a href="../config/experimental.html#experimental-vitemodulerunner"><code>experimental.viteModuleRunner</code></a>). This transforms all module exports into getters, so every access to an imported binding goes through something like <code>__vite_ssr_module__.value</code>. In regular tests this overhead is negligible, but in benchmarks where a function is called millions of times, the getter call itself can dominate the measurement.</p>
+<p>Vitest will print a warning if it detects excessive getter calls (which you can silence via <a href="../config/benchmark.html#benchmark-suppressexportgetterwarnings"><code>benchmark.suppressExportGetterWarnings</code></a>), but you should be aware of this when benchmarking imported functions:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { parse } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./parser.js&#x27;</span>
+
+<span class="hljs-keyword">const</span> _parse = parse
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;parsing&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-comment">// BAD: every call to `parse` goes through a getter</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;parse&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">parse</span>(input)
+  }).<span class="hljs-title function_">run</span>()
+
+  <span class="hljs-comment">// GOOD: store the reference locally to bypass the getter</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;parse&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">_parse</span>(input)
+  }).<span class="hljs-title function_">run</span>()
+})</code></pre></div>
+<p>If you are the library author, the same overhead applies inside the library you are benchmarking: every cross-module call within its source goes through the same getter wrapper. If you are benchmarking your own library, you have two ways to remove this:</p>
+<p><strong>Benchmark the pre-built artifact.</strong> Import the library through its package name (which resolves to its built output) instead of reaching into its source. The built file has already collapsed internal imports into direct references, so Vite&#39;s module runner sees a single module with no internal getters:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-comment">// BAD: every internal call inside the library goes through a getter</span>
+<span class="hljs-keyword">import</span> { parse } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;../src/index.ts&#x27;</span>
+
+<span class="hljs-comment">// GOOD: the published entry has no internal getters</span>
+<span class="hljs-keyword">import</span> { parse } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;my-library&#x27;</span></code></pre></div>
+<p>If you compare your library against other packages, benchmark the same kind of artifact for every implementation. For workspace packages, make sure the package name resolves to the built output instead of source, for example by externalizing the package in Vite or by importing from <code>dist</code>.</p>
+<p><strong>Disable the module runner for the benchmark.</strong> If the benchmark does not need Vite transforms, mocks, or Vitest module interception, disable <a href="../config/experimental.html#experimental-vitemodulerunner"><code>experimental.viteModuleRunner</code></a> for the benchmark project so Node runs native ESM directly.</p>
+<p>This only affects Node.js mode. Browser mode uses native ESM imports and does not have this overhead.</p>
+<h3 id="engine-specific-considerations"><a class="anchor" href="#engine-specific-considerations">#</a>Engine-Specific Considerations</h3>
+<h4 id="v8-node-js-chrome"><a class="anchor" href="#v8-node-js-chrome">#</a>V8 (Node.js, Chrome)</h4>
+<ul>
+<li><p><strong>JIT tiering</strong>: V8 compiles functions through multiple optimization tiers (Sparkplug → Maglev → TurboFan). A function may run at different speeds during warmup vs. steady-state. Tinybench handles warmup automatically, but very short benchmark runs may not reach the highest optimization tier.</p>
+</li>
+<li><p><strong>Deoptimization</strong>: V8 can &quot;bail out&quot; of optimized code mid-benchmark if it encounters unexpected types or shapes. Keep the types consistent in your benchmark function:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;process items&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-comment">// BAD: mixed shapes cause deoptimization</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;process&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> item <span class="hljs-keyword">of</span> items) {
+      <span class="hljs-comment">// some items have { name: string }, others have { name: string, id: number }</span>
+      <span class="hljs-title function_">process</span>(item)
+    }
+  }).<span class="hljs-title function_">run</span>()
+
+  <span class="hljs-comment">// GOOD: consistent object shapes</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;process&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> item <span class="hljs-keyword">of</span> items) {
+      <span class="hljs-comment">// all items have the same shape { name: string, id: number }</span>
+      <span class="hljs-title function_">process</span>(item)
+    }
+  }).<span class="hljs-title function_">run</span>()
+})</code></pre></div>
+</li>
+<li><p><strong>Garbage collection</strong>: Large allocations inside the benchmark loop add GC noise. If you&#39;re measuring computation, pre-allocate data in a <code>setup</code> hook rather than inside the benchmarked function:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;sorting&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">const</span> original = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>({ <span class="hljs-attr">length</span>: <span class="hljs-number">10000</span> }, <span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>())
+  <span class="hljs-keyword">let</span> <span class="hljs-attr">data</span>: <span class="hljs-built_in">number</span>[]
+
+  <span class="hljs-comment">// BAD: allocates a new array every iteration, GC adds noise</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;sort&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> data = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>({ <span class="hljs-attr">length</span>: <span class="hljs-number">10000</span> }, <span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>())
+    data.<span class="hljs-title function_">sort</span>()
+  }).<span class="hljs-title function_">run</span>()
+
+  <span class="hljs-comment">// GOOD: pre-allocate, copy in beforeEach</span>
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">bench</span>(
+    <span class="hljs-string">&#x27;sort&#x27;</span>,
+    <span class="hljs-function">() =&gt;</span> { data.<span class="hljs-title function_">sort</span>() },
+    {
+      <span class="hljs-title function_">beforeEach</span>(<span class="hljs-params"></span>) {
+        data = [...original]
+      },
+    },
+  ).<span class="hljs-title function_">run</span>()
+})</code></pre></div>
+</li>
+</ul>
+<h4 id="javascriptcore-bun-safari"><a class="anchor" href="#javascriptcore-bun-safari">#</a>JavaScriptCore (Bun, Safari)</h4>
+<ul>
+<li><strong>Different optimization thresholds</strong>: JSC uses its own JIT tiers (LLInt → Baseline → DFG → FTL) with different inlining and optimization heuristics. A benchmark that is fast on V8 may behave very differently on JSC.</li>
+<li><strong>Async benchmarks</strong>: Bun&#39;s event loop implementation differs from Node.js. If your benchmark involves async operations or timers, results may not be directly comparable across runtimes.</li>
+</ul>
+<h4 id="browser"><a class="anchor" href="#browser">#</a>Browser</h4>
+<ul>
+<li><p><strong>Timer resolution</strong>: Browsers may reduce <code>performance.now()</code> precision (e.g., to 100μs or even 1ms) as a security mechanism. This makes very fast operations difficult to measure accurately, so increase iterations to compensate:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;fast operations&#x27;</span>, <span class="hljs-title function_">async</span> ({ bench }) =&gt; {
+  <span class="hljs-keyword">await</span> bench.<span class="hljs-title function_">compare</span>(
+    <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;fast-op&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-title function_">fastOp</span>() }),
+    <span class="hljs-title function_">bench</span>(<span class="hljs-string">&#x27;other-op&#x27;</span>, <span class="hljs-function">() =&gt;</span> { <span class="hljs-title function_">otherOp</span>() }),
+    {
+      <span class="hljs-comment">// more iterations help overcome low timer resolution</span>
+      <span class="hljs-attr">iterations</span>: <span class="hljs-number">1000</span>,
+    },
+  )
+})</code></pre></div>
+</li>
+<li><p><strong>Cross-browser differences</strong>: V8 (Chrome), SpiderMonkey (Firefox), and JSC (Safari) optimize different patterns differently. A benchmark that shows one library winning in Chrome may show the opposite in Firefox.</p>
+</li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#defining-a-benchmark">Defining a Benchmark</a><a class="toc-2" href="#running-benchmarks">Running Benchmarks</a><a class="toc-3" href="#vitest-default">vitest (default)</a><a class="toc-3" href="#vitest-with-benchmark-enabled">vitest with benchmark.enabled</a><a class="toc-3" href="#vitest-bench">vitest bench</a><a class="toc-2" href="#comparing-benchmarks">Comparing Benchmarks</a><a class="toc-3" href="#options">Options</a><a class="toc-2" href="#comparing-across-projects">Comparing Across Projects</a><a class="toc-2" href="#asserting-performance">Asserting Performance</a><a class="toc-2" href="#retries">Retries</a><a class="toc-2" href="#storing-and-replaying-results">Storing and Replaying Results</a><a class="toc-3" href="#writeresult">writeResult</a><a class="toc-3" href="#bench-from">bench.from()</a><a class="toc-3" href="#per-project-artifacts">Per-project artifacts</a><a class="toc-2" href="#stability">Stability</a><a class="toc-3" href="#dead-code-elimination">Dead Code Elimination</a><a class="toc-3" href="#module-runner-overhead">Module Runner Overhead</a><a class="toc-3" href="#engine-specific-considerations">Engine-Specific Considerations</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

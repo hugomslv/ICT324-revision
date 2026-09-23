@@ -1,0 +1,1268 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formatters Reference (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">ESLint</a> › use/formatters/index  <a class="ext small" href="https://eslint.org/docs/latest/use/formatters/">version en ligne</a></div>
+<h1>Formatters Reference</h1><p>ESLint comes with several built-in formatters to control the appearance of the linting results, and supports third-party formatters as well.</p>
+<p>You can specify a formatter using the <a href="../command-line-interface.html#-f---format"><code>--format</code> or <code>-f</code></a> flag in the CLI. For example, <code>--format json</code> uses the <code>json</code> formatter.</p>
+<p>The built-in formatter options are:</p>
+<ul>
+<li><a href="#html">html</a></li>
+<li><a href="#json-with-metadata">json-with-metadata</a></li>
+<li><a href="#json">json</a></li>
+<li><a href="#stylish">stylish</a></li>
+</ul>
+<h2 id="example-source"><a class="anchor" href="#example-source">#</a>Example Source</h2>
+<p>Examples of each formatter were created from linting <code>fullOfProblems.js</code> using the <code>eslint.config.js</code> configuration shown below.</p>
+<p><code>fullOfProblems.js</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">addOne</span>(<span class="hljs-params">i</span>) {
+    <span class="hljs-keyword">if</span> (i != <span class="hljs-title class_">NaN</span>) {
+        <span class="hljs-keyword">return</span> i ++
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-keyword">return</span>
+    }
+};</code></pre></div>
+<p><code>eslint.config.js</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+<span class="hljs-keyword">import</span> js <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/js&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.js&quot;</span>],
+		<span class="hljs-attr">plugins</span>: {
+			js,
+		},
+		<span class="hljs-attr">extends</span>: [<span class="hljs-string">&quot;js/recommended&quot;</span>],
+		<span class="hljs-attr">rules</span>: {
+			<span class="hljs-string">&quot;consistent-return&quot;</span>: <span class="hljs-number">2</span>,
+			<span class="hljs-string">&quot;indent&quot;</span>           : [<span class="hljs-number">1</span>, <span class="hljs-number">4</span>],
+			<span class="hljs-string">&quot;no-else-return&quot;</span>   : <span class="hljs-number">1</span>,
+			<span class="hljs-string">&quot;semi&quot;</span>             : [<span class="hljs-number">1</span>, <span class="hljs-string">&quot;always&quot;</span>],
+			<span class="hljs-string">&quot;space-unary-ops&quot;</span>  : <span class="hljs-number">2</span>
+		}
+	}
+]);</code></pre></div>
+<p>Tests the formatters with the CLI:</p>
+<div class="code"><pre><code class="hljs lang-shell">npx eslint --format &lt;Add formatter here&gt; fullOfProblems.js</code></pre></div>
+<h2 id="built-in-formatter-options"><a class="anchor" href="#built-in-formatter-options">#</a>Built-In Formatter Options</h2>
+<h3 id="html"><a class="anchor" href="#html">#</a>html</h3>
+<p>Outputs results to HTML. The <code>html</code> formatter is useful for visual presentation in the browser.</p>
+<p>Example output:</p>
+<iframe src="html-formatter-example.html" width="100%" height="460px"></iframe><h3 id="json-with-metadata"><a class="anchor" href="#json-with-metadata">#</a>json-with-metadata</h3>
+<p>Outputs JSON-serialized results. The <code>json-with-metadata</code> provides the same linting results as the <a href="#json"><code>json</code></a> formatter with additional metadata about the rules applied. The linting results are included in the <code>results</code> property and the rules metadata is included in the <code>metadata</code> property.</p>
+<p>Alternatively, you can use the <a href="https://eslint.org/docs/latest/integrate/nodejs-api" class="ext" title="lien en ligne (non disponible hors-ligne)">ESLint Node.js API</a> to programmatically use ESLint.</p>
+<p>Example output (formatted for easier reading):</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;results&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;filePath&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;/var/lib/jenkins/workspace/eslint Release/eslint/fullOfProblems.js&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;messages&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;no-unused-vars&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&#x27;addOne&#x27; is defined but never used.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">10</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;unusedVar&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">16</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;suggestions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;removeVar&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;varName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;addOne&quot;</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                    <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-number">94</span>
+                                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&quot;</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;desc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Remove unused variable &#x27;addOne&#x27;.&quot;</span>
+                        <span class="hljs-punctuation">}</span>
+                    <span class="hljs-punctuation">]</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;use-isnan&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Use the isNaN function to compare with NaN.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">9</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;comparisonWithNaN&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">17</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;suggestions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;replaceWithIsNaN&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                    <span class="hljs-number">29</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-number">37</span>
+                                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;!Number.isNaN(i)&quot;</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;desc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Replace with Number.isNaN.&quot;</span>
+                        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;replaceWithCastingAndIsNaN&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                    <span class="hljs-number">29</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-number">37</span>
+                                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;!Number.isNaN(Number(i))&quot;</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;desc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Replace with Number.isNaN and cast to a Number.&quot;</span>
+                        <span class="hljs-punctuation">}</span>
+                    <span class="hljs-punctuation">]</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;space-unary-ops&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Unexpected space before unary operator &#x27;++&#x27;.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">16</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;unexpectedBefore&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">20</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                            <span class="hljs-number">57</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-number">58</span>
+                        <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&quot;</span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;no-useless-assignment&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;The value assigned to &#x27;i&#x27; is not used in subsequent statements.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">16</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;unnecessaryAssignment&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">17</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;semi&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Missing semicolon.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">20</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;missingSemi&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">4</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                            <span class="hljs-number">60</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-number">60</span>
+                        <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;;&quot;</span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;no-else-return&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Unnecessary &#x27;else&#x27; after &#x27;return&#x27;.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">4</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">12</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;unexpected&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">6</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">6</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                            <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-number">94</span>
+                        <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;function addOne(i) {\n    if (i != NaN) {\n        return i ++\n    } \n      return\n    \n}&quot;</span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;indent&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Expected indentation of 8 spaces but found 6.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;wrongIndentation&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">7</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                            <span class="hljs-number">74</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-number">80</span>
+                        <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;        &quot;</span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;consistent-return&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Function &#x27;addOne&#x27; expected a return value.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">7</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;missingReturnValue&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">13</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;semi&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Missing semicolon.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">13</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;missingSemi&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">6</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                            <span class="hljs-number">86</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-number">86</span>
+                        <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;;&quot;</span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;suppressedMessages&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;errorCount&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;fatalErrorCount&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;warningCount&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">4</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;fixableErrorCount&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;fixableWarningCount&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">4</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;source&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;function addOne(i) {\n    if (i != NaN) {\n        return i ++\n    } else {\n      return\n    }\n};&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;usedDeprecatedRules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;indent&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;replacedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-string">&quot;@stylistic/indent&quot;</span>
+                    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;info&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Formatting rules are being moved out of ESLint core.&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/blog/2023/10/deprecating-formatting-rules/&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;deprecatedSince&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;8.53.0&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;availableUntil&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;11.0.0&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;replacedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                            <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ESLint Stylistic now maintains deprecated stylistic core rules.&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/guide/migration&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;plugin&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;@stylistic/eslint-plugin&quot;</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style&quot;</span>
+                                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;rule&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;indent&quot;</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/rules/indent&quot;</span>
+                                <span class="hljs-punctuation">}</span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">]</span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;semi&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;replacedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-string">&quot;@stylistic/semi&quot;</span>
+                    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;info&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Formatting rules are being moved out of ESLint core.&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/blog/2023/10/deprecating-formatting-rules/&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;deprecatedSince&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;8.53.0&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;availableUntil&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;11.0.0&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;replacedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                            <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ESLint Stylistic now maintains deprecated stylistic core rules.&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/guide/migration&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;plugin&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;@stylistic/eslint-plugin&quot;</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style&quot;</span>
+                                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;rule&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;semi&quot;</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/rules/semi&quot;</span>
+                                <span class="hljs-punctuation">}</span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">]</span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;space-unary-ops&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;replacedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-string">&quot;@stylistic/space-unary-ops&quot;</span>
+                    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;info&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Formatting rules are being moved out of ESLint core.&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/blog/2023/10/deprecating-formatting-rules/&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;deprecatedSince&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;8.53.0&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;availableUntil&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;11.0.0&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;replacedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                            <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ESLint Stylistic now maintains deprecated stylistic core rules.&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/guide/migration&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;plugin&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;@stylistic/eslint-plugin&quot;</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style&quot;</span>
+                                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;rule&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;space-unary-ops&quot;</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/rules/space-unary-ops&quot;</span>
+                                <span class="hljs-punctuation">}</span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">]</span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">]</span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;metadata&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;cwd&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;/var/lib/jenkins/workspace/eslint Release/eslint&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;rulesMeta&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;no-unused-vars&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;problem&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;docs&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Disallow unused variables&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;recommended&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/docs/latest/rules/no-unused-vars&quot;</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;hasSuggestions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;schema&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                    <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;oneOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                            <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                    <span class="hljs-string">&quot;all&quot;</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-string">&quot;local&quot;</span>
+                                <span class="hljs-punctuation">]</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;object&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;properties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;vars&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                            <span class="hljs-string">&quot;all&quot;</span><span class="hljs-punctuation">,</span>
+                                            <span class="hljs-string">&quot;local&quot;</span>
+                                        <span class="hljs-punctuation">]</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;varsIgnorePattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;string&quot;</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;args&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                            <span class="hljs-string">&quot;all&quot;</span><span class="hljs-punctuation">,</span>
+                                            <span class="hljs-string">&quot;after-used&quot;</span><span class="hljs-punctuation">,</span>
+                                            <span class="hljs-string">&quot;none&quot;</span>
+                                        <span class="hljs-punctuation">]</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;ignoreRestSiblings&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;argsIgnorePattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;string&quot;</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;caughtErrors&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                            <span class="hljs-string">&quot;all&quot;</span><span class="hljs-punctuation">,</span>
+                                            <span class="hljs-string">&quot;none&quot;</span>
+                                        <span class="hljs-punctuation">]</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;caughtErrorsIgnorePattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;string&quot;</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;destructuredArrayIgnorePattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;string&quot;</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;ignoreClassWithStaticInitBlock&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;ignoreUsingDeclarations&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;reportUsedIgnorePattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span>
+                                    <span class="hljs-punctuation">}</span>
+                                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;additionalProperties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">]</span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;defaultOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                    <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;vars&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;all&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;args&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;after-used&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;ignoreRestSiblings&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;caughtErrors&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;all&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;ignoreClassWithStaticInitBlock&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;ignoreUsingDeclarations&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;reportUsedIgnorePattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messages&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;unusedVar&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&#x27;{{varName}}&#x27; is {{action}} but never used{{additional}}.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;usedIgnoredVar&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&#x27;{{varName}}&#x27; is marked as ignored but is used{{additional}}.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;removeVar&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Remove unused variable &#x27;{{varName}}&#x27;.&quot;</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;use-isnan&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;hasSuggestions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;problem&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;docs&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Require calls to `isNaN()` when checking for `NaN`&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;recommended&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/docs/latest/rules/use-isnan&quot;</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;schema&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                    <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;object&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;properties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;enforceForSwitchCase&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;enforceForIndexOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;additionalProperties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;defaultOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                    <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;enforceForIndexOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;enforceForSwitchCase&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messages&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;comparisonWithNaN&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Use the isNaN function to compare with NaN.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;switchNaN&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&#x27;switch(NaN)&#x27; can never match a case clause. Use Number.isNaN instead of the switch.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;caseNaN&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&#x27;case NaN&#x27; can never match. Use Number.isNaN before the switch.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;indexOfNaN&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Array prototype method &#x27;{{ methodName }}&#x27; cannot find NaN.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;replaceWithIsNaN&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Replace with Number.isNaN.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;replaceWithCastingAndIsNaN&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Replace with Number.isNaN and cast to a Number.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;replaceWithFindIndex&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Replace with Array.prototype.{{ methodName }}.&quot;</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;space-unary-ops&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;deprecated&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Formatting rules are being moved out of ESLint core.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/blog/2023/10/deprecating-formatting-rules/&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;deprecatedSince&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;8.53.0&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;availableUntil&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;11.0.0&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;replacedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ESLint Stylistic now maintains deprecated stylistic core rules.&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/guide/migration&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;plugin&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;@stylistic/eslint-plugin&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style&quot;</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;rule&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;space-unary-ops&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/rules/space-unary-ops&quot;</span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">}</span>
+                    <span class="hljs-punctuation">]</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;layout&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;docs&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Enforce consistent spacing before or after unary operators&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;recommended&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/docs/latest/rules/space-unary-ops&quot;</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;fixable&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;whitespace&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;schema&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                    <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;object&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;properties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;words&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;default&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;nonwords&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;default&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;overrides&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;object&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;additionalProperties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span>
+                                <span class="hljs-punctuation">}</span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;additionalProperties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messages&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;unexpectedBefore&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Unexpected space before unary operator &#x27;{{operator}}&#x27;.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;unexpectedAfter&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Unexpected space after unary operator &#x27;{{operator}}&#x27;.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;unexpectedAfterWord&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Unexpected space after unary word operator &#x27;{{word}}&#x27;.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;wordOperator&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Unary word operator &#x27;{{word}}&#x27; must be followed by whitespace.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;operator&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Unary operator &#x27;{{operator}}&#x27; must be followed by whitespace.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;beforeUnaryExpressions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Space is required before unary expressions &#x27;{{token}}&#x27;.&quot;</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;no-useless-assignment&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;problem&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;docs&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Disallow variable assignments when the value is not used&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;recommended&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/docs/latest/rules/no-useless-assignment&quot;</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;schema&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messages&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;unnecessaryAssignment&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;The value assigned to &#x27;{{name}}&#x27; is not used in subsequent statements.&quot;</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;semi&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;deprecated&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Formatting rules are being moved out of ESLint core.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/blog/2023/10/deprecating-formatting-rules/&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;deprecatedSince&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;8.53.0&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;availableUntil&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;11.0.0&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;replacedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ESLint Stylistic now maintains deprecated stylistic core rules.&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/guide/migration&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;plugin&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;@stylistic/eslint-plugin&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style&quot;</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;rule&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;semi&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/rules/semi&quot;</span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">}</span>
+                    <span class="hljs-punctuation">]</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;layout&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;docs&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Require or disallow semicolons instead of ASI&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;recommended&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/docs/latest/rules/semi&quot;</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;fixable&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;code&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;schema&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;anyOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;array&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;items&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                        <span class="hljs-string">&quot;never&quot;</span>
+                                    <span class="hljs-punctuation">]</span>
+                                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;object&quot;</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;properties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;beforeStatementContinuationChars&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                            <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                                <span class="hljs-string">&quot;always&quot;</span><span class="hljs-punctuation">,</span>
+                                                <span class="hljs-string">&quot;any&quot;</span><span class="hljs-punctuation">,</span>
+                                                <span class="hljs-string">&quot;never&quot;</span>
+                                            <span class="hljs-punctuation">]</span>
+                                        <span class="hljs-punctuation">}</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;additionalProperties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                                <span class="hljs-punctuation">}</span>
+                            <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;minItems&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;maxItems&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span>
+                        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;array&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;items&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                        <span class="hljs-string">&quot;always&quot;</span>
+                                    <span class="hljs-punctuation">]</span>
+                                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;object&quot;</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;properties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;omitLastInOneLineBlock&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                            <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span>
+                                        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                        <span class="hljs-attr">&quot;omitLastInOneLineClassBody&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                            <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span>
+                                        <span class="hljs-punctuation">}</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;additionalProperties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                                <span class="hljs-punctuation">}</span>
+                            <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;minItems&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;maxItems&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span>
+                        <span class="hljs-punctuation">}</span>
+                    <span class="hljs-punctuation">]</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messages&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;missingSemi&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Missing semicolon.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;extraSemi&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Extra semicolon.&quot;</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;no-else-return&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;suggestion&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;defaultOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                    <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;allowElseIf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;docs&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Disallow `else` blocks after `return` statements in `if` statements&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;recommended&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;frozen&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/docs/latest/rules/no-else-return&quot;</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;schema&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                    <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;object&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;properties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;allowElseIf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;additionalProperties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;fixable&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;code&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messages&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;unexpected&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Unnecessary &#x27;else&#x27; after &#x27;return&#x27;.&quot;</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;indent&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;deprecated&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Formatting rules are being moved out of ESLint core.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/blog/2023/10/deprecating-formatting-rules/&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;deprecatedSince&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;8.53.0&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;availableUntil&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;11.0.0&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;replacedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ESLint Stylistic now maintains deprecated stylistic core rules.&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/guide/migration&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;plugin&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;@stylistic/eslint-plugin&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style&quot;</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;rule&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;indent&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/rules/indent&quot;</span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">}</span>
+                    <span class="hljs-punctuation">]</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;layout&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;docs&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Enforce consistent indentation&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;recommended&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/docs/latest/rules/indent&quot;</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;fixable&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;whitespace&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;schema&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                    <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;oneOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                            <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                    <span class="hljs-string">&quot;tab&quot;</span>
+                                <span class="hljs-punctuation">]</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">]</span>
+                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;object&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;properties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;SwitchCase&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;default&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;VariableDeclarator&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;oneOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                    <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;oneOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                            <span class="hljs-punctuation">{</span>
+                                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                                <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                            <span class="hljs-punctuation">{</span>
+                                                <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                                    <span class="hljs-string">&quot;first&quot;</span><span class="hljs-punctuation">,</span>
+                                                    <span class="hljs-string">&quot;off&quot;</span>
+                                                <span class="hljs-punctuation">]</span>
+                                            <span class="hljs-punctuation">}</span>
+                                        <span class="hljs-punctuation">]</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;object&quot;</span><span class="hljs-punctuation">,</span>
+                                        <span class="hljs-attr">&quot;properties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                            <span class="hljs-attr">&quot;var&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                                <span class="hljs-attr">&quot;oneOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                                    <span class="hljs-punctuation">{</span>
+                                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                                        <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                                    <span class="hljs-punctuation">{</span>
+                                                        <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                                            <span class="hljs-string">&quot;first&quot;</span><span class="hljs-punctuation">,</span>
+                                                            <span class="hljs-string">&quot;off&quot;</span>
+                                                        <span class="hljs-punctuation">]</span>
+                                                    <span class="hljs-punctuation">}</span>
+                                                <span class="hljs-punctuation">]</span>
+                                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                            <span class="hljs-attr">&quot;let&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                                <span class="hljs-attr">&quot;oneOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                                    <span class="hljs-punctuation">{</span>
+                                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                                        <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                                    <span class="hljs-punctuation">{</span>
+                                                        <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                                            <span class="hljs-string">&quot;first&quot;</span><span class="hljs-punctuation">,</span>
+                                                            <span class="hljs-string">&quot;off&quot;</span>
+                                                        <span class="hljs-punctuation">]</span>
+                                                    <span class="hljs-punctuation">}</span>
+                                                <span class="hljs-punctuation">]</span>
+                                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                            <span class="hljs-attr">&quot;const&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                                <span class="hljs-attr">&quot;oneOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                                    <span class="hljs-punctuation">{</span>
+                                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                                        <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                                    <span class="hljs-punctuation">{</span>
+                                                        <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                                            <span class="hljs-string">&quot;first&quot;</span><span class="hljs-punctuation">,</span>
+                                                            <span class="hljs-string">&quot;off&quot;</span>
+                                                        <span class="hljs-punctuation">]</span>
+                                                    <span class="hljs-punctuation">}</span>
+                                                <span class="hljs-punctuation">]</span>
+                                            <span class="hljs-punctuation">}</span>
+                                        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                        <span class="hljs-attr">&quot;additionalProperties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                                    <span class="hljs-punctuation">}</span>
+                                <span class="hljs-punctuation">]</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;outerIIFEBody&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;oneOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                    <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                        <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                            <span class="hljs-string">&quot;off&quot;</span>
+                                        <span class="hljs-punctuation">]</span>
+                                    <span class="hljs-punctuation">}</span>
+                                <span class="hljs-punctuation">]</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;MemberExpression&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;oneOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                    <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                        <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                            <span class="hljs-string">&quot;off&quot;</span>
+                                        <span class="hljs-punctuation">]</span>
+                                    <span class="hljs-punctuation">}</span>
+                                <span class="hljs-punctuation">]</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;FunctionDeclaration&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;object&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;properties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;parameters&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;oneOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                            <span class="hljs-punctuation">{</span>
+                                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                                <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                            <span class="hljs-punctuation">{</span>
+                                                <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                                    <span class="hljs-string">&quot;first&quot;</span><span class="hljs-punctuation">,</span>
+                                                    <span class="hljs-string">&quot;off&quot;</span>
+                                                <span class="hljs-punctuation">]</span>
+                                            <span class="hljs-punctuation">}</span>
+                                        <span class="hljs-punctuation">]</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;body&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                        <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                                    <span class="hljs-punctuation">}</span>
+                                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;additionalProperties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;FunctionExpression&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;object&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;properties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;parameters&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;oneOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                            <span class="hljs-punctuation">{</span>
+                                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                                <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                            <span class="hljs-punctuation">{</span>
+                                                <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                                    <span class="hljs-string">&quot;first&quot;</span><span class="hljs-punctuation">,</span>
+                                                    <span class="hljs-string">&quot;off&quot;</span>
+                                                <span class="hljs-punctuation">]</span>
+                                            <span class="hljs-punctuation">}</span>
+                                        <span class="hljs-punctuation">]</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;body&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                        <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                                    <span class="hljs-punctuation">}</span>
+                                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;additionalProperties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;StaticBlock&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;object&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;properties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;body&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                        <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                                    <span class="hljs-punctuation">}</span>
+                                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;additionalProperties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;CallExpression&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;object&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;properties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;arguments&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;oneOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                            <span class="hljs-punctuation">{</span>
+                                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                                <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                            <span class="hljs-punctuation">{</span>
+                                                <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                                    <span class="hljs-string">&quot;first&quot;</span><span class="hljs-punctuation">,</span>
+                                                    <span class="hljs-string">&quot;off&quot;</span>
+                                                <span class="hljs-punctuation">]</span>
+                                            <span class="hljs-punctuation">}</span>
+                                        <span class="hljs-punctuation">]</span>
+                                    <span class="hljs-punctuation">}</span>
+                                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;additionalProperties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;ArrayExpression&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;oneOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                    <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                        <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                            <span class="hljs-string">&quot;first&quot;</span><span class="hljs-punctuation">,</span>
+                                            <span class="hljs-string">&quot;off&quot;</span>
+                                        <span class="hljs-punctuation">]</span>
+                                    <span class="hljs-punctuation">}</span>
+                                <span class="hljs-punctuation">]</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;ObjectExpression&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;oneOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                    <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                        <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                            <span class="hljs-string">&quot;first&quot;</span><span class="hljs-punctuation">,</span>
+                                            <span class="hljs-string">&quot;off&quot;</span>
+                                        <span class="hljs-punctuation">]</span>
+                                    <span class="hljs-punctuation">}</span>
+                                <span class="hljs-punctuation">]</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;ImportDeclaration&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;oneOf&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                    <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;integer&quot;</span><span class="hljs-punctuation">,</span>
+                                        <span class="hljs-attr">&quot;minimum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;enum&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                            <span class="hljs-string">&quot;first&quot;</span><span class="hljs-punctuation">,</span>
+                                            <span class="hljs-string">&quot;off&quot;</span>
+                                        <span class="hljs-punctuation">]</span>
+                                    <span class="hljs-punctuation">}</span>
+                                <span class="hljs-punctuation">]</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;flatTernaryExpressions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;default&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;offsetTernaryExpressions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;default&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;ignoredNodes&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;array&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;items&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;string&quot;</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;not&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;pattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;:exit$&quot;</span>
+                                    <span class="hljs-punctuation">}</span>
+                                <span class="hljs-punctuation">}</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;ignoreComments&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;default&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;additionalProperties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messages&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;wrongIndentation&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Expected indentation of {{expected}} but found {{actual}}.&quot;</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;consistent-return&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;suggestion&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;docs&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Require `return` statements to either always or never specify values&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;recommended&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/docs/latest/rules/consistent-return&quot;</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;schema&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                    <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;object&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;properties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;treatUndefinedAsUnspecified&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;boolean&quot;</span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;additionalProperties&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;defaultOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                    <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;treatUndefinedAsUnspecified&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messages&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;missingReturn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Expected to return a value at the end of {{name}}.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;missingReturnValue&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;{{name}} expected a return value.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;unexpectedReturnValue&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;{{name}} expected no return value.&quot;</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<h3 id="json"><a class="anchor" href="#json">#</a>json</h3>
+<p>Outputs JSON-serialized results. The <code>json</code> formatter is useful when you want to programmatically work with the CLI&#39;s linting results.</p>
+<p>Alternatively, you can use the <a href="https://eslint.org/docs/latest/integrate/nodejs-api" class="ext" title="lien en ligne (non disponible hors-ligne)">ESLint Node.js API</a> to programmatically use ESLint.</p>
+<p>Example output (formatted for easier reading):</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;filePath&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;/var/lib/jenkins/workspace/eslint Release/eslint/fullOfProblems.js&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;messages&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;no-unused-vars&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&#x27;addOne&#x27; is defined but never used.&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">10</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;unusedVar&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">16</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;suggestions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                    <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;removeVar&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;varName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;addOne&quot;</span>
+                        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-number">94</span>
+                            <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&quot;</span>
+                        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;desc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Remove unused variable &#x27;addOne&#x27;.&quot;</span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">]</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;use-isnan&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Use the isNaN function to compare with NaN.&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">9</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;comparisonWithNaN&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">17</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;suggestions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                    <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;replaceWithIsNaN&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                <span class="hljs-number">29</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-number">37</span>
+                            <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;!Number.isNaN(i)&quot;</span>
+                        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;desc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Replace with Number.isNaN.&quot;</span>
+                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-punctuation">{</span>
+                        <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;replaceWithCastingAndIsNaN&quot;</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                                <span class="hljs-number">29</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-number">37</span>
+                            <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;!Number.isNaN(Number(i))&quot;</span>
+                        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-attr">&quot;desc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Replace with Number.isNaN and cast to a Number.&quot;</span>
+                    <span class="hljs-punctuation">}</span>
+                <span class="hljs-punctuation">]</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;space-unary-ops&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Unexpected space before unary operator &#x27;++&#x27;.&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">16</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;unexpectedBefore&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">20</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-number">57</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-number">58</span>
+                    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&quot;</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;no-useless-assignment&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;The value assigned to &#x27;i&#x27; is not used in subsequent statements.&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">16</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;unnecessaryAssignment&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">17</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;semi&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Missing semicolon.&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">20</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;missingSemi&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">4</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-number">60</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-number">60</span>
+                    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;;&quot;</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;no-else-return&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Unnecessary &#x27;else&#x27; after &#x27;return&#x27;.&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">4</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">12</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;unexpected&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">6</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">6</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-number">94</span>
+                    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;function addOne(i) {\n    if (i != NaN) {\n        return i ++\n    } \n      return\n    \n}&quot;</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;indent&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Expected indentation of 8 spaces but found 6.&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;wrongIndentation&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">7</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-number">74</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-number">80</span>
+                    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;        &quot;</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;consistent-return&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Function &#x27;addOne&#x27; expected a return value.&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">7</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;missingReturnValue&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">13</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;semi&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;severity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Missing semicolon.&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;line&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;column&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">13</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;messageId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;missingSemi&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endLine&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">6</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;endColumn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-number">86</span><span class="hljs-punctuation">,</span>
+                        <span class="hljs-number">86</span>
+                    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;text&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;;&quot;</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span>
+        <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;suppressedMessages&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;errorCount&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;fatalErrorCount&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;warningCount&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">4</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;fixableErrorCount&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;fixableWarningCount&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">4</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;source&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;function addOne(i) {\n    if (i != NaN) {\n        return i ++\n    } else {\n      return\n    }\n};&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;usedDeprecatedRules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;indent&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;replacedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                    <span class="hljs-string">&quot;@stylistic/indent&quot;</span>
+                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;info&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Formatting rules are being moved out of ESLint core.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/blog/2023/10/deprecating-formatting-rules/&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;deprecatedSince&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;8.53.0&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;availableUntil&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;11.0.0&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;replacedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ESLint Stylistic now maintains deprecated stylistic core rules.&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/guide/migration&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;plugin&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;@stylistic/eslint-plugin&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style&quot;</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;rule&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;indent&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/rules/indent&quot;</span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">}</span>
+                    <span class="hljs-punctuation">]</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;semi&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;replacedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                    <span class="hljs-string">&quot;@stylistic/semi&quot;</span>
+                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;info&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Formatting rules are being moved out of ESLint core.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/blog/2023/10/deprecating-formatting-rules/&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;deprecatedSince&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;8.53.0&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;availableUntil&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;11.0.0&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;replacedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ESLint Stylistic now maintains deprecated stylistic core rules.&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/guide/migration&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;plugin&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;@stylistic/eslint-plugin&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style&quot;</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;rule&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;semi&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/rules/semi&quot;</span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">}</span>
+                    <span class="hljs-punctuation">]</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;ruleId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;space-unary-ops&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;replacedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                    <span class="hljs-string">&quot;@stylistic/space-unary-ops&quot;</span>
+                <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;info&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Formatting rules are being moved out of ESLint core.&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.org/blog/2023/10/deprecating-formatting-rules/&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;deprecatedSince&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;8.53.0&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;availableUntil&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;11.0.0&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;replacedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ESLint Stylistic now maintains deprecated stylistic core rules.&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/guide/migration&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;plugin&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;@stylistic/eslint-plugin&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style&quot;</span>
+                            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;rule&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;space-unary-ops&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;url&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://eslint.style/rules/space-unary-ops&quot;</span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">}</span>
+                    <span class="hljs-punctuation">]</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span>
+        <span class="hljs-punctuation">]</span>
+    <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">]</span></code></pre></div>
+<h3 id="stylish"><a class="anchor" href="#stylish">#</a>stylish</h3>
+<p>Human-readable output format. This is the default formatter.</p>
+<p>Example output:</p>
+<div class="code"><pre><code class="hljs lang-text">
+/var/lib/jenkins/workspace/eslint Release/eslint/fullOfProblems.js
+  1:10  error    &#x27;addOne&#x27; is defined but never used                              no-unused-vars
+  2:9   error    Use the isNaN function to compare with NaN                      use-isnan
+  3:16  error    Unexpected space before unary operator &#x27;++&#x27;                     space-unary-ops
+  3:16  error    The value assigned to &#x27;i&#x27; is not used in subsequent statements  no-useless-assignment
+  3:20  warning  Missing semicolon                                               semi
+  4:12  warning  Unnecessary &#x27;else&#x27; after &#x27;return&#x27;                               no-else-return
+  5:1   warning  Expected indentation of 8 spaces but found 6                    indent
+  5:7   error    Function &#x27;addOne&#x27; expected a return value                       consistent-return
+  5:13  warning  Missing semicolon                                               semi
+
+✖ 9 problems (5 errors, 4 warnings)
+  1 error and 4 warnings potentially fixable with the `--fix` option.
+</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#example-source">Example Source</a><a class="toc-2" href="#built-in-formatter-options">Built-In Formatter Options</a><a class="toc-3" href="#html">html</a><a class="toc-3" href="#json-with-metadata">json-with-metadata</a><a class="toc-3" href="#json">json</a><a class="toc-3" href="#stylish">stylish</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

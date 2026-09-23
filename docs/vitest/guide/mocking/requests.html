@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mocking Requests (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/mocking/requests  <a class="ext small" href="https://vitest.dev/guide/mocking/requests">version en ligne</a></div>
+<h1 id="mocking-requests"><a class="anchor" href="#mocking-requests">#</a>Mocking Requests</h1>
+<p>Because Vitest runs in Node, mocking network requests is tricky; web APIs are not available, so we need something that will mimic network behavior for us. We recommend <a href="https://mswjs.io/">Mock Service Worker</a> to accomplish this. It allows you to mock <code>http</code>, <code>WebSocket</code> and <code>GraphQL</code> network requests, and is framework agnostic.</p>
+<p>Mock Service Worker (MSW) works by intercepting the requests your tests make, allowing you to use it without changing any of your application code. In-browser, this uses the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API">Service Worker API</a>. In Node.js, and for Vitest, it uses the <a href="https://github.com/mswjs/interceptors"><code>@mswjs/interceptors</code></a> library. To learn more about MSW, read their <a href="https://mswjs.io/docs/">introduction</a></p>
+<h2 id="configuration"><a class="anchor" href="#configuration">#</a>Configuration</h2>
+<p>You can use it like below in your <a href="../../config/setupfiles.html">setup file</a></p>
+<div class="code-group"><div class="code"><div class="code-title">HTTP Setup</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { afterAll, afterEach, beforeAll } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { setupServer } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;msw/node&#x27;</span>
+<span class="hljs-keyword">import</span> { http, <span class="hljs-title class_">HttpResponse</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;msw&#x27;</span>
+
+<span class="hljs-keyword">const</span> posts = [
+  {
+    <span class="hljs-attr">userId</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">title</span>: <span class="hljs-string">&#x27;first post title&#x27;</span>,
+    <span class="hljs-attr">body</span>: <span class="hljs-string">&#x27;first post body&#x27;</span>,
+  },
+  <span class="hljs-comment">// ...</span>
+]
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> restHandlers = [
+  http.<span class="hljs-title function_">get</span>(<span class="hljs-string">&#x27;https://rest-endpoint.example/path/to/posts&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">HttpResponse</span>.<span class="hljs-title function_">json</span>(posts)
+  }),
+]
+
+<span class="hljs-keyword">const</span> server = <span class="hljs-title function_">setupServer</span>(...restHandlers)
+
+<span class="hljs-comment">// Start server before all tests</span>
+<span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">() =&gt;</span> server.<span class="hljs-title function_">listen</span>({ <span class="hljs-attr">onUnhandledRequest</span>: <span class="hljs-string">&#x27;error&#x27;</span> }))
+
+<span class="hljs-comment">// Close server after all tests</span>
+<span class="hljs-title function_">afterAll</span>(<span class="hljs-function">() =&gt;</span> server.<span class="hljs-title function_">close</span>())
+
+<span class="hljs-comment">// Reset handlers after each test for test isolation</span>
+<span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> server.<span class="hljs-title function_">resetHandlers</span>())</code></pre></div>
+<div class="code"><div class="code-title">GraphQL Setup</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { afterAll, afterEach, beforeAll } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { setupServer } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;msw/node&#x27;</span>
+<span class="hljs-keyword">import</span> { graphql, <span class="hljs-title class_">HttpResponse</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;msw&#x27;</span>
+
+<span class="hljs-keyword">const</span> posts = [
+  {
+    <span class="hljs-attr">userId</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">title</span>: <span class="hljs-string">&#x27;first post title&#x27;</span>,
+    <span class="hljs-attr">body</span>: <span class="hljs-string">&#x27;first post body&#x27;</span>,
+  },
+  <span class="hljs-comment">// ...</span>
+]
+
+<span class="hljs-keyword">const</span> graphqlHandlers = [
+  graphql.<span class="hljs-title function_">query</span>(<span class="hljs-string">&#x27;ListPosts&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">HttpResponse</span>.<span class="hljs-title function_">json</span>({
+      <span class="hljs-attr">data</span>: { posts },
+    })
+  }),
+]
+
+<span class="hljs-keyword">const</span> server = <span class="hljs-title function_">setupServer</span>(...graphqlHandlers)
+
+<span class="hljs-comment">// Start server before all tests</span>
+<span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">() =&gt;</span> server.<span class="hljs-title function_">listen</span>({ <span class="hljs-attr">onUnhandledRequest</span>: <span class="hljs-string">&#x27;error&#x27;</span> }))
+
+<span class="hljs-comment">// Close server after all tests</span>
+<span class="hljs-title function_">afterAll</span>(<span class="hljs-function">() =&gt;</span> server.<span class="hljs-title function_">close</span>())
+
+<span class="hljs-comment">// Reset handlers after each test for test isolation</span>
+<span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> server.<span class="hljs-title function_">resetHandlers</span>())</code></pre></div>
+<div class="code"><div class="code-title">WebSocket Setup</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { afterAll, afterEach, beforeAll } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { setupServer } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;msw/node&#x27;</span>
+<span class="hljs-keyword">import</span> { ws } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;msw&#x27;</span>
+
+<span class="hljs-keyword">const</span> chat = ws.<span class="hljs-title function_">link</span>(<span class="hljs-string">&#x27;wss://chat.example.com&#x27;</span>)
+
+<span class="hljs-keyword">const</span> wsHandlers = [
+  chat.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;connection&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">{ client }</span>) =&gt;</span> {
+    client.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&#x27;message&#x27;</span>, <span class="hljs-function">(<span class="hljs-params">event</span>) =&gt;</span> {
+      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Received message from client:&#x27;</span>, event.<span class="hljs-property">data</span>)
+      <span class="hljs-comment">// Echo the received message back to the client</span>
+      client.<span class="hljs-title function_">send</span>(<span class="hljs-string">`Server received: <span class="hljs-subst">${event.data}</span>`</span>)
+    })
+  }),
+]
+
+<span class="hljs-keyword">const</span> server = <span class="hljs-title function_">setupServer</span>(...wsHandlers)
+
+<span class="hljs-comment">// Start server before all tests</span>
+<span class="hljs-title function_">beforeAll</span>(<span class="hljs-function">() =&gt;</span> server.<span class="hljs-title function_">listen</span>({ <span class="hljs-attr">onUnhandledRequest</span>: <span class="hljs-string">&#x27;error&#x27;</span> }))
+
+<span class="hljs-comment">// Close server after all tests</span>
+<span class="hljs-title function_">afterAll</span>(<span class="hljs-function">() =&gt;</span> server.<span class="hljs-title function_">close</span>())
+
+<span class="hljs-comment">// Reset handlers after each test for test isolation</span>
+<span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> server.<span class="hljs-title function_">resetHandlers</span>())</code></pre></div>
+</div><blockquote>
+<p>Configuring the server with <code>onUnhandledRequest: &#39;error&#39;</code> ensures that an error is thrown whenever there is a request that does not have a corresponding request handler.</p>
+</blockquote>
+<h2 id="more"><a class="anchor" href="#more">#</a>More</h2>
+<p>There is much more to MSW. You can access cookies and query parameters, define mock error responses, and much more! To see all you can do with MSW, read <a href="https://mswjs.io/docs">their documentation</a>.</p>
+
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

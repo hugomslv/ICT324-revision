@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-unused-vars (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-unused-vars <span class="badge badge-problem">problème</span> <span class="badge badge-reco">✅ dans js/recommended</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-unused-vars">version en ligne</a></div>
+<h1>no-unused-vars</h1><p>Variables that are declared and not used anywhere in the code are most likely an error due to incomplete refactoring. Such variables take up space in the code and can lead to confusion by readers.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule is aimed at eliminating unused variables, functions, and function parameters.</p>
+<p>A variable <code>foo</code> is considered to be used if any of the following are true:</p>
+<ul>
+<li>It is called (<code>foo()</code>) or constructed (<code>new foo()</code>)</li>
+<li>It is read (<code>let bar = foo</code>)</li>
+<li>It is passed into a function as an argument (<code>doSomething(foo)</code>)</li>
+<li>It is read inside of a function that is passed to another function (<code>doSomething(function() { foo(); })</code>)</li>
+</ul>
+<p>A variable is <em>not</em> considered to be used if it is only ever declared (<code>let foo = 5</code>) or assigned to (<code>foo = 7</code>).</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: &quot;error&quot;*/</span>
+<span class="hljs-comment">/*global some_unused_var*/</span>
+
+<span class="hljs-comment">// It checks variables you have defined as global</span>
+some_unused_var = <span class="hljs-number">42</span>;
+
+<span class="hljs-keyword">let</span> x;
+
+<span class="hljs-comment">// Write-only variables are not considered as used.</span>
+<span class="hljs-keyword">let</span> y = <span class="hljs-number">10</span>;
+y = <span class="hljs-number">5</span>;
+
+<span class="hljs-comment">// A read for a modification of itself is not considered as used.</span>
+<span class="hljs-keyword">let</span> z = <span class="hljs-number">0</span>;
+z = z + <span class="hljs-number">1</span>;
+
+<span class="hljs-comment">// By default, unused arguments cause warnings.</span>
+(<span class="hljs-keyword">function</span>(<span class="hljs-params">foo</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-number">5</span>;
+})();
+
+<span class="hljs-comment">// Unused recursive functions also cause warnings.</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">fact</span>(<span class="hljs-params">n</span>) {
+    <span class="hljs-keyword">if</span> (n &lt; <span class="hljs-number">2</span>) <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">return</span> n * <span class="hljs-title function_">fact</span>(n - <span class="hljs-number">1</span>);
+}
+
+<span class="hljs-comment">// When a function definition destructures an array, unused entries from the array also cause warnings.</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getY</span>(<span class="hljs-params">[x, y]</span>) {
+    <span class="hljs-keyword">return</span> y;
+}
+<span class="hljs-title function_">getY</span>([<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-string">&quot;b&quot;</span>]);</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> x = <span class="hljs-number">10</span>;
+<span class="hljs-title function_">alert</span>(x);
+
+<span class="hljs-comment">// foo is considered used here</span>
+<span class="hljs-title function_">myFunc</span>(<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// ...</span>
+}.<span class="hljs-title function_">bind</span>(<span class="hljs-variable language_">this</span>));
+
+(<span class="hljs-keyword">function</span>(<span class="hljs-params">foo</span>) {
+    <span class="hljs-keyword">return</span> foo;
+})();
+
+<span class="hljs-keyword">var</span> myFunc;
+myFunc = <span class="hljs-built_in">setTimeout</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// myFunc is considered used</span>
+    <span class="hljs-title function_">myFunc</span>();
+}, <span class="hljs-number">50</span>);
+
+<span class="hljs-comment">// Only the second argument from the destructured array is used.</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getY</span>(<span class="hljs-params">[, y]</span>) {
+    <span class="hljs-keyword">return</span> y;
+}
+<span class="hljs-title function_">getY</span>([<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-string">&quot;b&quot;</span>]);</code></pre></div>
+</div><h3 id="exported"><a class="anchor" href="#exported">#</a>exported</h3>
+<p>In environments outside of CommonJS or ECMAScript modules, you may use <code>var</code> to create a global variable that may be used by other scripts. You can use the <code>/* exported variableName */</code> comment block to indicate that this variable is being exported and therefore should not be considered unused.</p>
+<p>Note that <code>/* exported */</code> has no effect for any of the following:</p>
+<ul>
+<li>when <code>languageOptions.sourceType</code> is <code>module</code> (default) or <code>commonjs</code></li>
+<li>when <code>languageOptions.parserOptions.ecmaFeatures.globalReturn</code> is <code>true</code></li>
+</ul>
+<p>The line comment <code>// exported variableName</code> will not work as <code>exported</code> is not line-specific.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/* exported global_var */</span>
+
+<span class="hljs-keyword">var</span> global_var = <span class="hljs-number">42</span>;</code></pre></div>
+<p>Examples of <strong>correct</strong> code for <code>/* exported variableName */</code> operation with <code>no-unused-vars</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: &quot;error&quot;*/</span>
+<span class="hljs-comment">/* exported global_var */</span>
+
+<span class="hljs-keyword">var</span> global_var = <span class="hljs-number">42</span>;</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule takes one argument which can be a string or an object. The string settings are the same as those of the <code>vars</code> property (explained below).</p>
+<p>By default this rule is enabled with <code>all</code> option for caught errors and variables, and <code>after-used</code> for arguments.</p>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;rules&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;no-unused-vars&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;error&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;vars&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;all&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;args&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;after-used&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;caughtErrors&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;all&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;ignoreRestSiblings&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;ignoreUsingDeclarations&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;reportUsedIgnorePattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span>
+        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+    <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<h3 id="vars"><a class="anchor" href="#vars">#</a>vars</h3>
+<p>The <code>vars</code> option has two settings:</p>
+<ul>
+<li><code>&quot;all&quot;</code> checks all variables for usage, including those in the global scope. However, it excludes variables targeted by other options like <code>args</code> and <code>caughtErrors</code>. This is the default setting.</li>
+<li><code>&quot;local&quot;</code> allows variables in the global scope to be unused.</li>
+</ul>
+<h4 id="vars-local"><a class="anchor" href="#vars-local">#</a>vars: local</h4>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;vars&quot;: &quot;local&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;vars&quot;: &quot;local&quot; }]*/</span>
+<span class="hljs-comment">/*global some_unused_var */</span>
+
+some_unused_var = <span class="hljs-number">42</span>;</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;vars&quot;: &quot;local&quot; }</code> option with <code>&quot;languageOptions&quot;: { &quot;sourceType&quot;: &quot;script&quot; }</code>:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;vars&quot;: &quot;local&quot; }]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-number">42</span>;
+
+<span class="hljs-keyword">let</span> bar;
+
+<span class="hljs-keyword">let</span> baz = <span class="hljs-number">42</span>;
+
+<span class="hljs-keyword">var</span> qux;
+
+<span class="hljs-keyword">var</span> quux = <span class="hljs-number">42</span>;</code></pre></div>
+</div><h3 id="varsignorepattern"><a class="anchor" href="#varsignorepattern">#</a>varsIgnorePattern</h3>
+<p>The <code>varsIgnorePattern</code> option specifies exceptions not to check for usage: variables whose names match a regexp pattern. For example, variables whose names contain <code>ignored</code> or <code>Ignored</code>. However, it excludes variables targeted by other options like <code>argsIgnorePattern</code> and <code>caughtErrorsIgnorePattern</code>.</p>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;varsIgnorePattern&quot;: &quot;[iI]gnored&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;varsIgnorePattern&quot;: &quot;[iI]gnored&quot; }]*/</span>
+
+<span class="hljs-keyword">const</span> firstVarIgnored = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">const</span> secondVar = <span class="hljs-number">2</span>;
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(secondVar);</code></pre></div>
+</div><h3 id="args"><a class="anchor" href="#args">#</a>args</h3>
+<p>The <code>args</code> option has three settings:</p>
+<ul>
+<li><code>after-used</code> - unused positional arguments that occur before the last used argument will not be checked, but all named arguments and all positional arguments after the last used argument will be checked.</li>
+<li><code>all</code> - all named arguments must be used.</li>
+<li><code>none</code> - do not check arguments.</li>
+</ul>
+<h4 id="args-after-used"><a class="anchor" href="#args-after-used">#</a>args: after-used</h4>
+<p>Examples of <strong>incorrect</strong> code for the default <code>{ &quot;args&quot;: &quot;after-used&quot; }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;args&quot;: &quot;after-used&quot; }]*/</span>
+
+<span class="hljs-comment">// 2 errors, for the parameters after the last used parameter (bar)</span>
+<span class="hljs-comment">// &quot;baz&quot; is defined but never used</span>
+<span class="hljs-comment">// &quot;qux&quot; is defined but never used</span>
+(<span class="hljs-keyword">function</span>(<span class="hljs-params">foo, bar, baz, qux</span>) {
+    <span class="hljs-keyword">return</span> bar;
+})();</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the default <code>{ &quot;args&quot;: &quot;after-used&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, {&quot;args&quot;: &quot;after-used&quot;}]*/</span>
+
+(<span class="hljs-keyword">function</span>(<span class="hljs-params">foo, bar, baz, qux</span>) {
+    <span class="hljs-keyword">return</span> qux;
+})();</code></pre></div>
+</div><h4 id="args-all"><a class="anchor" href="#args-all">#</a>args: all</h4>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;args&quot;: &quot;all&quot; }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;args&quot;: &quot;all&quot; }]*/</span>
+
+<span class="hljs-comment">// 2 errors</span>
+<span class="hljs-comment">// &quot;foo&quot; is defined but never used</span>
+<span class="hljs-comment">// &quot;baz&quot; is defined but never used</span>
+(<span class="hljs-keyword">function</span>(<span class="hljs-params">foo, bar, baz</span>) {
+    <span class="hljs-keyword">return</span> bar;
+})();</code></pre></div>
+</div><h4 id="args-none"><a class="anchor" href="#args-none">#</a>args: none</h4>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;args&quot;: &quot;none&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;args&quot;: &quot;none&quot; }]*/</span>
+
+(<span class="hljs-keyword">function</span>(<span class="hljs-params">foo, bar, baz</span>) {
+    <span class="hljs-keyword">return</span> bar;
+})();</code></pre></div>
+</div><h3 id="argsignorepattern"><a class="anchor" href="#argsignorepattern">#</a>argsIgnorePattern</h3>
+<p>The <code>argsIgnorePattern</code> option specifies exceptions not to check for usage: arguments whose names match a regexp pattern. For example, variables whose names begin with an underscore.</p>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;argsIgnorePattern&quot;: &quot;^_&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;argsIgnorePattern&quot;: &quot;^_&quot; }]*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">x, _y</span>) {
+    <span class="hljs-keyword">return</span> x + <span class="hljs-number">1</span>;
+}
+<span class="hljs-title function_">foo</span>();</code></pre></div>
+</div><h3 id="caughterrors"><a class="anchor" href="#caughterrors">#</a>caughtErrors</h3>
+<p>The <code>caughtErrors</code> option is used for <code>catch</code> block arguments validation.</p>
+<p>It has two settings:</p>
+<ul>
+<li><code>all</code> - all named arguments must be used. This is the default setting.</li>
+<li><code>none</code> - do not check error objects.</li>
+</ul>
+<h4 id="caughterrors-all"><a class="anchor" href="#caughterrors-all">#</a>caughtErrors: all</h4>
+<p>Not specifying this option is equivalent of assigning it to <code>all</code>.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;caughtErrors&quot;: &quot;all&quot; }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;caughtErrors&quot;: &quot;all&quot; }]*/</span>
+
+<span class="hljs-comment">// 1 error</span>
+<span class="hljs-comment">// &quot;err&quot; is defined but never used</span>
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-comment">//...</span>
+} <span class="hljs-keyword">catch</span> (err) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(<span class="hljs-string">&quot;errors&quot;</span>);
+}</code></pre></div>
+</div><h4 id="caughterrors-none"><a class="anchor" href="#caughterrors-none">#</a>caughtErrors: none</h4>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;caughtErrors&quot;: &quot;none&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;caughtErrors&quot;: &quot;none&quot; }]*/</span>
+
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-comment">//...</span>
+} <span class="hljs-keyword">catch</span> (err) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(<span class="hljs-string">&quot;errors&quot;</span>);
+}</code></pre></div>
+</div><h3 id="caughterrorsignorepattern"><a class="anchor" href="#caughterrorsignorepattern">#</a>caughtErrorsIgnorePattern</h3>
+<p>The <code>caughtErrorsIgnorePattern</code> option specifies exceptions not to check for usage: catch arguments whose names match a regexp pattern. For example, variables whose names begin with a string &#39;ignore&#39;.</p>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;caughtErrorsIgnorePattern&quot;: &quot;^ignore&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;caughtErrors&quot;: &quot;all&quot;, &quot;caughtErrorsIgnorePattern&quot;: &quot;^ignore&quot; }]*/</span>
+
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-comment">//...</span>
+} <span class="hljs-keyword">catch</span> (ignoreErr) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(<span class="hljs-string">&quot;errors&quot;</span>);
+}</code></pre></div>
+</div><h3 id="destructuredarrayignorepattern"><a class="anchor" href="#destructuredarrayignorepattern">#</a>destructuredArrayIgnorePattern</h3>
+<p>The <code>destructuredArrayIgnorePattern</code> option specifies exceptions not to check for usage: elements of array destructuring patterns whose names match a regexp pattern. For example, variables whose names begin with an underscore.</p>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;destructuredArrayIgnorePattern&quot;: &quot;^_&quot; }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;destructuredArrayIgnorePattern&quot;: &quot;^_&quot; }]*/</span>
+
+<span class="hljs-keyword">const</span> [a, _b, c] = [<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-string">&quot;b&quot;</span>, <span class="hljs-string">&quot;c&quot;</span>];
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(a+c);
+
+<span class="hljs-keyword">const</span> { <span class="hljs-attr">x</span>: [_a, foo] } = bar;
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(foo);
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">baz</span>(<span class="hljs-params">[_c, x]</span>) {
+    x;
+}
+<span class="hljs-title function_">baz</span>();
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">test</span>(<span class="hljs-params">{p: [_q, r]}</span>) {
+    r;
+}
+<span class="hljs-title function_">test</span>();
+
+<span class="hljs-keyword">let</span> _m, n;
+foo.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> {
+    [_m, n] = item;
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(n);
+});
+
+<span class="hljs-keyword">let</span> _o, p;
+_o = <span class="hljs-number">1</span>;
+[_o, p] = foo;
+p;</code></pre></div>
+</div><h3 id="ignorerestsiblings"><a class="anchor" href="#ignorerestsiblings">#</a>ignoreRestSiblings</h3>
+<p>The <code>ignoreRestSiblings</code> option is a boolean (default: <code>false</code>). Using a <a href="https://github.com/tc39/proposal-object-rest-spread">Rest Property</a> it is possible to &quot;omit&quot; properties from an object, but by default the sibling properties are marked as &quot;unused&quot;. With this option enabled the rest property&#39;s siblings are ignored.</p>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;ignoreRestSiblings&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;ignoreRestSiblings&quot;: true }]*/</span>
+
+<span class="hljs-comment">// &#x27;foo&#x27; and &#x27;bar&#x27; were ignored because they have a rest property sibling.</span>
+<span class="hljs-keyword">const</span> { foo, ...rest } = data;
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(rest);
+
+<span class="hljs-comment">// OR</span>
+
+<span class="hljs-keyword">let</span> bar;
+({ bar, ...rest } = data);</code></pre></div>
+</div><h3 id="ignoreclasswithstaticinitblock"><a class="anchor" href="#ignoreclasswithstaticinitblock">#</a>ignoreClassWithStaticInitBlock</h3>
+<p>The <code>ignoreClassWithStaticInitBlock</code> option is a boolean (default: <code>false</code>). Static initialization blocks allow you to initialize static variables and execute code during the evaluation of a class definition, meaning the static block code is executed without creating a new instance of the class. When set to <code>true</code>, this option ignores classes containing static initialization blocks.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;ignoreClassWithStaticInitBlock&quot;: true }</code> option</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;ignoreClassWithStaticInitBlock&quot;: true }]*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> {
+    <span class="hljs-keyword">static</span> myProperty = <span class="hljs-string">&quot;some string&quot;</span>;
+    <span class="hljs-keyword">static</span> <span class="hljs-title function_">mymethod</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;some string&quot;</span>;
+    }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Bar</span> {
+    <span class="hljs-keyword">static</span> {
+        <span class="hljs-keyword">let</span> baz; <span class="hljs-comment">// unused variable</span>
+    }
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;ignoreClassWithStaticInitBlock&quot;: true }</code> option</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;ignoreClassWithStaticInitBlock&quot;: true }]*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Foo</span> {
+    <span class="hljs-keyword">static</span> {
+        <span class="hljs-keyword">let</span> bar = <span class="hljs-string">&quot;some string&quot;</span>;
+
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(bar);
+    }
+}</code></pre></div>
+</div><h3 id="ignoreusingdeclarations"><a class="anchor" href="#ignoreusingdeclarations">#</a>ignoreUsingDeclarations</h3>
+<p>The <code>ignoreUsingDeclarations</code> option is a boolean (default: <code>false</code>). Explicit resource management allows automatic teardown of disposables by calling <code>Symbol.dispose</code> or <code>Symbol.asyncDispose</code> method implicitly at the end of the variable&#39;s scope. When this option is set to <code>true</code>, this rule ignores variables declared with <code>using</code> or <code>await using</code>.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;ignoreUsingDeclarations&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;ignoreUsingDeclarations&quot;: true }]*/</span>
+<span class="hljs-keyword">const</span> resource = <span class="hljs-title function_">getResource</span>();</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;ignoreUsingDeclarations&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;ignoreUsingDeclarations&quot;: true }]*/</span>
+
+<span class="hljs-keyword">using</span> syncResource = <span class="hljs-title function_">getSyncResource</span>();
+<span class="hljs-keyword">await</span> <span class="hljs-keyword">using</span> asyncResource = <span class="hljs-title function_">getAsyncResource</span>();</code></pre></div>
+</div><h3 id="reportusedignorepattern"><a class="anchor" href="#reportusedignorepattern">#</a>reportUsedIgnorePattern</h3>
+<p>The <code>reportUsedIgnorePattern</code> option is a boolean (default: <code>false</code>).
+Using this option will report variables that match any of the valid ignore
+pattern options (<code>varsIgnorePattern</code>, <code>argsIgnorePattern</code>, <code>caughtErrorsIgnorePattern</code>, or
+<code>destructuredArrayIgnorePattern</code>) if they have been used.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;reportUsedIgnorePattern&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;reportUsedIgnorePattern&quot;: true, &quot;varsIgnorePattern&quot;: &quot;[iI]gnored&quot; }]*/</span>
+
+<span class="hljs-keyword">const</span> firstVarIgnored = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">const</span> secondVar = <span class="hljs-number">2</span>;
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(firstVarIgnored, secondVar);</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;reportUsedIgnorePattern&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-unused-vars: [&quot;error&quot;, { &quot;reportUsedIgnorePattern&quot;: true, &quot;varsIgnorePattern&quot;: &quot;[iI]gnored&quot; }]*/</span>
+
+<span class="hljs-keyword">const</span> firstVar = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">const</span> secondVar = <span class="hljs-number">2</span>;
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(firstVar, secondVar);</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you don&#39;t want to be notified about unused variables or function arguments, you can safely turn this rule off.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="no-unassigned-vars.html"><code>no-unassigned-vars</code></a>, <a href="no-useless-assignment.html"><code>no-useless-assignment</code></a></p></div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-3" href="#exported">exported</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#vars">vars</a><a class="toc-3" href="#varsignorepattern">varsIgnorePattern</a><a class="toc-3" href="#args">args</a><a class="toc-3" href="#argsignorepattern">argsIgnorePattern</a><a class="toc-3" href="#caughterrors">caughtErrors</a><a class="toc-3" href="#caughterrorsignorepattern">caughtErrorsIgnorePattern</a><a class="toc-3" href="#destructuredarrayignorepattern">destructuredArrayIgnorePattern</a><a class="toc-3" href="#ignorerestsiblings">ignoreRestSiblings</a><a class="toc-3" href="#ignoreclasswithstaticinitblock">ignoreClassWithStaticInitBlock</a><a class="toc-3" href="#ignoreusingdeclarations">ignoreUsingDeclarations</a><a class="toc-3" href="#reportusedignorepattern">reportUsedIgnorePattern</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

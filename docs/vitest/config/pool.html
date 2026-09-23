@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pool | Config (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">Vitest</a> › config/pool  <a class="ext small" href="https://vitest.dev/config/pool">version en ligne</a></div>
+<h1 id="pool"><a class="anchor" href="#pool">#</a>pool</h1>
+<ul>
+<li><strong>Type:</strong> <code>&#39;threads&#39; | &#39;forks&#39; | &#39;vmThreads&#39; | &#39;vmForks&#39;</code></li>
+<li><strong>Default:</strong> <code>&#39;forks&#39;</code></li>
+<li><strong>CLI:</strong> <code>--pool=threads</code></li>
+</ul>
+<p>Pool used to run tests in.</p>
+<h2 id="threads"><a class="anchor" href="#threads">#</a>threads</h2>
+<p>Enable multi-threading. When using threads you are unable to use process related APIs such as <code>process.chdir()</code>. Changing <code>process.env.TZ</code> <a href="../guide/common-errors.html#time-zone-does-not-change-in-worker-threads">does not affect the time zone</a> in a worker thread. Some libraries written in native languages, such as <code>Prisma</code>, <code>bcrypt</code> and <code>canvas</code>, have problems when running in multiple threads and run into segfaults. In these cases it is advised to use <code>forks</code> pool instead.</p>
+<h2 id="forks"><a class="anchor" href="#forks">#</a>forks</h2>
+<p>Similar as <code>threads</code> pool but uses <code>child_process</code> instead of <code>worker_threads</code>. Communication between tests and main process is not as fast as with <code>threads</code> pool. Process related APIs such as <code>process.chdir()</code> are available in <code>forks</code> pool.</p>
+<h2 id="vmthreads"><a class="anchor" href="#vmthreads">#</a>vmThreads</h2>
+<p>Run tests using <a href="https://nodejs.org/api/vm.html">VM context</a> (inside a sandboxed environment) in a <code>threads</code> pool.</p>
+<p>This makes tests run faster, but the VM module is unstable when running <a href="https://github.com/nodejs/node/issues/37648">ESM code</a>. Your tests will <a href="https://github.com/nodejs/node/issues/33439">leak memory</a> - to battle that, workers are restarted when they exceed <a href="vmmemorylimit.html"><code>vmMemoryLimit</code></a>.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Worker recycling is expensive in <code>vmThreads</code></div><p>Restarting a worker thread is not free: Node.js runs a full garbage collection over everything the worker accumulated before the thread can exit, and that work runs on a small pool of background threads shared by every worker in the process. When a large test suite hits <a href="vmmemorylimit.html"><code>vmMemoryLimit</code></a> repeatedly, these teardowns pile up and also slow down the workers that are still running tests.</p>
+<p>The <code>vmForks</code> pool recycles workers by letting the child process exit, and the operating system reclaims the memory. If your test suite is large enough to recycle workers, <code>vmForks</code> is usually noticeably faster than <code>vmThreads</code>, even though its communication with the main process is slower.</p>
+</div><p>On Node.js 24.9 and later, <code>require()</code> of an ES module is supported inside vm pools, mirroring <a href="https://nodejs.org/api/modules.html#loading-ecmascript-modules-using-require">Node&#39;s own <code>require(esm)</code></a>. Calling <code>require()</code> on an ES module whose graph contains top-level <code>await</code> throws <code>ERR_REQUIRE_ASYNC_MODULE</code> - use <code>await import()</code> for those files.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention</div><p>Running code in a sandbox has some advantages (faster tests), but also comes with a number of disadvantages.</p>
+<ul>
+<li>The globals within native modules, such as (<code>fs</code>, <code>path</code>, etc), differ from the globals present in your test environment. As a result, any error thrown by these native modules will reference a different Error constructor compared to the one used in your code:</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">try</span> {
+  fs.<span class="hljs-title function_">writeFileSync</span>(<span class="hljs-string">&#x27;/does-not-exist&#x27;</span>)
+}
+<span class="hljs-keyword">catch</span> (err) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(err <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span>) <span class="hljs-comment">// false</span>
+}</code></pre></div>
+<ul>
+<li>Importing ES modules caches them indefinitely which introduces memory leaks if you have a lot of contexts (test files). There is no API in Node.js that clears that cache.</li>
+<li>Accessing globals <a href="https://github.com/nodejs/node/issues/31658">takes longer</a> in a sandbox environment.</li>
+</ul>
+<p>Please, be aware of these issues when using this option. Vitest team cannot fix any of the issues on our side.</p>
+</div><h2 id="vmforks"><a class="anchor" href="#vmforks">#</a>vmForks</h2>
+<p>Similar as <code>vmThreads</code> pool but uses <code>child_process</code> instead of <code>worker_threads</code>. Communication between tests and the main process is not as fast as with <code>vmThreads</code> pool. Process related APIs such as <code>process.chdir()</code> are available in <code>vmForks</code> pool. Please be aware that this pool has the same pitfalls listed in <code>vmThreads</code>.</p>
+<p>Unlike <code>vmThreads</code>, recycling a worker that exceeded <a href="vmmemorylimit.html"><code>vmMemoryLimit</code></a> only requires the child process to exit, so it is much cheaper. On large test suites that recycle workers regularly, prefer <code>vmForks</code> over <code>vmThreads</code>.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#threads">threads</a><a class="toc-2" href="#forks">forks</a><a class="toc-2" href="#vmthreads">vmThreads</a><a class="toc-2" href="#vmforks">vmForks</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

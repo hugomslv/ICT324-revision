@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Migrating from Jest | Guide (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/migration/jest  <a class="ext small" href="https://vitest.dev/guide/migration/jest">version en ligne</a></div>
+<h1 id="jest"><a class="anchor" href="#jest">#</a>Migrating from Jest</h1>
+<p>Vitest has been designed with a Jest compatible API, in order to make the migration from Jest as simple as possible. Despite those efforts, you may still run into the following differences:</p>
+<h2 id="globals-as-a-default"><a class="anchor" href="#globals-as-a-default">#</a>Globals as a Default</h2>
+<p>Jest has their <a href="https://jestjs.io/docs/api">globals API</a> enabled by default. Vitest does not. You can either enable globals via <a href="../../config/globals.html">the <code>globals</code> configuration setting</a> or update your code to use imports from the <code>vitest</code> module instead.</p>
+<p>If you decide to keep globals disabled, be aware that common libraries like <a href="https://testing-library.com/"><code>testing-library</code></a> will not run auto DOM <a href="https://testing-library.com/docs/svelte-testing-library/api/#cleanup">cleanup</a>.</p>
+<h2 id="mock-mockreset"><a class="anchor" href="#mock-mockreset">#</a><code>mock.mockReset</code></h2>
+<p>Jest&#39;s <a href="https://jestjs.io/docs/mock-function-api#mockfnmockreset"><code>mockReset</code></a> replaces the mock implementation with an
+empty function that returns <code>undefined</code>.</p>
+<p>Vitest&#39;s <a href="../../api/mock.html#mockreset"><code>mockReset</code></a> resets the mock implementation to its original.
+That is, resetting a mock created by <code>vi.fn(impl)</code> will reset the mock implementation to <code>impl</code>.</p>
+<h2 id="mock-mock-is-persistent"><a class="anchor" href="#mock-mock-is-persistent">#</a><code>mock.mock</code> is Persistent</h2>
+<p>Jest will recreate the mock state when <code>.mockClear</code> is called, meaning you always need to access it as a getter. Vitest, on the other hand, holds a persistent reference to the state, meaning you can reuse it:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> mock = vi.<span class="hljs-title function_">fn</span>()
+<span class="hljs-keyword">const</span> state = mock.<span class="hljs-property">mock</span>
+mock.<span class="hljs-title function_">mockClear</span>()
+
+<span class="hljs-title function_">expect</span>(state).<span class="hljs-title function_">toBe</span>(mock.<span class="hljs-property">mock</span>) <span class="hljs-comment">// fails in Jest</span></code></pre></div>
+<h2 id="module-mocks"><a class="anchor" href="#module-mocks">#</a>Module Mocks</h2>
+<p>When mocking a module in Jest, the factory argument&#39;s return value is the default export. In Vitest, the factory argument has to return an object with each export explicitly defined. For example, the following <code>jest.mock</code> would have to be updated as follows:</p>
+<div class="code"><pre><code class="hljs lang-ts">jest.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;./some-path&#x27;</span>, <span class="hljs-function">() =&gt;</span> <span class="hljs-string">&#x27;hello&#x27;</span>)
+vi.<span class="hljs-title function_">mock</span>(<span class="hljs-string">&#x27;./some-path&#x27;</span>, <span class="hljs-function">() =&gt;</span> ({
+  <span class="hljs-attr">default</span>: <span class="hljs-string">&#x27;hello&#x27;</span>,
+}))</code></pre></div>
+<p>For more details please refer to the <a href="../../api/vi.html#vi-mock"><code>vi.mock</code> api section</a>.</p>
+<h2 id="auto-mocking-behaviour"><a class="anchor" href="#auto-mocking-behaviour">#</a>Auto-Mocking Behaviour</h2>
+<p>Unlike Jest, mocked modules in <code>&lt;root&gt;/__mocks__</code> are not loaded unless <code>vi.mock()</code> is called. If you need them to be mocked in every test, like in Jest, you can mock them inside <a href="../../config/setupfiles.html"><code>setupFiles</code></a>.</p>
+<h2 id="importing-the-original-of-a-mocked-package"><a class="anchor" href="#importing-the-original-of-a-mocked-package">#</a>Importing the Original of a Mocked Package</h2>
+<p>If you are only partially mocking a package, you might have previously used Jest&#39;s function <code>requireActual</code>. In Vitest, you should replace these calls with <code>vi.importActual</code>.</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> { cloneDeep } = jest.<span class="hljs-title function_">requireActual</span>(<span class="hljs-string">&#x27;lodash/cloneDeep&#x27;</span>)
+<span class="hljs-keyword">const</span> { cloneDeep } = <span class="hljs-keyword">await</span> vi.<span class="hljs-title function_">importActual</span>(<span class="hljs-string">&#x27;lodash/cloneDeep&#x27;</span>)</code></pre></div>
+<h2 id="extends-mocking-to-external-libraries"><a class="anchor" href="#extends-mocking-to-external-libraries">#</a>Extends mocking to external libraries</h2>
+<p>Where Jest does it by default, when mocking a module and wanting this mocking to be extended to other external libraries that use the same module, you should explicitly tell which 3rd-party library you want to be mocked, so the external library would be part of your source code, by using <a href="../../config/server.html#inline">server.deps.inline</a>.</p>
+<div class="code"><pre><code class="hljs lang-txt">server.deps.inline: [&quot;lib-name&quot;]</code></pre></div>
+<h2 id="expect-getstate-currenttestname"><a class="anchor" href="#expect-getstate-currenttestname">#</a>expect.getState().currentTestName</h2>
+<p>Vitest&#39;s <code>test</code> names are joined with a <code>&gt;</code> symbol to make it easier to distinguish tests from suites, while Jest uses an empty space (<code> </code>).</p>
+<div class="code"><pre><code class="hljs lang-diff"><span class="hljs-deletion">- `${describeTitle} ${testTitle}`</span>
+<span class="hljs-addition">+ `${describeTitle} &gt; ${testTitle}`</span></code></pre></div>
+<p>The same applies to <a href="../../config/testnamepattern.html"><code>testNamePattern</code></a> (the <code>-t</code> flag): Vitest matches against the <code>&gt;</code>-joined full name, while Jest matches the space-joined name. Update patterns that span a suite and a test accordingly, or match a single segment (<code>-t adds</code>) or use a wildcard between segments (<code>-t &#39;math.*adds&#39;</code>).</p>
+<div class="code"><pre><code class="hljs lang-diff"><span class="hljs-deletion">- vitest -t &#x27;math adds&#x27;</span>
+<span class="hljs-addition">+ vitest -t &#x27;math &gt; adds&#x27;</span></code></pre></div>
+<h2 id="envs"><a class="anchor" href="#envs">#</a>Envs</h2>
+<p>Just like Jest, Vitest sets <code>NODE_ENV</code> to <code>test</code>, if it wasn&#39;t set before. Vitest also has a counterpart for <code>JEST_WORKER_ID</code> called <code>VITEST_POOL_ID</code> (always less than or equal to <code>maxWorkers</code>), so if you rely on it, don&#39;t forget to rename it. Vitest also exposes <code>VITEST_WORKER_ID</code> which is a unique ID of a running worker - this number is not affected by <code>maxWorkers</code>, and will increase with each created worker.</p>
+<h2 id="replace-property"><a class="anchor" href="#replace-property">#</a>Replace property</h2>
+<p>If you want to modify the object, you will use <a href="https://jestjs.io/docs/jest-object#jestreplacepropertyobject-propertykey-value">replaceProperty API</a> in Jest, you can use <a href="../../api/vi.html#vi-stubenv"><code>vi.stubEnv</code></a> or <a href="../../api/vi.html#vi-spyon"><code>vi.spyOn</code></a> to do the same also in Vitest.</p>
+<h2 id="done-callback"><a class="anchor" href="#done-callback">#</a>Done Callback</h2>
+<p>Vitest does not support the callback style of declaring tests. You can rewrite them to use <code>async</code>/<code>await</code> functions, or use Promise to mimic the callback style.</p>
+<!--@include: ../examples/promise-done.md--><h2 id="hooks"><a class="anchor" href="#hooks">#</a>Hooks</h2>
+<p><code>beforeAll</code>/<code>beforeEach</code> hooks may return <a href="../../api/hooks.html#beforeach">teardown function</a> in Vitest. Because of that you may need to rewrite your hooks declarations, if they return something other than <code>undefined</code> or <code>null</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">setActivePinia</span>(<span class="hljs-title function_">createTestingPinia</span>()))
+<span class="hljs-title function_">beforeEach</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-title function_">setActivePinia</span>(<span class="hljs-title function_">createTestingPinia</span>()) })</code></pre></div>
+<p>In Jest hooks are called sequentially (one after another). By default, Vitest runs hooks in a stack. To use Jest&#39;s behavior, update <a href="../../config/sequence.html#sequence-hooks"><code>sequence.hooks</code></a> option:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">sequence</span>: {
+      <span class="hljs-attr">hooks</span>: <span class="hljs-string">&#x27;list&#x27;</span>,
+    }
+  }
+})</code></pre></div>
+<h2 id="types"><a class="anchor" href="#types">#</a>Types</h2>
+<p>Vitest doesn&#39;t have an equivalent to <code>jest</code> namespace, so you will need to import types directly from <code>vitest</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">let</span> <span class="hljs-attr">fn</span>: jest.<span class="hljs-property">Mock</span>&lt;<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-built_in">number</span>&gt;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">Mock</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">let</span> <span class="hljs-attr">fn</span>: <span class="hljs-title class_">Mock</span>&lt;<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-built_in">number</span>&gt;</code></pre></div>
+<h2 id="timers"><a class="anchor" href="#timers">#</a>Timers</h2>
+<p>Vitest doesn&#39;t support Jest&#39;s legacy timers.</p>
+<h2 id="timeout"><a class="anchor" href="#timeout">#</a>Timeout</h2>
+<p>If you used <code>jest.setTimeout</code>, you would need to migrate to <code>vi.setConfig</code>:</p>
+<div class="code"><pre><code class="hljs lang-ts">jest.<span class="hljs-built_in">setTimeout</span>(<span class="hljs-number">5_000</span>)
+vi.<span class="hljs-title function_">setConfig</span>({ <span class="hljs-attr">testTimeout</span>: <span class="hljs-number">5_000</span> })</code></pre></div>
+<h2 id="vue-snapshots"><a class="anchor" href="#vue-snapshots">#</a>Vue Snapshots</h2>
+<p>This is not a Jest-specific feature, but if you previously were using Jest with vue-cli preset, you will need to install <a href="https://github.com/eddyerburgh/jest-serializer-vue"><code>jest-serializer-vue</code></a> package, and specify it in <a href="../../config/snapshotserializers.html"><code>snapshotSerializers</code></a>:</p>
+<div class="code"><div class="code-title">vitest.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest/config&#x27;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">snapshotSerializers</span>: [<span class="hljs-string">&#x27;jest-serializer-vue&#x27;</span>]
+  }
+})</code></pre></div>
+<p>Otherwise your snapshots will have a lot of escaped <code>&quot;</code> characters.</p>
+<h2 id="custom-snapshot-matcher"><a class="anchor" href="#custom-snapshot-matcher">#</a>Custom Snapshot Matchers <Experimental /> <Version>4.1.3</Version></h2>
+<p>Jest imports snapshot composables from <code>jest-snapshot</code>. In Vitest, use <code>Snapshots</code> from <code>vitest</code> instead:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> { toMatchSnapshot } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;jest-snapshot&#x27;</span>)
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">Snapshots</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">const</span> { toMatchSnapshot } = <span class="hljs-title class_">Snapshots</span>
+
+expect.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-title function_">toMatchTrimmedSnapshot</span>(<span class="hljs-params"><span class="hljs-attr">received</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">length</span>: <span class="hljs-built_in">number</span></span>) {
+    <span class="hljs-keyword">return</span> toMatchSnapshot.<span class="hljs-title function_">call</span>(<span class="hljs-variable language_">this</span>, received.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, length))
+  },
+})</code></pre></div>
+<p>For inline snapshots, the same applies:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">const</span> { toMatchInlineSnapshot } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;jest-snapshot&#x27;</span>)
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">Snapshots</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">const</span> { toMatchInlineSnapshot } = <span class="hljs-title class_">Snapshots</span>
+
+expect.<span class="hljs-title function_">extend</span>({
+  <span class="hljs-title function_">toMatchTrimmedInlineSnapshot</span>(<span class="hljs-params"><span class="hljs-attr">received</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">inlineSnapshot</span>?: <span class="hljs-built_in">string</span></span>) {
+    <span class="hljs-keyword">return</span> toMatchInlineSnapshot.<span class="hljs-title function_">call</span>(<span class="hljs-variable language_">this</span>, received.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>), inlineSnapshot)
+  },
+})</code></pre></div>
+<p>See <a href="../snapshot.html#custom-snapshot-matchers">Custom Snapshot Matchers</a> for the full guide.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#globals-as-a-default">Globals as a Default</a><a class="toc-2" href="#mock-mockreset">mock.mockReset</a><a class="toc-2" href="#mock-mock-is-persistent">mock.mock is Persistent</a><a class="toc-2" href="#module-mocks">Module Mocks</a><a class="toc-2" href="#auto-mocking-behaviour">Auto-Mocking Behaviour</a><a class="toc-2" href="#importing-the-original-of-a-mocked-package">Importing the Original of a Mocked Package</a><a class="toc-2" href="#extends-mocking-to-external-libraries">Extends mocking to external libraries</a><a class="toc-2" href="#expect-getstate-currenttestname">expect.getState().currentTestName</a><a class="toc-2" href="#envs">Envs</a><a class="toc-2" href="#replace-property">Replace property</a><a class="toc-2" href="#done-callback">Done Callback</a><a class="toc-2" href="#hooks">Hooks</a><a class="toc-2" href="#types">Types</a><a class="toc-2" href="#timers">Timers</a><a class="toc-2" href="#timeout">Timeout</a><a class="toc-2" href="#vue-snapshots">Vue Snapshots</a><a class="toc-2" href="#custom-snapshot-matcher">Custom Snapshot Matchers 4.1.3</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

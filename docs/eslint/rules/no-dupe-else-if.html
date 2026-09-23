@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>no-dupe-else-if (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/no-dupe-else-if <span class="badge badge-problem">problème</span> <span class="badge badge-reco">✅ dans js/recommended</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/no-dupe-else-if">version en ligne</a></div>
+<h1>no-dupe-else-if</h1><p><code>if-else-if</code> chains are commonly used when there is a need to execute only one branch (or at most one branch) out of several possible branches, based on certain conditions.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">if</span> (a) {
+    <span class="hljs-title function_">foo</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (b) {
+    <span class="hljs-title function_">bar</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (c) {
+    <span class="hljs-title function_">baz</span>();
+}</code></pre></div>
+<p>Two identical test conditions in the same chain are almost always a mistake in the code. Unless there are side effects in the expressions, a duplicate will evaluate to the same <code>true</code> or <code>false</code> value as the identical expression earlier in the chain, meaning that its branch can never execute.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">if</span> (a) {
+    <span class="hljs-title function_">foo</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (b) {
+    <span class="hljs-title function_">bar</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (b) {
+    <span class="hljs-title function_">baz</span>();
+}</code></pre></div>
+<p>In the above example, <code>baz()</code> can never execute. Obviously, <code>baz()</code> could be executed only when <code>b</code> evaluates to <code>true</code>, but in that case <code>bar()</code> would be executed instead, since it&#39;s earlier in the chain.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule disallows duplicate conditions in the same <code>if-else-if</code> chain.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-dupe-else-if: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">if</span> (<span class="hljs-title function_">isSomething</span>(x)) {
+    <span class="hljs-title function_">foo</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isSomething</span>(x)) {
+    <span class="hljs-title function_">bar</span>();
+}
+
+<span class="hljs-keyword">if</span> (a) {
+    <span class="hljs-title function_">foo</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (b) {
+    <span class="hljs-title function_">bar</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (c &amp;&amp; d) {
+    <span class="hljs-title function_">baz</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (c &amp;&amp; d) {
+    <span class="hljs-title function_">quux</span>();
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-title function_">quuux</span>();
+}
+
+<span class="hljs-keyword">if</span> (n === <span class="hljs-number">1</span>) {
+    <span class="hljs-title function_">foo</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (n === <span class="hljs-number">2</span>) {
+    <span class="hljs-title function_">bar</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (n === <span class="hljs-number">3</span>) {
+    <span class="hljs-title function_">baz</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (n === <span class="hljs-number">2</span>) {
+    <span class="hljs-title function_">quux</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (n === <span class="hljs-number">5</span>) {
+    <span class="hljs-title function_">quuux</span>();
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-dupe-else-if: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">if</span> (<span class="hljs-title function_">isSomething</span>(x)) {
+    <span class="hljs-title function_">foo</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isSomethingElse</span>(x)) {
+    <span class="hljs-title function_">bar</span>();
+}
+
+<span class="hljs-keyword">if</span> (a) {
+    <span class="hljs-title function_">foo</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (b) {
+    <span class="hljs-title function_">bar</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (c &amp;&amp; d) {
+    <span class="hljs-title function_">baz</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (c &amp;&amp; e) {
+    <span class="hljs-title function_">quux</span>();
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-title function_">quuux</span>();
+}
+
+<span class="hljs-keyword">if</span> (n === <span class="hljs-number">1</span>) {
+    <span class="hljs-title function_">foo</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (n === <span class="hljs-number">2</span>) {
+    <span class="hljs-title function_">bar</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (n === <span class="hljs-number">3</span>) {
+    <span class="hljs-title function_">baz</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (n === <span class="hljs-number">4</span>) {
+    <span class="hljs-title function_">quux</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (n === <span class="hljs-number">5</span>) {
+    <span class="hljs-title function_">quuux</span>();
+}</code></pre></div>
+</div><p>This rule can also detect some cases where the conditions are not identical, but the branch can never execute due to the logic of <code>||</code> and <code>&amp;&amp;</code> operators.</p>
+<p>Examples of additional <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint no-dupe-else-if: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">if</span> (a || b) {
+    <span class="hljs-title function_">foo</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (a) {
+    <span class="hljs-title function_">bar</span>();
+}
+
+<span class="hljs-keyword">if</span> (a) {
+    <span class="hljs-title function_">foo</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (b) {
+    <span class="hljs-title function_">bar</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (a || b) {
+    <span class="hljs-title function_">baz</span>();
+}
+
+<span class="hljs-keyword">if</span> (a) {
+    <span class="hljs-title function_">foo</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (a &amp;&amp; b) {
+    <span class="hljs-title function_">bar</span>();
+}
+
+<span class="hljs-keyword">if</span> (a &amp;&amp; b) {
+    <span class="hljs-title function_">foo</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (a &amp;&amp; b &amp;&amp; c) {
+    <span class="hljs-title function_">bar</span>();
+}
+
+<span class="hljs-keyword">if</span> (a || b) {
+    <span class="hljs-title function_">foo</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (b &amp;&amp; c) {
+    <span class="hljs-title function_">bar</span>();
+}
+
+<span class="hljs-keyword">if</span> (a) {
+    <span class="hljs-title function_">foo</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (b &amp;&amp; c) {
+    <span class="hljs-title function_">bar</span>();
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (d &amp;&amp; (c &amp;&amp; e &amp;&amp; b || a)) {
+    <span class="hljs-title function_">baz</span>();
+}</code></pre></div>
+</div><p>Please note that this rule does not compare conditions from the chain with conditions inside statements, and will not warn in the cases such as follows:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-keyword">if</span> (a) {
+    <span class="hljs-keyword">if</span> (a) {
+        <span class="hljs-title function_">foo</span>();
+    }
+}
+
+<span class="hljs-keyword">if</span> (a) {
+    <span class="hljs-title function_">foo</span>();
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">if</span> (a) {
+        <span class="hljs-title function_">bar</span>();
+    }
+}</code></pre></div>
+<h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has no options.</p>
+<h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>In rare cases where you really need identical test conditions in the same chain, which necessarily means that the expressions in the chain are causing and relying on side effects, you will have to turn this rule off.</p>
+<div class="box box-info"><div class="box-title">Règles liées</div><p><a href="no-duplicate-case.html"><code>no-duplicate-case</code></a>, <a href="no-lonely-if.html"><code>no-lonely-if</code></a></p></div>
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

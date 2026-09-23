@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>func-name-matching (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/func-name-matching <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/func-name-matching">version en ligne</a></div>
+<h1>func-name-matching</h1><h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule requires function names to match the name of the variable or property to which they are assigned. The rule will ignore property assignments where the property name is a literal that is not a valid identifier in the ECMAScript version specified in your configuration (default ES5).</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-name-matching: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">let</span> foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};
+foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};
+<span class="hljs-keyword">const</span> obj = {<span class="hljs-attr">foo</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {}};
+obj.<span class="hljs-property">foo</span> = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};
+obj[<span class="hljs-string">&#x27;foo&#x27;</span>] = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};
+({[<span class="hljs-string">&#x27;foo&#x27;</span>]: <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {}});
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+    foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};
+}</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-name-matching: [&quot;error&quot;, &quot;never&quot;] */</span>
+
+<span class="hljs-keyword">let</span> foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+<span class="hljs-keyword">const</span> obj = {<span class="hljs-attr">foo</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}};
+obj.<span class="hljs-property">foo</span> = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+obj[<span class="hljs-string">&#x27;foo&#x27;</span>] = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+({[<span class="hljs-string">&#x27;foo&#x27;</span>]: <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}});
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+    foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-name-matching: &quot;error&quot;*/</span>
+<span class="hljs-comment">// equivalent to /*eslint func-name-matching: [&quot;error&quot;, &quot;always&quot;]*/</span>
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+<span class="hljs-keyword">const</span> foo1 = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">foo2</span> = (<span class="hljs-params"></span>) =&gt; {};
+foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+
+<span class="hljs-keyword">const</span> obj = {<span class="hljs-attr">foo</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}};
+obj.<span class="hljs-property">foo</span> = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+obj[<span class="hljs-string">&#x27;foo&#x27;</span>] = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+obj[<span class="hljs-string">&#x27;foo//bar&#x27;</span>] = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+obj[foo] = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};
+
+<span class="hljs-keyword">const</span> obj1 = {[foo]: <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {}};
+<span class="hljs-keyword">const</span> obj2 = {<span class="hljs-string">&#x27;foo//bar&#x27;</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}};
+<span class="hljs-keyword">const</span> obj3 = {<span class="hljs-attr">foo</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}};
+
+obj[<span class="hljs-string">&#x27;x&#x27;</span> + <span class="hljs-number">2</span>] = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>){};
+<span class="hljs-keyword">const</span> [ bar ] = [ <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>){} ];
+({[foo]: <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {}})
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+    foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+    baz = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+}
+
+<span class="hljs-comment">// private names are ignored</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">D</span> {
+    #foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+    #bar = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+    <span class="hljs-title function_">baz</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-variable language_">this</span>.#foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+        <span class="hljs-variable language_">this</span>.#foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};
+    }
+}
+
+<span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">name</span>) {};
+<span class="hljs-variable language_">module</span>[<span class="hljs-string">&#x27;exports&#x27;</span>] = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">name</span>) {};</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-name-matching: [&quot;error&quot;, &quot;never&quot;] */</span>
+
+<span class="hljs-keyword">let</span> foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};
+<span class="hljs-keyword">const</span> foo1 = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">foo2</span> = (<span class="hljs-params"></span>) =&gt; {};
+foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};
+
+<span class="hljs-keyword">const</span> obj = {<span class="hljs-attr">foo</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {}};
+obj.<span class="hljs-property">foo</span> = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};
+obj[<span class="hljs-string">&#x27;foo&#x27;</span>] = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};
+obj[<span class="hljs-string">&#x27;foo//bar&#x27;</span>] = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+obj[foo] = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+
+<span class="hljs-keyword">const</span> obj1 = {<span class="hljs-attr">foo</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {}};
+<span class="hljs-keyword">const</span> obj2 = {[foo]: <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}};
+<span class="hljs-keyword">const</span> obj3 = {<span class="hljs-string">&#x27;foo//bar&#x27;</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}};
+<span class="hljs-keyword">const</span> obj4 = {<span class="hljs-attr">foo</span>: <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {}};
+
+obj[<span class="hljs-string">&#x27;x&#x27;</span> + <span class="hljs-number">2</span>] = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>){};
+<span class="hljs-keyword">const</span> [ bar ] = [ <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>){} ];
+({[foo]: <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {}})
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+    foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};
+    baz = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) {};
+}
+
+<span class="hljs-comment">// private names are ignored</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">D</span> {
+    #foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+    #bar = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+    <span class="hljs-title function_">baz</span>(<span class="hljs-params"></span>) {
+        <span class="hljs-variable language_">this</span>.#foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {};
+        <span class="hljs-variable language_">this</span>.#foo = <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {};
+    }
+}
+
+<span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">name</span>) {};
+<span class="hljs-variable language_">module</span>[<span class="hljs-string">&#x27;exports&#x27;</span>] = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">name</span>) {};</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule takes an optional string of <code>&quot;always&quot;</code> or <code>&quot;never&quot;</code> (when omitted, it defaults to <code>&quot;always&quot;</code>), and an optional options object with two properties <code>considerPropertyDescriptor</code> and <code>includeCommonJSModuleExports</code>.</p>
+<h3 id="considerpropertydescriptor"><a class="anchor" href="#considerpropertydescriptor">#</a>considerPropertyDescriptor</h3>
+<p>A boolean value that defaults to <code>false</code>. If <code>considerPropertyDescriptor</code> is set to true, the check will take into account the use of <code>Object.create</code>, <code>Object.defineProperty</code>, <code>Object.defineProperties</code>, and <code>Reflect.defineProperty</code>.</p>
+<p>Examples of <strong>correct</strong> code for the <code>{ considerPropertyDescriptor: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-name-matching: [&quot;error&quot;, { &quot;considerPropertyDescriptor&quot;: true }]*/</span>
+<span class="hljs-comment">// equivalent to /*eslint func-name-matching: [&quot;error&quot;, &quot;always&quot;, { &quot;considerPropertyDescriptor&quot;: true }]*/</span>
+<span class="hljs-keyword">const</span> obj = {};
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">create</span>(obj, {<span class="hljs-attr">foo</span>:{<span class="hljs-attr">value</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}}});
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">defineProperty</span>(obj, <span class="hljs-string">&#x27;bar&#x27;</span>, {<span class="hljs-attr">value</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {}});
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">defineProperties</span>(obj, {<span class="hljs-attr">baz</span>:{<span class="hljs-attr">value</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">baz</span>(<span class="hljs-params"></span>) {} }});
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">defineProperty</span>(obj, <span class="hljs-string">&#x27;foo&#x27;</span>, {<span class="hljs-attr">value</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {}});</code></pre></div>
+</div><p>Examples of <strong>incorrect</strong> code for the <code>{ considerPropertyDescriptor: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-name-matching: [&quot;error&quot;, { &quot;considerPropertyDescriptor&quot;: true }]*/</span>
+<span class="hljs-comment">// equivalent to /*eslint func-name-matching: [&quot;error&quot;, &quot;always&quot;, { &quot;considerPropertyDescriptor&quot;: true }]*/</span>
+<span class="hljs-keyword">const</span> obj = {};
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">create</span>(obj, {<span class="hljs-attr">foo</span>:{<span class="hljs-attr">value</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) {}}});
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">defineProperty</span>(obj, <span class="hljs-string">&#x27;bar&#x27;</span>, {<span class="hljs-attr">value</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">baz</span>(<span class="hljs-params"></span>) {}});
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">defineProperties</span>(obj, {<span class="hljs-attr">baz</span>:{<span class="hljs-attr">value</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) {} }});
+<span class="hljs-title class_">Reflect</span>.<span class="hljs-title function_">defineProperty</span>(obj, <span class="hljs-string">&#x27;foo&#x27;</span>, {<span class="hljs-attr">value</span>: <span class="hljs-keyword">function</span> <span class="hljs-title function_">value</span>(<span class="hljs-params"></span>) {}});</code></pre></div>
+</div><h3 id="includecommonjsmoduleexports"><a class="anchor" href="#includecommonjsmoduleexports">#</a>includeCommonJSModuleExports</h3>
+<p>A boolean value that defaults to <code>false</code>. If <code>includeCommonJSModuleExports</code> is set to true, <code>module.exports</code> and <code>module[&quot;exports&quot;]</code> will be checked by this rule.</p>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ includeCommonJSModuleExports: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint func-name-matching: [&quot;error&quot;, { &quot;includeCommonJSModuleExports&quot;: true }]*/</span>
+<span class="hljs-comment">// equivalent to /*eslint func-name-matching: [&quot;error&quot;, &quot;always&quot;, { &quot;includeCommonJSModuleExports&quot;: true }]*/</span>
+
+<span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">name</span>) {};
+<span class="hljs-variable language_">module</span>[<span class="hljs-string">&#x27;exports&#x27;</span>] = <span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params">name</span>) {};</code></pre></div>
+</div><h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>Do not use this rule if you want to allow named functions to have different names from the variable or property to which they are assigned.</p>
+<h2 id="compatibility"><a class="anchor" href="#compatibility">#</a>Compatibility</h2>
+<ul>
+<li><strong>JSCS</strong>: <a href="https://jscs-dev.github.io/rule/requireMatchingFunctionName">requireMatchingFunctionName</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#considerpropertydescriptor">considerPropertyDescriptor</a><a class="toc-3" href="#includecommonjsmoduleexports">includeCommonJSModuleExports</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a><a class="toc-2" href="#compatibility">Compatibility</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

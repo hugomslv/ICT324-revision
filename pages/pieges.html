@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Erreurs et pièges · ICT-324 Révision</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/hljs.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../index.html">Accueil</a><a class="nav-link" href="../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../pages/vite.html">1. Vite</a><a class="nav-link" href="../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../pages/projets.html">Projets du cours</a><a class="nav-link" href="../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../pages/exercices.html">Exercices corrigés</a><a class="nav-link active" href="../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../docs/index.html">Index des docs</a><a class="nav-link" href="../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../docs/vite/index.html">Vite</a><a class="nav-link" href="../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+
+<h1>Erreurs et pièges</h1><p class="lead">Message d'erreur → cause → solution. La plupart des messages ont été reproduits réellement (ESLint 10, Vitest 5, JSDoc 4, Vite 8). Astuce : cherche un morceau du message avec Ctrl+K.</p><h2 id="npm-reseau"><a class="anchor" href="#npm-reseau">#</a>npm / réseau</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Message</th>
+<th>Cause</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>npm ERR! code ENOTFOUND</code> / <code>EAI_AGAIN</code> / <code>ETIMEDOUT</code></td>
+<td>pas de réseau</td>
+<td>installer pendant la phase connectée ; sinon essayer <code>npm install --offline</code> (cache)</td>
+</tr>
+<tr>
+<td><code>npm error Missing script: &quot;lint&quot;</code></td>
+<td>script absent de <code>package.json</code></td>
+<td>ajouter <code>&quot;lint&quot;: &quot;eslint .&quot;</code> dans <code>&quot;scripts&quot;</code></td>
+</tr>
+<tr>
+<td><code>&#39;vite&#39; n&#39;est pas reconnu…</code> / <code>vite: command not found</code></td>
+<td><code>node_modules</code> absent</td>
+<td><code>npm install</code> ; lancer via <code>npm run dev</code> ou <code>npx vite</code></td>
+</tr>
+<tr>
+<td><code>npm.ps1 cannot be loaded because running scripts is disabled</code> (PowerShell)</td>
+<td>politique d&#39;exécution Windows</td>
+<td>utiliser <strong>cmd</strong> au lieu de PowerShell, ou <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code></td>
+</tr>
+<tr>
+<td><code>npm publish</code> envoie (ou refuse d&#39;envoyer) sur npmjs</td>
+<td>confusion avec le script</td>
+<td>taper <strong><code>npm run publish</code></strong></td>
+</tr>
+</tbody></table></div>
+<h2 id="eslint"><a class="anchor" href="#eslint">#</a>ESLint</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Message</th>
+<th>Cause</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ESLint couldn&#39;t find an eslint.config.* file.</code></td>
+<td>pas de fichier de config (ou mauvais dossier)</td>
+<td>créer <code>eslint.config.js</code> à la racine ; lancer depuis la racine du projet</td>
+</tr>
+<tr>
+<td><code>&#39;document&#39; is not defined</code> / <code>&#39;console&#39; is not defined</code> (no-undef)</td>
+<td>globales du navigateur inconnues</td>
+<td><code>languageOptions: { globals: globals.browser }</code></td>
+</tr>
+<tr>
+<td><code>&#39;process&#39; is not defined</code></td>
+<td>script Node</td>
+<td>bloc avec <code>files: [ &quot;scripts/**&quot; ]</code> et <code>globals.node</code></td>
+</tr>
+<tr>
+<td><code>&#39;test&#39; is not defined</code> / <code>&#39;expect&#39;…</code></td>
+<td>Vitest <code>globals: true</code> sans import</td>
+<td>importer depuis <code>&quot;vitest&quot;</code> ou <code>globals.vitest</code></td>
+</tr>
+<tr>
+<td><code>Expected linebreaks to be &#39;LF&#39; but found &#39;CRLF&#39;</code> sur chaque ligne</td>
+<td>fichiers Windows</td>
+<td><code>npx eslint . --fix</code>, ou VS Code : cliquer <strong>CRLF</strong> → <strong>LF</strong></td>
+</tr>
+<tr>
+<td>des centaines d&#39;erreurs dans <code>docs/</code>, <code>coverage/</code>, <code>dist/</code></td>
+<td>fichiers générés analysés</td>
+<td><code>globalIgnores([ &quot;dist/&quot;, &quot;docs/&quot;, &quot;coverage/&quot; ])</code></td>
+</tr>
+<tr>
+<td><code>A configuration object specifies rule &quot;filename-rules/match&quot;, but could not find plugin &quot;filename-rules&quot;.</code></td>
+<td>plugin non déclaré</td>
+<td><code>plugins: { &quot;filename-rules&quot;: filenameRules }</code> dans le <strong>même</strong> objet (ou un objet précédent)</td>
+</tr>
+<tr>
+<td><code>A config object has a &quot;plugins&quot; key defined as an array of strings.</code></td>
+<td>ancien format <code>.eslintrc</code></td>
+<td><code>plugins: { nom: objetImporte }</code></td>
+</tr>
+<tr>
+<td><code>Key &quot;rules&quot;: Key &quot;quotes&quot;: Value … should be equal to one of the allowed values.</code></td>
+<td>option invalide</td>
+<td>relire la section <strong>Options</strong> de la règle dans la doc</td>
+</tr>
+<tr>
+<td><code>Warning: Module type of file:///…/eslint.config.js is not specified</code></td>
+<td><code>import</code> sans <code>&quot;type&quot;: &quot;module&quot;</code></td>
+<td>ajouter <code>&quot;type&quot;: &quot;module&quot;</code> ou renommer en <code>eslint.config.mjs</code></td>
+</tr>
+<tr>
+<td><code>Cannot find package &#39;@eslint/js&#39;</code> / <code>&#39;globals&#39;</code></td>
+<td>paquet pas installé</td>
+<td><code>npm i -D @eslint/js globals</code> (avec réseau)</td>
+</tr>
+<tr>
+<td><code>Parsing error: &#39;import&#39; and &#39;export&#39; may appear only with &#39;sourceType: module&#39;</code></td>
+<td><code>sourceType: &quot;script&quot;</code> sur un fichier module</td>
+<td>limiter ce réglage avec <code>files</code></td>
+</tr>
+<tr>
+<td><code>no-implicit-globals</code> ne signale rien</td>
+<td>normal dans un module ES</td>
+<td>voir <a href="eslint-regles.html#no-implicit-globals-pas-de-globales">la règle</a></td>
+</tr>
+<tr>
+<td>l&#39;extension VS Code ne souligne rien</td>
+<td>ESLint pas installé localement / config en erreur</td>
+<td><code>npm i -D eslint</code>, regarder <strong>Sortie → ESLint</strong> dans VS Code, redémarrer VS Code</td>
+</tr>
+</tbody></table></div>
+<h2 id="vitest"><a class="anchor" href="#vitest">#</a>Vitest</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Message</th>
+<th>Cause</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>No test files found, exiting with code 1</code></td>
+<td>aucun fichier <code>*.test.js</code> / <code>*.spec.js</code></td>
+<td>renommer le fichier de test</td>
+</tr>
+<tr>
+<td><code>Error: Cannot find module &#39;./math.js&#39; imported from …/src/x.test.js</code></td>
+<td>mauvais chemin d&#39;import</td>
+<td>chemin <strong>relatif au fichier de test</strong> (<code>./math.js</code> si dans le même dossier)</td>
+</tr>
+<tr>
+<td><code>TypeError: add is not a function</code></td>
+<td>la fonction n&#39;est pas exportée (ou mauvais nom)</td>
+<td><code>export function add…</code> et <code>import { add }</code></td>
+</tr>
+<tr>
+<td><code>AssertionError: expected [ 1, 2 ] to be [ 1, 2 ] // Object.is equality</code> + <em>serializes to the same string</em></td>
+<td><code>toBe</code> sur un tableau / objet</td>
+<td><strong><code>toEqual</code></strong></td>
+</tr>
+<tr>
+<td><code>ReferenceError: document is not defined</code></td>
+<td>environnement Node</td>
+<td><code>// @vitest-environment jsdom</code> en haut du fichier (+ <code>npm i -D jsdom</code>)</td>
+</tr>
+<tr>
+<td><code>ReferenceError: test is not defined</code></td>
+<td>pas d&#39;import</td>
+<td><code>import { test, expect } from &quot;vitest&quot;</code></td>
+</tr>
+<tr>
+<td>le test « plante » au lieu de vérifier <code>toThrow</code></td>
+<td><code>expect(f())</code> au lieu de <code>expect(() =&gt; f())</code></td>
+<td>passer une <strong>fonction</strong></td>
+</tr>
+<tr>
+<td><code>MISSING DEPENDENCY Cannot find dependency &#39;@vitest/coverage-v8&#39;</code></td>
+<td>provider de couverture absent</td>
+<td><code>npm i -D @vitest/coverage-v8</code> avec réseau, même version que vitest</td>
+</tr>
+<tr>
+<td>tests qui appellent une API échouent hors-ligne (<code>fetch failed</code>)</td>
+<td>vrai appel réseau</td>
+<td>mocker <code>fetch</code> avec <code>vi.stubGlobal</code> (<a href="vitest.html#mocks-simuler-fetch-console">exemple</a>)</td>
+</tr>
+<tr>
+<td><code>0.1 + 0.2</code> ne vaut pas <code>0.3</code></td>
+<td>flottants</td>
+<td><code>toBeCloseTo(0.3)</code></td>
+</tr>
+<tr>
+<td>Vitest ne rend pas la main</td>
+<td>mode watch</td>
+<td><code>npx vitest run</code>, ou <code>q</code> pour quitter</td>
+</tr>
+<tr>
+<td><code>The CJS build of Vite&#39;s Node API is deprecated</code></td>
+<td>pas de <code>&quot;type&quot;: &quot;module&quot;</code></td>
+<td>l&#39;ajouter dans <code>package.json</code> (avertissement sans gravité)</td>
+</tr>
+</tbody></table></div>
+<h2 id="jsdoc"><a class="anchor" href="#jsdoc">#</a>JSDoc</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Symptôme</th>
+<th>Cause</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>There are no input files to process.</code></td>
+<td>aucun fichier donné</td>
+<td><code>npx jsdoc src -r</code> ou <code>source.include</code> dans la config</td>
+</tr>
+<tr>
+<td><code>Error: ENOENT: no such file or directory, open &#39;./README.md&#39;</code></td>
+<td><code>-R README.md</code> mais pas de README</td>
+<td>créer le README</td>
+</tr>
+<tr>
+<td>la doc est vide (juste « Home »)</td>
+<td>commentaires en <code>/* */</code> au lieu de <code>/** */</code></td>
+<td><strong>deux étoiles</strong></td>
+</tr>
+<tr>
+<td>les fonctions sont dans « Global »</td>
+<td>pas de <code>@module</code></td>
+<td><code>@module nom</code> dans l&#39;en-tête du fichier</td>
+</tr>
+<tr>
+<td>image du README cassée dans <code>docs/index.html</code></td>
+<td><code>img/</code> non copié</td>
+<td>copier <code>img/</code> → <code>docs/img/</code></td>
+</tr>
+<tr>
+<td>doc générée dans <code>docs/nom/1.0.0/</code></td>
+<td>option <code>-P package.json</code></td>
+<td>enlever <code>-P</code> ou adapter les chemins</td>
+</tr>
+<tr>
+<td>les tests apparaissent dans la doc</td>
+<td><code>.test.js</code> inclus</td>
+<td><code>&quot;excludePattern&quot;: &quot;\\.test\\.js$&quot;</code> dans <code>source</code></td>
+</tr>
+<tr>
+<td><code>&#39;.&#39; n&#39;est pas reconnu</code> en lançant <code>./node_modules/jsdoc/jsdoc.js</code> (Windows)</td>
+<td>chemin Unix</td>
+<td>écrire <code>jsdoc …</code> dans le script npm</td>
+</tr>
+</tbody></table></div>
+<h2 id="vite-build-ftp"><a class="anchor" href="#vite-build-ftp">#</a>Vite / build / FTP</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Symptôme</th>
+<th>Cause</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>page blanche</strong> en ligne, 404 sur <code>/assets/index-xxx.js</code></td>
+<td><code>base</code> absent ou faux</td>
+<td><code>base: &quot;/nom_du_dossier/&quot;</code></td>
+</tr>
+<tr>
+<td>favicon absent en ligne</td>
+<td>pas dans <code>public/</code>, ou chemin faux</td>
+<td><code>public/favicon.png</code> + <code>href=&quot;/favicon.png&quot;</code></td>
+</tr>
+<tr>
+<td>image OK en local, 404 en ligne</td>
+<td>chemin en dur dans le JS, ou casse différente</td>
+<td><code>import</code> / <code>import.meta.env.BASE_URL</code> ; noms en minuscules ; <code>check-dist.js</code></td>
+</tr>
+<tr>
+<td><code>dist/index.html</code> ouvert par double-clic → page blanche</td>
+<td><code>type=&quot;module&quot;</code> et chemins absolus ne marchent pas en <code>file://</code></td>
+<td><strong>normal</strong> : utiliser <code>npm run preview</code></td>
+</tr>
+<tr>
+<td><code>Top-level await is not available in the configured target environment</code></td>
+<td><code>await</code> hors fonction</td>
+<td><code>build: { target: &quot;esnext&quot; }</code></td>
+</tr>
+<tr>
+<td><code>[vite]: Rollup failed to resolve import</code> / <code>Failed to resolve import</code></td>
+<td>fichier importé introuvable</td>
+<td>vérifier le chemin et la casse</td>
+</tr>
+<tr>
+<td><code>Port 5173 is in use, trying another one…</code></td>
+<td>un autre serveur tourne</td>
+<td>normal, Vite prend le port suivant</td>
+</tr>
+<tr>
+<td>une page <code>contact.html</code> absente de <code>dist/</code></td>
+<td>pas déclarée comme entrée</td>
+<td><code>input: { … }</code> dans la config (<a href="vite.html#site-a-plusieurs-pages">multi-pages</a>)</td>
+</tr>
+<tr>
+<td>tout est dans <code>/mon_dossier/dist/</code> sur le serveur</td>
+<td>envoi du dossier au lieu du contenu</td>
+<td>envoyer le <strong>contenu</strong> de <code>dist/</code></td>
+</tr>
+<tr>
+<td><code>lftp: command not found</code></td>
+<td>lftp pas installé</td>
+<td>FileZilla / WinSCP, ou <code>curl -T</code></td>
+</tr>
+</tbody></table></div>
+<h2 id="reflexes-de-debogage"><a class="anchor" href="#reflexes-de-debogage">#</a>Réflexes de débogage</h2>
+<ol>
+<li><strong>Lis le message en entier</strong> : le nom de la règle / le fichier / la ligne sont indiqués.</li>
+<li><strong>Cherche le message</strong> ici (<kbd>Ctrl</kbd> <kbd>K</kbd>) ou dans la doc.</li>
+<li><strong>Isole</strong> : <code>npx eslint un_fichier.js</code>, <code>npx vitest run -t &quot;nom&quot;</code>.</li>
+<li><strong>Config finale</strong> : <code>npx eslint --print-config src/main.js</code>.</li>
+<li><strong>Repars d&#39;un état qui marche</strong> : le <a href="modele.html">projet modèle</a>.</li>
+</ol>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#npm-reseau">npm / réseau</a><a class="toc-2" href="#eslint">ESLint</a><a class="toc-2" href="#vitest">Vitest</a><a class="toc-2" href="#jsdoc">JSDoc</a><a class="toc-2" href="#vite-build-ftp">Vite / build / FTP</a><a class="toc-2" href="#reflexes-de-debogage">Réflexes de débogage</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../assets/app.js"></script>
+</body>
+</html>

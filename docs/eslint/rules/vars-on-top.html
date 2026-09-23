@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vars-on-top (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/vars-on-top <span class="badge badge-suggestion">suggestion</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/vars-on-top">version en ligne</a></div>
+<h1>vars-on-top</h1><p>The <code>vars-on-top</code> rule generates warnings when variable declarations are not used serially at the top of a function scope or the top of a program.
+By default variable declarations are always moved (“hoisted”) invisibly to the top of their containing scope by the JavaScript interpreter.
+This rule forces the programmer to represent that behavior by manually moving the variable declaration to the top of its containing scope.</p>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule aims to keep all variable declarations in the leading series of statements.
+Allowing multiple declarations helps promote maintainability and is thus allowed.</p>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint vars-on-top: &quot;error&quot;*/</span>
+
+<span class="hljs-comment">// Variable declaration in a nested block, and a variable declaration after other statements:</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomething</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
+        <span class="hljs-keyword">var</span> first = <span class="hljs-literal">true</span>;
+    }
+    <span class="hljs-keyword">var</span> second;
+}
+
+<span class="hljs-comment">// Variable declaration in for initializer:</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomethingElse</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i=<span class="hljs-number">0</span>; i&lt;<span class="hljs-number">10</span>; i++) {}
+}</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint vars-on-top: &quot;error&quot;*/</span>
+
+<span class="hljs-comment">// Variable declaration after other statements:</span>
+<span class="hljs-title function_">f</span>();
+<span class="hljs-keyword">var</span> a;</code></pre></div>
+</div><div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint vars-on-top: &quot;error&quot;*/</span>
+
+<span class="hljs-comment">// Variables in class static blocks should be at the top of the static blocks.</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+
+    <span class="hljs-comment">// Variable declaration in a nested block:</span>
+    <span class="hljs-keyword">static</span> {
+        <span class="hljs-keyword">if</span> (something) {
+            <span class="hljs-keyword">var</span> a = <span class="hljs-literal">true</span>;
+        }
+    }
+
+    <span class="hljs-comment">// Variable declaration after other statements:</span>
+    <span class="hljs-keyword">static</span> {
+        <span class="hljs-title function_">f</span>();
+        <span class="hljs-keyword">var</span> a;
+    }
+
+}</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint vars-on-top: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomething</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">var</span> first;
+    <span class="hljs-keyword">var</span> second; <span class="hljs-comment">//multiple declarations are allowed at the top</span>
+    <span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) {
+        first = <span class="hljs-literal">true</span>;
+    }
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomethingElse</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">var</span> i;
+    <span class="hljs-keyword">for</span> (i=<span class="hljs-number">0</span>; i&lt;<span class="hljs-number">10</span>; i++) {}
+}</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint vars-on-top: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">var</span> a;
+<span class="hljs-title function_">f</span>();</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint vars-on-top: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+
+    <span class="hljs-keyword">static</span> {
+        <span class="hljs-keyword">var</span> a;
+        <span class="hljs-keyword">if</span> (something) {
+            a = <span class="hljs-literal">true</span>;
+        }
+    }
+
+    <span class="hljs-keyword">static</span> {
+        <span class="hljs-keyword">var</span> a;
+        <span class="hljs-title function_">f</span>();
+    }
+
+}</code></pre></div>
+</div><div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint vars-on-top: &quot;error&quot;*/</span>
+
+<span class="hljs-comment">// Directives may precede variable declarations.</span>
+<span class="hljs-meta">&quot;use strict&quot;</span>;
+<span class="hljs-keyword">var</span> a;
+<span class="hljs-title function_">f</span>();
+
+<span class="hljs-comment">// Comments can describe variables.</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">doSomething</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-comment">// this is the first var.</span>
+    <span class="hljs-keyword">var</span> first;
+    <span class="hljs-comment">// this is the second var.</span>
+    <span class="hljs-keyword">var</span> second;
+}</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule has no options.</p>
+<h2 id="further-reading">Further Reading</h2><ul><li><a class="ext" href="https://www.adequatelygood.com/JavaScript-Scoping-and-Hoisting.html">https://www.adequatelygood.com/JavaScript-Scoping-and-Hoisting.html</a></li><li><a class="ext" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/var#var_hoisting">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/var#var_hoisting</a></li><li><a class="ext" href="https://danhough.com/blog/single-var-pattern-rant/">https://danhough.com/blog/single-var-pattern-rant/</a></li><li><a class="ext" href="https://benalman.com/news/2012/05/multiple-var-statements-javascript/">https://benalman.com/news/2012/05/multiple-var-statements-javascript/</a></li></ul>
+</article>
+
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

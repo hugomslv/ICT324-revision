@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>array-callback-return (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../index.html">Accueil</a><a class="nav-link" href="../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../docs/index.html">Index des docs</a><a class="nav-link active" href="../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../index.html">ESLint</a> › rules/array-callback-return <span class="badge badge-problem">problème</span> <a class="ext small" href="https://eslint.org/docs/latest/rules/array-callback-return">version en ligne</a></div>
+<h1>array-callback-return</h1><p><code>Array</code> has several methods for filtering, mapping, and folding.
+If we forget to write <code>return</code> statement in a callback of those, it&#39;s probably a mistake. If you don&#39;t want to use a return or don&#39;t need the returned results, consider using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach">.forEach</a> instead.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// example: convert [&#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;] --&gt; {a: 0, b: 1, c: 2}</span>
+<span class="hljs-keyword">const</span> indexMap = myArray.<span class="hljs-title function_">reduce</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params">memo, item, index</span>) {
+  memo[item] = index;
+}, {}); <span class="hljs-comment">// Error: cannot set property &#x27;b&#x27; of undefined</span></code></pre></div>
+<h2 id="rule-details"><a class="anchor" href="#rule-details">#</a>Rule Details</h2>
+<p>This rule enforces usage of <code>return</code> statement in callbacks of array&#39;s methods.
+Additionally, it may also enforce the <code>forEach</code> array method callback to <strong>not</strong> return a value by using the <code>checkForEach</code> option.</p>
+<p>This rule finds callback functions of the following methods, then checks usage of <code>return</code> statement.</p>
+<ul>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/#sec-array.from"><code>Array.from</code></a></li>
+<li><a href="https://tc39.es/ecma262/#sec-array.fromasync"><code>Array.fromAsync</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.every"><code>Array.prototype.every</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.filter"><code>Array.prototype.filter</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.find"><code>Array.prototype.find</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.findindex"><code>Array.prototype.findIndex</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/14.0/#sec-array.prototype.findlast"><code>Array.prototype.findLast</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/14.0/#sec-array.prototype.findlastindex"><code>Array.prototype.findLastIndex</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/10.0/#sec-array.prototype.flatmap"><code>Array.prototype.flatMap</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.foreach"><code>Array.prototype.forEach</code></a> (optional, based on <code>checkForEach</code> parameter)</li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.map"><code>Array.prototype.map</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.reduce"><code>Array.prototype.reduce</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.reduceright"><code>Array.prototype.reduceRight</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.some"><code>Array.prototype.some</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/6.0/#sec-array.prototype.sort"><code>Array.prototype.sort</code></a></li>
+<li><a href="https://www.ecma-international.org/ecma-262/14.0/#sec-array.prototype.tosorted"><code>Array.prototype.toSorted</code></a></li>
+<li>And above of typed arrays if applicable.</li>
+</ul>
+<p>Examples of <strong>incorrect</strong> code for this rule:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint array-callback-return: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> indexMap = myArray.<span class="hljs-title function_">reduce</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params">memo, item, index</span>) {
+    memo[item] = index;
+}, {});
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(nodes, <span class="hljs-keyword">function</span>(<span class="hljs-params">node</span>) {
+    <span class="hljs-keyword">if</span> (node.<span class="hljs-property">tagName</span> === <span class="hljs-string">&quot;DIV&quot;</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    }
+});
+
+<span class="hljs-keyword">const</span> bar = foo.<span class="hljs-title function_">filter</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params">x</span>) {
+    <span class="hljs-keyword">if</span> (x) {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span>;
+    }
+});</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for this rule:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint array-callback-return: &quot;error&quot;*/</span>
+
+<span class="hljs-keyword">const</span> indexMap = myArray.<span class="hljs-title function_">reduce</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params">memo, item, index</span>) {
+    memo[item] = index;
+    <span class="hljs-keyword">return</span> memo;
+}, {});
+
+<span class="hljs-keyword">const</span> foo = <span class="hljs-title class_">Array</span>.<span class="hljs-title function_">from</span>(nodes, <span class="hljs-keyword">function</span>(<span class="hljs-params">node</span>) {
+    <span class="hljs-keyword">if</span> (node.<span class="hljs-property">tagName</span> === <span class="hljs-string">&quot;DIV&quot;</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+});
+
+<span class="hljs-keyword">const</span> bar = foo.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">node</span> =&gt;</span> node.<span class="hljs-title function_">getAttribute</span>(<span class="hljs-string">&quot;id&quot;</span>));</code></pre></div>
+</div><h2 id="options"><a class="anchor" href="#options">#</a>Options</h2>
+<p>This rule accepts a configuration object with three options:</p>
+<ul>
+<li><code>&quot;allowImplicit&quot;: false</code> (default) When set to <code>true</code>, allows callbacks of methods that require a return value to implicitly return <code>undefined</code> with a <code>return</code> statement containing no expression.</li>
+<li><code>&quot;checkForEach&quot;: false</code> (default) When set to <code>true</code>, rule will also report <code>forEach</code> callbacks that return a value.</li>
+<li><code>&quot;allowVoid&quot;: false</code> (default) When set to <code>true</code>, allows <code>void</code> in <code>forEach</code> callbacks, so rule will not report the return value with a <code>void</code> operator.</li>
+</ul>
+<p><strong>Note:</strong> <code>{ &quot;allowVoid&quot;: true }</code> works only if <code>checkForEach</code> option is set to <code>true</code>.</p>
+<h3 id="allowimplicit"><a class="anchor" href="#allowimplicit">#</a>allowImplicit</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;allowImplicit&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint array-callback-return: [&quot;error&quot;, { allowImplicit: true }]*/</span>
+<span class="hljs-keyword">const</span> undefAllTheThings = myArray.<span class="hljs-title function_">map</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params">item</span>) {
+    <span class="hljs-keyword">return</span>;
+});</code></pre></div>
+</div><h3 id="checkforeach"><a class="anchor" href="#checkforeach">#</a>checkForEach</h3>
+<p>Examples of <strong>incorrect</strong> code for the <code>{ &quot;checkForEach&quot;: true }</code> option:</p>
+<div class="box box-incorrect"><div class="box-title">❌ Incorrect (KO)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint array-callback-return: [&quot;error&quot;, { checkForEach: true }]*/</span>
+
+myArray.<span class="hljs-title function_">forEach</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params">item</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title function_">handleItem</span>(item);
+});
+
+myArray.<span class="hljs-title function_">forEach</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params">item</span>) {
+    <span class="hljs-keyword">if</span> (item &lt; <span class="hljs-number">0</span>) {
+        <span class="hljs-keyword">return</span> x;
+    }
+    <span class="hljs-title function_">handleItem</span>(item);
+});
+
+myArray.<span class="hljs-title function_">forEach</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params">item</span>) {
+    <span class="hljs-keyword">if</span> (item &lt; <span class="hljs-number">0</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">void</span> x;
+    }
+    <span class="hljs-title function_">handleItem</span>(item);
+});
+
+myArray.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> <span class="hljs-title function_">handleItem</span>(item));
+
+myArray.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">handleItem</span>(item));
+
+myArray.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-title function_">handleItem</span>(item);
+});
+
+myArray.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">handleItem</span>(item);
+});</code></pre></div>
+</div><p>Examples of <strong>correct</strong> code for the <code>{ &quot;checkForEach&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint array-callback-return: [&quot;error&quot;, { checkForEach: true }]*/</span>
+
+myArray.<span class="hljs-title function_">forEach</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params">item</span>) {
+    <span class="hljs-title function_">handleItem</span>(item)
+});
+
+myArray.<span class="hljs-title function_">forEach</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params">item</span>) {
+    <span class="hljs-keyword">if</span> (item &lt; <span class="hljs-number">0</span>) {
+        <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-title function_">handleItem</span>(item);
+});
+
+myArray.<span class="hljs-title function_">forEach</span>(<span class="hljs-keyword">function</span>(<span class="hljs-params">item</span>) {
+    <span class="hljs-title function_">handleItem</span>(item);
+    <span class="hljs-keyword">return</span>;
+});
+
+myArray.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> {
+    <span class="hljs-title function_">handleItem</span>(item);
+});</code></pre></div>
+</div><h3 id="allowvoid"><a class="anchor" href="#allowvoid">#</a>allowVoid</h3>
+<p>Examples of <strong>correct</strong> code for the <code>{ &quot;allowVoid&quot;: true }</code> option:</p>
+<div class="box box-correct"><div class="box-title">✅ Correct (OK)</div><div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">/*eslint array-callback-return: [&quot;error&quot;, { checkForEach: true, allowVoid: true }]*/</span>
+
+myArray.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">handleItem</span>(item));
+
+myArray.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">handleItem</span>(item);
+});
+
+myArray.<span class="hljs-title function_">forEach</span>(<span class="hljs-function"><span class="hljs-params">item</span> =&gt;</span> {
+    <span class="hljs-keyword">if</span> (item &lt; <span class="hljs-number">0</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">void</span> x;
+    }
+    <span class="hljs-title function_">handleItem</span>(item);
+});</code></pre></div>
+</div><h2 id="known-limitations"><a class="anchor" href="#known-limitations">#</a>Known Limitations</h2>
+<p>This rule checks callback functions of methods with the given names, <em>even if</em> the object which has the method is <em>not</em> an array.</p>
+<h2 id="when-not-to-use-it"><a class="anchor" href="#when-not-to-use-it">#</a>When Not To Use It</h2>
+<p>If you don&#39;t want to warn about usage of <code>return</code> statement in callbacks of array&#39;s methods, then it&#39;s safe to disable this rule.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#rule-details">Rule Details</a><a class="toc-2" href="#options">Options</a><a class="toc-3" href="#allowimplicit">allowImplicit</a><a class="toc-3" href="#checkforeach">checkForEach</a><a class="toc-3" href="#allowvoid">allowVoid</a><a class="toc-2" href="#known-limitations">Known Limitations</a><a class="toc-2" href="#when-not-to-use-it">When Not To Use It</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../assets/app.js"></script>
+</body>
+</html>

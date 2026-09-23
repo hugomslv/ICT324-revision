@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schema-Driven Assertions | Recipes (Vitest) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link active" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">Vitest</a> › guide/recipes/schema-matching  <a class="ext small" href="https://vitest.dev/guide/recipes/schema-matching">version en ligne</a></div>
+<h1 id="schema-driven-assertions"><a class="anchor" href="#schema-driven-assertions">#</a>Schema-Driven Assertions</h1>
+<p>If your project already validates data with <a href="https://zod.dev">Zod</a>, <a href="https://valibot.dev">Valibot</a>, or <a href="https://arktype.io">ArkType</a>, those schemas already describe what a valid value looks like. Reusing them in tests is more direct than duplicating shape checks across <code>toEqual</code> and <code>toMatchObject</code>.</p>
+<p><a href="../../api/expect.html#expect-schemamatching"><code>expect.schemaMatching</code></a> <Version>4.0.0</Version> is an asymmetric matcher that takes any <a href="https://standardschema.dev">Standard Schema v1</a> object and passes if the value conforms to it.</p>
+<h2 id="pattern"><a class="anchor" href="#pattern">#</a>Pattern</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { z } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;zod&#x27;</span>
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;email validation&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> user = { <span class="hljs-attr">email</span>: <span class="hljs-string">&#x27;john@example.com&#x27;</span> }
+
+  <span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toEqual</span>({
+    <span class="hljs-attr">email</span>: expect.<span class="hljs-title function_">schemaMatching</span>(z.<span class="hljs-title function_">string</span>().<span class="hljs-title function_">email</span>()),
+  })
+})</code></pre></div>
+<p><code>expect.schemaMatching</code> is an asymmetric matcher, so it composes inside any equality check the same way <code>expect.any</code> or <code>expect.stringMatching</code> do:</p>
+<ul>
+<li><code>toEqual</code> / <code>toStrictEqual</code></li>
+<li><code>toMatchObject</code></li>
+<li><code>toContainEqual</code></li>
+<li><code>toThrow</code></li>
+<li><code>toHaveBeenCalledWith</code></li>
+<li><code>toHaveReturnedWith</code></li>
+<li><code>toHaveBeenResolvedWith</code></li>
+</ul>
+<h2 id="works-with-any-standard-schema-library"><a class="anchor" href="#works-with-any-standard-schema-library">#</a>Works with any Standard Schema library</h2>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { z } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;zod&#x27;</span>
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> v <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;valibot&#x27;</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-keyword">type</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;arktype&#x27;</span>
+
+<span class="hljs-keyword">const</span> user = { <span class="hljs-attr">email</span>: <span class="hljs-string">&#x27;john@example.com&#x27;</span> }
+
+<span class="hljs-comment">// Zod</span>
+<span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toEqual</span>({
+  <span class="hljs-attr">email</span>: expect.<span class="hljs-title function_">schemaMatching</span>(z.<span class="hljs-title function_">string</span>().<span class="hljs-title function_">email</span>()),
+})
+
+<span class="hljs-comment">// Valibot</span>
+<span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toEqual</span>({
+  <span class="hljs-attr">email</span>: expect.<span class="hljs-title function_">schemaMatching</span>(v.<span class="hljs-title function_">pipe</span>(v.<span class="hljs-title function_">string</span>(), v.<span class="hljs-title function_">email</span>())),
+})
+
+<span class="hljs-comment">// ArkType</span>
+<span class="hljs-title function_">expect</span>(user).<span class="hljs-title function_">toEqual</span>({
+  <span class="hljs-attr">email</span>: expect.<span class="hljs-title function_">schemaMatching</span>(<span class="hljs-title function_">type</span>(<span class="hljs-string">&#x27;string.email&#x27;</span>)),
+})</code></pre></div>
+<h2 id="verifying-call-arguments"><a class="anchor" href="#verifying-call-arguments">#</a>Verifying call arguments</h2>
+<p>A common use is asserting that a mock was called with data that conforms to a schema, without spelling out every field:</p>
+<div class="code"><pre><code class="hljs lang-ts"><span class="hljs-keyword">import</span> { expect, test, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;vitest&#x27;</span>
+<span class="hljs-keyword">import</span> { z } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;zod&#x27;</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">UserSchema</span> = z.<span class="hljs-title function_">object</span>({
+  <span class="hljs-attr">id</span>: z.<span class="hljs-title function_">string</span>().<span class="hljs-title function_">uuid</span>(),
+  <span class="hljs-attr">email</span>: z.<span class="hljs-title function_">string</span>().<span class="hljs-title function_">email</span>(),
+  <span class="hljs-attr">createdAt</span>: z.<span class="hljs-title function_">date</span>(),
+})
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&#x27;persists a valid user&#x27;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">const</span> repo = { <span class="hljs-attr">save</span>: vi.<span class="hljs-title function_">fn</span>() }
+  <span class="hljs-title function_">registerUser</span>(repo, { <span class="hljs-attr">email</span>: <span class="hljs-string">&#x27;a@b.com&#x27;</span> })
+
+  <span class="hljs-title function_">expect</span>(repo.<span class="hljs-property">save</span>).<span class="hljs-title function_">toHaveBeenCalledWith</span>(expect.<span class="hljs-title function_">schemaMatching</span>(<span class="hljs-title class_">UserSchema</span>))
+})</code></pre></div>
+<p>Reach for <code>schemaMatching</code> when you already have a schema for the value and would otherwise spell out every property by hand. It&#39;s especially useful for assertions over generated fields like UUIDs or timestamps, where you can validate the format without predicting the exact value.</p>
+<h2 id="see-also"><a class="anchor" href="#see-also">#</a>See also</h2>
+<ul>
+<li><a href="../../api/expect.html#expect-schemamatching"><code>expect.schemaMatching</code></a></li>
+<li><a href="https://standardschema.dev">Standard Schema</a></li>
+<li><a href="../../api/expect.html">Asymmetric Matchers</a></li>
+</ul>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#pattern">Pattern</a><a class="toc-2" href="#works-with-any-standard-schema-library">Works with any Standard Schema library</a><a class="toc-2" href="#verifying-call-arguments">Verifying call arguments</a><a class="toc-2" href="#see-also">See also</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>

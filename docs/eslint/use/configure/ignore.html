@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ignore Files (ESLint) · ICT-324 Révision</title>
+<link rel="icon" href="../../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../assets/hljs.css">
+<link rel="stylesheet" href="../../../../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../../../../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../../../../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../../../../index.html">Accueil</a><a class="nav-link" href="../../../../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../../../../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../../../../pages/vite.html">1. Vite</a><a class="nav-link" href="../../../../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../../../../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../../../../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../../../../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../../../../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../../../../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../../../../pages/projets.html">Projets du cours</a><a class="nav-link" href="../../../../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../../../../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../../../../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../../../../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../../../../docs/index.html">Index des docs</a><a class="nav-link" href="../../../../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../../../../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../../../../docs/vite/index.html">Vite</a><a class="nav-link" href="../../../../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+<div class="doc-meta"><a href="../../index.html">ESLint</a> › use/configure/ignore  <a class="ext small" href="https://eslint.org/docs/latest/use/configure/ignore">version en ligne</a></div>
+<h1>Ignore Files</h1><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This page explains how to ignore files using the flat config format.</p>
+</div><div class="box box-tip"><div class="box-title">💡 Astuce</div><p>This page explains how to use the <code>globalIgnores()</code> function to completely ignore files and directories. For more information on non-global ignores, see <a href="configuration-files.html#specify-files-and-ignores">Specify files and ignores</a>. For more information on the differences between global and non-global ignores, see <a href="configuration-files.html#globally-ignore-files-with-ignores">Globally ignore files with <code>ignores</code></a>.</p>
+</div><p>You can configure ESLint to ignore certain files and directories while linting by specifying one or more glob patterns in the following ways:</p>
+<ul>
+<li>Inside of your <code>eslint.config.js</code> file.</li>
+<li>On the command line using <code>--ignore-pattern</code>.</li>
+</ul>
+<h2 id="ignore-files"><a class="anchor" href="#ignore-files">#</a>Ignore Files</h2>
+<p>In your <code>eslint.config.js</code> file, you can use the <code>globalIgnores()</code> helper function to indicate patterns of files to be ignored. Here&#39;s an example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig, globalIgnores } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([<span class="hljs-title function_">globalIgnores</span>([<span class="hljs-string">&quot;.config/*&quot;</span>])]);</code></pre></div>
+<p>This configuration specifies that all of the files in the <code>.config</code> directory should be ignored. This pattern is added after the default patterns, which are <code>[&quot;**/node_modules/&quot;, &quot;.git/&quot;]</code>.</p>
+<p>By default, ESLint lints files that match the patterns <code>**/*.js</code>, <code>**/*.cjs</code>, and <code>**/*.mjs</code>. You can ignore them with <code>globalIgnores()</code> if you don&#39;t want ESLint to lint these files:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig, globalIgnores } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-title function_">globalIgnores</span>([<span class="hljs-string">&quot;**/*.js&quot;</span>, <span class="hljs-string">&quot;**/*.cjs&quot;</span>, <span class="hljs-string">&quot;**/*.mjs&quot;</span>]),
+]);</code></pre></div>
+<p>When non-JS files are specified in the <code>files</code> property, ESLint still lints files that match the default patterns. To lint only the files specified in the <code>files</code> property, you must ignore the default file patterns:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig, globalIgnores } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-title function_">globalIgnores</span>([<span class="hljs-string">&quot;**/*.js&quot;</span>, <span class="hljs-string">&quot;**/*.cjs&quot;</span>, <span class="hljs-string">&quot;**/*.mjs&quot;</span>]),
+	{
+		<span class="hljs-attr">files</span>: [<span class="hljs-string">&quot;**/*.ts&quot;</span>],
+		<span class="hljs-attr">ignores</span>: [<span class="hljs-string">&quot;.config/**&quot;</span>],
+		<span class="hljs-attr">rules</span>: {<span class="hljs-comment">/* ... */</span>},
+	},
+]);</code></pre></div>
+<p>You can also ignore files on the command line using <a href="../command-line-interface.html#--ignore-pattern"><code>--ignore-pattern</code></a>, such as:</p>
+<div class="code"><pre><code class="hljs lang-bash">npx eslint . --ignore-pattern <span class="hljs-string">&#x27;.config/*&#x27;</span></code></pre></div>
+<h2 id="ignore-directories"><a class="anchor" href="#ignore-directories">#</a>Ignore Directories</h2>
+<p>Ignoring directories works the same way as ignoring files, by passing a pattern to the <code>globalIgnores()</code> helper function. For example, the following ignores the <code>.config</code> directory as a whole (meaning file search will not traverse into it at all):</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig, globalIgnores } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([<span class="hljs-title function_">globalIgnores</span>([<span class="hljs-string">&quot;.config/&quot;</span>])]);</code></pre></div>
+<p>Unlike <code>.gitignore</code>, an ignore pattern like <code>.config</code> will only ignore the <code>.config</code> directory in the same directory as the configuration file. If you want to recursively ignore all directories named <code>.config</code>, you need to use <code>**/.config/</code>, as in this example:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig, globalIgnores } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([<span class="hljs-title function_">globalIgnores</span>([<span class="hljs-string">&quot;**/.config/&quot;</span>])]);</code></pre></div>
+<h2 id="unignore-files-and-directories"><a class="anchor" href="#unignore-files-and-directories">#</a>Unignore Files and Directories</h2>
+<p>You can also unignore files and directories that are ignored by previous patterns, including the default patterns. For example, this config unignores <code>node_modules/mylibrary</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig, globalIgnores } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-title function_">globalIgnores</span>([
+		<span class="hljs-string">&quot;!node_modules/&quot;</span>, <span class="hljs-comment">// unignore `node_modules/` directory</span>
+		<span class="hljs-string">&quot;node_modules/*&quot;</span>, <span class="hljs-comment">// ignore its content</span>
+		<span class="hljs-string">&quot;!node_modules/mylibrary/&quot;</span>, <span class="hljs-comment">// unignore `node_modules/mylibrary` directory</span>
+	]),
+]);</code></pre></div>
+<p>If you&#39;d like to ignore a directory except for specific files or subdirectories, then the ignore pattern <code>directory/**/*</code> must be used instead of <code>directory/**</code>. The pattern <code>directory/**</code> ignores the entire directory and its contents, so traversal will skip over the directory completely and you cannot unignore anything inside.</p>
+<p>For example, <code>build/**</code> ignores directory <code>build</code> and its contents, whereas <code>build/**/*</code> ignores only its contents. If you&#39;d like to ignore everything in the <code>build</code> directory except for <code>build/test.js</code>, you&#39;d need to create a config like this:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig, globalIgnores } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-title function_">globalIgnores</span>([
+		<span class="hljs-string">&quot;build/**/*&quot;</span>, <span class="hljs-comment">// ignore all contents in and under `build/` directory but not the `build/` directory itself</span>
+		<span class="hljs-string">&quot;!build/test.js&quot;</span>, <span class="hljs-comment">// unignore `!build/test.js`</span>
+	]),
+]);</code></pre></div>
+<p>If you&#39;d like to ignore a directory except for specific files at any level under the directory, you should also ensure that subdirectories are not ignored. Note that while patterns that end with <code>/</code> only match directories, patterns that don&#39;t end with <code>/</code> match both files and directories so it isn&#39;t possible to write a single pattern that only ignores files, but you can achieve this with two patterns: one to ignore all contents and another to unignore subdirectories.</p>
+<p>For example, this config ignores all files in and under <code>build</code> directory except for files named <code>test.js</code> at any level:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig, globalIgnores } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-title function_">globalIgnores</span>([
+		<span class="hljs-string">&quot;build/**/*&quot;</span>, <span class="hljs-comment">// ignore all contents in and under `build/` directory but not the `build/` directory itself</span>
+		<span class="hljs-string">&quot;!build/**/*/&quot;</span>, <span class="hljs-comment">// unignore all subdirectories</span>
+		<span class="hljs-string">&quot;!build/**/test.js&quot;</span>, <span class="hljs-comment">// unignore `test.js` files</span>
+	]),
+]);</code></pre></div>
+<p>If you want to ignore ESLint&#39;s default file patterns (<code>**/*.js</code>, <code>**/*.cjs</code>, and <code>**/*.mjs</code>) while still linting specific files or directories, you can use negative patterns to unignore them:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig, globalIgnores } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-title function_">globalIgnores</span>([<span class="hljs-string">&quot;**/*.js&quot;</span>, <span class="hljs-string">&quot;**/*.cjs&quot;</span>, <span class="hljs-string">&quot;**/*.mjs&quot;</span>, <span class="hljs-string">&quot;!**/src/**/*.js&quot;</span>]),
+]);</code></pre></div>
+<p>This configuration ignores all files matching the default patterns except for JavaScript files located within <code>src</code> directories.</p>
+<div class="box box-important"><div class="box-title">❗ Important</div><p>Note that only global <code>ignores</code> patterns can match directories.
+<code>ignores</code> patterns that are specific to a configuration will only match file names.</p>
+</div><p>You can also unignore files on the command line using <a href="../command-line-interface.html#--ignore-pattern"><code>--ignore-pattern</code></a>, such as:</p>
+<div class="code"><pre><code class="hljs lang-bash">npx eslint . --ignore-pattern <span class="hljs-string">&#x27;!node_modules/&#x27;</span></code></pre></div>
+<h2 id="glob-pattern-resolution"><a class="anchor" href="#glob-pattern-resolution">#</a>Glob Pattern Resolution</h2>
+<p>How glob patterns are evaluated depends on where they are located and how they are used:</p>
+<ol>
+<li>When using <code>globalIgnores()</code> in an <code>eslint.config.js</code> file, glob patterns are evaluated relative to the <code>eslint.config.js</code> file.</li>
+<li>When using <code>globalIgnores()</code> in an alternate configuration file specified using the <a href="../command-line-interface.html#-c---config"><code>--config</code></a> command line option, glob patterns are evaluated relative to the current working directory.</li>
+<li>When using <a href="../command-line-interface.html#--ignore-pattern"><code>--ignore-pattern</code></a>, glob patterns are evaluated relative to the current working directory.</li>
+</ol>
+<h2 id="name-the-global-ignores-config"><a class="anchor" href="#name-the-global-ignores-config">#</a>Name the Global Ignores Config</h2>
+<p>By default, <code>globalIgnores()</code> will assign a name to the config that represents your ignores. You can override this name by providing a second argument to <code>globalIgnores()</code>, which is the name you&#39;d like to use instead of the default:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig, globalIgnores } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-title function_">globalIgnores</span>([<span class="hljs-string">&quot;build/**/*&quot;</span>], <span class="hljs-string">&quot;Ignore Build Directory&quot;</span>),
+]);</code></pre></div>
+<p>The <code>&quot;Ignore Build Directory&quot;</code> string in this example is the name of the config created for the global ignores. This is useful for debugging purposes.</p>
+<h2 id="ignored-file-warnings"><a class="anchor" href="#ignored-file-warnings">#</a>Ignored File Warnings</h2>
+<p>When you pass directories to the ESLint CLI, files and directories are silently ignored. If you pass a specific file to ESLint, then ESLint creates a warning that the file was skipped. For example, suppose you have an <code>eslint.config.js</code> file that looks like this:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+<span class="hljs-keyword">import</span> { defineConfig, globalIgnores } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([<span class="hljs-title function_">globalIgnores</span>([<span class="hljs-string">&quot;foo.js&quot;</span>])]);</code></pre></div>
+<p>And then you run:</p>
+<div class="code"><pre><code class="hljs lang-bash">npx eslint foo.js</code></pre></div>
+<p>You&#39;ll see this warning:</p>
+<div class="code"><pre><code class="hljs lang-text">foo.js
+  0:0  warning  File ignored because of a matching ignore pattern. Use &quot;--no-ignore&quot; to disable file ignore settings or use &quot;--no-warn-ignored&quot; to suppress this warning.
+
+✖ 1 problem (0 errors, 1 warning)</code></pre></div>
+<p>This message occurs because ESLint is unsure if you wanted to actually lint the file or not. As the message indicates, you can use <code>--no-ignore</code> to omit using the ignore rules.</p>
+<h2 id="include-gitignore-files"><a class="anchor" href="#include-gitignore-files">#</a>Include <code>.gitignore</code> Files</h2>
+<p>If you want to include patterns from a <a href="https://git-scm.com/docs/gitignore"><code>.gitignore</code></a> file or any other file with gitignore-style patterns, you can use the <code>includeIgnoreFile</code> utility.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+
+<span class="hljs-keyword">import</span> { defineConfig, includeIgnoreFile } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+<span class="hljs-keyword">import</span> { fileURLToPath } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:url&quot;</span>;
+
+<span class="hljs-keyword">const</span> gitignorePath = <span class="hljs-title function_">fileURLToPath</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(<span class="hljs-string">&quot;.gitignore&quot;</span>, <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">url</span>));
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-title function_">includeIgnoreFile</span>(gitignorePath, { <span class="hljs-attr">gitignoreResolution</span>: <span class="hljs-literal">true</span> }),
+	{
+		<span class="hljs-comment">// your overrides</span>
+	},
+]);</code></pre></div>
+<p>This automatically loads the specified file and translates gitignore-style patterns into a config object containing <code>ignores</code> glob patterns. The <code>{ gitignoreResolution: true }</code> option ensures that patterns will be interpreted relative to the location of the specified file.</p>
+<p>An array of ignore file paths can also be provided:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+
+<span class="hljs-keyword">import</span> { defineConfig, includeIgnoreFile } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+<span class="hljs-keyword">import</span> { fileURLToPath } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:url&quot;</span>;
+
+<span class="hljs-keyword">const</span> rootGitignorePath = <span class="hljs-title function_">fileURLToPath</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(<span class="hljs-string">&quot;.gitignore&quot;</span>, <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">url</span>));
+<span class="hljs-keyword">const</span> nestedGitignorePath = <span class="hljs-title function_">fileURLToPath</span>(
+	<span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(<span class="hljs-string">&quot;some/other/folder/.gitignore&quot;</span>, <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">url</span>),
+);
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-title function_">includeIgnoreFile</span>([rootGitignorePath, nestedGitignorePath], {
+		<span class="hljs-attr">gitignoreResolution</span>: <span class="hljs-literal">true</span>,
+	}),
+	{
+		<span class="hljs-comment">// your overrides</span>
+	},
+]);</code></pre></div>
+<p>In this case, an array of config objects will be returned.</p>
+<h3 id="include-other-ignore-files"><a class="anchor" href="#include-other-ignore-files">#</a>Include other ignore files</h3>
+<p>If <code>{ gitignoreResolution: true }</code> is omitted, or if <code>{ gitignoreResolution: false&quot; }</code> is specified, <code>includeIgnoreFile()</code> will interpret the ignore patterns relative to the location of the ESLint config file.</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+
+<span class="hljs-keyword">import</span> { defineConfig, includeIgnoreFile } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+<span class="hljs-keyword">import</span> { fileURLToPath } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:url&quot;</span>;
+
+<span class="hljs-keyword">const</span> eslintIgnorePath = <span class="hljs-title function_">fileURLToPath</span>(
+	<span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(<span class="hljs-string">&quot;eslint-ignore-patterns&quot;</span>, <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">url</span>),
+);
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-title function_">includeIgnoreFile</span>(eslintIgnorePath),
+	{
+		<span class="hljs-comment">// your overrides</span>
+	},
+]);</code></pre></div>
+<p>By contrast, <code>.gitignore</code> files are specified such that the ignore patterns should be interpreted relative to the location of the <code>.gitignore</code> file itself. Therefore, <code>{ gitignoreResolution: true }</code>, which tells <code>includeIgnoreFile()</code> to match this behavior, should always be used when including ignore patterns from <code>.gitignore</code> files.</p>
+<h3 id="customize-name-of-output-configs"><a class="anchor" href="#customize-name-of-output-configs">#</a>Customize name of output configs</h3>
+<p>By default, <code>includeIgnoreFile()</code> will assign a name to the config that represents your ignores. You can override this name by providing it in the second argument to <code>includeIgnoreFile()</code>:</p>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-comment">// eslint.config.js</span>
+
+<span class="hljs-keyword">import</span> { defineConfig, includeIgnoreFile } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>;
+<span class="hljs-keyword">import</span> { fileURLToPath } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:url&quot;</span>;
+
+<span class="hljs-keyword">const</span> gitignorePath = <span class="hljs-title function_">fileURLToPath</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(<span class="hljs-string">&quot;.gitignore&quot;</span>, <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">url</span>));
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+	<span class="hljs-title function_">includeIgnoreFile</span>(gitignorePath, {
+		<span class="hljs-attr">gitignoreResolution</span>: <span class="hljs-literal">true</span>,
+		<span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Imported .gitignore patterns&quot;</span>,
+	}),
+	{
+		<span class="hljs-comment">// your overrides</span>
+	},
+]);</code></pre></div>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#ignore-files">Ignore Files</a><a class="toc-2" href="#ignore-directories">Ignore Directories</a><a class="toc-2" href="#unignore-files-and-directories">Unignore Files and Directories</a><a class="toc-2" href="#glob-pattern-resolution">Glob Pattern Resolution</a><a class="toc-2" href="#name-the-global-ignores-config">Name the Global Ignores Config</a><a class="toc-2" href="#ignored-file-warnings">Ignored File Warnings</a><a class="toc-2" href="#include-gitignore-files">Include .gitignore Files</a><a class="toc-3" href="#include-other-ignore-files">Include other ignore files</a><a class="toc-3" href="#customize-name-of-output-configs">Customize name of output configs</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../../../../assets/app.js"></script>
+</body>
+</html>
