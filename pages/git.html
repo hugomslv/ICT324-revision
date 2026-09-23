@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Git : corrigés et mémo · ICT-324 Révision</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/hljs.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../index.html">Accueil</a><a class="nav-link" href="../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Tutos pas à pas</div><a class="nav-link" href="../pages/tutos.html">Départ : le projet Vite</a><a class="nav-link" href="../pages/tuto-1-linter.html">Tuto 1 : le linter</a><a class="nav-link" href="../pages/tuto-2-tests.html">Tuto 2 : les tests</a><a class="nav-link" href="../pages/tuto-3-doc.html">Tuto 3 : la documentation</a><a class="nav-link" href="../pages/tuto-4-ftp.html">Tuto 4 : la config FTP</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../pages/vite.html">1. Vite</a><a class="nav-link" href="../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../pages/projets.html">Projets du cours</a><a class="nav-link" href="../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../docs/index.html">Index des docs</a><a class="nav-link" href="../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../docs/vite/index.html">Vite</a><a class="nav-link" href="../docs/jsdoc/index.html">JSDoc</a></div><div class="nav-group"><div class="nav-title">Extras</div><a class="nav-link active" href="../pages/git.html">Git : corrigés et mémo</a></div></nav>
+<main class="content">
+<article class="doc">
+
+<h1>Git : corrigés et mémo</h1><p class="lead">Les corrigés Git du cours (exercice basique et exercice binCraft), expliqués ligne par ligne, puis un mémo des commandes. L'exercice basique a été rejoué en local avec Git 2.54 : les erreurs citées sont les vraies.</p><h2 id="exercice-basique"><a class="anchor" href="#exercice-basique">#</a>Exercice basique</h2>
+<h3 id="le-corrige"><a class="anchor" href="#le-corrige">#</a>Le corrigé</h3>
+<div class="code"><pre><code class="hljs lang-bash">$ <span class="hljs-built_in">mkdir</span> ex-git
+$ <span class="hljs-built_in">cd</span> ex-git
+$ git init --initial-branch=main
+$ <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Pierre Ferrari&quot;</span> &gt; ferrarip
+$ git add ferrarip
+$ git commit -m <span class="hljs-string">&quot;chore: First commit&quot;</span>
+$ git remote add origin https://git.s2.rpn.ch/ict-324/exercice-base.git
+$ git pull origin main
+<span class="hljs-comment"># → déclenche une erreur (voir plus bas)</span>
+$ git pull origin main --allow-unrelated-histories</code></pre></div>
+<h3 id="ligne-par-ligne"><a class="anchor" href="#ligne-par-ligne">#</a>Ligne par ligne</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Commande</th>
+<th>Ce qu&#39;elle fait</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>mkdir ex-git</code></td>
+<td>crée le dossier du projet</td>
+</tr>
+<tr>
+<td><code>cd ex-git</code></td>
+<td>entre dedans</td>
+</tr>
+<tr>
+<td><code>git init --initial-branch=main</code></td>
+<td>transforme le dossier en dépôt Git, avec une branche nommée <code>main</code> (au lieu de <code>master</code>)</td>
+</tr>
+<tr>
+<td><code>echo &quot;Pierre Ferrari&quot; &gt; ferrarip</code></td>
+<td>crée un fichier <code>ferrarip</code> qui contient ton nom (le nom du fichier = ton login, ex : <code>ferrarip</code> pour Ferrari Pierre)</td>
+</tr>
+<tr>
+<td><code>git add ferrarip</code></td>
+<td>ajoute le fichier à la <strong>zone de préparation</strong> (staging)</td>
+</tr>
+<tr>
+<td><code>git commit -m &quot;chore: First commit&quot;</code></td>
+<td>enregistre une version (un <em>commit</em>) avec un message</td>
+</tr>
+<tr>
+<td><code>git remote add origin &lt;url&gt;</code></td>
+<td>relie ton dépôt local au dépôt du serveur, sous le nom <code>origin</code></td>
+</tr>
+<tr>
+<td><code>git pull origin main</code></td>
+<td>récupère la branche <code>main</code> du serveur et la fusionne avec la tienne : <strong>erreur</strong></td>
+</tr>
+<tr>
+<td><code>git pull origin main --allow-unrelated-histories</code></td>
+<td>force la fusion de deux historiques qui n&#39;ont rien en commun</td>
+</tr>
+</tbody></table></div>
+<h3 id="pourquoi-le-premier-git-pull-echoue"><a class="anchor" href="#pourquoi-le-premier-git-pull-echoue">#</a>Pourquoi le premier <code>git pull</code> échoue</h3>
+<p>Ton dépôt local a son propre premier commit (<code>chore: First commit</code>), et le dépôt du serveur a <strong>son propre</strong> premier commit. Les deux historiques n&#39;ont <strong>aucun ancêtre commun</strong> : Git refuse de les mélanger par sécurité.</p>
+<p>Testé avec Git 2.54, selon ta configuration, tu obtiens l&#39;une de ces deux erreurs :</p>
+<p><strong>Cas 1 : Git ne sait pas comment fusionner</strong> (configuration par défaut, le plus probable sur un poste neuf)</p>
+<div class="code"><pre><code class="hljs lang-text">hint: You have divergent branches and need to specify how to reconcile them.
+...
+fatal: Need to specify how to reconcile divergent branches.</code></pre></div>
+<p>Solution : dire à Git de <strong>fusionner</strong> (merge), puis autoriser les historiques sans rapport :</p>
+<div class="code"><pre><code class="hljs lang-bash">git pull --no-rebase origin main --allow-unrelated-histories</code></pre></div>
+<p>Ou une fois pour toutes :</p>
+<div class="code"><pre><code class="hljs lang-bash">git config --global pull.rebase <span class="hljs-literal">false</span></code></pre></div>
+<p><strong>Cas 2 : les historiques n&#39;ont rien en commun</strong> (si <code>pull.rebase</code> est déjà réglé, c&#39;est l&#39;erreur du corrigé)</p>
+<div class="code"><pre><code class="hljs lang-text">fatal: refusing to merge unrelated histories</code></pre></div>
+<p>Solution : <code>git pull origin main --allow-unrelated-histories</code></p>
+<p>Résultat (testé) : un commit de fusion qui réunit les deux historiques, et tu as les fichiers des deux côtés :</p>
+<div class="code"><pre><code class="hljs lang-text">*   691aee2 Merge branch &#x27;main&#x27; of ...
+|\
+| * 9e1e130 init                  ← le commit du serveur
+* 0b367ea chore: First commit     ← ton commit</code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Si Git ouvre un éditeur pour le message de fusion</div><p>C&#39;est souvent <strong>vim</strong> : tape <code>:wq</code> puis <kbd>Entrée</kbd> pour valider le message proposé. Dans <strong>nano</strong> : <kbd>Ctrl</kbd> <kbd>X</kbd>. Pour éviter l&#39;éditeur : ajoute <code>--no-edit</code> à la commande.</p>
+</div><p>Ensuite, pour envoyer ton travail sur le serveur :</p>
+<div class="code"><pre><code class="hljs lang-bash">git push -u origin main</code></pre></div>
+<p><code>-u</code> mémorise <code>origin main</code> : la prochaine fois, <code>git push</code> et <code>git pull</code> suffisent.</p>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Si Git demande qui tu es</div><p><code>Author identity unknown *** Please tell me who you are.</code> → à faire une fois sur le poste :</p>
+<div class="code"><pre><code class="hljs lang-bash">git config --global user.name <span class="hljs-string">&quot;Prénom Nom&quot;</span>
+git config --global user.email <span class="hljs-string">&quot;prenom.nom@rpn.ch&quot;</span></code></pre></div>
+</div><h2 id="exercice-bincraft"><a class="anchor" href="#exercice-bincraft">#</a>Exercice binCraft</h2>
+<h3 id="le-corrige-2"><a class="anchor" href="#le-corrige-2">#</a>Le corrigé</h3>
+<div class="code"><pre><code class="hljs lang-bash">$ git diff --patch cf2cb6d8 HEAD binCraft_decoder.py &gt; patch.txt
+$ <span class="hljs-built_in">cat</span> patch.txt</code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Morceau</th>
+<th>Sens</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>git diff</code></td>
+<td>montre les différences entre deux versions</td>
+</tr>
+<tr>
+<td><code>--patch</code></td>
+<td>au format <em>patch</em> (le format par défaut de <code>git diff</code>, écrit explicitement)</td>
+</tr>
+<tr>
+<td><code>cf2cb6d8</code></td>
+<td>l&#39;identifiant (le <em>hash</em>, abrégé) d&#39;un ancien commit</td>
+</tr>
+<tr>
+<td><code>HEAD</code></td>
+<td>le commit actuel (le dernier de ta branche)</td>
+</tr>
+<tr>
+<td><code>binCraft_decoder.py</code></td>
+<td>limite la comparaison à ce fichier</td>
+</tr>
+<tr>
+<td><code>&gt; patch.txt</code></td>
+<td>enregistre le résultat dans un fichier au lieu de l&#39;afficher</td>
+</tr>
+<tr>
+<td><code>cat patch.txt</code></td>
+<td>affiche le fichier</td>
+</tr>
+</tbody></table></div>
+<p>Pour trouver l&#39;identifiant d&#39;un commit :</p>
+<div class="code"><pre><code class="hljs lang-bash">git <span class="hljs-built_in">log</span> --oneline
+git <span class="hljs-built_in">log</span> --oneline -- binCraft_decoder.py   <span class="hljs-comment"># seulement les commits qui touchent ce fichier</span></code></pre></div>
+<h3 id="le-patch-obtenu"><a class="anchor" href="#le-patch-obtenu">#</a>Le patch obtenu</h3>
+<div class="code"><div class="code-title">patch.txt</div><pre><code class="hljs lang-diff"><span class="hljs-comment">+++ b/binCraft_decoder.py</span>
+<span class="hljs-meta">@@ -1,4 +1,4 @@</span>
+<span class="hljs-deletion">-#!/usr/bin/python3</span>
+<span class="hljs-addition">+#!/usr/bin/env python3</span>
+ # -*- coding: utf-8 -*-
+ import struct
+ import math
+<span class="hljs-meta">@@ -96,10 +96,10 @@</span> def binCraftReader(file,zstd_compressed=False):
+        ac[&#x27;lat&#x27;] = s32[2] / 1e6;
+        ac[&#x27;lon&#x27;] = s32[3] / 1e6;
+
+<span class="hljs-deletion">-       ac[&#x27;alt_baro&#x27;] = s16[8] * 25;</span>
+<span class="hljs-deletion">-       ac[&#x27;alt_geom&#x27;] = s16[9] * 25;</span>
+<span class="hljs-deletion">-       ac[&#x27;baro_rate&#x27;] = s16[10] * 8;</span>
+<span class="hljs-deletion">-       ac[&#x27;geom_rate&#x27;] = s16[11] * 8;</span>
+<span class="hljs-addition">+       ac[&#x27;alt_baro&#x27;] = s16[10] * 25;</span>
+<span class="hljs-addition">+       ac[&#x27;alt_geom&#x27;] = s16[11] * 25;</span>
+<span class="hljs-addition">+       ac[&#x27;baro_rate&#x27;] = s16[8] * 8;</span>
+<span class="hljs-addition">+       ac[&#x27;geom_rate&#x27;] = s16[9] * 8;</span>
+
+        ac[&#x27;nav_altitude_mcp&#x27;] = u16[12] * 4;
+        ac[&#x27;nav_altitude_fms&#x27;] = u16[13] * 4;
+<span class="hljs-meta">@@ -150,7 +150,7 @@</span> def binCraftReader(file,zstd_compressed=False):
+        ac[&#x27;nic_a&#x27;] = (u8[72] &amp; 64) &gt;&gt; 6;
+        ac[&#x27;nic_c&#x27;] = (u8[72] &amp; 128) &gt;&gt; 7;
+
+<span class="hljs-deletion">-       ac[&#x27;rssi&#x27;] = 10 * math.log10(u8[86]*u8[86]/65025 + 1.125e-5);</span>
+<span class="hljs-addition">+       ac[&#x27;rssi&#x27;] = 10 * math.log10(u8[86]*u8[86]/65025 + 1.125e-5) / math.log(10);</span>
+        ac[&#x27;dbFlags&#x27;] = u8[87];
+
+        ac[&#x27;flight&#x27;] = genStr(u8,78,87)</code></pre></div>
+<h3 id="lire-un-patch"><a class="anchor" href="#lire-un-patch">#</a>Lire un patch</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Ligne</th>
+<th>Sens</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--- a/fichier</code> / <code>+++ b/fichier</code></td>
+<td>l&#39;ancienne version (a) et la nouvelle (b)</td>
+</tr>
+<tr>
+<td><code>@@ -96,10 +96,10 @@</code></td>
+<td>un bloc (<em>hunk</em>) : dans l&#39;ancienne version, 10 lignes à partir de la ligne 96 ; dans la nouvelle, 10 lignes à partir de la ligne 96</td>
+</tr>
+<tr>
+<td><code>-ligne</code> (rouge)</td>
+<td>ligne <strong>supprimée</strong></td>
+</tr>
+<tr>
+<td><code>+ligne</code> (vert)</td>
+<td>ligne <strong>ajoutée</strong></td>
+</tr>
+<tr>
+<td><code> ligne</code> (espace)</td>
+<td>ligne inchangée, affichée pour le contexte</td>
+</tr>
+</tbody></table></div>
+<p>Les 3 modifications de ce patch :</p>
+<ol>
+<li><strong>Ligne 1</strong> : <code>#!/usr/bin/python3</code> → <code>#!/usr/bin/env python3</code> (trouve Python là où il est installé, plus portable).</li>
+<li><strong>Lignes 99 à 102</strong> : les indices de <code>s16</code> sont échangés : <code>alt_baro</code> / <code>alt_geom</code> lisent maintenant <code>s16[10]</code> / <code>s16[11]</code>, et <code>baro_rate</code> / <code>geom_rate</code> lisent <code>s16[8]</code> / <code>s16[9]</code>.</li>
+<li><strong>Ligne 153</strong> : le calcul de <code>rssi</code> est divisé par <code>math.log(10)</code>.</li>
+</ol>
+<h3 id="appliquer-un-patch"><a class="anchor" href="#appliquer-un-patch">#</a>Appliquer un patch</h3>
+<div class="code"><pre><code class="hljs lang-bash">git apply --check patch.txt   <span class="hljs-comment"># vérifie qu&#x27;il s&#x27;applique, sans rien modifier</span>
+git apply patch.txt           <span class="hljs-comment"># applique les modifications aux fichiers</span>
+git diff                      <span class="hljs-comment"># voir ce qui a changé</span></code></pre></div>
+<h3 id="la-derniere-partie"><a class="anchor" href="#la-derniere-partie">#</a>La dernière partie</h3>
+<p>Pour le dernier exercice, le corrigé dit : <strong>il suffit de faire les add / commit l&#39;un après l&#39;autre</strong>. Donc une modification = un commit :</p>
+<div class="code"><pre><code class="hljs lang-bash"><span class="hljs-comment"># modification 1</span>
+git add binCraft_decoder.py
+git commit -m <span class="hljs-string">&quot;fix: shebang portable avec /usr/bin/env&quot;</span>
+
+<span class="hljs-comment"># modification 2</span>
+git add binCraft_decoder.py
+git commit -m <span class="hljs-string">&quot;fix: inversion des indices altitude / vitesse verticale&quot;</span>
+
+<span class="hljs-comment"># modification 3</span>
+git add binCraft_decoder.py
+git commit -m <span class="hljs-string">&quot;fix: correction du calcul du rssi&quot;</span>
+
+git <span class="hljs-built_in">log</span> --oneline   <span class="hljs-comment"># vérifier : 3 commits</span></code></pre></div>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Plusieurs modifications déjà faites dans le même fichier ?</div><p><code>git add -p binCraft_decoder.py</code> te propose chaque bloc un par un : <code>y</code> = l&#39;ajouter à ce commit, <code>n</code> = le garder pour plus tard. Tu peux ainsi faire 3 commits séparés à partir d&#39;un seul fichier modifié.</p>
+</div><h2 id="messages-de-commit-conventional-commits"><a class="anchor" href="#messages-de-commit-conventional-commits">#</a>Messages de commit (Conventional Commits)</h2>
+<p>Le corrigé utilise <code>chore: First commit</code>. Le format : <code>type: description</code>.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Pour</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>feat:</code></td>
+<td>une nouvelle fonctionnalité</td>
+</tr>
+<tr>
+<td><code>fix:</code></td>
+<td>une correction de bug</td>
+</tr>
+<tr>
+<td><code>docs:</code></td>
+<td>la documentation</td>
+</tr>
+<tr>
+<td><code>style:</code></td>
+<td>la mise en forme (pas de changement de logique)</td>
+</tr>
+<tr>
+<td><code>refactor:</code></td>
+<td>réorganisation du code sans changer le comportement</td>
+</tr>
+<tr>
+<td><code>test:</code></td>
+<td>les tests</td>
+</tr>
+<tr>
+<td><code>chore:</code></td>
+<td>maintenance (config, dépendances, premier commit…)</td>
+</tr>
+</tbody></table></div>
+<h2 id="memo-des-commandes-git"><a class="anchor" href="#memo-des-commandes-git">#</a>Mémo des commandes Git</h2>
+<h3 id="demarrer"><a class="anchor" href="#demarrer">#</a>Démarrer</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Commande</th>
+<th>Effet</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>git init --initial-branch=main</code></td>
+<td>nouveau dépôt dans le dossier courant</td>
+</tr>
+<tr>
+<td><code>git clone &lt;url&gt;</code></td>
+<td>copie un dépôt du serveur</td>
+</tr>
+<tr>
+<td><code>git config --global user.name &quot;Nom&quot;</code></td>
+<td>ton nom (une fois par poste)</td>
+</tr>
+<tr>
+<td><code>git config --global user.email &quot;mail&quot;</code></td>
+<td>ton e-mail</td>
+</tr>
+</tbody></table></div>
+<h3 id="au-quotidien"><a class="anchor" href="#au-quotidien">#</a>Au quotidien</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Commande</th>
+<th>Effet</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>git status</code></td>
+<td>état : fichiers modifiés, ajoutés, non suivis</td>
+</tr>
+<tr>
+<td><code>git add fichier</code> / <code>git add .</code></td>
+<td>prépare un fichier / tout</td>
+</tr>
+<tr>
+<td><code>git commit -m &quot;message&quot;</code></td>
+<td>enregistre une version</td>
+</tr>
+<tr>
+<td><code>git log --oneline --graph</code></td>
+<td>historique compact</td>
+</tr>
+<tr>
+<td><code>git diff</code></td>
+<td>modifications pas encore ajoutées</td>
+</tr>
+<tr>
+<td><code>git diff --staged</code></td>
+<td>modifications ajoutées (prêtes à commit)</td>
+</tr>
+<tr>
+<td><code>git diff &lt;commit1&gt; &lt;commit2&gt; fichier</code></td>
+<td>différences entre deux versions</td>
+</tr>
+<tr>
+<td><code>git show &lt;commit&gt;</code></td>
+<td>détail d&#39;un commit</td>
+</tr>
+</tbody></table></div>
+<h3 id="serveur-remote"><a class="anchor" href="#serveur-remote">#</a>Serveur (remote)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Commande</th>
+<th>Effet</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>git remote add origin &lt;url&gt;</code></td>
+<td>relie au serveur</td>
+</tr>
+<tr>
+<td><code>git remote -v</code></td>
+<td>affiche les serveurs reliés</td>
+</tr>
+<tr>
+<td><code>git push -u origin main</code></td>
+<td>envoie (la 1re fois)</td>
+</tr>
+<tr>
+<td><code>git push</code></td>
+<td>envoie</td>
+</tr>
+<tr>
+<td><code>git pull</code></td>
+<td>récupère et fusionne</td>
+</tr>
+<tr>
+<td><code>git fetch</code></td>
+<td>récupère sans fusionner</td>
+</tr>
+</tbody></table></div>
+<h3 id="branches"><a class="anchor" href="#branches">#</a>Branches</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Commande</th>
+<th>Effet</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>git branch</code></td>
+<td>liste les branches</td>
+</tr>
+<tr>
+<td><code>git switch -c nouvelle</code></td>
+<td>crée une branche et va dessus</td>
+</tr>
+<tr>
+<td><code>git switch main</code></td>
+<td>change de branche</td>
+</tr>
+<tr>
+<td><code>git merge nouvelle</code></td>
+<td>fusionne <code>nouvelle</code> dans la branche actuelle</td>
+</tr>
+<tr>
+<td><code>git branch -d nouvelle</code></td>
+<td>supprime une branche fusionnée</td>
+</tr>
+</tbody></table></div>
+<h3 id="annuler"><a class="anchor" href="#annuler">#</a>Annuler</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Commande</th>
+<th>Effet</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>git restore fichier</code></td>
+<td>annule les modifications non ajoutées d&#39;un fichier</td>
+</tr>
+<tr>
+<td><code>git restore --staged fichier</code></td>
+<td>retire un fichier de la zone de préparation</td>
+</tr>
+<tr>
+<td><code>git commit --amend -m &quot;msg&quot;</code></td>
+<td>corrige le dernier commit (s&#39;il n&#39;est pas encore poussé)</td>
+</tr>
+<tr>
+<td><code>git revert &lt;commit&gt;</code></td>
+<td>crée un commit qui annule un ancien commit</td>
+</tr>
+<tr>
+<td><code>git stash</code> / <code>git stash pop</code></td>
+<td>met de côté les modifications / les récupère</td>
+</tr>
+</tbody></table></div>
+<h3 id="le-fichier-gitignore"><a class="anchor" href="#le-fichier-gitignore">#</a>Le fichier .gitignore</h3>
+<div class="code"><div class="code-title">.gitignore</div><pre><code class="hljs lang-text">node_modules/
+dist/
+docs/
+coverage/
+.env</code></pre></div>
+<p>Un fichier déjà suivi par Git n&#39;est pas ignoré après coup : <code>git rm --cached fichier</code> pour arrêter de le suivre.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#exercice-basique">Exercice basique</a><a class="toc-3" href="#le-corrige">Le corrigé</a><a class="toc-3" href="#ligne-par-ligne">Ligne par ligne</a><a class="toc-3" href="#pourquoi-le-premier-git-pull-echoue">Pourquoi le premier git pull échoue</a><a class="toc-2" href="#exercice-bincraft">Exercice binCraft</a><a class="toc-3" href="#le-corrige-2">Le corrigé</a><a class="toc-3" href="#le-patch-obtenu">Le patch obtenu</a><a class="toc-3" href="#lire-un-patch">Lire un patch</a><a class="toc-3" href="#appliquer-un-patch">Appliquer un patch</a><a class="toc-3" href="#la-derniere-partie">La dernière partie</a><a class="toc-2" href="#messages-de-commit-conventional-commits">Messages de commit (Conventional Commits)</a><a class="toc-2" href="#memo-des-commandes-git">Mémo des commandes Git</a><a class="toc-3" href="#demarrer">Démarrer</a><a class="toc-3" href="#au-quotidien">Au quotidien</a><a class="toc-3" href="#serveur-remote">Serveur (remote)</a><a class="toc-3" href="#branches">Branches</a><a class="toc-3" href="#annuler">Annuler</a><a class="toc-3" href="#le-fichier-gitignore">Le fichier .gitignore</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../assets/app.js"></script>
+</body>
+</html>

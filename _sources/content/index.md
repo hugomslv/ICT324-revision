@@ -47,6 +47,12 @@ Pendant la phase **avec réseau**, installe **toutes** les dépendances dont tu 
 <a class="card" href="pages/exercices.html"><div class="card-icon">✍️</div><h3>Exercices corrigés</h3><p>Exercices ESLint 1 et 2 corrigés, entraînements tests et doc.</p></a>
 </div>
 
+## Extras
+
+<div class="cards">
+<a class="card" href="pages/git.html"><div class="card-icon">🌿</div><h3>Git : corrigés et mémo</h3><p>Exercice basique (<code>--allow-unrelated-histories</code>), exercice binCraft (<code>git diff --patch</code>), mémo des commandes.</p></a>
+</div>
+
 ## Organisation des fichiers de ce site
 
 ```text

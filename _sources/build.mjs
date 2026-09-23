@@ -214,6 +214,9 @@ const NAV = [
     [ "docs/vite/index", "Vite" ],
     [ "docs/jsdoc/index", "JSDoc" ],
   ] },
+  { group: "Extras", items: [
+    [ "pages/git", "Git : corrigés et mémo" ],
+  ] },
 ]
 
 function layout({ title, body, headings = [], relRoot, current, extraClass = "", meta = "" }) {
