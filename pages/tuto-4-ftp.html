@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tuto 4 : configurer la publication FTP · ICT-324 Révision</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/hljs.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../index.html">Accueil</a><a class="nav-link" href="../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Tutos pas à pas</div><a class="nav-link" href="../pages/tutos.html">Départ : le projet Vite</a><a class="nav-link" href="../pages/tuto-1-linter.html">Tuto 1 : le linter</a><a class="nav-link" href="../pages/tuto-2-tests.html">Tuto 2 : les tests</a><a class="nav-link" href="../pages/tuto-3-doc.html">Tuto 3 : la documentation</a><a class="nav-link active" href="../pages/tuto-4-ftp.html">Tuto 4 : la config FTP</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../pages/vite.html">1. Vite</a><a class="nav-link" href="../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../pages/projets.html">Projets du cours</a><a class="nav-link" href="../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../docs/index.html">Index des docs</a><a class="nav-link" href="../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../docs/vite/index.html">Vite</a><a class="nav-link" href="../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+
+<h1>Tuto 4 : configurer la publication FTP</h1><p class="lead">Consigne : « Configurer correctement votre projet pour qu'il puisse être publié en FTP dans un dossier spécifique sans qu'il y ait d'erreurs (favicon, images et autre). Cette partie se fera à l'aveugle. » Résultat attendu : un dist/ qui marche dans /nom_du_dossier/, vérifié sans serveur.</p><div class="progress"><span></span></div>
+<p class="small muted">Progression : <span id="progress-label"></span> · <a href="#" id="reset-checks">tout décocher</a></p><p>Dans ce tuto, le dossier s&#39;appelle <strong><code>mon_dossier</code></strong> : remplace-le partout par le nom donné dans la consigne.</p>
+<h2 id="pourquoi-c-est-un-piege"><a class="anchor" href="#pourquoi-c-est-un-piege">#</a>Pourquoi c&#39;est un piège</h2>
+<p>Le site sera à <code>https://serveur.ch/mon_dossier/</code>. Par défaut Vite écrit des chemins comme <code>/assets/index.js</code>, que le navigateur cherche à <code>https://serveur.ch/assets/index.js</code>, <strong>en dehors</strong> de ton dossier. Résultat : page blanche, pas de favicon, images cassées. Et comme tu es hors-ligne, tu ne pourras pas le voir : il faut le vérifier en local.</p>
+<h2 id="etape-1-indiquer-le-dossier-dans-vite-config-js"><a class="anchor" href="#etape-1-indiquer-le-dossier-dans-vite-config-js">#</a>Étape 1 : indiquer le dossier dans vite.config.js</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Créer (ou compléter) <strong><code>vite.config.js</code></strong> à la racine :</li>
+</ul>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig, coverageConfigDefaults } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest/config&quot;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">base</span>: <span class="hljs-string">&quot;/mon_dossier/&quot;</span>,
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">coverage</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-string">&quot;v8&quot;</span>,
+      <span class="hljs-attr">include</span>: [ <span class="hljs-string">&quot;src/**/*.js&quot;</span> ],
+      <span class="hljs-attr">exclude</span>: [ <span class="hljs-string">&quot;src/main.js&quot;</span>, ...coverageConfigDefaults.<span class="hljs-property">exclude</span> ],
+    },
+  },
+})</code></pre></div>
+<div class="box box-danger"><div class="box-title">🛑 Danger : Les deux slashs</div><p><code>base: &quot;/mon_dossier/&quot;</code> : un <code>/</code> <strong>au début</strong> et un <code>/</code> <strong>à la fin</strong>. Testé :</p>
+<ul>
+<li><code>&quot;mon_dossier&quot;</code> : Vite corrige mais avertit <em>« &quot;base&quot; option should start with a slash »</em>.</li>
+<li><code>&quot;/mon_dossier&quot;</code> (sans <code>/</code> final) : <strong>aucun avertissement</strong>, mais <code>import.meta.env.BASE_URL</code> vaut <code>/mon_dossier</code> et <code>`${import.meta.env.BASE_URL}images/logo.png`</code> devient <strong><code>/mon_dossierimages/logo.png</code></strong> → 404. Le script de l&#39;étape 6b le détecte.</li>
+</ul>
+</div><p>(Le bloc <code>test</code> vient du <a href="tuto-2-tests.html">tuto 2</a> ; si tu ne fais pas de couverture, <code>base</code> suffit, avec <code>import { defineConfig } from &quot;vite&quot;</code>.)</p>
+<h2 id="etape-2-le-favicon"><a class="anchor" href="#etape-2-le-favicon">#</a>Étape 2 : le favicon</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Mettre le favicon dans <strong><code>public/</code></strong> : <code>public/favicon.svg</code> (Vite en crée un) ou ton propre <code>public/favicon.png</code>.</li>
+<li><input disabled="" type="checkbox"> Dans <strong><code>index.html</code></strong>, dans <code>&lt;head&gt;</code>, un lien avec un chemin qui commence par <strong><code>/</code></strong> :</li>
+</ul>
+<div class="code"><div class="code-title">index.html</div><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;icon&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;image/svg+xml&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/favicon.svg&quot;</span> /&gt;</span>
+<span class="hljs-comment">&lt;!-- ou pour un PNG : --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;icon&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;image/png&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/favicon.png&quot;</span> /&gt;</span></code></pre></div>
+<p>Au build, Vite le transforme en <code>/mon_dossier/favicon.svg</code> (testé).</p>
+<h2 id="etape-3-les-images"><a class="anchor" href="#etape-3-les-images">#</a>Étape 3 : les images</h2>
+<p>Deux endroits possibles, selon l&#39;usage :</p>
+<ul>
+<li><input disabled="" type="checkbox"> Images <strong>fixes</strong> (logo…) dans <strong><code>public/images/</code></strong>, par exemple <code>public/images/logo.png</code>.</li>
+<li><input disabled="" type="checkbox"> Images utilisées <strong>par le JavaScript</strong> dans <strong><code>src/assets/</code></strong>, par exemple <code>src/assets/vite.svg</code>.</li>
+</ul>
+<p>Et <strong>comment les écrire</strong> :</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Où tu écris le chemin</th>
+<th>Écris</th>
+<th>Au build</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>dans <code>index.html</code></td>
+<td><code>&lt;img src=&quot;/images/logo.png&quot;&gt;</code></td>
+<td>✅ devient <code>/mon_dossier/images/logo.png</code></td>
+</tr>
+<tr>
+<td>dans un <code>.css</code></td>
+<td><code>url(&quot;/images/logo.png&quot;)</code></td>
+<td>✅ devient <code>/mon_dossier/images/logo.png</code></td>
+</tr>
+<tr>
+<td>dans un <code>.js</code>, image de <code>src/assets/</code></td>
+<td><code>import logo from &quot;./assets/vite.svg&quot;</code> puis <code>img.src = logo</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>dans un <code>.js</code>, image de <code>public/</code></td>
+<td><code>img.src = `${import.meta.env.BASE_URL}images/logo.png`</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>dans un <code>.js</code></td>
+<td><del><code>img.src = &quot;/images/logo.png&quot;</code></del></td>
+<td>❌ <strong>pas modifié → 404</strong></td>
+</tr>
+<tr>
+<td>lien vers une autre page</td>
+<td><code>&lt;a href=&quot;contact.html&quot;&gt;</code> (sans <code>/</code> au début)</td>
+<td>✅</td>
+</tr>
+</tbody></table></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Noms de fichiers</div><p>Tout en <strong>minuscules</strong>, sans espace ni accent. Le serveur est sous Linux : <code>Logo.png</code> et <code>logo.png</code> sont deux fichiers différents. Sur ton PC ça marche, en ligne ça fait une 404.</p>
+</div><h2 id="etape-4-ecrire-un-main-js-propre"><a class="anchor" href="#etape-4-ecrire-un-main-js-propre">#</a>Étape 4 : écrire un main.js propre</h2>
+<p>Le <code>main.js</code> de démo de Vite contient des chemins en dur (<code>/icons.svg#...</code>) qui cassent dans un sous-dossier. Remplace-le.</p>
+<ul>
+<li><input disabled="" type="checkbox"> Supprimer ce qui ne sert plus : <code>src/counter.js</code>, <code>public/icons.svg</code>, <code>src/assets/javascript.svg</code>, <code>src/assets/hero.png</code>.</li>
+<li><input disabled="" type="checkbox"> <strong><code>index.html</code></strong> :</li>
+</ul>
+<div class="code"><div class="code-title">tuto/index.html</div><pre><code class="hljs lang-html"><span class="hljs-meta">&lt;!doctype <span class="hljs-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;fr&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">&quot;UTF-8&quot;</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;icon&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;image/svg+xml&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/favicon.svg&quot;</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;viewport&quot;</span> <span class="hljs-attr">content</span>=<span class="hljs-string">&quot;width=device-width, initial-scale=1.0&quot;</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Mon projet ICT-324<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/images/logo.png&quot;</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;Logo&quot;</span> <span class="hljs-attr">width</span>=<span class="hljs-string">&quot;80&quot;</span> /&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Mon projet<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;app&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/src/main.js&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></code></pre></div>
+<p class="file-link"><a href="../projets/tuto/index.html">📄 ouvrir le fichier index.html</a></p><ul>
+<li><input disabled="" type="checkbox"> <strong><code>src/main.js</code></strong> (les deux bonnes façons de mettre une image depuis le JS) :</li>
+</ul>
+<div class="code"><div class="code-title">tuto/src/main.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> <span class="hljs-string">&quot;./style.css&quot;</span>
+<span class="hljs-keyword">import</span> vite_logo <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./assets/vite.svg&quot;</span>
+<span class="hljs-keyword">import</span> { double, dire_bonjour } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./exemples.js&quot;</span>
+
+<span class="hljs-keyword">const</span> app = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&quot;#app&quot;</span>)
+
+<span class="hljs-comment">// image de src/assets : on l&#x27;IMPORTE</span>
+<span class="hljs-keyword">const</span> img1 = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&quot;img&quot;</span>)
+img1.<span class="hljs-property">src</span> = vite_logo
+img1.<span class="hljs-property">alt</span> = <span class="hljs-string">&quot;Vite&quot;</span>
+app.<span class="hljs-title function_">appendChild</span>(img1)
+
+<span class="hljs-comment">// image de public/ utilisée dans le JS : BASE_URL devant</span>
+<span class="hljs-keyword">const</span> img2 = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&quot;img&quot;</span>)
+img2.<span class="hljs-property">src</span> = <span class="hljs-string">`<span class="hljs-subst">${<span class="hljs-keyword">import</span>.meta.env.BASE_URL}</span>images/logo.png`</span>
+img2.<span class="hljs-property">alt</span> = <span class="hljs-string">&quot;Logo&quot;</span>
+img2.<span class="hljs-property">width</span> = <span class="hljs-number">40</span>
+app.<span class="hljs-title function_">appendChild</span>(img2)
+
+<span class="hljs-keyword">const</span> p = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&quot;p&quot;</span>)
+p.<span class="hljs-property">textContent</span> = <span class="hljs-string">`<span class="hljs-subst">${dire_bonjour(<span class="hljs-string">&quot;Hugo&quot;</span>)}</span> double(21) = <span class="hljs-subst">${double(<span class="hljs-number">21</span>)}</span>`</span>
+app.<span class="hljs-title function_">appendChild</span>(p)</code></pre></div>
+<p class="file-link"><a href="../projets/tuto/src/main.js">📄 ouvrir le fichier main.js</a></p><ul>
+<li><input disabled="" type="checkbox"> <strong><code>src/style.css</code></strong> (image de fond depuis <code>public/</code>) :</li>
+</ul>
+<div class="code"><div class="code-title">tuto/src/style.css</div><pre><code class="hljs lang-css"><span class="hljs-selector-tag">body</span> {
+  <span class="hljs-attribute">font-family</span>: system-ui, sans-serif;
+  <span class="hljs-attribute">text-align</span>: center;
+  <span class="hljs-attribute">background</span>: <span class="hljs-number">#fafafa</span> <span class="hljs-built_in">url</span>(<span class="hljs-string">&quot;/images/logo.png&quot;</span>) no-repeat right <span class="hljs-number">1rem</span> top <span class="hljs-number">1rem</span> / <span class="hljs-number">40px</span>;
+}</code></pre></div>
+<p class="file-link"><a href="../projets/tuto/src/style.css">📄 ouvrir le fichier style.css</a></p><h2 id="etape-5-construire-build"><a class="anchor" href="#etape-5-construire-build">#</a>Étape 5 : construire (build)</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Lancer :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-bash">npm run build</code></pre></div>
+<p>Sortie attendue (testé) :</p>
+<div class="code"><pre><code class="hljs lang-text">dist/index.html                 0.59 kB │ gzip: 0.35 kB
+dist/assets/vite-BF8QNONU.svg   8.70 kB │ gzip: 1.60 kB
+dist/assets/index-Dj4gvqNB.css  0.14 kB │ gzip: 0.14 kB
+dist/assets/index-Blj_DcOc.js   1.10 kB │ gzip: 0.57 kB
+✓ built in 359ms</code></pre></div>
+<ul>
+<li><input disabled="" type="checkbox"> Ouvrir <strong><code>dist/index.html</code></strong> dans VS Code (pas dans le navigateur) et vérifier que <strong>tous</strong> les chemins commencent par <code>/mon_dossier/</code> :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;icon&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;image/svg+xml&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;/mon_dossier/favicon.svg&quot;</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span> <span class="hljs-attr">crossorigin</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/mon_dossier/assets/index-Blj_DcOc.js&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;/mon_dossier/images/logo.png&quot;</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">&quot;Logo&quot;</span> <span class="hljs-attr">width</span>=<span class="hljs-string">&quot;80&quot;</span> /&gt;</span></code></pre></div>
+<ul>
+<li><input disabled="" type="checkbox"> Vérifier le contenu de <code>dist/</code> :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-text">dist/
+├── index.html
+├── favicon.svg          ← copié depuis public/
+├── images/logo.png      ← copié depuis public/
+└── assets/              ← JS, CSS et images importées (noms avec un code)</code></pre></div>
+<div class="box box-info"><div class="box-title">ℹ️ Info : Double-cliquer sur dist/index.html donne une page blanche</div><p>C&#39;est <strong>normal</strong> : un site construit ne s&#39;ouvre pas en <code>file://</code>. Utilise l&#39;étape 6.</p>
+</div><h2 id="etape-6-verifier-a-l-aveugle-sans-serveur-sans-reseau"><a class="anchor" href="#etape-6-verifier-a-l-aveugle-sans-serveur-sans-reseau">#</a>Étape 6 : vérifier « à l&#39;aveugle » (sans serveur, sans réseau)</h2>
+<h3 id="6a-avec-npm-run-preview"><a class="anchor" href="#6a-avec-npm-run-preview">#</a>6a. Avec <code>npm run preview</code></h3>
+<ul>
+<li><input disabled="" type="checkbox"> Lancer :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-bash">npm run preview</code></pre></div>
+<ul>
+<li><input disabled="" type="checkbox"> Ouvrir l&#39;adresse affichée : <strong><code>http://localhost:4173/mon_dossier/</code></strong>. <code>preview</code> se comporte comme le vrai serveur, dans le sous-dossier.</li>
+<li><input disabled="" type="checkbox"> Appuyer sur <kbd>F12</kbd> → onglet <strong>Réseau</strong> (Network) → recharger avec <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>R</kbd>.</li>
+<li><input disabled="" type="checkbox"> <strong>Aucune ligne en rouge</strong> (404). Le favicon apparaît dans l&#39;onglet du navigateur. Les images s&#39;affichent.</li>
+<li><input disabled="" type="checkbox"> Onglet <strong>Console</strong> : aucune erreur.</li>
+<li><input disabled="" type="checkbox"> <kbd>Ctrl</kbd> <kbd>C</kbd> dans le terminal pour arrêter.</li>
+</ul>
+<h3 id="6b-avec-le-script-de-verification"><a class="anchor" href="#6b-avec-le-script-de-verification">#</a>6b. Avec le script de vérification</h3>
+<p>Il détecte aussi les erreurs de <strong>majuscules</strong> que ton PC ne voit pas.</p>
+<ul>
+<li><input disabled="" type="checkbox"> Copier <code>projets/modele/scripts/check-dist.js</code> (de ce site) dans <strong><code>scripts/check-dist.js</code></strong> de ton projet (<a href="modele.html#verifier-dist-sans-serveur">code</a>).</li>
+<li><input disabled="" type="checkbox"> Dans <code>package.json</code> : <code>&quot;check&quot;: &quot;node scripts/check-dist.js&quot;</code></li>
+<li><input disabled="" type="checkbox"> Lancer :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-bash">npm run build
+npm run check</code></pre></div>
+<p>Résultat attendu (testé) :</p>
+<div class="code"><pre><code class="hljs lang-text">base = &quot;/mon_dossier/&quot;
+6 fichiers analysés dans dist/
+✅ Aucun lien cassé détecté : dist/ est prêt pour le FTP.</code></pre></div>
+<p>S&#39;il affiche des ❌, il dit quel fichier et quel chemin corriger.</p>
+<h2 id="etape-7-preparer-l-envoi-ftp"><a class="anchor" href="#etape-7-preparer-l-envoi-ftp">#</a>Étape 7 : préparer l&#39;envoi FTP</h2>
+<p>Même si tu ne peux pas l&#39;envoyer (hors-ligne), prépare tout pour que ça marche.</p>
+<ul>
+<li><input disabled="" type="checkbox"> Installer (avec réseau) : <code>npm install -D dotenv-cli</code></li>
+<li><input disabled="" type="checkbox"> Créer <strong><code>scripts/publish.sh</code></strong> :</li>
+</ul>
+<div class="code"><div class="code-title">tuto/scripts/publish.sh</div><pre><code class="hljs lang-bash"><span class="hljs-meta">#!/usr/bin/env bash</span>
+<span class="hljs-comment"># Envoie le contenu de dist/ dans le dossier FTP_DEST du serveur</span>
+<span class="hljs-built_in">set</span> -euo pipefail
+
+lftp -u <span class="hljs-string">&quot;<span class="hljs-variable">$FTP_USER</span>,<span class="hljs-variable">$FTP_PASS</span>&quot;</span> <span class="hljs-string">&quot;<span class="hljs-variable">$FTP_HOST</span>&quot;</span> \
+  -e <span class="hljs-string">&quot;set ssl:verify-certificate no; mirror -R --delete dist <span class="hljs-variable">$FTP_DEST</span>; bye&quot;</span></code></pre></div>
+<p class="file-link"><a href="../projets/tuto/scripts/publish.sh">📄 ouvrir le fichier publish.sh</a></p><ul>
+<li><input disabled="" type="checkbox"> Créer <strong><code>.env.example</code></strong> (le modèle, sans vrai mot de passe) :</li>
+</ul>
+<div class="code"><div class="code-title">tuto/.env.example</div><pre><code class="hljs lang-ini"><span class="hljs-attr">FTP_HOST</span>=ftp.exemple.ch
+<span class="hljs-attr">FTP_USER</span>=mon_login
+<span class="hljs-attr">FTP_PASS</span>=mon_mot_de_passe
+<span class="hljs-attr">FTP_DEST</span>=/mon_dossier</code></pre></div>
+<p class="file-link"><a href="../projets/tuto/.env.example">📄 ouvrir le fichier .env.example</a></p><ul>
+<li><input disabled="" type="checkbox"> Pour envoyer pour de vrai : copier <code>.env.example</code> en <strong><code>.env</code></strong> et y mettre les vrais identifiants.</li>
+<li><input disabled="" type="checkbox"> Dans <code>.gitignore</code>, ajouter <strong><code>.env</code></strong> (le mot de passe ne doit jamais être partagé).</li>
+<li><input disabled="" type="checkbox"> Dans <code>package.json</code> :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;publish&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dotenv -e .env -- bash scripts/publish.sh&quot;</span></code></pre></div>
+<p>Envoi : <code>npm run build</code> puis <code>npm run publish</code> (<strong><code>run</code></strong> obligatoire : <code>npm publish</code> est une autre commande). Testé contre un serveur FTP local : les 6 fichiers arrivent dans <code>/mon_dossier/</code>, puis le site répond sans aucune 404.</p>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Sans lftp (Windows)</div><p>FileZilla ou WinSCP : connexion, ouvrir <code>/mon_dossier/</code> à droite, entrer <strong>dans</strong> <code>dist/</code> à gauche, tout sélectionner et glisser. On envoie le <strong>contenu</strong> de <code>dist/</code>, pas le dossier <code>dist</code> lui-même.</p>
+</div><h2 id="le-package-json-final"><a class="anchor" href="#le-package-json-final">#</a>Le package.json final</h2>
+<div class="code"><div class="code-title">tuto/package.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;tuto&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;0.0.0&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;private&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;module&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;dev&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;build&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite build&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;preview&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite preview&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;lint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;eslint .&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;lint:fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;eslint . --fix&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;test&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;test:run&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest run&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;coverage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest run --coverage&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;doc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;jsdoc -c jsdoc-conf.json &amp;&amp; node -e \&quot;require(&#x27;fs&#x27;).cpSync(&#x27;img&#x27;, &#x27;docs/img&#x27;, { recursive: true })\&quot;&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;check&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;node scripts/check-dist.js&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;publish&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dotenv -e .env -- bash scripts/publish.sh&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;devDependencies&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;@eslint/js&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^10.0.1&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;@vitest/coverage-v8&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^5.0.1&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;dotenv-cli&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^11.0.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;eslint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^10.11.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;globals&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^17.12.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;jsdoc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^4.0.5&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;vite&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^8.3.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;vitest&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^5.0.1&quot;</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p class="file-link"><a href="../projets/tuto/package.json">📄 ouvrir le fichier package.json</a></p><h2 id="checklist-finale"><a class="anchor" href="#checklist-finale">#</a>Checklist finale</h2>
+<ul>
+<li><input disabled="" type="checkbox"> <code>base: &quot;/mon_dossier/&quot;</code> (bon nom, deux slashs)</li>
+<li><input disabled="" type="checkbox"> favicon dans <code>public/</code> + <code>&lt;link rel=&quot;icon&quot; href=&quot;/favicon...&quot;&gt;</code></li>
+<li><input disabled="" type="checkbox"> images fixes dans <code>public/images/</code>, chemins en <code>/images/...</code> dans le HTML et le CSS</li>
+<li><input disabled="" type="checkbox"> dans le JS : <code>import</code> ou <code>import.meta.env.BASE_URL</code>, jamais <code>&quot;/images/...&quot;</code></li>
+<li><input disabled="" type="checkbox"> noms de fichiers en minuscules, sans espace ni accent</li>
+<li><input disabled="" type="checkbox"> <code>npm run build</code> : pas d&#39;erreur</li>
+<li><input disabled="" type="checkbox"> <code>dist/index.html</code> : tous les chemins en <code>/mon_dossier/...</code></li>
+<li><input disabled="" type="checkbox"> <code>npm run preview</code> : 0 erreur 404</li>
+<li><input disabled="" type="checkbox"> <code>npm run check</code> : ✅</li>
+<li><input disabled="" type="checkbox"> <code>scripts/publish.sh</code>, <code>.env.example</code>, <code>.env</code> dans <code>.gitignore</code></li>
+</ul>
+<p>Plus de détails et d&#39;explications : <a href="build-ftp.html">6. Build &amp; publication FTP</a>. Le projet terminé des 4 tutos est dans <code>projets/tuto/</code>.</p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#pourquoi-c-est-un-piege">Pourquoi c'est un piège</a><a class="toc-2" href="#etape-1-indiquer-le-dossier-dans-vite-config-js">Étape 1 : indiquer le dossier dans vite.config.js</a><a class="toc-2" href="#etape-2-le-favicon">Étape 2 : le favicon</a><a class="toc-2" href="#etape-3-les-images">Étape 3 : les images</a><a class="toc-2" href="#etape-4-ecrire-un-main-js-propre">Étape 4 : écrire un main.js propre</a><a class="toc-2" href="#etape-5-construire-build">Étape 5 : construire (build)</a><a class="toc-2" href="#etape-6-verifier-a-l-aveugle-sans-serveur-sans-reseau">Étape 6 : vérifier « à l'aveugle » (sans serveur, sans réseau)</a><a class="toc-3" href="#6a-avec-npm-run-preview">6a. Avec npm run preview</a><a class="toc-3" href="#6b-avec-le-script-de-verification">6b. Avec le script de vérification</a><a class="toc-2" href="#etape-7-preparer-l-envoi-ftp">Étape 7 : préparer l'envoi FTP</a><a class="toc-2" href="#le-package-json-final">Le package.json final</a><a class="toc-2" href="#checklist-finale">Checklist finale</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../assets/app.js"></script>
+</body>
+</html>

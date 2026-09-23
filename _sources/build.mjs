@@ -184,6 +184,13 @@ const NAV = [
     [ "pages/examen", "Jour J : déroulé de l'examen" ],
     [ "pages/antiseche", "Antisèche des commandes" ],
   ] },
+  { group: "Tutos pas à pas", items: [
+    [ "pages/tutos", "Départ : le projet Vite" ],
+    [ "pages/tuto-1-linter", "Tuto 1 : le linter" ],
+    [ "pages/tuto-2-tests", "Tuto 2 : les tests" ],
+    [ "pages/tuto-3-doc", "Tuto 3 : la documentation" ],
+    [ "pages/tuto-4-ftp", "Tuto 4 : la config FTP" ],
+  ] },
   { group: "Cours", items: [
     [ "pages/vite", "1. Vite" ],
     [ "pages/eslint", "2. ESLint (config)" ],

@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tuto 2 : mettre en place des tests unitaires · ICT-324 Révision</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/hljs.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../index.html">Accueil</a><a class="nav-link" href="../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Tutos pas à pas</div><a class="nav-link" href="../pages/tutos.html">Départ : le projet Vite</a><a class="nav-link" href="../pages/tuto-1-linter.html">Tuto 1 : le linter</a><a class="nav-link active" href="../pages/tuto-2-tests.html">Tuto 2 : les tests</a><a class="nav-link" href="../pages/tuto-3-doc.html">Tuto 3 : la documentation</a><a class="nav-link" href="../pages/tuto-4-ftp.html">Tuto 4 : la config FTP</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../pages/vite.html">1. Vite</a><a class="nav-link" href="../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../pages/projets.html">Projets du cours</a><a class="nav-link" href="../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../docs/index.html">Index des docs</a><a class="nav-link" href="../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../docs/vite/index.html">Vite</a><a class="nav-link" href="../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+
+<h1>Tuto 2 : mettre en place des tests unitaires</h1><p class="lead">Consigne : « Mettre en place des tests unitaires simples ». Résultat attendu : npm run test:run affiche tous les tests en vert. Ce tuto donne 11 exemples très simples (testés : 25 tests, tous verts, 100 % de couverture).</p><div class="progress"><span></span></div>
+<p class="small muted">Progression : <span id="progress-label"></span> · <a href="#" id="reset-checks">tout décocher</a></p><h2 id="le-principe-en-30-secondes"><a class="anchor" href="#le-principe-en-30-secondes">#</a>Le principe en 30 secondes</h2>
+<ul>
+<li>Tu as un fichier avec des <strong>fonctions exportées</strong> : <code>src/exemples.js</code>.</li>
+<li>Tu crées <strong>à côté</strong> un fichier qui porte le <strong>même nom + <code>.test.js</code></strong> : <code>src/exemples.test.js</code>.</li>
+<li>Dans ce fichier, tu appelles tes fonctions et tu dis ce que tu attends : <code>expect(double(4)).toBe(8)</code>.</li>
+<li>Vitest lance tous les fichiers <code>*.test.js</code> et te dit ce qui passe (✓) ou non (×).</li>
+</ul>
+<h2 id="etape-1-installer-vitest-avec-reseau"><a class="anchor" href="#etape-1-installer-vitest-avec-reseau">#</a>Étape 1 : installer Vitest (avec réseau)</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Installer :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-bash">npm install -D vitest @vitest/coverage-v8</code></pre></div>
+<p><code>@vitest/coverage-v8</code> sert à la couverture de code : installe-le maintenant, hors-ligne ce sera impossible.</p>
+<h2 id="etape-2-ajouter-les-commandes-dans-package-json"><a class="anchor" href="#etape-2-ajouter-les-commandes-dans-package-json">#</a>Étape 2 : ajouter les commandes dans package.json</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Dans <code>&quot;scripts&quot;</code> :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;test&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest&quot;</span><span class="hljs-punctuation">,</span>
+<span class="hljs-attr">&quot;test:run&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest run&quot;</span><span class="hljs-punctuation">,</span>
+<span class="hljs-attr">&quot;coverage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vitest run --coverage&quot;</span></code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Commande</th>
+<th>Effet</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>npm test</code></td>
+<td>lance les tests et <strong>reste ouvert</strong> : relance à chaque sauvegarde (<code>q</code> pour quitter)</td>
+</tr>
+<tr>
+<td><code>npm run test:run</code></td>
+<td>lance les tests <strong>une fois</strong></td>
+</tr>
+<tr>
+<td><code>npm run coverage</code></td>
+<td>+ le pourcentage de code testé</td>
+</tr>
+</tbody></table></div>
+<h2 id="etape-3-creer-le-fichier-de-code"><a class="anchor" href="#etape-3-creer-le-fichier-de-code">#</a>Étape 3 : créer le fichier de code</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Créer <strong><code>src/exemples.js</code></strong>. Chaque fonction doit avoir <strong><code>export</code></strong> devant, sinon le test ne peut pas l&#39;utiliser.</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-text">mon-projet/
+└── src/
+    ├── exemples.js        ← ICI
+    └── exemples.test.js   ← et ça à l&#x27;étape 4</code></pre></div>
+<p>Le fichier complet est en bas de page (<a href="#les-fichiers-complets">code complet</a>). On le voit fonction par fonction ci-dessous.</p>
+<h2 id="etape-4-creer-le-fichier-de-test"><a class="anchor" href="#etape-4-creer-le-fichier-de-test">#</a>Étape 4 : créer le fichier de test</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Créer <strong><code>src/exemples.test.js</code></strong> et commencer par les imports :</li>
+</ul>
+<div class="code"><div class="code-title">src/exemples.test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { describe, test, expect, vi, afterEach } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>
+<span class="hljs-keyword">import</span> {
+  double, est_pair, dire_bonjour, somme, maximum, garder_pairs,
+  creer_personne, diviser, attendre, temperature,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./exemples.js&quot;</span></code></pre></div>
+<ul>
+<li>La 1re ligne importe les outils de Vitest.</li>
+<li>La 2e importe <strong>tes</strong> fonctions. Le chemin <code>&quot;./exemples.js&quot;</code> est relatif au fichier de test (même dossier = <code>./</code>).</li>
+</ul>
+<p>Ensuite, ajoute les exemples ci-dessous, les uns après les autres.</p>
+<h2 id="les-11-exemples"><a class="anchor" href="#les-11-exemples">#</a>Les 11 exemples</h2>
+<h3 id="exemple-1-le-plus-simple-un-nombre"><a class="anchor" href="#exemple-1-le-plus-simple-un-nombre">#</a>Exemple 1 : le plus simple (un nombre)</h3>
+<div class="code"><div class="code-title">src/exemples.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">double</span>(<span class="hljs-params">n</span>) {
+  <span class="hljs-keyword">return</span> n * <span class="hljs-number">2</span>
+}</code></pre></div>
+<div class="code"><div class="code-title">src/exemples.test.js</div><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;double(4) vaut 8&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">double</span>(<span class="hljs-number">4</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">8</span>)
+})</code></pre></div>
+<p>Lecture : « je teste que <code>double(4)</code> <strong>vaut</strong> 8 ». <code>test(&quot;nom&quot;, () =&gt; { ... })</code> : le nom décrit ce qu&#39;on vérifie.</p>
+<h3 id="exemple-2-plusieurs-cas-regroupes-describe"><a class="anchor" href="#exemple-2-plusieurs-cas-regroupes-describe">#</a>Exemple 2 : plusieurs cas regroupés (describe)</h3>
+<div class="code"><div class="code-title">src/exemples.test.js</div><pre><code class="hljs lang-js"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;double&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;nombre négatif&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">double</span>(-<span class="hljs-number">3</span>)).<span class="hljs-title function_">toBe</span>(-<span class="hljs-number">6</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;zéro&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">double</span>(<span class="hljs-number">0</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">0</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;nombre à virgule&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">double</span>(<span class="hljs-number">0.1</span>)).<span class="hljs-title function_">toBeCloseTo</span>(<span class="hljs-number">0.2</span>)
+  })
+})</code></pre></div>
+<p><code>describe</code> range les tests d&#39;une même fonction ensemble. Pour les nombres à virgule, <code>toBeCloseTo</code> (à cause des arrondis : <code>0.1 + 0.2</code> ne vaut pas exactement <code>0.3</code> en JavaScript).</p>
+<h3 id="exemple-3-un-vrai-faux-booleen"><a class="anchor" href="#exemple-3-un-vrai-faux-booleen">#</a>Exemple 3 : un vrai / faux (booléen)</h3>
+<div class="code"><div class="code-title">src/exemples.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">est_pair</span>(<span class="hljs-params">n</span>) {
+  <span class="hljs-keyword">return</span> n % <span class="hljs-number">2</span> === <span class="hljs-number">0</span>
+}</code></pre></div>
+<div class="code"><div class="code-title">src/exemples.test.js</div><pre><code class="hljs lang-js"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;est_pair&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;4 est pair&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">est_pair</span>(<span class="hljs-number">4</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">true</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;7 n&#x27;est pas pair&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">est_pair</span>(<span class="hljs-number">7</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">false</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;0 est pair&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">est_pair</span>(<span class="hljs-number">0</span>)).<span class="hljs-title function_">toBeTruthy</span>()
+  })
+})</code></pre></div>
+<h3 id="exemple-4-du-texte-chaine"><a class="anchor" href="#exemple-4-du-texte-chaine">#</a>Exemple 4 : du texte (chaîne)</h3>
+<div class="code"><div class="code-title">src/exemples.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">dire_bonjour</span>(<span class="hljs-params">prenom</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-string">`Bonjour <span class="hljs-subst">${prenom}</span> !`</span>
+}</code></pre></div>
+<div class="code"><div class="code-title">src/exemples.test.js</div><pre><code class="hljs lang-js"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;dire_bonjour&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;texte exact&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">dire_bonjour</span>(<span class="hljs-string">&quot;Léa&quot;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;Bonjour Léa !&quot;</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;contient le prénom&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">dire_bonjour</span>(<span class="hljs-string">&quot;Tom&quot;</span>)).<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&quot;Tom&quot;</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;commence par Bonjour&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">dire_bonjour</span>(<span class="hljs-string">&quot;Max&quot;</span>)).<span class="hljs-title function_">toMatch</span>(<span class="hljs-regexp">/^Bonjour/</span>)
+  })
+})</code></pre></div>
+<h3 id="exemple-5-le-meme-test-avec-plusieurs-donnees-test-each"><a class="anchor" href="#exemple-5-le-meme-test-avec-plusieurs-donnees-test-each">#</a>Exemple 5 : le même test avec plusieurs données (test.each)</h3>
+<div class="code"><div class="code-title">src/exemples.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">somme</span>(<span class="hljs-params">nombres</span>) {
+  <span class="hljs-keyword">let</span> total = <span class="hljs-number">0</span>
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> n <span class="hljs-keyword">of</span> nombres) {
+    total = total + n
+  }
+  <span class="hljs-keyword">return</span> total
+}</code></pre></div>
+<div class="code"><div class="code-title">src/exemples.test.js</div><pre><code class="hljs lang-js">test.<span class="hljs-title function_">each</span>([
+  [[ <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span> ], <span class="hljs-number">6</span> ],
+  [[ <span class="hljs-number">10</span>, -<span class="hljs-number">5</span> ], <span class="hljs-number">5</span> ],
+  [[], <span class="hljs-number">0</span> ],
+])(<span class="hljs-string">&quot;somme(%j) = %i&quot;</span>, <span class="hljs-function">(<span class="hljs-params">tableau, attendu</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">somme</span>(tableau)).<span class="hljs-title function_">toBe</span>(attendu)
+})</code></pre></div>
+<p>Chaque ligne <code>[ entrée, résultat attendu ]</code> devient un test. <code>%j</code> et <code>%i</code> sont remplacés dans le nom : <code>somme([1,2,3]) = 6</code>.</p>
+<h3 id="exemple-6-un-resultat-vide-null"><a class="anchor" href="#exemple-6-un-resultat-vide-null">#</a>Exemple 6 : un résultat « vide » (null)</h3>
+<div class="code"><div class="code-title">src/exemples.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">maximum</span>(<span class="hljs-params">nombres</span>) {
+  <span class="hljs-keyword">if</span> (nombres.<span class="hljs-property">length</span> === <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(...nombres)
+}</code></pre></div>
+<div class="code"><div class="code-title">src/exemples.test.js</div><pre><code class="hljs lang-js"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;maximum&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;renvoie le plus grand&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">maximum</span>([ <span class="hljs-number">3</span>, <span class="hljs-number">9</span>, <span class="hljs-number">2</span> ])).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">9</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;tableau vide -&gt; null&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">maximum</span>([])).<span class="hljs-title function_">toBeNull</span>()
+  })
+})</code></pre></div>
+<p>Pense toujours au <strong>cas limite</strong> : tableau vide, zéro, texte vide…</p>
+<h3 id="exemple-7-un-tableau-toequal-pas-tobe"><a class="anchor" href="#exemple-7-un-tableau-toequal-pas-tobe">#</a>Exemple 7 : un tableau (toEqual, PAS toBe)</h3>
+<div class="code"><div class="code-title">src/exemples.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">garder_pairs</span>(<span class="hljs-params">nombres</span>) {
+  <span class="hljs-keyword">return</span> nombres.<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">n</span>) =&gt;</span> <span class="hljs-title function_">est_pair</span>(n))
+}</code></pre></div>
+<div class="code"><div class="code-title">src/exemples.test.js</div><pre><code class="hljs lang-js"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;garder_pairs&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;garde 2 et 4&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">garder_pairs</span>([ <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span> ])).<span class="hljs-title function_">toEqual</span>([ <span class="hljs-number">2</span>, <span class="hljs-number">4</span> ])
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;longueur du résultat&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">garder_pairs</span>([ <span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">6</span> ])).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">3</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;ne modifie pas le tableau d&#x27;origine&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> origine = [ <span class="hljs-number">1</span>, <span class="hljs-number">2</span> ]
+    <span class="hljs-title function_">garder_pairs</span>(origine)
+    <span class="hljs-title function_">expect</span>(origine).<span class="hljs-title function_">toEqual</span>([ <span class="hljs-number">1</span>, <span class="hljs-number">2</span> ])
+  })
+})</code></pre></div>
+<div class="box box-danger"><div class="box-title">🛑 Danger : Le piège n°1</div><p><code>expect([ 2, 4 ]).toBe([ 2, 4 ])</code> <strong>échoue</strong> (testé : <em>expected [ 2, 4 ] to be [ 2, 4 ] // Object.is equality</em>), car ce sont deux tableaux différents en mémoire. Tableaux et objets → <strong><code>toEqual</code></strong>.</p>
+</div><h3 id="exemple-8-un-objet"><a class="anchor" href="#exemple-8-un-objet">#</a>Exemple 8 : un objet</h3>
+<div class="code"><div class="code-title">src/exemples.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">creer_personne</span>(<span class="hljs-params">nom, age</span>) {
+  <span class="hljs-keyword">return</span> { nom, age, <span class="hljs-attr">majeur</span>: age &gt;= <span class="hljs-number">18</span> }
+}</code></pre></div>
+<div class="code"><div class="code-title">src/exemples.test.js</div><pre><code class="hljs lang-js"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;creer_personne&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;objet complet&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">creer_personne</span>(<span class="hljs-string">&quot;Ana&quot;</span>, <span class="hljs-number">20</span>))
+      .<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">nom</span>: <span class="hljs-string">&quot;Ana&quot;</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">20</span>, <span class="hljs-attr">majeur</span>: <span class="hljs-literal">true</span> })
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;mineur&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">creer_personne</span>(<span class="hljs-string">&quot;Léo&quot;</span>, <span class="hljs-number">12</span>)).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&quot;majeur&quot;</span>, <span class="hljs-literal">false</span>)
+  })
+})</code></pre></div>
+<h3 id="exemple-9-une-erreur-tothrow"><a class="anchor" href="#exemple-9-une-erreur-tothrow">#</a>Exemple 9 : une erreur (toThrow)</h3>
+<div class="code"><div class="code-title">src/exemples.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">diviser</span>(<span class="hljs-params">a, b</span>) {
+  <span class="hljs-keyword">if</span> (b === <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Division par zéro&quot;</span>)
+  }
+  <span class="hljs-keyword">return</span> a / b
+}</code></pre></div>
+<div class="code"><div class="code-title">src/exemples.test.js</div><pre><code class="hljs lang-js"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;diviser&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;10 / 2 = 5&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">diviser</span>(<span class="hljs-number">10</span>, <span class="hljs-number">2</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">5</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;division par zéro -&gt; erreur&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">diviser</span>(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&quot;Division par zéro&quot;</span>)
+  })
+})</code></pre></div>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Le piège n°2</div><p>Pour <code>toThrow</code>, il faut une <strong>flèche</strong> : <code>expect(() =&gt; diviser(1, 0))</code>. Sans la flèche, l&#39;erreur arrive avant <code>expect</code> et le test plante.</p>
+</div><h3 id="exemple-10-une-fonction-asynchrone-async-await"><a class="anchor" href="#exemple-10-une-fonction-asynchrone-async-await">#</a>Exemple 10 : une fonction asynchrone (async / await)</h3>
+<div class="code"><div class="code-title">src/exemples.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">attendre</span>(<span class="hljs-params">valeur</span>) {
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> <span class="hljs-built_in">setTimeout</span>(resolve, <span class="hljs-number">10</span>))
+  <span class="hljs-keyword">return</span> valeur
+}</code></pre></div>
+<div class="code"><div class="code-title">src/exemples.test.js</div><pre><code class="hljs lang-js"><span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;attendre renvoie la valeur&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> resultat = <span class="hljs-keyword">await</span> <span class="hljs-title function_">attendre</span>(<span class="hljs-number">42</span>)
+  <span class="hljs-title function_">expect</span>(resultat).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">42</span>)
+})</code></pre></div>
+<p>Si la fonction est <code>async</code>, le test aussi (<code>async () =&gt;</code>) et on met <code>await</code> devant l&#39;appel.</p>
+<h3 id="exemple-11-simuler-internet-mock-de-fetch"><a class="anchor" href="#exemple-11-simuler-internet-mock-de-fetch">#</a>Exemple 11 : simuler internet (mock de fetch)</h3>
+<p>À l&#39;examen tu es <strong>hors-ligne</strong> : un test qui appelle une vraie API échoue. On remplace <code>fetch</code> par une fausse version.</p>
+<div class="code"><div class="code-title">src/exemples.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">export</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">temperature</span>(<span class="hljs-params">ville</span>) {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">const</span> reponse = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`https://api.meteo.test/<span class="hljs-subst">${ville}</span>`</span>)
+    <span class="hljs-keyword">if</span> (!reponse.<span class="hljs-property">ok</span>) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Erreur HTTP&quot;</span>)
+    }
+    <span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> reponse.<span class="hljs-title function_">json</span>()
+    <span class="hljs-keyword">return</span> data.<span class="hljs-property">temperature</span>
+  } <span class="hljs-keyword">catch</span> (erreur) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(erreur)
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>
+  }
+}</code></pre></div>
+<div class="code"><div class="code-title">src/exemples.test.js</div><pre><code class="hljs lang-js"><span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;temperature (fetch simulé)&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> {
+    vi.<span class="hljs-title function_">unstubAllGlobals</span>()   <span class="hljs-comment">// remet le vrai fetch</span>
+    vi.<span class="hljs-title function_">restoreAllMocks</span>()    <span class="hljs-comment">// remet le vrai console.error</span>
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;renvoie la température&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    vi.<span class="hljs-title function_">stubGlobal</span>(<span class="hljs-string">&quot;fetch&quot;</span>, vi.<span class="hljs-title function_">fn</span>().<span class="hljs-title function_">mockResolvedValue</span>({
+      <span class="hljs-attr">ok</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">json</span>: <span class="hljs-title function_">async</span> () =&gt; ({ <span class="hljs-attr">temperature</span>: <span class="hljs-number">21</span> }),
+    }))
+    <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">await</span> <span class="hljs-title function_">temperature</span>(<span class="hljs-string">&quot;neuchatel&quot;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">21</span>)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;renvoie null si l&#x27;API répond une erreur&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    vi.<span class="hljs-title function_">stubGlobal</span>(<span class="hljs-string">&quot;fetch&quot;</span>, vi.<span class="hljs-title function_">fn</span>().<span class="hljs-title function_">mockResolvedValue</span>({ <span class="hljs-attr">ok</span>: <span class="hljs-literal">false</span> }))
+    vi.<span class="hljs-title function_">spyOn</span>(<span class="hljs-variable language_">console</span>, <span class="hljs-string">&quot;error&quot;</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> {})
+    <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">await</span> <span class="hljs-title function_">temperature</span>(<span class="hljs-string">&quot;neuchatel&quot;</span>)).<span class="hljs-title function_">toBeNull</span>()
+    <span class="hljs-title function_">expect</span>(<span class="hljs-variable language_">console</span>.<span class="hljs-property">error</span>).<span class="hljs-title function_">toHaveBeenCalledOnce</span>()
+  })
+})</code></pre></div>
+<ul>
+<li><code>vi.fn().mockResolvedValue({...})</code> : une fausse fonction qui renvoie ce qu&#39;on veut.</li>
+<li><code>vi.stubGlobal(&quot;fetch&quot;, ...)</code> : remplace le <code>fetch</code> du navigateur par la fausse version.</li>
+<li><code>vi.spyOn(console, &quot;error&quot;)</code> : surveille <code>console.error</code> (et l&#39;empêche d&#39;afficher).</li>
+</ul>
+<h2 id="etape-5-lancer-les-tests"><a class="anchor" href="#etape-5-lancer-les-tests">#</a>Étape 5 : lancer les tests</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Lancer :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-bash">npm run <span class="hljs-built_in">test</span>:run</code></pre></div>
+<p>Ce que tu dois voir (testé) :</p>
+<div class="code"><pre><code class="hljs lang-text"> Test Files  1 passed (1)
+      Tests  25 passed (25)</code></pre></div>
+<p>Pour voir chaque test un par un :</p>
+<div class="code"><pre><code class="hljs lang-bash">npx vitest run --reporter=verbose</code></pre></div>
+<p>Si un test échoue, Vitest affiche <code>×</code>, le nom du test, et la différence (testé en changeant volontairement <code>toBe(0)</code> en <code>toBe(1)</code>) :</p>
+<div class="code"><pre><code class="hljs lang-text">     × zéro 2ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected +0 to be 1 // Object.is equality
+- Expected
++ Received
+      Tests  1 failed | 24 passed (25)</code></pre></div>
+<h2 id="etape-6-la-couverture-de-code"><a class="anchor" href="#etape-6-la-couverture-de-code">#</a>Étape 6 : la couverture de code</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Dans <code>vite.config.js</code> (à créer à la racine s&#39;il n&#39;existe pas), exclure <code>main.js</code> qui n&#39;est pas testable :</li>
+</ul>
+<div class="code"><div class="code-title">vite.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { defineConfig, coverageConfigDefaults } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest/config&quot;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>({
+  <span class="hljs-attr">test</span>: {
+    <span class="hljs-attr">coverage</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-string">&quot;v8&quot;</span>,
+      <span class="hljs-attr">include</span>: [ <span class="hljs-string">&quot;src/**/*.js&quot;</span> ],
+      <span class="hljs-attr">exclude</span>: [ <span class="hljs-string">&quot;src/main.js&quot;</span>, ...coverageConfigDefaults.<span class="hljs-property">exclude</span> ],
+    },
+  },
+})</code></pre></div>
+<ul>
+<li><input disabled="" type="checkbox"> Lancer :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-bash">npm run coverage</code></pre></div>
+<p>Tu vois un tableau avec le pourcentage de lignes testées par fichier (les fichiers à 100 % peuvent être masqués du tableau texte). Le rapport détaillé s&#39;ouvre dans le navigateur : <strong><code>coverage/index.html</code></strong> (lignes rouges = jamais exécutées par un test).</p>
+<ul>
+<li><input disabled="" type="checkbox"> Supprimer <code>src/counter.js</code> s&#39;il n&#39;est plus utilisé, sinon il apparaît à 0 %.</li>
+<li><input disabled="" type="checkbox"> Ajouter <code>coverage/</code> au <code>.gitignore</code>.</li>
+</ul>
+<h2 id="aide-memoire-des-verifications"><a class="anchor" href="#aide-memoire-des-verifications">#</a>Aide-mémoire des vérifications</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Je veux vérifier…</th>
+<th>J&#39;écris</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>un nombre, un texte, un booléen exact</td>
+<td><code>expect(x).toBe(valeur)</code></td>
+</tr>
+<tr>
+<td>un tableau ou un objet</td>
+<td><code>expect(x).toEqual(valeur)</code></td>
+</tr>
+<tr>
+<td>un nombre à virgule</td>
+<td><code>expect(x).toBeCloseTo(0.3)</code></td>
+</tr>
+<tr>
+<td>vrai / faux « au sens large »</td>
+<td><code>toBeTruthy()</code> / <code>toBeFalsy()</code></td>
+</tr>
+<tr>
+<td><code>null</code> / <code>undefined</code></td>
+<td><code>toBeNull()</code> / <code>toBeUndefined()</code></td>
+</tr>
+<tr>
+<td>plus grand / plus petit</td>
+<td><code>toBeGreaterThan(5)</code> / <code>toBeLessThan(5)</code></td>
+</tr>
+<tr>
+<td>contient un élément / un mot</td>
+<td><code>toContain(x)</code></td>
+</tr>
+<tr>
+<td>longueur</td>
+<td><code>toHaveLength(3)</code></td>
+</tr>
+<tr>
+<td>une propriété d&#39;objet</td>
+<td><code>toHaveProperty(&quot;nom&quot;, &quot;Ana&quot;)</code></td>
+</tr>
+<tr>
+<td>un motif de texte</td>
+<td><code>toMatch(/regex/)</code></td>
+</tr>
+<tr>
+<td>le type</td>
+<td><code>toBeTypeOf(&quot;number&quot;)</code></td>
+</tr>
+<tr>
+<td>une erreur</td>
+<td><code>expect(() =&gt; f()).toThrow(&quot;message&quot;)</code></td>
+</tr>
+<tr>
+<td>le contraire</td>
+<td><code>.not.</code> : <code>expect(x).not.toBe(0)</code></td>
+</tr>
+</tbody></table></div>
+<p>Plus de détails : <a href="vitest.html">3. Vitest</a>.</p>
+<h2 id="idees-de-tests-simples-pour-l-examen"><a class="anchor" href="#idees-de-tests-simples-pour-l-examen">#</a>Idées de tests « simples » pour l&#39;examen</h2>
+<p>Pour chaque fonction, teste au moins :</p>
+<ul>
+<li><input disabled="" type="checkbox"> un cas normal</li>
+<li><input disabled="" type="checkbox"> zéro / tableau vide / texte vide</li>
+<li><input disabled="" type="checkbox"> un nombre négatif</li>
+<li><input disabled="" type="checkbox"> un mauvais type (<code>&quot;a&quot;</code> au lieu d&#39;un nombre) si la fonction le gère</li>
+<li><input disabled="" type="checkbox"> l&#39;erreur si la fonction peut en lever une</li>
+</ul>
+<h2 id="les-fichiers-complets"><a class="anchor" href="#les-fichiers-complets">#</a>Les fichiers complets</h2>
+<div class="code"><div class="code-title">tuto/src/exemples.js</div><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@file</span> Petites fonctions très simples pour s&#x27;entraîner aux tests.
+ * <span class="hljs-doctag">@module</span> <span class="hljs-variable">exemples</span>
+ * <span class="hljs-doctag">@author</span> <span class="hljs-variable">Hugo</span>
+ * <span class="hljs-doctag">@version</span> 1.0.0
+ */</span>
+
+<span class="hljs-comment">/**
+ * Multiplie un nombre par 2.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">n</span> - Le nombre.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number</span>} Le double de n.
+ * <span class="hljs-doctag">@example</span>
+ * double(4) // 8
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">double</span>(<span class="hljs-params">n</span>) {
+  <span class="hljs-keyword">return</span> n * <span class="hljs-number">2</span>
+}
+
+<span class="hljs-comment">/**
+ * Dit si un nombre est pair.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">n</span> - Le nombre.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">boolean</span>} true si n est pair.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">est_pair</span>(<span class="hljs-params">n</span>) {
+  <span class="hljs-keyword">return</span> n % <span class="hljs-number">2</span> === <span class="hljs-number">0</span>
+}
+
+<span class="hljs-comment">/**
+ * Dit bonjour à quelqu&#x27;un.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">prenom</span> - Le prénom.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">string</span>} &quot;Bonjour &lt;prenom&gt; !&quot;
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">dire_bonjour</span>(<span class="hljs-params">prenom</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-string">`Bonjour <span class="hljs-subst">${prenom}</span> !`</span>
+}
+
+<span class="hljs-comment">/**
+ * Additionne tous les nombres d&#x27;un tableau.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number[]</span>} <span class="hljs-variable">nombres</span> - Les nombres.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number</span>} La somme (0 si tableau vide).
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">somme</span>(<span class="hljs-params">nombres</span>) {
+  <span class="hljs-keyword">let</span> total = <span class="hljs-number">0</span>
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> n <span class="hljs-keyword">of</span> nombres) {
+    total = total + n
+  }
+  <span class="hljs-keyword">return</span> total
+}
+
+<span class="hljs-comment">/**
+ * Renvoie le plus grand nombre d&#x27;un tableau.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number[]</span>} <span class="hljs-variable">nombres</span> - Les nombres.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number|null</span>} Le maximum, ou null si le tableau est vide.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">maximum</span>(<span class="hljs-params">nombres</span>) {
+  <span class="hljs-keyword">if</span> (nombres.<span class="hljs-property">length</span> === <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(...nombres)
+}
+
+<span class="hljs-comment">/**
+ * Garde seulement les nombres pairs.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number[]</span>} <span class="hljs-variable">nombres</span> - Les nombres.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number[]</span>} Un nouveau tableau avec les pairs.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">garder_pairs</span>(<span class="hljs-params">nombres</span>) {
+  <span class="hljs-keyword">return</span> nombres.<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">n</span>) =&gt;</span> <span class="hljs-title function_">est_pair</span>(n))
+}
+
+<span class="hljs-comment">/**
+ * Crée un objet personne.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">nom</span> - Le nom.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">age</span> - L&#x27;âge.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">{nom: string, age: number, majeur: boolean</span>}} La personne.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">creer_personne</span>(<span class="hljs-params">nom, age</span>) {
+  <span class="hljs-keyword">return</span> { nom, age, <span class="hljs-attr">majeur</span>: age &gt;= <span class="hljs-number">18</span> }
+}
+
+<span class="hljs-comment">/**
+ * Divise a par b.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">a</span> - Le dividende.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">b</span> - Le diviseur.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number</span>} Le résultat.
+ * <span class="hljs-doctag">@throws</span> {<span class="hljs-type">Error</span>} Si b vaut 0.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">diviser</span>(<span class="hljs-params">a, b</span>) {
+  <span class="hljs-keyword">if</span> (b === <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Division par zéro&quot;</span>)
+  }
+  <span class="hljs-keyword">return</span> a / b
+}
+
+<span class="hljs-comment">/**
+ * Renvoie une valeur après un petit délai (fonction asynchrone).
+ * <span class="hljs-doctag">@async</span>
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">*</span>} <span class="hljs-variable">valeur</span> - La valeur à renvoyer.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">Promise&lt;*&gt;</span>} La valeur, après 10 ms.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">attendre</span>(<span class="hljs-params">valeur</span>) {
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> <span class="hljs-built_in">setTimeout</span>(resolve, <span class="hljs-number">10</span>))
+  <span class="hljs-keyword">return</span> valeur
+}
+
+<span class="hljs-comment">/**
+ * Récupère la température d&#x27;une ville depuis une API.
+ * <span class="hljs-doctag">@async</span>
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">ville</span> - Nom de la ville.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">Promise&lt;number|null&gt;</span>} La température, ou null en cas d&#x27;erreur.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">temperature</span>(<span class="hljs-params">ville</span>) {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">const</span> reponse = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`https://api.meteo.test/<span class="hljs-subst">${ville}</span>`</span>)
+    <span class="hljs-keyword">if</span> (!reponse.<span class="hljs-property">ok</span>) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Erreur HTTP&quot;</span>)
+    }
+    <span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> reponse.<span class="hljs-title function_">json</span>()
+    <span class="hljs-keyword">return</span> data.<span class="hljs-property">temperature</span>
+  } <span class="hljs-keyword">catch</span> (erreur) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(erreur)
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>
+  }
+}</code></pre></div>
+<p class="file-link"><a href="../projets/tuto/src/exemples.js">📄 ouvrir le fichier exemples.js</a></p><div class="code"><div class="code-title">tuto/src/exemples.test.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { describe, test, expect, vi, afterEach } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>
+<span class="hljs-keyword">import</span> {
+  double, est_pair, dire_bonjour, somme, maximum, garder_pairs,
+  creer_personne, diviser, attendre, temperature,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./exemples.js&quot;</span>
+
+<span class="hljs-comment">// 1. Le plus simple : un nombre -&gt; toBe</span>
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;double(4) vaut 8&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">double</span>(<span class="hljs-number">4</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">8</span>)
+})
+
+<span class="hljs-comment">// 2. Plusieurs cas dans un describe</span>
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;double&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;nombre négatif&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">double</span>(-<span class="hljs-number">3</span>)).<span class="hljs-title function_">toBe</span>(-<span class="hljs-number">6</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;zéro&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">double</span>(<span class="hljs-number">0</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">0</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;nombre à virgule&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">double</span>(<span class="hljs-number">0.1</span>)).<span class="hljs-title function_">toBeCloseTo</span>(<span class="hljs-number">0.2</span>)
+  })
+})
+
+<span class="hljs-comment">// 3. Un booléen -&gt; toBe(true) / toBeTruthy</span>
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;est_pair&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;4 est pair&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">est_pair</span>(<span class="hljs-number">4</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">true</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;7 n&#x27;est pas pair&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">est_pair</span>(<span class="hljs-number">7</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">false</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;0 est pair&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">est_pair</span>(<span class="hljs-number">0</span>)).<span class="hljs-title function_">toBeTruthy</span>()
+  })
+})
+
+<span class="hljs-comment">// 4. Une chaîne -&gt; toBe, toContain, toMatch</span>
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;dire_bonjour&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;texte exact&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">dire_bonjour</span>(<span class="hljs-string">&quot;Léa&quot;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;Bonjour Léa !&quot;</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;contient le prénom&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">dire_bonjour</span>(<span class="hljs-string">&quot;Tom&quot;</span>)).<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&quot;Tom&quot;</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;commence par Bonjour&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">dire_bonjour</span>(<span class="hljs-string">&quot;Max&quot;</span>)).<span class="hljs-title function_">toMatch</span>(<span class="hljs-regexp">/^Bonjour/</span>)
+  })
+})
+
+<span class="hljs-comment">// 5. test.each : le même test avec plusieurs données</span>
+test.<span class="hljs-title function_">each</span>([
+  [[ <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span> ], <span class="hljs-number">6</span> ],
+  [[ <span class="hljs-number">10</span>, -<span class="hljs-number">5</span> ], <span class="hljs-number">5</span> ],
+  [[], <span class="hljs-number">0</span> ],
+])(<span class="hljs-string">&quot;somme(%j) = %i&quot;</span>, <span class="hljs-function">(<span class="hljs-params">tableau, attendu</span>) =&gt;</span> {
+  <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">somme</span>(tableau)).<span class="hljs-title function_">toBe</span>(attendu)
+})
+
+<span class="hljs-comment">// 6. null / undefined</span>
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;maximum&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;renvoie le plus grand&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">maximum</span>([ <span class="hljs-number">3</span>, <span class="hljs-number">9</span>, <span class="hljs-number">2</span> ])).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">9</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;tableau vide -&gt; null&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">maximum</span>([])).<span class="hljs-title function_">toBeNull</span>()
+  })
+})
+
+<span class="hljs-comment">// 7. Un tableau -&gt; toEqual (PAS toBe !)</span>
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;garder_pairs&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;garde 2 et 4&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">garder_pairs</span>([ <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span> ])).<span class="hljs-title function_">toEqual</span>([ <span class="hljs-number">2</span>, <span class="hljs-number">4</span> ])
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;longueur du résultat&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">garder_pairs</span>([ <span class="hljs-number">2</span>, <span class="hljs-number">4</span>, <span class="hljs-number">6</span> ])).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">3</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;ne modifie pas le tableau d&#x27;origine&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> origine = [ <span class="hljs-number">1</span>, <span class="hljs-number">2</span> ]
+    <span class="hljs-title function_">garder_pairs</span>(origine)
+    <span class="hljs-title function_">expect</span>(origine).<span class="hljs-title function_">toEqual</span>([ <span class="hljs-number">1</span>, <span class="hljs-number">2</span> ])
+  })
+})
+
+<span class="hljs-comment">// 8. Un objet -&gt; toEqual, toHaveProperty</span>
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;creer_personne&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;objet complet&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">creer_personne</span>(<span class="hljs-string">&quot;Ana&quot;</span>, <span class="hljs-number">20</span>))
+      .<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">nom</span>: <span class="hljs-string">&quot;Ana&quot;</span>, <span class="hljs-attr">age</span>: <span class="hljs-number">20</span>, <span class="hljs-attr">majeur</span>: <span class="hljs-literal">true</span> })
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;mineur&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">creer_personne</span>(<span class="hljs-string">&quot;Léo&quot;</span>, <span class="hljs-number">12</span>)).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&quot;majeur&quot;</span>, <span class="hljs-literal">false</span>)
+  })
+})
+
+<span class="hljs-comment">// 9. Une erreur -&gt; toThrow (avec une FONCTION fléchée)</span>
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;diviser&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;10 / 2 = 5&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">diviser</span>(<span class="hljs-number">10</span>, <span class="hljs-number">2</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">5</span>)
+  })
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;division par zéro -&gt; erreur&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">diviser</span>(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>)).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&quot;Division par zéro&quot;</span>)
+  })
+})
+
+<span class="hljs-comment">// 10. Asynchrone -&gt; async / await</span>
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;attendre renvoie la valeur&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> resultat = <span class="hljs-keyword">await</span> <span class="hljs-title function_">attendre</span>(<span class="hljs-number">42</span>)
+  <span class="hljs-title function_">expect</span>(resultat).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">42</span>)
+})
+
+<span class="hljs-comment">// 11. Simuler fetch (pas de réseau pendant l&#x27;examen !)</span>
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;temperature (fetch simulé)&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> {
+    vi.<span class="hljs-title function_">unstubAllGlobals</span>()
+    vi.<span class="hljs-title function_">restoreAllMocks</span>()
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;renvoie la température&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    vi.<span class="hljs-title function_">stubGlobal</span>(<span class="hljs-string">&quot;fetch&quot;</span>, vi.<span class="hljs-title function_">fn</span>().<span class="hljs-title function_">mockResolvedValue</span>({
+      <span class="hljs-attr">ok</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">json</span>: <span class="hljs-title function_">async</span> () =&gt; ({ <span class="hljs-attr">temperature</span>: <span class="hljs-number">21</span> }),
+    }))
+    <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">await</span> <span class="hljs-title function_">temperature</span>(<span class="hljs-string">&quot;neuchatel&quot;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">21</span>)
+  })
+
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;renvoie null si l&#x27;API répond une erreur&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    vi.<span class="hljs-title function_">stubGlobal</span>(<span class="hljs-string">&quot;fetch&quot;</span>, vi.<span class="hljs-title function_">fn</span>().<span class="hljs-title function_">mockResolvedValue</span>({ <span class="hljs-attr">ok</span>: <span class="hljs-literal">false</span> }))
+    vi.<span class="hljs-title function_">spyOn</span>(<span class="hljs-variable language_">console</span>, <span class="hljs-string">&quot;error&quot;</span>).<span class="hljs-title function_">mockImplementation</span>(<span class="hljs-function">() =&gt;</span> {})
+    <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">await</span> <span class="hljs-title function_">temperature</span>(<span class="hljs-string">&quot;neuchatel&quot;</span>)).<span class="hljs-title function_">toBeNull</span>()
+    <span class="hljs-title function_">expect</span>(<span class="hljs-variable language_">console</span>.<span class="hljs-property">error</span>).<span class="hljs-title function_">toHaveBeenCalledOnce</span>()
+  })
+})</code></pre></div>
+<p class="file-link"><a href="../projets/tuto/src/exemples.test.js">📄 ouvrir le fichier exemples.test.js</a></p><p>Suite : <a href="tuto-3-doc.html">Tuto 3 : la documentation →</a></p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#le-principe-en-30-secondes">Le principe en 30 secondes</a><a class="toc-2" href="#etape-1-installer-vitest-avec-reseau">Étape 1 : installer Vitest (avec réseau)</a><a class="toc-2" href="#etape-2-ajouter-les-commandes-dans-package-json">Étape 2 : ajouter les commandes dans package.json</a><a class="toc-2" href="#etape-3-creer-le-fichier-de-code">Étape 3 : créer le fichier de code</a><a class="toc-2" href="#etape-4-creer-le-fichier-de-test">Étape 4 : créer le fichier de test</a><a class="toc-2" href="#les-11-exemples">Les 11 exemples</a><a class="toc-3" href="#exemple-1-le-plus-simple-un-nombre">Exemple 1 : le plus simple (un nombre)</a><a class="toc-3" href="#exemple-2-plusieurs-cas-regroupes-describe">Exemple 2 : plusieurs cas regroupés (describe)</a><a class="toc-3" href="#exemple-3-un-vrai-faux-booleen">Exemple 3 : un vrai / faux (booléen)</a><a class="toc-3" href="#exemple-4-du-texte-chaine">Exemple 4 : du texte (chaîne)</a><a class="toc-3" href="#exemple-5-le-meme-test-avec-plusieurs-donnees-test-each">Exemple 5 : le même test avec plusieurs données (test.each)</a><a class="toc-3" href="#exemple-6-un-resultat-vide-null">Exemple 6 : un résultat « vide » (null)</a><a class="toc-3" href="#exemple-7-un-tableau-toequal-pas-tobe">Exemple 7 : un tableau (toEqual, PAS toBe)</a><a class="toc-3" href="#exemple-8-un-objet">Exemple 8 : un objet</a><a class="toc-3" href="#exemple-9-une-erreur-tothrow">Exemple 9 : une erreur (toThrow)</a><a class="toc-3" href="#exemple-10-une-fonction-asynchrone-async-await">Exemple 10 : une fonction asynchrone (async / await)</a><a class="toc-3" href="#exemple-11-simuler-internet-mock-de-fetch">Exemple 11 : simuler internet (mock de fetch)</a><a class="toc-2" href="#etape-5-lancer-les-tests">Étape 5 : lancer les tests</a><a class="toc-2" href="#etape-6-la-couverture-de-code">Étape 6 : la couverture de code</a><a class="toc-2" href="#aide-memoire-des-verifications">Aide-mémoire des vérifications</a><a class="toc-2" href="#idees-de-tests-simples-pour-l-examen">Idées de tests « simples » pour l'examen</a><a class="toc-2" href="#les-fichiers-complets">Les fichiers complets</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../assets/app.js"></script>
+</body>
+</html>

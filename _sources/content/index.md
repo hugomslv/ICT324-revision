@@ -14,10 +14,10 @@ title: Accueil
 |---|---|---|
 | Créer un projet **Vite** | ✅ branché | [1. Vite](pages/vite.html) |
 | Mettre en place les **docs** ESLint / Vitest / JSDoc sur le poste | ❌ hors-ligne | [Docs hors-ligne](pages/docs-hors-ligne.html), [Docs officielles](docs/index.html) |
-| Configurer un **linter** avec des règles à trouver dans la doc | ❌ | [2. ESLint](pages/eslint.html), [2b. Règles](pages/eslint-regles.html) |
-| Écrire des **tests unitaires** simples | ❌ | [3. Vitest](pages/vitest.html) |
-| Générer une **documentation** (images, README.md…) | ❌ | [4. JSDoc](pages/jsdoc.html), [5. README](pages/readme.html) |
-| Configurer le projet pour une **publication FTP** dans un dossier précis, sans erreurs (favicon, images…) « à l'aveugle » | ❌ | [6. Build & FTP](pages/build-ftp.html) |
+| Configurer un **linter** avec des règles à trouver dans la doc | ❌ | **[Tuto 1](pages/tuto-1-linter.html)**, [2. ESLint](pages/eslint.html), [2b. Règles](pages/eslint-regles.html) |
+| Écrire des **tests unitaires** simples | ❌ | **[Tuto 2](pages/tuto-2-tests.html)**, [3. Vitest](pages/vitest.html) |
+| Générer une **documentation** (images, README.md…) | ❌ | **[Tuto 3](pages/tuto-3-doc.html)**, [4. JSDoc](pages/jsdoc.html), [5. README](pages/readme.html) |
+| Configurer le projet pour une **publication FTP** dans un dossier précis, sans erreurs (favicon, images…) « à l'aveugle » | ❌ | **[Tuto 4](pages/tuto-4-ftp.html)**, [6. Build & FTP](pages/build-ftp.html) |
 
 ::: danger La règle d'or
 Pendant la phase **avec réseau**, installe **toutes** les dépendances dont tu auras besoin ensuite (`eslint`, `@eslint/js`, `globals`, `vitest`, `@vitest/coverage-v8`, `jsdoc`…). Une fois hors-ligne, `npm install` ne marchera plus. Tout est détaillé dans [Jour J](pages/examen.html).
@@ -26,6 +26,7 @@ Pendant la phase **avec réseau**, installe **toutes** les dépendances dont tu 
 ## Par où commencer
 
 <div class="cards">
+<a class="card" href="pages/tutos.html"><div class="card-icon">🧭</div><h3>Tutos pas à pas</h3><p>Les 4 étapes de l'examen : quel fichier créer, où, quelle commande, avec des exemples très simples.</p></a>
 <a class="card" href="pages/examen.html"><div class="card-icon">🎯</div><h3>Jour J</h3><p>Le déroulé complet de l'examen, étape par étape, avec checklist à cocher.</p></a>
 <a class="card" href="pages/antiseche.html"><div class="card-icon">⌨️</div><h3>Antisèche</h3><p>Toutes les commandes et tous les fichiers de config sur une page.</p></a>
 <a class="card" href="pages/modele.html"><div class="card-icon">📦</div><h3>Projet modèle</h3><p>Un projet complet, testé : lint + tests + doc + build FTP. À recopier.</p></a>
@@ -51,7 +52,7 @@ Pendant la phase **avec réseau**, installe **toutes** les dépendances dont tu 
 ```text
 ICT324-revision/
 ├── index.html                ← cette page (ouvre-la dans le navigateur)
-├── pages/                    ← les fiches de cours
+├── pages/                    ← les fiches de cours et les tutos
 ├── docs/                     ← documentations officielles hors-ligne
 │   ├── eslint/  (rules/ + use/)
 │   ├── vitest/
@@ -63,7 +64,8 @@ ICT324-revision/
 │   │   ├── 2-vitest/                 ← exercice Vitest + JSDoc
 │   │   ├── 3-vite_lint_test_doc/     ← Vite + lint + test + doc
 │   │   └── 4-currency-converter/     ← projet complet + publication FTP
-│   └── modele/               ← projet modèle vérifié, prêt à copier
+│   ├── modele/               ← projet modèle vérifié, prêt à copier
+│   └── tuto/                 ← le projet obtenu en suivant les 4 tutos
 └── assets/                   ← style, script, index de recherche
 ```
 

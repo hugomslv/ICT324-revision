@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tuto 1 : mettre en place le linter · ICT-324 Révision</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/hljs.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../index.html">Accueil</a><a class="nav-link" href="../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Tutos pas à pas</div><a class="nav-link" href="../pages/tutos.html">Départ : le projet Vite</a><a class="nav-link active" href="../pages/tuto-1-linter.html">Tuto 1 : le linter</a><a class="nav-link" href="../pages/tuto-2-tests.html">Tuto 2 : les tests</a><a class="nav-link" href="../pages/tuto-3-doc.html">Tuto 3 : la documentation</a><a class="nav-link" href="../pages/tuto-4-ftp.html">Tuto 4 : la config FTP</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../pages/vite.html">1. Vite</a><a class="nav-link" href="../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../pages/projets.html">Projets du cours</a><a class="nav-link" href="../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../docs/index.html">Index des docs</a><a class="nav-link" href="../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../docs/vite/index.html">Vite</a><a class="nav-link" href="../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+
+<h1>Tuto 1 : mettre en place le linter</h1><p class="lead">Consigne : « Mettre en place un linter selon des règles à trouver dans la documentation ». Résultat attendu : npm run lint affiche 0 erreur avec les règles demandées.</p><div class="progress"><span></span></div>
+<p class="small muted">Progression : <span id="progress-label"></span> · <a href="#" id="reset-checks">tout décocher</a></p><h2 id="etape-1-installer-eslint-avec-reseau"><a class="anchor" href="#etape-1-installer-eslint-avec-reseau">#</a>Étape 1 : installer ESLint (avec réseau)</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Dans le terminal, à la racine du projet :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-bash">npm install -D eslint @eslint/js globals</code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Paquet</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>eslint</code></td>
+<td>le linter</td>
+</tr>
+<tr>
+<td><code>@eslint/js</code></td>
+<td>les règles recommandées (<code>js/recommended</code>)</td>
+</tr>
+<tr>
+<td><code>globals</code></td>
+<td>la liste des variables du navigateur (<code>document</code>, <code>window</code>…)</td>
+</tr>
+</tbody></table></div>
+<p>Vérification :</p>
+<div class="code"><pre><code class="hljs lang-bash">npx eslint --version</code></pre></div>
+<p>Tu dois voir un numéro, par exemple <code>v10.11.0</code>.</p>
+<h2 id="etape-2-creer-le-fichier-de-configuration"><a class="anchor" href="#etape-2-creer-le-fichier-de-configuration">#</a>Étape 2 : créer le fichier de configuration</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Créer le fichier <strong><code>eslint.config.js</code></strong> à la <strong>racine</strong> du projet (à côté de <code>package.json</code>, pas dans <code>src/</code>).</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-text">mon-projet/
+├── eslint.config.js   ← ICI
+├── package.json
+└── src/</code></pre></div>
+<ul>
+<li><input disabled="" type="checkbox"> Coller ce contenu :</li>
+</ul>
+<div class="code"><div class="code-title">eslint.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> js <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@eslint/js&quot;</span>
+<span class="hljs-keyword">import</span> globals <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;globals&quot;</span>
+<span class="hljs-keyword">import</span> { defineConfig, globalIgnores } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;eslint/config&quot;</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>([
+  <span class="hljs-comment">// dossiers générés : on ne les vérifie pas</span>
+  <span class="hljs-title function_">globalIgnores</span>([ <span class="hljs-string">&quot;dist/&quot;</span>, <span class="hljs-string">&quot;docs/&quot;</span>, <span class="hljs-string">&quot;coverage/&quot;</span> ]),
+
+  {
+    <span class="hljs-attr">files</span>: [ <span class="hljs-string">&quot;**/*.{js,mjs,cjs}&quot;</span> ],
+    <span class="hljs-attr">plugins</span>: { js },
+    <span class="hljs-attr">extends</span>: [ <span class="hljs-string">&quot;js/recommended&quot;</span> ],
+    <span class="hljs-attr">languageOptions</span>: { <span class="hljs-attr">globals</span>: globals.<span class="hljs-property">browser</span> },
+    <span class="hljs-attr">rules</span>: {
+      <span class="hljs-comment">// ↓↓↓ ICI tu mets les règles demandées dans la consigne ↓↓↓</span>
+      <span class="hljs-attr">quotes</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;double&quot;</span> ],
+      <span class="hljs-attr">semi</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;never&quot;</span> ],
+      <span class="hljs-attr">indent</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-number">2</span> ],
+      <span class="hljs-attr">eqeqeq</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-var&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;prefer-const&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-unused-vars&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;no-undef&quot;</span>: <span class="hljs-string">&quot;error&quot;</span>,
+      <span class="hljs-string">&quot;array-bracket-spacing&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;always&quot;</span>, { <span class="hljs-attr">arraysInArrays</span>: <span class="hljs-literal">false</span> } ],
+      <span class="hljs-string">&quot;object-curly-spacing&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;always&quot;</span> ],
+      <span class="hljs-string">&quot;brace-style&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;1tbs&quot;</span> ],
+      <span class="hljs-string">&quot;linebreak-style&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;unix&quot;</span> ],
+      <span class="hljs-string">&quot;max-len&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, { <span class="hljs-attr">code</span>: <span class="hljs-number">80</span> } ],
+    },
+  },
+
+  <span class="hljs-comment">// fichiers exécutés par Node (config, scripts) : process, __dirname…</span>
+  {
+    <span class="hljs-attr">files</span>: [ <span class="hljs-string">&quot;*.config.js&quot;</span>, <span class="hljs-string">&quot;scripts/**/*.js&quot;</span> ],
+    <span class="hljs-attr">languageOptions</span>: { <span class="hljs-attr">globals</span>: globals.<span class="hljs-property">node</span> },
+  },
+])</code></pre></div>
+<div class="box box-info"><div class="box-title">ℹ️ Info : Si le package.json n'a pas &quot;type&quot;: &quot;module</div><p>Un projet créé avec <code>npm create vite</code> l&#39;a déjà. Sinon, nomme le fichier <strong><code>eslint.config.mjs</code></strong> (même contenu).</p>
+</div><h2 id="etape-3-ajouter-les-commandes-dans-package-json"><a class="anchor" href="#etape-3-ajouter-les-commandes-dans-package-json">#</a>Étape 3 : ajouter les commandes dans package.json</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Dans <code>package.json</code>, partie <code>&quot;scripts&quot;</code>, ajouter :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;lint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;eslint .&quot;</span><span class="hljs-punctuation">,</span>
+<span class="hljs-attr">&quot;lint:fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;eslint . --fix&quot;</span></code></pre></div>
+<p>Ce qui donne par exemple :</p>
+<div class="code"><div class="code-title">package.json</div><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;dev&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;build&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite build&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;preview&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;vite preview&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;lint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;eslint .&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;lint:fix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;eslint . --fix&quot;</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<h2 id="etape-4-lancer-le-linter"><a class="anchor" href="#etape-4-lancer-le-linter">#</a>Étape 4 : lancer le linter</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Lancer :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-bash">npm run lint</code></pre></div>
+<p>Sur un projet Vite neuf, avec la config ci-dessus, tu obtiens ceci (testé) :</p>
+<div class="code"><pre><code class="hljs lang-text">src/counter.js
+  7:28  error  Strings must use doublequote  quotes
+
+src/main.js
+   1:8   error  Strings must use doublequote                          quotes
+   2:21  error  Strings must use doublequote                          quotes
+  ...
+  25:1   error  This line has a length of 115. Maximum allowed is 80  max-len
+  48:1   error  This line has a length of 193. Maximum allowed is 80  max-len
+  ...
+✖ 15 problems (15 errors, 0 warnings)
+  8 errors and 0 warnings potentially fixable with the `--fix` option.</code></pre></div>
+<p>Comment lire une ligne : <code>7:28</code> = ligne 7, colonne 28 · <code>Strings must use doublequote</code> = le problème · <code>quotes</code> = <strong>le nom de la règle</strong> (celle que tu cherches dans la doc).</p>
+<h2 id="etape-5-corriger"><a class="anchor" href="#etape-5-corriger">#</a>Étape 5 : corriger</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Correction automatique de tout ce qui peut l&#39;être (guillemets, points-virgules, indentation, espaces) :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-bash">npm run lint:fix</code></pre></div>
+<p>Testé : il reste <strong>7 erreurs <code>max-len</code></strong>, les lignes trop longues du HTML de démo de Vite dans <code>src/main.js</code>. <code>--fix</code> ne sait pas couper une ligne. Trois solutions :</p>
+<ol>
+<li><strong>Remplacer le code de démo</strong> (de toute façon tu vas écrire ton propre <code>main.js</code>, voir <a href="tuto-4-ftp.html#etape-4-ecrire-un-main-js-propre">tuto 4</a>).</li>
+<li>Couper les lignes toi-même.</li>
+<li>Si la consigne le permet, ignorer les chaînes de template (testé, 0 erreur ensuite) :</li>
+</ol>
+<div class="code"><pre><code class="hljs lang-js"><span class="hljs-string">&quot;max-len&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, { <span class="hljs-attr">code</span>: <span class="hljs-number">80</span>, <span class="hljs-attr">ignoreTemplateLiterals</span>: <span class="hljs-literal">true</span> } ],</code></pre></div>
+<ul>
+<li><input disabled="" type="checkbox"> Relancer jusqu&#39;à obtenir <strong>aucune sortie</strong> (= 0 erreur) :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-bash">npm run lint</code></pre></div>
+<h2 id="etape-6-trouver-les-regles-de-la-consigne-dans-la-doc"><a class="anchor" href="#etape-6-trouver-les-regles-de-la-consigne-dans-la-doc">#</a>Étape 6 : trouver les règles de la consigne dans la doc</h2>
+<p>C&#39;est le cœur de l&#39;exercice : la consigne donne des phrases en français, tu dois trouver la règle.</p>
+<ul>
+<li><input disabled="" type="checkbox"> Pour <strong>chaque phrase</strong> de la consigne :</li>
+</ul>
+<ol>
+<li>Traduis en mots-clés anglais (voir tableau).</li>
+<li>Ouvre la <a href="../docs/eslint/rules/index.html">liste de toutes les règles</a> et tape le mot-clé dans le filtre.</li>
+<li>Ouvre la règle, lis <strong>Rule Details</strong> (ce qu&#39;elle fait) et <strong>Options</strong> (quoi écrire).</li>
+<li>Écris-la dans <code>rules: { }</code> : <code>&quot;nom-de-la-regle&quot;: [ &quot;error&quot;, option ]</code>.</li>
+<li>Teste avec un petit bout de code qui doit être refusé.</li>
+</ol>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>La consigne parle de…</th>
+<th>Cherche</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>guillemets, apostrophes</td>
+<td><code>quotes</code></td>
+</tr>
+<tr>
+<td>point-virgule</td>
+<td><code>semi</code></td>
+</tr>
+<tr>
+<td>indentation, tabulation</td>
+<td><code>indent</code></td>
+</tr>
+<tr>
+<td>accolades, if / else</td>
+<td><code>brace-style</code>, <code>curly</code></td>
+</tr>
+<tr>
+<td>espaces dans les tableaux <code>[ ]</code></td>
+<td><code>array-bracket-spacing</code></td>
+</tr>
+<tr>
+<td>espaces dans les objets <code>{ }</code></td>
+<td><code>object-curly-spacing</code></td>
+</tr>
+<tr>
+<td><code>==</code> / <code>===</code></td>
+<td><code>eqeqeq</code></td>
+</tr>
+<tr>
+<td><code>var</code>, <code>let</code>, <code>const</code></td>
+<td><code>no-var</code>, <code>prefer-const</code>, <code>no-const-assign</code></td>
+</tr>
+<tr>
+<td>longueur des lignes</td>
+<td><code>max-len</code></td>
+</tr>
+<tr>
+<td>nom des variables (camelCase, snake_case)</td>
+<td><code>camelcase</code>, <code>id-match</code></td>
+</tr>
+<tr>
+<td>variables globales</td>
+<td><code>no-implicit-globals</code>, <code>no-undef</code></td>
+</tr>
+<tr>
+<td>variables inutilisées</td>
+<td><code>no-unused-vars</code></td>
+</tr>
+<tr>
+<td><code>console.log</code></td>
+<td><code>no-console</code></td>
+</tr>
+<tr>
+<td>virgule finale</td>
+<td><code>comma-dangle</code></td>
+</tr>
+<tr>
+<td>espaces en fin de ligne</td>
+<td><code>no-trailing-spaces</code></td>
+</tr>
+</tbody></table></div>
+<p>Toutes les consignes du cours, déjà traduites : <a href="eslint-regles.html">2b. ESLint : les règles</a>.</p>
+<div class="box box-example"><div class="box-title">🧪 Exemple : Exemple complet : « Interdire les console.log »</div><ol>
+<li>Mot-clé : <em>console</em> → règle <a href="../docs/eslint/rules/no-console.html"><code>no-console</code></a>.</li>
+<li>Dans la config : <code>&quot;no-console&quot;: &quot;error&quot;,</code></li>
+<li>Test : ajoute <code>console.log(&quot;test&quot;)</code> dans <code>src/main.js</code>, lance <code>npm run lint</code> → <code>Unexpected console statement  no-console</code>. ✅</li>
+<li>Enlève la ligne de test.</li>
+</ol>
+</div><h2 id="etape-7-si-demande-noms-de-fichiers-en-snake-case"><a class="anchor" href="#etape-7-si-demande-noms-de-fichiers-en-snake-case">#</a>Étape 7 (si demandé) : noms de fichiers en snake_case</h2>
+<p>ESLint ne vérifie pas les noms de fichiers : il faut un plugin (<strong>à installer avec le réseau</strong>).</p>
+<ul>
+<li><input disabled="" type="checkbox"> Installer :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-bash">npm install -D @maintained/eslint-plugin-filename-rules</code></pre></div>
+<ul>
+<li><input disabled="" type="checkbox"> Dans <code>eslint.config.js</code>, ajouter l&#39;import en haut, le plugin et la règle :</li>
+</ul>
+<div class="code"><div class="code-title">eslint.config.js</div><pre><code class="hljs lang-js"><span class="hljs-keyword">import</span> { plugin <span class="hljs-keyword">as</span> filenameRules } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@maintained/eslint-plugin-filename-rules&quot;</span>
+
+<span class="hljs-comment">// ... dans le bloc principal :</span>
+    <span class="hljs-attr">plugins</span>: { js, <span class="hljs-string">&quot;filename-rules&quot;</span>: filenameRules },
+    <span class="hljs-comment">// ...</span>
+    <span class="hljs-attr">rules</span>: {
+      <span class="hljs-string">&quot;filename-rules/match&quot;</span>: [ <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-string">&quot;snake_case&quot;</span> ],
+      <span class="hljs-comment">// ...</span>
+    },</code></pre></div>
+<p>Un fichier <code>monFichier.js</code> donne alors : <code>Filename &#39;monFichier.js&#39; does not match snake_case</code>.</p>
+<h2 id="verification-finale"><a class="anchor" href="#verification-finale">#</a>Vérification finale</h2>
+<ul>
+<li><input disabled="" type="checkbox"> <code>npm run lint</code> n&#39;affiche <strong>aucune erreur</strong></li>
+<li><input disabled="" type="checkbox"> chaque phrase de la consigne a sa règle dans <code>eslint.config.js</code></li>
+<li><input disabled="" type="checkbox"> j&#39;ai testé au moins une règle avec du code volontairement faux</li>
+<li><input disabled="" type="checkbox"> <code>dist/</code>, <code>docs/</code>, <code>coverage/</code> sont dans <code>globalIgnores</code></li>
+</ul>
+<div class="box box-tip"><div class="box-title">💡 Astuce : Si l'extension VS Code ESLint est installée</div><p>Les erreurs sont soulignées en rouge directement dans l&#39;éditeur, avec le nom de la règle au survol. Pratique pour corriger au fil de l&#39;eau.</p>
+</div><p>Suite : <a href="tuto-2-tests.html">Tuto 2 : les tests →</a></p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#etape-1-installer-eslint-avec-reseau">Étape 1 : installer ESLint (avec réseau)</a><a class="toc-2" href="#etape-2-creer-le-fichier-de-configuration">Étape 2 : créer le fichier de configuration</a><a class="toc-2" href="#etape-3-ajouter-les-commandes-dans-package-json">Étape 3 : ajouter les commandes dans package.json</a><a class="toc-2" href="#etape-4-lancer-le-linter">Étape 4 : lancer le linter</a><a class="toc-2" href="#etape-5-corriger">Étape 5 : corriger</a><a class="toc-2" href="#etape-6-trouver-les-regles-de-la-consigne-dans-la-doc">Étape 6 : trouver les règles de la consigne dans la doc</a><a class="toc-2" href="#etape-7-si-demande-noms-de-fichiers-en-snake-case">Étape 7 (si demandé) : noms de fichiers en snake_case</a><a class="toc-2" href="#verification-finale">Vérification finale</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../assets/app.js"></script>
+</body>
+</html>

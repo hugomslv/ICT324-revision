@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tuto 3 : mettre en place la documentation · ICT-324 Révision</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/hljs.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="" data-root="../">
+<header class="topbar">
+  <button class="menu-btn" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">☰</button>
+  <a class="brand" href="../index.html"><span class="logo">324</span> ICT-324 <span class="brand-sub">Révision hors-ligne</span></a>
+  <button class="search-btn" id="search-open">🔍 Rechercher <kbd>Ctrl</kbd><kbd>K</kbd></button>
+  <button class="theme-btn" id="theme-toggle" title="Thème clair / sombre">◐</button>
+</header>
+<nav class="sidebar"><div class="nav-group"><div class="nav-title">Démarrer</div><a class="nav-link" href="../index.html">Accueil</a><a class="nav-link" href="../pages/examen.html">Jour J : déroulé de l'examen</a><a class="nav-link" href="../pages/antiseche.html">Antisèche des commandes</a></div><div class="nav-group"><div class="nav-title">Tutos pas à pas</div><a class="nav-link" href="../pages/tutos.html">Départ : le projet Vite</a><a class="nav-link" href="../pages/tuto-1-linter.html">Tuto 1 : le linter</a><a class="nav-link" href="../pages/tuto-2-tests.html">Tuto 2 : les tests</a><a class="nav-link active" href="../pages/tuto-3-doc.html">Tuto 3 : la documentation</a><a class="nav-link" href="../pages/tuto-4-ftp.html">Tuto 4 : la config FTP</a></div><div class="nav-group"><div class="nav-title">Cours</div><a class="nav-link" href="../pages/vite.html">1. Vite</a><a class="nav-link" href="../pages/eslint.html">2. ESLint (config)</a><a class="nav-link" href="../pages/eslint-regles.html">2b. ESLint : les règles</a><a class="nav-link" href="../pages/vitest.html">3. Vitest (tests)</a><a class="nav-link" href="../pages/jsdoc.html">4. JSDoc</a><a class="nav-link" href="../pages/readme.html">5. README & Markdown</a><a class="nav-link" href="../pages/build-ftp.html">6. Build & publication FTP</a></div><div class="nav-group"><div class="nav-title">Pratique</div><a class="nav-link" href="../pages/projets.html">Projets du cours</a><a class="nav-link" href="../pages/modele.html">Projet modèle complet</a><a class="nav-link" href="../pages/exercices.html">Exercices corrigés</a><a class="nav-link" href="../pages/pieges.html">Erreurs & pièges</a><a class="nav-link" href="../pages/docs-hors-ligne.html">Préparer les docs hors-ligne</a></div><div class="nav-group"><div class="nav-title">Docs officielles</div><a class="nav-link" href="../docs/index.html">Index des docs</a><a class="nav-link" href="../docs/eslint/rules/index.html">ESLint : toutes les règles</a><a class="nav-link" href="../docs/vitest/index.html">Vitest</a><a class="nav-link" href="../docs/vite/index.html">Vite</a><a class="nav-link" href="../docs/jsdoc/index.html">JSDoc</a></div></nav>
+<main class="content">
+<article class="doc">
+
+<h1>Tuto 3 : mettre en place la documentation</h1><p class="lead">Consigne : « Mettre en place une documentation avec quelques particularités (images, README.md, etc.) ». Résultat attendu : un dossier docs/ dont la page d'accueil est ton README, avec l'image qui s'affiche, et la page de chaque fonction.</p><div class="progress"><span></span></div>
+<p class="small muted">Progression : <span id="progress-label"></span> · <a href="#" id="reset-checks">tout décocher</a></p><h2 id="ce-qu-on-va-obtenir"><a class="anchor" href="#ce-qu-on-va-obtenir">#</a>Ce qu&#39;on va obtenir</h2>
+<div class="code"><pre><code class="hljs lang-text">mon-projet/
+├── README.md          ← page d&#x27;accueil de la doc
+├── img/
+│   └── capture.png    ← image affichée dans le README
+├── jsdoc-conf.json    ← réglages de JSDoc
+├── src/exemples.js    ← code avec des commentaires /** ... */
+└── docs/              ← GÉNÉRÉ par JSDoc
+    ├── index.html     ← le README mis en page
+    ├── img/capture.png← COPIÉ (sinon image cassée)
+    ├── module-exemples.html
+    └── ...</code></pre></div>
+<h2 id="etape-1-installer-jsdoc-avec-reseau"><a class="anchor" href="#etape-1-installer-jsdoc-avec-reseau">#</a>Étape 1 : installer JSDoc (avec réseau)</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Installer :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-bash">npm install -D jsdoc</code></pre></div>
+<p>Vérification : <code>npx jsdoc --version</code> → <code>JSDoc 4.0.5 …</code></p>
+<h2 id="etape-2-ecrire-les-commentaires-dans-le-code"><a class="anchor" href="#etape-2-ecrire-les-commentaires-dans-le-code">#</a>Étape 2 : écrire les commentaires dans le code</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Dans <code>src/exemples.js</code>, <strong>tout en haut du fichier</strong>, l&#39;en-tête :</li>
+</ul>
+<div class="code"><div class="code-title">src/exemples.js</div><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@file</span> Petites fonctions très simples pour s&#x27;entraîner aux tests.
+ * <span class="hljs-doctag">@module</span> <span class="hljs-variable">exemples</span>
+ * <span class="hljs-doctag">@author</span> <span class="hljs-variable">Hugo</span>
+ * <span class="hljs-doctag">@version</span> 1.0.0
+ */</span></code></pre></div>
+<p><code>@module exemples</code> crée une page « exemples » qui regroupe toutes les fonctions du fichier.</p>
+<ul>
+<li><input disabled="" type="checkbox"> <strong>Au-dessus de chaque fonction</strong>, un commentaire qui commence par <strong><code>/**</code></strong> (deux étoiles) :</li>
+</ul>
+<div class="code"><div class="code-title">src/exemples.js</div><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * Multiplie un nombre par 2.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">n</span> - Le nombre.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number</span>} Le double de n.
+ * <span class="hljs-doctag">@example</span>
+ * double(4) // 8
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">double</span>(<span class="hljs-params">n</span>) {
+  <span class="hljs-keyword">return</span> n * <span class="hljs-number">2</span>
+}</code></pre></div>
+<p>Les tags les plus utiles :</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>À quoi il sert</th>
+<th>Exemple</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>(texte au début)</td>
+<td>description</td>
+<td><code>Multiplie un nombre par 2.</code></td>
+</tr>
+<tr>
+<td><code>@param</code></td>
+<td>un paramètre : <code>{type} nom - description</code></td>
+<td><code>@param {number} n - Le nombre.</code></td>
+</tr>
+<tr>
+<td><code>@param</code> optionnel</td>
+<td>entre crochets, avec valeur par défaut</td>
+<td><code>@param {number} [n=1] - ...</code></td>
+</tr>
+<tr>
+<td><code>@returns</code></td>
+<td>ce que la fonction renvoie</td>
+<td><code>@returns {number} Le double.</code></td>
+</tr>
+<tr>
+<td><code>@throws</code></td>
+<td>l&#39;erreur qu&#39;elle peut lever</td>
+<td><code>@throws {Error} Si b vaut 0.</code></td>
+</tr>
+<tr>
+<td><code>@example</code></td>
+<td>un exemple d&#39;utilisation (lignes suivantes)</td>
+<td><code>double(4) // 8</code></td>
+</tr>
+<tr>
+<td><code>@async</code></td>
+<td>fonction asynchrone</td>
+<td></td>
+</tr>
+<tr>
+<td><code>@see</code></td>
+<td>lien</td>
+<td><code>@see {@link https://jsdoc.app}</code></td>
+</tr>
+</tbody></table></div>
+<p>Types : <code>{number}</code>, <code>{string}</code>, <code>{boolean}</code>, <code>{number[]}</code> (tableau de nombres), <code>{Object}</code>, <code>{number|null}</code> (l&#39;un ou l&#39;autre), <code>{Promise&lt;number&gt;}</code>, <code>{*}</code> (n&#39;importe quoi). Liste complète : <a href="jsdoc.html#les-tags-a-connaitre">4. JSDoc</a>.</p>
+<p>Le fichier complet commenté : <a href="#les-fichiers-complets">en bas de page</a>.</p>
+<h2 id="etape-3-ecrire-le-readme-avec-une-image"><a class="anchor" href="#etape-3-ecrire-le-readme-avec-une-image">#</a>Étape 3 : écrire le README avec une image</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Créer un dossier <strong><code>img/</code></strong> à la racine et y mettre une image, par exemple une capture d&#39;écran du projet : <strong><code>img/capture.png</code></strong>.</li>
+</ul>
+<div class="box box-warning"><div class="box-title">⚠️ Attention : Nom de l'image</div><p>En <strong>minuscules</strong>, sans espace, sans accent : <code>capture.png</code>, <code>ecran_accueil.png</code>. Pas <code>Capture d&#39;écran 2026.png</code>.</p>
+</div><ul>
+<li><input disabled="" type="checkbox"> Créer <strong><code>README.md</code></strong> à la racine :</li>
+</ul>
+<div class="code"><div class="code-title">README.md</div><pre><code class="hljs lang-markdown"><span class="hljs-section"># Mon projet ICT-324</span>
+
+Projet Vite avec linter, tests unitaires et documentation.
+
+![<span class="hljs-string">Capture du projet</span>](<span class="hljs-link">./img/capture.png</span>)
+
+<span class="hljs-section">## Installation</span>
+
+<span class="hljs-code">```bash
+npm install
+```</span>
+
+<span class="hljs-section">## Commandes</span>
+
+| Commande | Rôle |
+|---|---|
+| <span class="hljs-code">`npm run dev`</span> | lance le site en local |
+| <span class="hljs-code">`npm run lint`</span> | vérifie le code |
+| <span class="hljs-code">`npm test`</span> | lance les tests |
+| <span class="hljs-code">`npm run doc`</span> | génère la documentation |
+| <span class="hljs-code">`npm run build`</span> | prépare la version à publier |
+
+<span class="hljs-section">## Auteur</span>
+
+Hugo</code></pre></div>
+<ul>
+<li>L&#39;image s&#39;écrit <code>![texte alternatif](./img/capture.png)</code>, avec un chemin <strong>relatif</strong> qui commence par <code>./</code>.</li>
+<li>Pour régler la taille, du HTML fonctionne aussi : <code>&lt;img src=&quot;img/capture.png&quot; width=&quot;50%&quot;&gt;</code>.</li>
+<li>Aperçu dans VS Code : <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>V</kbd>.</li>
+</ul>
+<p>Toute la syntaxe Markdown : <a href="readme.html">5. README &amp; Markdown</a>.</p>
+<h2 id="etape-4-le-fichier-de-configuration-jsdoc"><a class="anchor" href="#etape-4-le-fichier-de-configuration-jsdoc">#</a>Étape 4 : le fichier de configuration JSDoc</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Créer <strong><code>jsdoc-conf.json</code></strong> à la racine :</li>
+</ul>
+<div class="code"><div class="code-title">jsdoc-conf.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;plugins&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;plugins/markdown&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;source&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;include&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;src&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;includePattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;.+\\.js$&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;excludePattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;\\.test\\.js$&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;sourceType&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;module&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;opts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;destination&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./docs/&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;readme&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./README.md&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;recurse&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Ligne</th>
+<th>Sens</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&quot;plugins&quot;: [&quot;plugins/markdown&quot;]</code></td>
+<td>autorise le Markdown dans les commentaires</td>
+</tr>
+<tr>
+<td><code>&quot;include&quot;: [&quot;src&quot;]</code></td>
+<td>documente le dossier <code>src/</code></td>
+</tr>
+<tr>
+<td><code>&quot;includePattern&quot;</code></td>
+<td>seulement les fichiers <code>.js</code></td>
+</tr>
+<tr>
+<td><code>&quot;excludePattern&quot;</code></td>
+<td><strong>sans</strong> les fichiers de test</td>
+</tr>
+<tr>
+<td><code>&quot;sourceType&quot;: &quot;module&quot;</code></td>
+<td>le code utilise <code>import</code> / <code>export</code></td>
+</tr>
+<tr>
+<td><code>&quot;destination&quot;</code></td>
+<td>la doc est générée dans <code>docs/</code></td>
+</tr>
+<tr>
+<td><code>&quot;readme&quot;</code></td>
+<td>le README devient la page d&#39;accueil</td>
+</tr>
+<tr>
+<td><code>&quot;recurse&quot;</code></td>
+<td>aussi les sous-dossiers de <code>src/</code></td>
+</tr>
+</tbody></table></div>
+<p>La version du prof (plus longue, même effet) est dans <a href="jsdoc.html#le-fichier-de-configuration">4. JSDoc</a>.</p>
+<h2 id="etape-5-la-commande-de-generation"><a class="anchor" href="#etape-5-la-commande-de-generation">#</a>Étape 5 : la commande de génération</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Dans <code>package.json</code>, partie <code>&quot;scripts&quot;</code> :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-json"><span class="hljs-attr">&quot;doc&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;jsdoc -c jsdoc-conf.json &amp;&amp; node -e \&quot;require(&#x27;fs&#x27;).cpSync(&#x27;img&#x27;, &#x27;docs/img&#x27;, { recursive: true })\&quot;&quot;</span></code></pre></div>
+<p>Elle fait deux choses :</p>
+<ol>
+<li><code>jsdoc -c jsdoc-conf.json</code> : génère <code>docs/</code>.</li>
+<li><code>node -e &quot;...cpSync(&#39;img&#39;, &#39;docs/img&#39;...)&quot;</code> : <strong>copie le dossier <code>img/</code> dans <code>docs/img/</code></strong>.</li>
+</ol>
+<div class="box box-danger"><div class="box-title">🛑 Danger : La particularité à ne pas oublier</div><p>JSDoc recopie le <strong>texte</strong> du README dans <code>docs/index.html</code>, mais <strong>pas les images</strong>. Sans la copie, l&#39;image est cassée dans la doc. La commande <code>node -e ...</code> marche sous Windows, macOS et Linux (contrairement à <code>cp -r</code> du corrigé du prof, qui ne marche pas sous Windows).</p>
+</div><h2 id="etape-6-generer-et-verifier"><a class="anchor" href="#etape-6-generer-et-verifier">#</a>Étape 6 : générer et vérifier</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Lancer :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-bash">npm run doc</code></pre></div>
+<ul>
+<li><input disabled="" type="checkbox"> Vérifier que ces fichiers existent (testé) :</li>
+</ul>
+<div class="code"><pre><code class="hljs lang-text">docs/
+├── exemples.js.html       ← le code source
+├── fonts/
+├── img/capture.png        ← l&#x27;image copiée
+├── index.html             ← le README
+├── module-exemples.html   ← toutes les fonctions
+├── scripts/
+└── styles/</code></pre></div>
+<ul>
+<li><input disabled="" type="checkbox"> Ouvrir <strong><code>docs/index.html</code></strong> dans le navigateur (double-clic) :<ul>
+<li>le README s&#39;affiche, <strong>avec l&#39;image</strong> ;</li>
+<li>à droite, le menu « Modules » → <code>exemples</code> ;</li>
+<li>chaque fonction montre ses paramètres, son retour et son exemple.</li>
+</ul>
+</li>
+<li><input disabled="" type="checkbox"> Aucun fichier <code>*.test.js</code> dans la doc.</li>
+</ul>
+<h2 id="etape-7-finitions"><a class="anchor" href="#etape-7-finitions">#</a>Étape 7 : finitions</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Ajouter <code>docs/</code> au <code>.gitignore</code> (c&#39;est un dossier généré) : ajoute la ligne <code>docs/</code>.</li>
+<li><input disabled="" type="checkbox"> Vérifier que <code>docs/</code> est bien dans les <code>globalIgnores</code> d&#39;ESLint (sinon <code>npm run lint</code> analyse la doc générée : des centaines d&#39;erreurs).</li>
+</ul>
+<h2 id="bonus-autres-particularites-possibles"><a class="anchor" href="#bonus-autres-particularites-possibles">#</a>Bonus : autres « particularités » possibles</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Particularité</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>nom et version du projet sur la page d&#39;accueil</td>
+<td>option <code>-P package.json</code> : ⚠️ la doc va alors dans <code>docs/&lt;nom&gt;/&lt;version&gt;/</code> (testé), il faut copier les images là</td>
+</tr>
+<tr>
+<td>pages de tutoriel</td>
+<td>dossier <code>tutorials/</code> avec des <code>.md</code>, option <code>-u tutorials</code>, lien <code>{@tutorial nom}</code></td>
+</tr>
+<tr>
+<td>un lien vers une autre fonction</td>
+<td><code>{@link double}</code></td>
+</tr>
+<tr>
+<td>un type objet réutilisable</td>
+<td><code>@typedef</code> + <code>@property</code> (<a href="jsdoc.html#exemple-complet-teste">exemple</a>)</td>
+</tr>
+<tr>
+<td>inclure les éléments privés</td>
+<td>option <code>-p</code></td>
+</tr>
+</tbody></table></div>
+<h2 id="les-fichiers-complets"><a class="anchor" href="#les-fichiers-complets">#</a>Les fichiers complets</h2>
+<div class="code"><div class="code-title">tuto/README.md</div><pre><code class="hljs lang-md"><span class="hljs-section"># Mon projet ICT-324</span>
+
+Projet Vite avec linter, tests unitaires et documentation.
+
+![<span class="hljs-string">Capture du projet</span>](<span class="hljs-link">./img/capture.png</span>)
+
+<span class="hljs-section">## Installation</span>
+
+<span class="hljs-code">```bash
+npm install
+```</span>
+
+<span class="hljs-section">## Commandes</span>
+
+| Commande | Rôle |
+|---|---|
+| <span class="hljs-code">`npm run dev`</span> | lance le site en local |
+| <span class="hljs-code">`npm run lint`</span> | vérifie le code |
+| <span class="hljs-code">`npm test`</span> | lance les tests |
+| <span class="hljs-code">`npm run doc`</span> | génère la documentation |
+| <span class="hljs-code">`npm run build`</span> | prépare la version à publier |
+
+<span class="hljs-section">## Auteur</span>
+
+Hugo</code></pre></div>
+<p class="file-link"><a href="../projets/tuto/README.md">📄 ouvrir le fichier README.md</a></p><div class="code"><div class="code-title">tuto/jsdoc-conf.json</div><pre><code class="hljs lang-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;plugins&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;plugins/markdown&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;source&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;include&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;src&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;includePattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;.+\\.js$&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;excludePattern&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;\\.test\\.js$&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;sourceType&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;module&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;opts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;destination&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./docs/&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;readme&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./README.md&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;recurse&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre></div>
+<p class="file-link"><a href="../projets/tuto/jsdoc-conf.json">📄 ouvrir le fichier jsdoc-conf.json</a></p><div class="code"><div class="code-title">tuto/src/exemples.js</div><pre><code class="hljs lang-js"><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@file</span> Petites fonctions très simples pour s&#x27;entraîner aux tests.
+ * <span class="hljs-doctag">@module</span> <span class="hljs-variable">exemples</span>
+ * <span class="hljs-doctag">@author</span> <span class="hljs-variable">Hugo</span>
+ * <span class="hljs-doctag">@version</span> 1.0.0
+ */</span>
+
+<span class="hljs-comment">/**
+ * Multiplie un nombre par 2.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">n</span> - Le nombre.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number</span>} Le double de n.
+ * <span class="hljs-doctag">@example</span>
+ * double(4) // 8
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">double</span>(<span class="hljs-params">n</span>) {
+  <span class="hljs-keyword">return</span> n * <span class="hljs-number">2</span>
+}
+
+<span class="hljs-comment">/**
+ * Dit si un nombre est pair.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">n</span> - Le nombre.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">boolean</span>} true si n est pair.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">est_pair</span>(<span class="hljs-params">n</span>) {
+  <span class="hljs-keyword">return</span> n % <span class="hljs-number">2</span> === <span class="hljs-number">0</span>
+}
+
+<span class="hljs-comment">/**
+ * Dit bonjour à quelqu&#x27;un.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">prenom</span> - Le prénom.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">string</span>} &quot;Bonjour &lt;prenom&gt; !&quot;
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">dire_bonjour</span>(<span class="hljs-params">prenom</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-string">`Bonjour <span class="hljs-subst">${prenom}</span> !`</span>
+}
+
+<span class="hljs-comment">/**
+ * Additionne tous les nombres d&#x27;un tableau.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number[]</span>} <span class="hljs-variable">nombres</span> - Les nombres.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number</span>} La somme (0 si tableau vide).
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">somme</span>(<span class="hljs-params">nombres</span>) {
+  <span class="hljs-keyword">let</span> total = <span class="hljs-number">0</span>
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> n <span class="hljs-keyword">of</span> nombres) {
+    total = total + n
+  }
+  <span class="hljs-keyword">return</span> total
+}
+
+<span class="hljs-comment">/**
+ * Renvoie le plus grand nombre d&#x27;un tableau.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number[]</span>} <span class="hljs-variable">nombres</span> - Les nombres.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number|null</span>} Le maximum, ou null si le tableau est vide.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">maximum</span>(<span class="hljs-params">nombres</span>) {
+  <span class="hljs-keyword">if</span> (nombres.<span class="hljs-property">length</span> === <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>
+  }
+  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(...nombres)
+}
+
+<span class="hljs-comment">/**
+ * Garde seulement les nombres pairs.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number[]</span>} <span class="hljs-variable">nombres</span> - Les nombres.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number[]</span>} Un nouveau tableau avec les pairs.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">garder_pairs</span>(<span class="hljs-params">nombres</span>) {
+  <span class="hljs-keyword">return</span> nombres.<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">n</span>) =&gt;</span> <span class="hljs-title function_">est_pair</span>(n))
+}
+
+<span class="hljs-comment">/**
+ * Crée un objet personne.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">nom</span> - Le nom.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">age</span> - L&#x27;âge.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">{nom: string, age: number, majeur: boolean</span>}} La personne.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">creer_personne</span>(<span class="hljs-params">nom, age</span>) {
+  <span class="hljs-keyword">return</span> { nom, age, <span class="hljs-attr">majeur</span>: age &gt;= <span class="hljs-number">18</span> }
+}
+
+<span class="hljs-comment">/**
+ * Divise a par b.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">a</span> - Le dividende.
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">number</span>} <span class="hljs-variable">b</span> - Le diviseur.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">number</span>} Le résultat.
+ * <span class="hljs-doctag">@throws</span> {<span class="hljs-type">Error</span>} Si b vaut 0.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">diviser</span>(<span class="hljs-params">a, b</span>) {
+  <span class="hljs-keyword">if</span> (b === <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Division par zéro&quot;</span>)
+  }
+  <span class="hljs-keyword">return</span> a / b
+}
+
+<span class="hljs-comment">/**
+ * Renvoie une valeur après un petit délai (fonction asynchrone).
+ * <span class="hljs-doctag">@async</span>
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">*</span>} <span class="hljs-variable">valeur</span> - La valeur à renvoyer.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">Promise&lt;*&gt;</span>} La valeur, après 10 ms.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">attendre</span>(<span class="hljs-params">valeur</span>) {
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> <span class="hljs-built_in">setTimeout</span>(resolve, <span class="hljs-number">10</span>))
+  <span class="hljs-keyword">return</span> valeur
+}
+
+<span class="hljs-comment">/**
+ * Récupère la température d&#x27;une ville depuis une API.
+ * <span class="hljs-doctag">@async</span>
+ * <span class="hljs-doctag">@param</span> {<span class="hljs-type">string</span>} <span class="hljs-variable">ville</span> - Nom de la ville.
+ * <span class="hljs-doctag">@returns</span> {<span class="hljs-type">Promise&lt;number|null&gt;</span>} La température, ou null en cas d&#x27;erreur.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">temperature</span>(<span class="hljs-params">ville</span>) {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">const</span> reponse = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`https://api.meteo.test/<span class="hljs-subst">${ville}</span>`</span>)
+    <span class="hljs-keyword">if</span> (!reponse.<span class="hljs-property">ok</span>) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Erreur HTTP&quot;</span>)
+    }
+    <span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> reponse.<span class="hljs-title function_">json</span>()
+    <span class="hljs-keyword">return</span> data.<span class="hljs-property">temperature</span>
+  } <span class="hljs-keyword">catch</span> (erreur) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(erreur)
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>
+  }
+}</code></pre></div>
+<p class="file-link"><a href="../projets/tuto/src/exemples.js">📄 ouvrir le fichier exemples.js</a></p><p>Voir le résultat : <a href="../projets/tuto/docs/index.html">docs/index.html du projet tuto</a></p>
+<p>Suite : <a href="tuto-4-ftp.html">Tuto 4 : la config FTP →</a></p>
+
+</article>
+<aside class="toc"><div class="toc-title">Sur cette page</div><a class="toc-2" href="#ce-qu-on-va-obtenir">Ce qu'on va obtenir</a><a class="toc-2" href="#etape-1-installer-jsdoc-avec-reseau">Étape 1 : installer JSDoc (avec réseau)</a><a class="toc-2" href="#etape-2-ecrire-les-commentaires-dans-le-code">Étape 2 : écrire les commentaires dans le code</a><a class="toc-2" href="#etape-3-ecrire-le-readme-avec-une-image">Étape 3 : écrire le README avec une image</a><a class="toc-2" href="#etape-4-le-fichier-de-configuration-jsdoc">Étape 4 : le fichier de configuration JSDoc</a><a class="toc-2" href="#etape-5-la-commande-de-generation">Étape 5 : la commande de génération</a><a class="toc-2" href="#etape-6-generer-et-verifier">Étape 6 : générer et vérifier</a><a class="toc-2" href="#etape-7-finitions">Étape 7 : finitions</a><a class="toc-2" href="#bonus-autres-particularites-possibles">Bonus : autres « particularités » possibles</a><a class="toc-2" href="#les-fichiers-complets">Les fichiers complets</a></aside>
+</main>
+<div class="search-modal" id="search-modal" hidden>
+  <div class="search-box">
+    <input id="search-input" type="search" placeholder="Rechercher partout (règle, commande, tag JSDoc, erreur…)" autocomplete="off">
+    <div class="search-filters">
+      <label><input type="checkbox" data-f="perso" checked> Mes pages</label>
+      <label><input type="checkbox" data-f="eslint" checked> ESLint</label>
+      <label><input type="checkbox" data-f="vitest" checked> Vitest</label>
+      <label><input type="checkbox" data-f="vite" checked> Vite</label>
+      <label><input type="checkbox" data-f="jsdoc" checked> JSDoc</label>
+    </div>
+    <div id="search-results" class="search-results"><p class="muted">Tape au moins 2 caractères. Entrée = ouvrir le 1er résultat, Échap = fermer.</p></div>
+  </div>
+</div>
+<script src="../assets/app.js"></script>
+</body>
+</html>
